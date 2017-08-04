@@ -180,7 +180,7 @@ body.custom-background { background-color: #fefefe; }
 				<p>I am a “;”, which I am the alpha and the omega. I help you start a line, and you need me to end a line.</p>
 		</div><!-- .wrap -->
 	</div><!-- .panel-content -->
-
+    </div>
 </article><!-- #post-## -->
 
 		
@@ -190,8 +190,8 @@ body.custom-background { background-color: #fefefe; }
 
 		</div><!-- #content -->
 
-		<footer id="colophon" class="site-footer" role="contentinfo">
-			<div class="wrap">
+<footer id="colophon" class="site-footer" role="contentinfo">
+    <div class="wrap">
 				
 
 	<aside class="widget-area" role="complementary">
@@ -209,111 +209,13 @@ body.custom-background { background-color: #fefefe; }
 </section>		
 </div>
 </aside><!-- .widget-area -->
+</div>
+        
 </footer><!-- #colophon -->
 </div><!-- .site-content-contain -->
 </div><!-- #page -->
-<!--  -->
-	<script type="text/javascript">
-	/* <![CDATA[ */
-		jQuery(document).ready( function($) {
-			function doFollowingHover() {
-				$('#wp-admin-bar-follow > a').unbind( '.unfollow' );
 
-				$('#wp-admin-bar-follow > a').bind( 'mouseover.unfollow', function() {
 
-					$(this).html( "Unfollow" ).parent( 'li' ).addClass( 'unfollow' );
-				});
-				$('#wp-admin-bar-follow > a').bind( 'mouseout.unfollow', function() {
-					$(this).html( "Following" ).parent( 'li' ).removeClass( 'unfollow' );
-				});
-			}
-							doFollowingHover();
-			
-			$('#wp-admin-bar-follow > a').click( function( e ) {
-				$('#wp-admin-bar-follow > a').unbind( '.unfollow' );
-
-				e.preventDefault();
-
-				var link = $( this ), li = $( '#wp-admin-bar-follow' ), timeout = 0;
-
-				if ( li.hasClass( 'subscribed' ) ) {
-					li.removeClass( 'subscribed' ).removeClass( 'unfollow' );
-					link.html( "Follow" );
-
-					$('body').append( $( 'div.wpcom-bubble' ).removeClass( 'fadein' ) ).off( 'click.bubble' );
-
-					var action = 'ab_unsubscribe_from_blog';
-				} else {
-					li.addClass( 'subscribed' ).removeClass( 'unfollow' );
-					link.html( "Following" );
-
-						var left = 131 - link.width();
-						li.append( $( 'div.wpcom-bubble' ).css( { left: '-' + left + 'px' } ) );
-						$( 'div.bubble-txt', 'div.wpcom-bubble' ).html( "New posts from this blog will now appear in <a target=\"_blank\" href=\"http:\/\/wordpress.com\/\">your reader<\/a>. You can manage email alerts from your <a target=\"_blank\" href=\"http:\/\/wordpress.com\/following\/edit\/\">subscriptions page<\/a>." );
-
-						$( 'div.wpcom-bubble.action-bubble' ).addClass( 'fadein' );
-
-						setTimeout( function() {
-							$('body').on( 'click.bubble touchstart.bubble', function(e) {
-								if ( !$(e.target).hasClass('wpcom-bubble') && !$(e.target).parents( 'div.wpcom-bubble' ).length )
-									hideBubble();
-							});
-							setTimeout( hideBubble, 15000 );
-						}, 500 );
-
-					var action = 'ab_subscribe_to_blog';
-					$('#wp-admin-bar-follow > a').bind( 'mouseout.shift', function() {
-						doFollowingHover();
-						$(this).unbind( '.shift' );
-					});
-				}
-
-				var nonce = link.attr( 'href' ).split( '_wpnonce=' );
-				nonce = nonce[1];
-
-				$.post( "https:\/\/s1lin.github.io\/wp-admin\/admin-ajax.php", {
-					'action': action,
-					'_wpnonce': nonce,
-					'source': 'admin_bar',
-					'blog_id': 101539442				});
-			});
-		});
-	/* ]]> */
-	</script>
-<script type="text/javascript" src="./1_files/gprofiles.js.下载"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-var WPGroHo = {"my_hash":"cbe51b9ae2d2fc7f3a0505339a3eb626"};
-/* ]]> */
-</script>
-<script type="text/javascript" src="./1_files/wpgroho.js.下载"></script>
-
-	<script>
-		//initialize and attach hovercards to all gravatars
-		jQuery( document ).ready( function( $ ) {
-
-			if (typeof Gravatar === "undefined"){
-				return;
-			}
-
-			if ( typeof Gravatar.init !== "function" ) {
-				return;
-			}			
-
-			Gravatar.profile_cb = function( hash, id ) {
-				WPGroHo.syncProfileData( hash, id );
-			};
-			Gravatar.my_hash = WPGroHo.my_hash;
-			Gravatar.init( 'body', '#wp-admin-bar-my-account' );
-		});
-	</script>
-
-		<div style="display:none">
-	</div>
-<div id="report-form-window" style="display:none;"></div><script type="text/javascript">
-/* <![CDATA[ */
-var HighlanderComments = {"loggingInText":"Logging In\u2026","submittingText":"Posting Comment\u2026","postCommentText":"Post Comment","connectingToText":"Connecting to %s","commentingAsText":"%1$s: You are commenting using your %2$s account.","logoutText":"Log Out","loginText":"Log In","connectURL":"https:\/\/s1lin.github.io\/public.api\/connect\/?action=request","logoutURL":"https:\/\/s1lin.github.io\/wp-login.php?action=logout&_wpnonce=9b3c2a94e2","homeURL":"https:\/\/s1lin.github.io\/","postID":"1","gravDefault":"identicon","enterACommentError":"Please enter a comment","enterEmailError":"Please enter your email address here","invalidEmailError":"Invalid email address","enterAuthorError":"Please enter your name here","gravatarFromEmail":"This picture will show whenever you leave a comment. Click to customize it.","logInToExternalAccount":"Log in to use details from one of these accounts.","change":"Change","changeAccount":"Change Account","comment_registration":"0","userIsLoggedIn":"1","isJetpack":"0","text_direction":"ltr"};
-/* ]]> */
-</script>
-
-<div class="comment-likes-overlay" style="display: none;"></div><img src="./1_files/g.gif" alt=":)" id="wpstats"></body></html>
+<div class="comment-likes-overlay" style="display: none;"></div><img src="./1_files/g.gif" alt=":)" id="wpstats">
+</body>
+</html>
