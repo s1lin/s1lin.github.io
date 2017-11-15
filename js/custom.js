@@ -132,32 +132,32 @@ $(function() {
 });
 
 
-// Testimonial slider
-$(window).load(function(){
-  $('.flexslider').flexslider({
-	animation: "fade",
-	animationLoop: true,
-	slideshow: true,
-	pauseOnAction: false,
-	slideshowSpeed: 7000,
-	controlNav: true,
-	start: function(slider){
-	  $('body').removeClass('loading');
-	}
-  });
-});
-
-
-// we worked slider
-$(window).load(function(){
-      $('.worklogo').flexslider({
-        animation: "slide",
-		slideshow: false,
-        itemWidth: 210,
-        itemMargin: 5,
-        
-      });
-    });
+// // Testimonial slider
+// $(window).load(function(){
+//   $('.flexslider').flexslider({
+// 	animation: "fade",
+// 	animationLoop: true,
+// 	slideshow: true,
+// 	pauseOnAction: false,
+// 	slideshowSpeed: 7000,
+// 	controlNav: true,
+// 	start: function(slider){
+// 	  $('body').removeClass('loading');
+// 	}
+//   });
+// });
+//
+//
+// // we worked slider
+// $(window).load(function(){
+//   $('.worklogo').flexslider({
+// 	animation: "slide",
+// 	slideshow: false,
+// 	itemWidth: 210,
+// 	itemMargin: 5,
+//
+//   });
+// });
 
 // Skill set 
 
