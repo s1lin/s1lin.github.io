@@ -3,32 +3,38 @@
 $(document).ready(function(){
 	var skillbar = $('.skillbar');
 	var navbar = $('.navbar-wrapper');
-	$('.slide').prepend('<div class="patternOverlay"></div>');	
-	
+	$('.slide').prepend('<div class="patternOverlay"></div>');
+
 	skillbar.each(function(){
 		$(this).find('.skillbar-bar').animate({
 			width:$(this).attr('data-percent')
 		},6000);
 	});
-	
+
 	skillbar.each(function(){
 		$(this).find('.skill-bar-percent').animate({
 			left:$(this).attr('data-percent')
 		},6000);
 	});
-	
+
 	skillbar.each(function(){
 		$(this).find('.skill-bar-percent').text($(this).attr('data-percent'));
 	});
-	
+
 	if($(window).width()>767){
 		navbar.animate({
 			opacity:0
 		},200);
 		navbar.addClass('default-menu');
-		
-	}	
-	
+
+	}
+
+    navbar.animate({
+        opacity:1
+    },200);
+    navbar.removeClass('default-menu');
+    $('#nav-show').fadeOut();
+
 	$('#nav-show').click(function(x){
 		x.preventDefault();
 		$('.wrapper').removeClass('noGap');
@@ -38,18 +44,18 @@ $(document).ready(function(){
 		navbar.removeClass('default-menu');
 		$(this).fadeOut();
 	});
-	
+
 	$('.closeMenu').click(function(x){
 		x.preventDefault();
 		navbar.animate({
 			opacity:0
 		},50,function(){navbar.addClass('default-menu');});
-		
+
 		$('#nav-show').fadeIn();
 	});
-	
-	
-});	
+
+
+});
 
 
 	
