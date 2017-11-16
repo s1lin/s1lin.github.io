@@ -229,17 +229,17 @@ header{
     top: 0;
     z-index: 9999;
 }
-/*.logo{*/
-	/*float:left;*/
-	/*background:url(/images/logo-2.png) no-repeat 0 0;*/
-	/*width:123px;*/
-	/*height:80px;*/
-	/*font-size:0;*/
-	/*line-height:0;*/
-/*}*/
-/*.isStuck .logo{*/
-	/*background:url(/images/logo.png) no-repeat 0 0;*/
-/*}*/
+.logo{
+	float:left;
+	background:url(/images/logo-2.png) no-repeat 0 0;
+	width:123px;
+	height:80px;
+	font-size:0;
+	line-height:0;
+}
+.isStuck .logo{
+	background:url(/images/logo.png) no-repeat 0 0;
+}
 .navwrapper .container{
 	padding:0;
 	width:auto;
@@ -407,7 +407,7 @@ header{
 	4. About me Style
 ------------------------------------------------------*/
 .aboutus{
-	background:#ffffff;
+	background: #f7f3f7;
 	text-align:left;
 }
 .aboutus .container{
