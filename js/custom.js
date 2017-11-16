@@ -167,7 +167,4 @@ $(function() {
 //   });
 // });
 
-// Skill set 
-
-
 }(jQuery));
