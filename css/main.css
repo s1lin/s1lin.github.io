@@ -231,14 +231,14 @@ header{
 }
 .logo{
 	float:left;
-	background:url(/images/logo-2.png) no-repeat 0 0;
-	width:123px;
+	background:url(/images/logo.jpg) no-repeat 0 0;
+	width:80px;
 	height:80px;
 	font-size:0;
-	line-height:0;
+	/*line-height:0;*/
 }
 .isStuck .logo{
-	background:url(/images/logo.png) no-repeat 0 0;
+	background:url(/images/logo.jpg) no-repeat 0 0;
 }
 .navwrapper .container{
 	padding:0;
