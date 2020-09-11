@@ -407,7 +407,7 @@ header{
 	4. About me Style
 ------------------------------------------------------*/
 .aboutus{
-	background: #f7f3f7;
+	background: #fff;
 	text-align:left;
 }
 .aboutus .container{
@@ -495,7 +495,18 @@ header{
 .skillbar-bar {
 	height:7px;
 	width:0;
+	background: #e88988;
+}
+.skillbar-bar-software{
+	height:7px;
+	width:0;
 	background: #ced067;
+}
+
+.skillbar-bar-game{
+	height:7px;
+	width:0;
+	background: #5baee9;
 }
 
 .skill-bar-percent {
@@ -519,7 +530,7 @@ header{
 	margin-bottom:-20px;
 }
 .expertiesico {
-	padding:70px 63px 70px 0;
+	padding:22% 20% 20% 0%;
 	text-align:right;
 	font-family:'Crimson Text',serif;
 	font-size:21px;
