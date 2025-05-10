@@ -151,7 +151,7 @@ header { position: relative; }
 
 .expertiesico { padding: 20%; text-align: right; font-size: 21px; line-height: 24px; color: #09102A; font-style: italic; }
 
-.expertiesdesc { border-left: 3px solid #FF9900; padding-left: 40px; margin-bottom: 100px; }
+.expertiesdesc { border-left: 3px solid #FF9900; padding-left: 40px; margin-bottom: 60px; }
 
 .expertiesdesc p { padding-bottom: 0; }
 
@@ -159,17 +159,17 @@ header { position: relative; }
 
 .expertiesdesc h5 { color: #09102A; font-size: 18px; font-style: italic; font-weight: 400; }
 
-/*---------------------------------------------------- 	 8. Protfolio Style ------------------------------------------------------*/.protfolio { background: #fff; width: 100%; overflow: hidden; }
+/*---------------------------------------------------- 	 8. portfolio Style ------------------------------------------------------*/.portfolio { background: #fff; width: 100%; overflow: hidden; }
 
-.protfolio .container { padding-top: 67px; padding-bottom: 0; }
+.portfolio .container { padding-top: 67px; padding-bottom: 0; }
 
-.protfolio .heading { padding-bottom: 50px; }
+.portfolio .heading { padding-bottom: 50px; }
 
-.protfolio .protBox { padding-top: 0; padding-bottom: 0; position: relative; }
+.portfolio .protBox { padding-top: 0; padding-bottom: 0; position: relative; }
 
-.protfolio .heading p { padding-bottom: 41px; color: #242424 }
+.portfolio .heading p { padding-bottom: 41px; color: #242424 }
 
-.protfolio h4 { font-weight: 700; }
+.portfolio h4 { font-weight: 700; }
 
 .portfolioFilter { display: block; margin: 0 auto; text-align: center; }
 
