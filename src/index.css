@@ -1,0 +1,31 @@
+/*
+ * Tailwind's theme and utilities, without its preflight reset: site.css has its
+ * own base styles, set for this design. site.css sits in the base layer, so a
+ * utility class always wins over it.
+ */
+@layer theme, compat, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "./styles/site.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "./";
+
+/* The issue's tokens as Tailwind colours and fonts: bg-paper, text-ink-2, font-mincho… */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-sumi: var(--sumi);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --font-display: var(--f-display);
+  --font-sans: var(--f-sans);
+  --font-mono: var(--f-mono);
+  --font-mincho: var(--f-mincho);
+  --font-gothic: var(--f-gothic);
+}
+
+/* Utilities that add a border expect a solid style, as Tailwind's preflight would give them.
+   Its own layer, below site.css, so the issue's styles always win. */
+@layer compat {
+  *, ::before, ::after { border-style: solid; border-width: 0; }
+}
