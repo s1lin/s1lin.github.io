@@ -1,8 +1,9 @@
 import * as typewriter from "ascii.rest/pieces/typewriter";
 import { AsciiArt } from "@/components/AsciiArt";
-import { Folio, Roundel } from "@/components/bits";
+import { Barcode, Folio, Roundel } from "@/components/bits";
 import { GitHubHeatmap } from "@/components/GitHubHeatmap";
 import { TokenSkyline } from "@/components/TokenSkyline";
+import { POSTS } from "@/content/posts";
 
 const FEATURES: { href: string; letter: string; name: string; page: string }[] = [
   { href: "#tokensbeat", letter: "T", name: "Tokensbeat", page: "08" },
@@ -69,6 +70,24 @@ export function Contents() {
             <Entry href="#workshop" title="The workshop" ja="工房" page="36" />
             <Entry href="#departures" title="Departures" ja="年表" page="44" />
             <Entry href="#colophon" title="Colophon" ja="奥付" page="48" />
+            <Entry href="/blog/" title="Blog, between issues" ja="随筆" page="→" />
+            <li className="toc__sub">
+              <ol>
+                {POSTS.map((p) => (
+                  <li key={p.slug}>
+                    <a href={`/blog/${p.slug}/`}>
+                      <span className="toc__t">
+                        <span className="toc__no">{p.no}</span>
+                        <span lang={p.lang}>{p.title}</span>
+                      </span>
+                      <span className="toc__p">
+                        <Barcode id={p.id} label={false} />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </li>
           </ol>
         </nav>
 

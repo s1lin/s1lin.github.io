@@ -426,6 +426,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .toc__sub { padding-left: 18px; border-left: 0.5px solid var(--rule); margin-left: 6px !important; }
 .toc__sub a { font: 500 0.95rem/1.2 var(--f-sans); padding: 6px 0; align-items: center; }
 .toc__sub .roundel { font-size: 0.72rem; }
+/* The blog's posts under its line, numbered as on the blog. */
+.toc__no { display: inline-block; width: 2.2em; font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
 
 .foreword { grid-column: 7 / span 6; }
 .theorem {
@@ -962,6 +964,112 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   .okuzuke dd { border-top: 0; padding-top: 2px; }
 }
 
+/* ------------------------------------------------------------------ blog */
+/* Outside the issue, at /blog/ (components/Blog.tsx): an index of posts, then
+   each post as one spread, its head and spec sheet held on the left while the
+   text runs on the right, set for the language it was written in. */
+
+.blog__intro { grid-column: 1 / span 7; }
+.blog__aside { grid-column: 9 / span 4; align-self: end; margin: 0; color: var(--ink-2); font-size: 0.95rem; }
+
+.posts { grid-column: 1 / -1; list-style: none; margin: clamp(40px, 5vw, 72px) 0 0; padding: 0; border-top: 0.5px solid var(--rule-strong); }
+.posts a {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: baseline;
+  padding: 24px 0 28px; border-bottom: 0.5px solid var(--rule); text-decoration: none;
+}
+.posts__meta { grid-column: 1 / span 3; display: grid; justify-items: start; gap: 10px; font: 500 11px/1.7 var(--f-mono); letter-spacing: 0.1em; color: var(--ink-3); }
+.posts__title { grid-column: 4 / span 5; font: 400 clamp(1.6rem, 1.4vw + 1.1rem, 2.6rem)/1.2 var(--f-display); text-wrap: balance; }
+.posts__dek { grid-column: 9 / span 4; font-size: 0.95rem; color: var(--ink-2); }
+
+.post__head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--head-h) + 28px); }
+.post__head .kicker a { text-decoration: none; }
+.post__title { margin: 0; font: 400 clamp(2.4rem, 4vw, 4.2rem)/1.15 var(--f-display); text-wrap: balance; }
+.posts__title[lang="zh-Hans"], .post__title[lang="zh-Hans"] { font-family: "Noto Serif SC", var(--f-mincho); letter-spacing: 0.02em; }
+.post__head .dek { margin-top: 22px; font-size: clamp(1.05rem, 0.4vw + 0.95rem, 1.3rem); }
+.post__head .spec { margin-top: 32px; }
+.post__head .spec dd { font-size: 0.88rem; }
+.post__code { margin: 22px 0 0; }
+
+/* A post's id as a barcode (Barcode in bits.tsx), in place of a date: the bars
+   as wide as the id printed under them; in the contents, the bars alone. */
+.code { display: inline-grid; gap: 5px; width: max-content; vertical-align: middle; }
+/* width 0 and min-width 100%: the stretched drawing fills the id's width and never sets it */
+.code svg { display: block; width: 0; min-width: 100%; height: 26px; fill: var(--sumi); }
+.code__id { font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: none; color: var(--ink-2); white-space: nowrap; }
+.toc .code svg { width: 56px; min-width: 0; height: 11px; }
+
+.post__text { grid-column: 6 / span 6; }
+.post__text p { margin: 0; text-align: justify; }
+.post__text p + p { margin-top: 0.9em; }
+.post__text strong { font-weight: 700; }
+/* Chinese reads at a size up, with room between the lines and each paragraph indented two characters. */
+.post__text[lang="zh-Hans"] { font-size: clamp(17px, 0.3vw + 16px, 19px); line-height: 1.95; letter-spacing: 0.03em; }
+.post__text[lang="zh-Hans"] > p { text-indent: 2em; }
+
+.post__text figure { margin: 2.2em 0; }
+/* Pictures fill the column, except small ones, which keep their own size rather than blur. */
+.post__text figure img { width: auto; max-width: 100%; background: var(--paper-2); }
+
+/* Inside a post: section heads, quoted passages, lists of short lines, and a line set as a formula. */
+.post__text h2 {
+  margin: 2.6em 0 1.2em; padding-bottom: 10px; border-bottom: 0.5px solid var(--rule-strong);
+  font: 700 1.3em/1.3 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.2em;
+}
+.post__text > blockquote { margin: 1.4em 0; padding-left: 1.4em; border-left: 0.5px solid var(--rule-strong); color: var(--ink-2); }
+.post__text > blockquote p { text-indent: 0 !important; }
+.post__text > blockquote p[lang="en"] { font: italic 400 1.3em/1.35 var(--f-display); letter-spacing: 0; text-align: left; }
+.post__text > blockquote cite { display: block; margin-top: 0.4em; font-style: normal; text-align: right; }
+.post__text ul { list-style: none; margin: 0.9em 0; padding-left: 2em; }
+.post__text .post__formula { margin-block: 1.4em; text-align: center !important; text-indent: 0 !important; line-height: 1.8; }
+.post__text figcaption { font: 400 13px/1.6 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.04em; }
+.post__text figcaption::before { font: 500 11px/1 var(--f-mono); letter-spacing: 0.02em; }
+
+/* A break between the parts of a post: one registration mark. */
+.post__text hr {
+  width: 11px; height: 11px; margin: 2.6em auto; border: 0; color: var(--ink-3);
+  background: linear-gradient(currentColor 0 0) center / 1px 11px no-repeat, linear-gradient(currentColor 0 0) center / 11px 1px no-repeat;
+}
+
+.post__epigraph { margin: 0 0 2.4em !important; padding-bottom: 1.6em; border-bottom: 0.5px solid var(--rule); }
+.post__epigraph blockquote { margin: 0; font-size: 1.15em; letter-spacing: 0.2em; }
+.post__epigraph blockquote [lang="en"] { display: block; margin-bottom: 6px; font: italic 400 clamp(1.8rem, 1.6vw + 1.2rem, 2.6rem)/1.1 var(--f-display); letter-spacing: 0; }
+.post__epigraph figcaption::before { content: none; }
+
+.post__signed { margin-top: 2.4em !important; text-align: right !important; text-indent: 0 !important; line-height: 1.7; }
+.post__signed [lang="en"] { font: 500 0.9em/1 var(--f-mono); letter-spacing: 0.08em; }
+/* Sources: a bracketed number in the text, and the list under it, links in mono since they are addresses. */
+.ref { font: 500 0.62em/0 var(--f-mono); letter-spacing: 0; vertical-align: 0.6em; }
+.ref a { text-decoration: none; color: var(--ink-2); }
+.post__refs { margin-top: 2.8em; padding-top: 14px; border-top: 0.5px solid var(--rule); font-size: 0.82em; line-height: 1.7; color: var(--ink-2); }
+.post__refs h2 { margin: 0 0 10px; font: 700 1em/1.4 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.2em; color: var(--sumi); }
+.post__refs ol { margin: 0; padding-left: 2.2em; }
+.post__refs li + li { margin-top: 8px; }
+.post__refs li:target { color: var(--sumi); }
+.post__refs a { font: 400 11.5px/1.7 var(--f-mono); letter-spacing: 0; overflow-wrap: anywhere; }
+
+/* The foot of a blog page: links that wrap whole on a phone, never mid-phrase. */
+.blog .endmark, .post .endmark { flex-wrap: wrap; row-gap: 10px; }
+.blog .endmark p, .post .endmark p { white-space: nowrap; }
+
+.post__note {
+  margin-top: 3em !important; padding-top: 12px; border-top: 0.5px solid var(--rule-strong);
+  text-align: left !important; text-indent: 0 !important;
+  font: 400 11px/1.6 var(--f-mono); letter-spacing: 0.02em; color: var(--ink-2);
+}
+
+@media (max-width: 900px) {
+  .blog__intro, .blog__aside { grid-column: 1 / -1; }
+  .blog__aside { margin-top: 20px; }
+  .posts__meta { grid-column: 1 / -1; }
+  .posts__title, .posts__dek { grid-column: 1 / -1; margin-top: 8px; }
+  .post__head, .post__text { grid-column: 1 / -1; }
+  .post__head { position: static; margin-bottom: 48px; }
+}
+@media (min-width: 901px) and (max-width: 1180px) {
+  .post__head { grid-column: 1 / span 5; }
+  .post__text { grid-column: 6 / span 7; }
+}
+
 /* ------------------------------------------------------------------ Canvas UI frames */
 /* Ripple on the night photo, Magnify over screenshots, Frost over everything
    and the sand under it (components/effects.tsx). Ripple hides its <img> once
@@ -1017,4 +1125,6 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   [data-fx] img { opacity: 1 !important; }
   .night { background: #fff; color: #000; }
   .spread { padding-block: 32px; break-inside: avoid-page; }
+  .post { break-inside: auto; }
+  .post__head { position: static; }
 }

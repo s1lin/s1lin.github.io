@@ -14,9 +14,9 @@ npm run preview  # serve dist/
 npm run lint
 ```
 
-`npm run build` renders the app to HTML (`src/entry-server.tsx`,
-`scripts/prerender.mjs`), so the page reads without JavaScript and the client
-only hydrates it.
+`npm run build` renders every page to HTML (`src/entry-server.tsx`,
+`scripts/prerender.mjs`): the issue, the blog and each post, so they read
+without JavaScript and the client only hydrates them.
 
 ## Layout
 
@@ -35,6 +35,8 @@ only hydrates it.
 | `src/styles/site.css` | The design system: paper and ink tokens, the page frame, grid, type |
 | `src/index.css` | Tailwind theme and utilities over `site.css` (no preflight) |
 | `public/assets/img/` | Photographs and screenshots, WebP |
+| `blog/`, `src/blog.tsx`, `src/components/Blog.tsx` | The blog at `/blog/`, outside the issue: its index, and a page per post |
+| `src/content/posts/` | The posts, newest first in `index.ts`, one file each |
 
 ## UI components
 
@@ -96,6 +98,21 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 
 Tailwind utilities win over `site.css`. The issue's colours and fonts are available
 as `bg-paper`, `text-sumi`, `text-ink-2`, `font-mincho` and so on.
+
+## Blog
+
+`/blog/` holds longer pieces, outside the issue, each in the language it was
+written in; the contents list on the issue's front page lists them under
+"Blog, between issues". A post is one file in `src/content/posts/` (its title,
+spec sheet, text, sources and a note on where it ran first), listed in
+`index.ts`, plus an HTML shell at `blog/<slug>/index.html` carrying its title
+and meta tags and `data-post="<slug>"` on the root. Vite builds every shell
+under `blog/`, and the build fails if a listed post has no shell. Images go in
+`public/assets/img/blog-*.webp`.
+
+The issue loads Noto Serif SC only for the characters it shows. When a post's
+title is Chinese, add its characters to the `text=` list of that font in the
+root `index.html`, or the title falls back to a system font in the contents.
 
 ## Metro data
 

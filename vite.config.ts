@@ -1,12 +1,23 @@
+import { readdirSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+const here = (p: string) => path.resolve(import.meta.dirname, p);
+
+// The pages: the issue, the blog's index, and a shell for each post at blog/<slug>/index.html.
+const posts = readdirSync(here("blog"), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => here(`blog/${d.name}/index.html`));
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: { "@": path.resolve(import.meta.dirname, "./src") },
+    alias: { "@": here("./src") },
+  },
+  build: {
+    rolldownOptions: { input: [here("index.html"), here("blog/index.html"), ...posts] },
   },
 });

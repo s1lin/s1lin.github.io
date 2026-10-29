@@ -42,15 +42,22 @@ function useRunningHead(initial: string) {
   return label;
 }
 
-export function Runhead() {
-  const label = useRunningHead("特集 · Architecture — five lines, one proof");
+/** The running head. Off the issue's page (the blog), `home` leads back to it and `label` holds still. */
+export function Runhead({
+  label: initial = "特集 · Architecture — five lines, one proof",
+  home = "#cover",
+}: {
+  label?: string;
+  home?: string;
+}) {
+  const label = useRunningHead(initial);
   const parts = label.split(" · ");
   const ja = parts.find((p) => CJK.test(p)) ?? "";
   const en = parts.filter((p) => p !== ja).join(" · ");
   return (
     <header className="runhead">
       <div className="wrap">
-        <a className="runhead__brand" href="#cover">
+        <a className="runhead__brand" href={home}>
           <Mark className="runhead__mark" />
           <b>S1LIN</b>
           <span lang="ja">設計</span>

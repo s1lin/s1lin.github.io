@@ -1,12 +1,32 @@
 import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import App from "./App.tsx";
+import { BlogPage } from "@/components/Blog";
+import { POSTS } from "@/content/posts";
 
-/** The page as HTML, for scripts/prerender.mjs. */
+/** The issue as HTML. */
 export function render() {
   return renderToString(
     <StrictMode>
       <App />
     </StrictMode>,
   );
+}
+
+/** A page of the blog as HTML: a post by its slug, or the index. */
+function renderBlog(slug?: string) {
+  return renderToString(
+    <StrictMode>
+      <BlogPage slug={slug} />
+    </StrictMode>,
+  );
+}
+
+/** Every page, by its file under dist/, for scripts/prerender.mjs. */
+export function pages(): Record<string, () => string> {
+  return {
+    "index.html": render,
+    "blog/index.html": () => renderBlog(),
+    ...Object.fromEntries(POSTS.map((p) => [`blog/${p.slug}/index.html`, () => renderBlog(p.slug)])),
+  };
 }
