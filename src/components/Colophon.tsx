@@ -146,7 +146,7 @@ export function Colophon() {
               inclusifai.com, awakeai.ca and tokensbeat.com, October 2026.
             </dd>
             <dt>Printed on</dt>
-            <dd>GitHub Pages. No trackers, no ads, no cookies.</dd>
+            <dd>GitHub Pages. No ads, no cookies; visits are counted by Cloudflare Web Analytics, which keeps no personal data.</dd>
             <dt>Small print</dt>
             <dd>
               Cities: Skylines is a trademark of Paradox Interactive. LEGO® is a trademark of the LEGO Group of

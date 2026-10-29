@@ -506,6 +506,11 @@ export function FeatureOpener() {
               </button>
             ))}
           </div>
+          {/* WorkGo draws the same kind of map from anyone's resume, in Career Identity and on their personal site. */}
+          <p className="rm-make">
+            <span>WorkGo draws this kind of map from your resume.</span>
+            <a href="https://workgo.ai/career-identity">Build your own map on WorkGo ↗</a>
+          </p>
           {on ? (
             <Timetable on={on} />
           ) : (

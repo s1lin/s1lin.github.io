@@ -637,6 +637,11 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   .rm-tt__head p { display: none; }
 }
 
+/* the way to a map of one's own, on WorkGo; in ink, like Metro2Line's "make your own map" */
+.rm-make { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 4px 14px; margin: 12px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+.rm-make a { color: var(--sumi); text-decoration: none; border-bottom: 0.5px solid currentColor; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.rm-make a:hover { color: var(--ink-2); }
+
 /* the chosen line's timetable (時刻表): the year as the hour, the month as the minute, Tokyo's station numbers */
 .rm-tt-hint { margin: 14px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
 .rm-tt { margin-top: 14px; border-top: 6px solid var(--c); background: var(--paper); }
