@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { createFrost, type FrostInstance, type FrostOptions } from "@/components/canvasui/Frost";
 import { createGlitch, type GlitchInstance, type GlitchOptions } from "@/components/canvasui/Glitch";
@@ -47,6 +47,118 @@ export function RipplePhoto({ className, children }: { className?: string; child
       ) : (
         children
       )}
+    </div>
+  );
+}
+
+type Frame = { src: string; alt: string };
+
+/**
+ * A game screenshot laid over the same frame re-rendered as a photograph. The
+ * pointer rubs the game away with a soft round brush and the photograph shows
+ * through: a mouse as it passes, a finger as it drags sideways (a vertical
+ * drag still scrolls the page). The game sits on a plain 2D canvas, no WebGL;
+ * what has been rubbed out is kept and redrawn if the figure changes size.
+ * Without JavaScript, or until the canvas is ready, the game shows.
+ */
+export function ErasePhoto({ game, photo, w, h }: { game: Frame; photo: Frame; w: number; h: number }) {
+  const box = useRef<HTMLDivElement>(null);
+  const shot = useRef<HTMLImageElement>(null);
+  const sheet = useRef<HTMLCanvasElement>(null);
+  const rub = useRef<(x: number, y: number) => void>(() => {});
+  const last = useRef<[number, number] | null>(null);
+  const live = useHydrated();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const frame = box.current;
+    const img = shot.current;
+    const canvas = sheet.current;
+    const ctx = canvas?.getContext("2d");
+    if (!frame || !img || !canvas || !ctx) return;
+    const marks: [number, number][] = []; // rubbed points, as fractions of the frame
+    let width = 0;
+    let height = 0;
+    const radius = () => Math.max(22, width * 0.06);
+
+    const stamp = (x: number, y: number) => {
+      const r = radius();
+      const g = ctx.createRadialGradient(x, y, r * 0.5, x, y, r);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    const draw = () => {
+      const box = frame.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = box.width;
+      height = box.height;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.drawImage(img, 0, 0, width, height);
+      ctx.globalCompositeOperation = "destination-out";
+      for (const [fx, fy] of marks) stamp(fx * width, fy * height);
+      setReady(true);
+    };
+    // Rub from the last point to this one, a stamp every third of a radius, so fast strokes leave no gaps.
+    rub.current = (x, y) => {
+      if (!width) return;
+      const from = last.current ?? [x, y];
+      const steps = Math.max(1, Math.ceil(Math.hypot(x - from[0], y - from[1]) / (radius() / 3)));
+      for (let i = 1; i <= steps; i++) {
+        const px = from[0] + ((x - from[0]) * i) / steps;
+        const py = from[1] + ((y - from[1]) * i) / steps;
+        stamp(px, py);
+        if (marks.length < 6000) marks.push([px / width, py / height]);
+      }
+      last.current = [x, y];
+    };
+
+    let size: ResizeObserver | null = null;
+    const start = () => {
+      draw();
+      size = new ResizeObserver(() => {
+        if (Math.abs(frame.getBoundingClientRect().width - width) > 1) draw();
+      });
+      size.observe(frame);
+    };
+    if (img.complete && img.naturalWidth) start();
+    else img.addEventListener("load", start, { once: true });
+    return () => {
+      img.removeEventListener("load", start);
+      size?.disconnect();
+      rub.current = () => {};
+    };
+  }, [live]);
+
+  const at = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top] as const;
+  };
+  return (
+    <div
+      ref={box}
+      className="erase"
+      data-fx="erase"
+      style={{ aspectRatio: `${w} / ${h}` }}
+      onPointerMove={(e) => {
+        if (e.pointerType === "mouse" || e.buttons) rub.current(...at(e));
+      }}
+      onPointerDown={(e) => {
+        last.current = null;
+        rub.current(...at(e));
+      }}
+      onPointerLeave={() => (last.current = null)}
+      onPointerUp={() => (last.current = null)}
+    >
+      <img className="erase__photo" src={photo.src} width={w} height={h} loading="lazy" alt={photo.alt} />
+      <img ref={shot} className={ready ? "erase__game is-painted" : "erase__game"} src={game.src} width={w} height={h} loading="lazy" alt={game.alt} />
+      <canvas ref={sheet} className="erase__sheet" aria-hidden />
     </div>
   );
 }

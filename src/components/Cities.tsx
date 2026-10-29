@@ -1,10 +1,19 @@
 import * as skyline from "ascii.rest/pieces/skyline";
 import { AsciiArt } from "@/components/AsciiArt";
 import { Folio, Kicker } from "@/components/bits";
-import { GlitchTitle, RipplePhoto } from "@/components/effects";
+import { ErasePhoto, GlitchTitle } from "@/components/effects";
 import { SKYLINE } from "@/content/ascii-stills";
 
-type Photo = { cls: string; src: string; w: number; h: number; alt: string; caption: string };
+type Photo = {
+  cls: string;
+  src: string;
+  w: number;
+  h: number;
+  alt: string;
+  caption: string;
+  /** The same frame re-rendered as a photograph, under the game, to be rubbed through to. */
+  real?: { src: string; alt: string };
+};
 
 const PHOTOS: Photo[] = [
   {
@@ -21,14 +30,34 @@ const PHOTOS: Photo[] = [
     w: 1400,
     h: 788,
     alt: "A domed stadium district surrounded by parks, office towers and an elevated rail line.",
-    caption: "The stadium district, with a park on its roof line.",
+    caption: "The stadium district, with a park on its roof line. Rub it out: the same district under snow.",
+    real: { src: "cs-stadium-snow", alt: "The same stadium district re-rendered as a photograph, under snow." },
   },
 ];
+
+const STREET: Photo = {
+  cls: "e-st",
+  src: "cs-street",
+  w: 1400,
+  h: 788,
+  alt: "Street-level view of an off-ramp lined with trees, telephone poles and an exit sign, office towers beyond.",
+  caption: "Street level, where the game stops looking like a game. Rub it out: the same street in the rain.",
+  real: { src: "cs-street-rain", alt: "The same street re-rendered as a photograph in the rain: a wet road, low cloud over the towers." },
+};
 
 function Plate({ p }: { p: Photo }) {
   return (
     <figure className={p.cls}>
-      <img src={`/assets/img/${p.src}.webp`} width={p.w} height={p.h} loading="lazy" alt={p.alt} />
+      {p.real ? (
+        <ErasePhoto
+          game={{ src: `/assets/img/${p.src}.webp`, alt: p.alt }}
+          photo={{ src: `/assets/img/${p.real.src}.webp`, alt: p.real.alt }}
+          w={p.w}
+          h={p.h}
+        />
+      ) : (
+        <img src={`/assets/img/${p.src}.webp`} width={p.w} height={p.h} loading="lazy" alt={p.alt} />
+      )}
       <figcaption>{p.caption}</figcaption>
     </figure>
   );
@@ -59,18 +88,22 @@ export function Cities() {
 
         <div className="essay">
           <figure className="e-full">
-            <RipplePhoto className="e-full__photo">
-              <img
-                src="/assets/img/cs-night.webp"
-                width={1800}
-                height={1012}
-                loading="lazy"
-                alt="A city in the early morning: a cluster of skyscrapers on the horizon, highway interchanges still lit in the foreground."
-              />
-            </RipplePhoto>
+            <ErasePhoto
+              game={{
+                src: "/assets/img/cs-night.webp",
+                alt: "A city in the early morning: a cluster of skyscrapers on the horizon, highway interchanges still lit in the foreground.",
+              }}
+              photo={{
+                src: "/assets/img/cs-night-haze.webp",
+                alt: "The same frame re-rendered as a photograph: the skyline in a golden morning haze over the interchanges.",
+              }}
+              w={1800}
+              h={1012}
+            />
             <figcaption>
               Early morning over the interchanges, October 2020. Every ramp in the foreground was placed by hand, and
-              the official Cities:&nbsp;Skylines account featured it that week. Run the cursor across it.
+              the official Cities:&nbsp;Skylines account featured it that week. Rub the game away: under it is the same
+              frame re-rendered as a photograph by an image model, in haze.
             </figcaption>
           </figure>
 
@@ -86,6 +119,8 @@ export function Cities() {
             </blockquote>
             <cite>Revised from the first version of this site.</cite>
           </div>
+
+          <Plate p={STREET} />
         </div>
       </div>
       <Folio page="28" />

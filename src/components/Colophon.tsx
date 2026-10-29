@@ -107,9 +107,10 @@ export function Colophon() {
             </dd>
             <dt>Effects</dt>
             <dd>
-              <a href="https://canvasui.dev">Canvas UI</a> by David Haz (MIT + Commons Clause): Ripple on the night
-              photo, Magnify as the loupe over each screenshot, Frost on the glass in front of every page, Glitch on the
-              section titles. Patched here to run in any WebGL2 browser.
+              <a href="https://canvasui.dev">Canvas UI</a> by David Haz (MIT + Commons Clause): Magnify as the loupe
+              over each screenshot, Frost on the glass in front of every page, Glitch on the section titles,
+              ParticleScroll as the sand at the foot of the screen. Patched here to run in any WebGL2 browser. The
+              eraser on the city plates is this issue's own.
             </dd>
             <dt>Cover</dt>
             <dd>
@@ -125,7 +126,8 @@ export function Colophon() {
             <dd>React, Vite and Tailwind CSS, prerendered at build time</dd>
             <dt>Photographs</dt>
             <dd>
-              Cities: Skylines screenshots by the author. Website screenshots of workgo.ai,
+              Cities: Skylines screenshots by the author; under three of them, the same frames re-rendered as
+              photographs by an image model (Qwen-Image), not real places. Website screenshots of workgo.ai,
               inclusifai.com, awakeai.ca and tokensbeat.com, October 2026.
             </dd>
             <dt>Printed on</dt>
