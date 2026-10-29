@@ -498,7 +498,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
    Each agent has its own colour in every chart: Claude orange, Codex blue, Pi
    aqua, the first three slots of a palette checked for colour-blind and
    normal-vision separation, each with its own step at night. Cache reads, the
-   point of the kinds pie, take violet; the other kinds stay in ink (--ink-4 is
+   bulk of the flow's kinds, take violet; the other kinds stay in ink (--ink-4 is
    a fourth grey, checked to clear the paper). Labels name every colour. */
 .tokens {
   --agent-claude: #eb6834; --agent-codex: #2a78d6; --agent-pi: #1baf7a; --kind-cache: #6250d6; --ink-4: #a8a8a8;
@@ -542,19 +542,28 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .tokens__key span { display: inline-flex; align-items: center; gap: 5px; }
 .tokens__key i { width: 9px; height: 9px; }
 
-/* Three rings in a row, each named and read out beside itself. */
-.pies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 30px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
-.pie__title { margin: 0 0 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
-.pie svg { display: block; width: 100%; max-width: 132px; height: auto; }
-.pie__slice { stroke: var(--paper); stroke-width: 1.4; stroke-linejoin: round; }
-.pie__middle { font: 400 13px var(--f-display); fill: var(--sumi); text-anchor: middle; dominant-baseline: middle; }
-.pie__key { margin: 10px 0 0; padding: 0; list-style: none; font-size: 10px; color: var(--ink-2); }
-.pie__key li { display: grid; grid-template-columns: 9px 1fr auto; align-items: center; gap: 6px; padding: 2px 0; }
-.pie__key i { width: 9px; height: 9px; }
-.pie__key b { font-weight: 500; color: var(--sumi); font-variant-numeric: tabular-nums; }
+/* The flow from agent to kind (Flow in TokenSkyline.tsx). The drawing stretches
+   to the middle column while its height stays 168px, the same as FH, so the
+   labels either side sit at their nodes' heights; a label for a sliver of a
+   node is nudged below the one above it, into the room under the drawing. */
+.flows { margin: 30px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
+.flows__title { margin: 0 0 14px; font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); }
+.flow { display: grid; grid-template-columns: 8.4em minmax(0, 1fr) 11em; column-gap: 10px; height: 168px; margin-bottom: 18px; }
+.flow__side { position: relative; margin: 0; padding: 0; list-style: none; font-size: 10px; letter-spacing: 0.04em; }
+.flow__side li { position: absolute; inset-inline: 0; transform: translateY(-50%); line-height: 1.4; white-space: nowrap; cursor: default; }
+.flow__side--from li { text-align: right; }
+.flow__side b { font-weight: 500; color: var(--sumi); }
+.flow__side span { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.flow__side--from span { display: block; }
+.flow__side--to span { margin-left: 6px; }
+.flow__plot { display: block; width: 100%; height: 168px; overflow: visible; }
+.flow__link { opacity: 0.4; transition: opacity 0.15s; }
+.flow__plot.is-picking .flow__link { opacity: 0.1; }
+.flow__plot.is-picking .flow__link.is-on { opacity: 0.75; }
+.flows__read { margin: 0; min-height: 1.6em; color: var(--ink-2); }
 @container (max-width: 380px) {
-  .pies { gap: 12px; }
-  .pie__key { font-size: 9px; }
+  .flow { grid-template-columns: 7.6em minmax(0, 1fr) 9.8em; column-gap: 6px; }
+  .flow__side { font-size: 9px; }
 }
 .tokens figcaption [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); }
 

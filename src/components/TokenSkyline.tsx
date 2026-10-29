@@ -7,12 +7,13 @@ import { DAY, MONTHS, long, short, thousands } from "@/lib/calendar";
 /*
  * The editor's tokens with coding agents, under the GitHub heatmap: the total
  * and its value at API list prices, a skyline from the first week there was
- * any (a week to a building, stacked by agent), and three rings for the
- * shares. scripts/token-data.py counts it all from cc-switch into
- * src/content/tokens.json. Each agent keeps its own colour everywhere
+ * any (a week to a building, stacked by agent), and a flow from each agent to
+ * the kinds of token it spent. scripts/token-data.py counts it all from
+ * cc-switch into src/content/tokens.json. Each agent keeps its own colour everywhere
  * (agent-claude and so on, in site.css) and is always named beside its marks.
  */
 
+type Parts = { input: number; output: number; cacheRead: number; cacheWrite: number };
 type Tokens = {
   fetched: string;
   machines: number;
@@ -21,7 +22,8 @@ type Tokens = {
   byApp: Record<string, number>;
   usd: number;
   usdByApp: Record<string, number>;
-  parts: { input: number; output: number; cacheRead: number; cacheWrite: number };
+  parts: Parts;
+  partsByApp: Record<string, Parts>;
   since: string | null;
   days: [string, number[], number[]][];
 };
@@ -129,66 +131,179 @@ const BUILDINGS = (
   </g>
 );
 
-// ---------------------------------------------------------------- the rings
+// ---------------------------------------------------------------- the flow
 
-type Slice = { label: string; value: number; cls: string };
+const BY_AGENT = T.apps.map((a) => ({ label: named(a), value: T.byApp[a] }));
+const KINDS: { key: keyof Parts; label: string; cls: string }[] = [
+  // Cache reads are most of it, so they alone take a colour; the other kinds stay in ink.
+  { key: "cacheRead", label: "Cache reads", cls: "kind-cache" },
+  { key: "input", label: "Fresh input", cls: "kind-input" },
+  { key: "cacheWrite", label: "Cache writes", cls: "kind-write" },
+  { key: "output", label: "Output", cls: "kind-output" },
+];
 
-/** A slice of a ring from a to b, in turns from twelve o'clock, clockwise. */
-function arc(a: number, b: number, r = 42, inner = 27) {
-  const pt = (t: number, rad: number) => [50 + rad * Math.sin(2 * Math.PI * t), 50 - rad * Math.cos(2 * Math.PI * t)];
-  const big = b - a > 0.5 ? 1 : 0;
-  const [x0, y0] = pt(a, r);
-  const [x1, y1] = pt(b, r);
-  const [x2, y2] = pt(b, inner);
-  const [x3, y3] = pt(a, inner);
-  return `M${x0} ${y0} A${r} ${r} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${inner} ${inner} 0 ${big} 0 ${x3} ${y3} Z`;
+/*
+ * The drawing is FW units wide and stretches to its column, while its height
+ * stays FH pixels, so the labels either side (HTML, readable at any width) sit
+ * level with their nodes. A token is the same height on both sides.
+ */
+const FW = 300;
+const FH = 168;
+const NODE = 6;
+const GAP = 10;
+const PER = (FH - (KINDS.length - 1) * GAP) / T.total;
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
+type Span = { y0: number; y1: number };
+/** Values stacked down one side, a gap between each, centred in the drawing. */
+function stack(values: number[]): Span[] {
+  let y = (FH - values.reduce((a, v) => a + v * PER, 0) - (values.length - 1) * GAP) / 2;
+  return values.map((v) => {
+    const span = { y0: y, y1: y + v * PER };
+    y = span.y1 + GAP;
+    return span;
+  });
+}
+const FROM = stack(T.apps.map((a) => T.byApp[a]));
+const TO = stack(KINDS.map((k) => T.parts[k.key]));
+
+/** Label centres beside a side's nodes, nudged down until no two are closer than `room` pixels. */
+function spread(spans: Span[], room: number) {
+  const ys = spans.map((s) => (s.y0 + s.y1) / 2);
+  for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + room);
+  return ys.map(r2);
+}
+const FROM_Y = spread(FROM, 28);
+const TO_Y = spread(TO, 14);
+
+/**
+ * A band for each agent and kind it spent: agents leave in kind order and
+ * kinds fill in agent order, so no two bands cross more than they must.
+ */
+const LINKS = (() => {
+  const out: { app: number; kind: number; value: number; d: string }[] = [];
+  const at = TO.map((s) => s.y0);
+  FROM.forEach((from, i) => {
+    let y = from.y0;
+    KINDS.forEach((k, j) => {
+      const value = T.partsByApp[T.apps[i]]?.[k.key] ?? 0;
+      if (!value) return;
+      const h = value * PER;
+      const [a0, a1, b0, b1] = [y, y + h, at[j], at[j] + h].map(r2);
+      const [x0, x1, m] = [NODE, FW - NODE, FW / 2];
+      out.push({ app: i, kind: j, value, d: `M${x0} ${a0}C${m} ${a0} ${m} ${b0} ${x1} ${b0}L${x1} ${b1}C${m} ${b1} ${m} ${a1} ${x0} ${a1}Z` });
+      y += h;
+      at[j] += h;
+    });
+  });
+  return out;
+})();
+
+/** What the pointer is on: a band (an agent and a kind), an agent, or a kind. */
+type Pick = { app?: number; kind?: number } | null;
+
+function readout(pick: Pick) {
+  if (!pick) return `${compact(T.total)} tokens, ${percent(T.parts.cacheRead, T.total)} of them read back from the cache`;
+  const { app, kind } = pick;
+  if (app !== undefined && kind !== undefined) {
+    const a = T.apps[app];
+    const v = T.partsByApp[a]?.[KINDS[kind].key] ?? 0;
+    return `${named(a)} → ${KINDS[kind].label} · ${compact(v)} · ${percent(v, T.byApp[a])} of ${named(a)}'s`;
+  }
+  if (app !== undefined) {
+    const a = T.apps[app];
+    return `${named(a)} · ${compact(T.byApp[a])} tokens · ${dollars(T.usdByApp[a] ?? 0)} · ${percent(T.partsByApp[a]?.cacheRead ?? 0, T.byApp[a])} cache reads`;
+  }
+  const k = KINDS[kind!];
+  const each = T.apps.map((a) => [named(a), T.partsByApp[a]?.[k.key] ?? 0] as const).filter(([, v]) => v > 0);
+  return `${k.label} · ${compact(T.parts[k.key])} · ${percent(T.parts[k.key], T.total)} · ${each.map(([n, v]) => `${n} ${compact(v)}`).join(", ")}`;
 }
 
-/** Shares of a whole as a ring, the whole in its middle, every slice named beside it. */
-function Ring({ title, slices, middle, format }: { title: string; slices: Slice[]; middle: string; format: (n: number) => string }) {
-  const whole = slices.reduce((a, s) => a + s.value, 0) || 1;
-  let at = 0;
+/** Each agent's tokens running to the kinds they were, with the agent's value at list prices beside it. */
+function Flow() {
+  const [pick, setPick] = useState<Pick>(null);
+  const on = (app: number, kind: number) =>
+    pick !== null && (pick.app === undefined || pick.app === app) && (pick.kind === undefined || pick.kind === kind);
+  const hold = (p: Pick) => ({ onPointerEnter: () => setPick(p), onPointerDown: () => setPick(p) });
+
   return (
-    <div className="pie">
-      <p className="pie__title mono">{title}</p>
-      <svg viewBox="0 0 100 100" role="img" aria-label={`${title}: ${slices.map((s) => `${s.label} ${percent(s.value, whole)}`).join(", ")}`}>
-        {slices.map((s) => {
-          const from = at;
-          at += s.value / whole;
-          // A whole ring cannot be one arc; a lone slice is drawn as two halves.
-          const d = at - from >= 0.9999 ? `${arc(0, 0.5)} ${arc(0.5, 0.9999)}` : arc(from, at);
-          return s.value > 0 ? (
-            <path key={s.label} className={`pie__slice ${s.cls}`} d={d}>
-              <title>{`${s.label}: ${format(s.value)}, ${percent(s.value, whole)}`}</title>
-            </path>
-          ) : null;
-        })}
-        <text className="pie__middle" x="50" y="53.5">
-          {middle}
-        </text>
-      </svg>
-      <ul className="pie__key mono">
-        {slices.map((s) => (
-          <li key={s.label}>
-            <i className={s.cls} />
-            <span>{s.label}</span>
-            <b>{percent(s.value, whole)}</b>
-          </li>
-        ))}
-      </ul>
+    <div className="flows">
+      <p className="flows__title mono">Agent to kind</p>
+      <div
+        className="flow"
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") setPick(null);
+        }}
+      >
+        <ul className="flow__side flow__side--from mono">
+          {T.apps.map((a, i) => (
+            <li key={a} style={{ top: FROM_Y[i] }} {...hold({ app: i })}>
+              <b>{named(a)}</b>
+              <span>
+                {compact(T.byApp[a])} · {dollars(T.usdByApp[a] ?? 0)}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <svg className={pick ? "flow__plot is-picking" : "flow__plot"} viewBox={`0 0 ${FW} ${FH}`} preserveAspectRatio="none" aria-hidden="true">
+          {LINKS.map((l) => (
+            <path
+              key={`${l.app}-${l.kind}`}
+              className={`flow__link ${hue(T.apps[l.app])}${on(l.app, l.kind) ? " is-on" : ""}`}
+              d={l.d}
+              {...hold({ app: l.app, kind: l.kind })}
+            />
+          ))}
+          {FROM.map((s, i) => (
+            <rect key={i} className={hue(T.apps[i])} x={0} y={r2(s.y0)} width={NODE} height={r2(Math.max(1, s.y1 - s.y0))} />
+          ))}
+          {TO.map((s, j) => (
+            <rect key={j} className={KINDS[j].cls} x={FW - NODE} y={r2(s.y0)} width={NODE} height={r2(Math.max(1, s.y1 - s.y0))} />
+          ))}
+        </svg>
+        <ul className="flow__side flow__side--to mono">
+          {KINDS.map((k, j) => (
+            <li key={k.key} style={{ top: TO_Y[j] }} {...hold({ kind: j })}>
+              <b>{k.label}</b>
+              <span>{percent(T.parts[k.key], T.total)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="flows__read mono">{readout(pick)}</p>
+      {/* A table cannot be made 1px wide, so it hides inside a box that can. */}
+      <div className="visually-hidden">
+        <table>
+          <caption>Tokens by agent and kind</caption>
+          <thead>
+            <tr>
+              <th scope="col">Agent</th>
+              {KINDS.map((k) => (
+                <th key={k.key} scope="col">
+                  {k.label}
+                </th>
+              ))}
+              <th scope="col">All tokens</th>
+              <th scope="col">Value at list prices</th>
+            </tr>
+          </thead>
+          <tbody>
+            {T.apps.map((a) => (
+              <tr key={a}>
+                <th scope="row">{named(a)}</th>
+                {KINDS.map((k) => (
+                  <td key={k.key}>{thousands(T.partsByApp[a]?.[k.key] ?? 0)}</td>
+                ))}
+                <td>{thousands(T.byApp[a])}</td>
+                <td>{dollars(T.usdByApp[a] ?? 0)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
-
-const BY_AGENT = T.apps.map((a) => ({ label: named(a), value: T.byApp[a], cls: hue(a) }));
-const VALUE_BY_AGENT = T.apps.map((a) => ({ label: named(a), value: T.usdByApp[a] ?? 0, cls: hue(a) }));
-const BY_KIND: Slice[] = [
-  // Cache reads are the point of this pie, so they alone take a colour; the rest stay in ink.
-  { label: "Cache reads", value: T.parts.cacheRead, cls: "kind-cache" },
-  { label: "Fresh input", value: T.parts.input, cls: "kind-input" },
-  { label: "Cache writes", value: T.parts.cacheWrite, cls: "kind-write" },
-  { label: "Output", value: T.parts.output, cls: "kind-output" },
-];
 
 // ---------------------------------------------------------------- the total
 
@@ -232,8 +347,8 @@ function Odometer({ value }: { value: number }) {
 
 /**
  * Tokens with coding agents: the total and what it is worth, the weeks as a
- * skyline, and the shares as rings. The line under the skyline reads out the
- * week the pointer is on.
+ * skyline, and the shares as a flow from agent to kind. The lines under the
+ * skyline and the flow read out what the pointer is on.
  */
 export function TokenSkyline() {
   const [at, setAt] = useState<number | null>(null);
@@ -324,15 +439,12 @@ export function TokenSkyline() {
         </p>
       </div>
 
-      <div className="pies">
-        <Ring title="Tokens by agent" slices={BY_AGENT} middle={compact(T.total)} format={(n) => `${compact(n)} tokens`} />
-        <Ring title="Value by agent" slices={VALUE_BY_AGENT} middle={dollars(T.usd)} format={(n) => dollars(n)} />
-        <Ring title="Tokens by kind" slices={BY_KIND} middle={percent(T.parts.cacheRead, T.total)} format={(n) => `${compact(n)} tokens`} />
-      </div>
+      <Flow />
 
       <figcaption>
         <span lang="ja">楼</span>, tower: a week of tokens to a building, stacked by agent, from the first week there were
-        any. Counted by cc-switch on {MACHINES}, cache reads included, to {long(new Date(T.fetched))}. The money is what the
+        any. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
+        cache, or written back as output. Counted by cc-switch on {MACHINES}, cache reads included, to {long(new Date(T.fetched))}. The money is what the
         tokens are worth at API list prices, not what I paid; models no price table knows count at nothing, so it is a
         floor. The typist types 40 words a minute, 230 days a year, and a token is about three-quarters of a word.
       </figcaption>

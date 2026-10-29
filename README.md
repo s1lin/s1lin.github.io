@@ -151,12 +151,14 @@ too; commit a fresh one now and then so it does not drift far.
 
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and
 its value at API list prices, a building a week from the first week there was
-any, stacked by agent, and three pies for the shares (tokens and value by
-agent, tokens by kind) (`src/components/TokenSkyline.tsx`). Money is the cost
+any, stacked by agent, and a flow from each agent to the kinds of token it
+spent (cache reads, fresh input, cache writes, output), each agent's value
+beside it (`src/components/TokenSkyline.tsx`). Money is the cost
 cc-switch recorded; rows it left at $0 for want of a price are priced from the
 fullest price table among the machines. `scripts/token-data.py` counts them from
 cc-switch's usage database on each machine (this one, and others over SSH) and
-writes only the totals, per agent per day, to `src/content/tokens.json`:
+writes only the totals, per agent per day and per agent per kind, to
+`src/content/tokens.json`:
 
 ```bash
 python3 -I scripts/token-data.py ~/.cc-switch/cc-switch.db ssh://user@host:port/root/.cc-switch/cc-switch.db

@@ -4,7 +4,8 @@ cc-switch keeps the usage of Claude Code, Codex, Pi and the rest in an SQLite
 database: recent requests one row each (proxy_request_logs), older days rolled
 up (usage_daily_rollups). This reads one or more of those databases, on this
 machine or another over SSH, and writes src/content/tokens.json with tokens
-per agent per day and nothing else: no providers, models, costs or hosts.
+per agent per day, and per agent per kind, and nothing else: no providers,
+models, costs or hosts.
 
 Usage:
   python3 -I scripts/token-data.py SOURCE [SOURCE ...] [--sync]
@@ -135,6 +136,7 @@ def main(argv):
 
     days = {}  # day -> {app: [tokens, usd]}
     parts = dict.fromkeys(PARTS, 0)
+    parts_by_app = {}  # app -> the four kinds, for the flow from agents to kinds
     for t in tallies:
         for app, by_day in merge(t, prices).items():
             for day, cell in by_day.items():
@@ -143,6 +145,7 @@ def main(argv):
                 mine[1] += cell[4]
                 for k, v in zip(PARTS, cell[:4]):
                     parts[k] += v
+                    parts_by_app.setdefault(app, dict.fromkeys(PARTS, 0))[k] += v
 
     apps = sorted({a for cell in days.values() for a in cell}, key=lambda a: -sum(c.get(a, [0])[0] for c in days.values()))
     rows = [
@@ -159,6 +162,7 @@ def main(argv):
         "usd": round(sum(sum(r[2]) for r in rows), 2),
         "usdByApp": {a: round(sum(r[2][i] for r in rows), 2) for i, a in enumerate(apps)},
         "parts": parts,
+        "partsByApp": {a: parts_by_app[a] for a in apps},
         "since": rows[0][0] if rows else None,
         "days": rows,
     }
