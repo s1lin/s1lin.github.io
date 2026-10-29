@@ -14,9 +14,10 @@ type Item = {
 const ITEMS: Item[] = [
   {
     no: "01",
-    title: "LEGOLocator",
-    meta: "2025.12 · PDF parsing · Instruction lookup",
-    text: "A leftover LEGO piece, traced back to the steps that add it. Choose a piece from the booklet’s illustrated inventory to see where it belongs. The first local viewer covers the Vespa set.",
+    title: "Brick Locator",
+    meta: "2025.12 · PyMuPDF · PDF.js · AGPL 3.0",
+    text: "A leftover LEGO piece, traced back to every step that adds it and marked on the page. The site ships only an index of the booklet. You bring the PDF from LEGO and your browser draws the pages, so no artwork is hosted. One booklet so far: the Vespa.",
+    link: { href: "/brick-locator/", label: "Find a piece ↗" },
   },
   {
     no: "02",
