@@ -16,7 +16,7 @@ const ITEMS: Item[] = [
     no: "01",
     title: "Brick Locator",
     meta: "2025.12 · PyMuPDF · PDF.js · AGPL 3.0",
-    text: "A leftover LEGO piece, traced back to every step that adds it and marked on the page. The site ships only an index of the booklet. You bring the PDF from LEGO and your browser draws the pages, so no artwork is hosted. One booklet so far: the Vespa.",
+    text: "A leftover LEGO piece, traced back to every step that adds it and marked on the page. The site ships an index of the booklet and a two-page sample. You bring the PDF from LEGO, and your browser draws every other page from your copy. One booklet so far: the Vespa.",
     link: { href: "/brick-locator/", label: "Find a piece ↗" },
   },
   {
