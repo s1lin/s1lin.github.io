@@ -406,10 +406,13 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .namenote p + p { margin-top: 10px; }
 .namenote [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); }
 
-/* The heatmap goes under the contents list while the foreword runs on beside
-   both; the first row is only as tall as the list (components/GitHubHeatmap.tsx). */
-.frontmatter { grid-template-rows: auto 1fr; }
-.frontmatter .foreword { grid-row: 1 / span 2; }
+/* Under the contents and the foreword, one row of two charts on the page's own
+   columns: the grass under the contents, the tokens under the foreword. The
+   grass is short, so it stays in view beside the tokens as the page scrolls. */
+.charts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; margin-top: 72px; }
+.charts > * { min-width: 0; }
+.charts .heatmap { grid-column: 1 / span 5; max-width: 40rem; position: sticky; top: calc(var(--head-h) + 28px); }
+.charts .tokens { grid-column: 7 / span 6; margin-top: 0; }
 
 /* A square a day in GitHub's own greens, its light scale on paper and its dark one at night. */
 .heatmap {
@@ -418,7 +421,6 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   --l2: #40c463;
   --l3: #30a14e;
   --l4: #216e39;
-  grid-column: 1 / span 5; grid-row: 2; align-self: start; margin-top: 44px; max-width: 40rem;
   container-type: inline-size;
 }
 @media (prefers-color-scheme: dark) {
@@ -448,12 +450,77 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .heatmap__key i:last-of-type { margin-right: 5px; }
 .heatmap figcaption [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); }
 
+/* Tokens with agents (components/TokenSkyline.tsx): the total, its value, a
+   building a week from the first week there was any, and rings for the shares.
+   Each agent has its own colour in every chart: Claude orange, Codex blue, Pi
+   aqua, the first three slots of a palette checked for colour-blind and
+   normal-vision separation, each with its own step at night. Cache reads, the
+   point of the kinds pie, take violet; the other kinds stay in ink (--ink-4 is
+   a fourth grey, checked to clear the paper). Labels name every colour. */
+.tokens {
+  --agent-claude: #eb6834; --agent-codex: #2a78d6; --agent-pi: #1baf7a; --kind-cache: #6250d6; --ink-4: #a8a8a8;
+  margin: 52px 0 0; container-type: inline-size;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tokens { --agent-claude: #d95926; --agent-codex: #3987e5; --agent-pi: #199e70; --kind-cache: #9085e9; --ink-4: #4a4a4a; }
+}
+:root[data-theme="dark"] .tokens { --agent-claude: #d95926; --agent-codex: #3987e5; --agent-pi: #199e70; --kind-cache: #9085e9; --ink-4: #4a4a4a; }
+.tokens .sect-label { margin-bottom: 16px; }
+.tokens__total, .tokens__usd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; }
+.tokens__n { font: 400 clamp(2.2rem, 8.6cqi, 3.5rem)/1 var(--f-display); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; white-space: nowrap; }
+.tokens__lead { color: var(--ink-3); opacity: 0.4; }
+.tokens__usd { margin: 8px 0 22px; }
+.tokens__money { font: 400 clamp(1.5rem, 5cqi, 2.1rem)/1 var(--f-display); font-variant-numeric: lining-nums; }
+.tokens__unit { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+/* Why it is a lot: a corollary of the foreword's theorem, set like it, and its proof. */
+.corollary { margin: 0 0 26px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
+.corollary__claim { margin: 0 0 10px; font: italic 400 clamp(1.25rem, 4.4cqi, 1.6rem)/1.25 var(--f-display); text-wrap: balance; }
+.corollary__claim b { display: block; margin-bottom: 8px; font: 500 11px/1 var(--f-mono); font-style: normal; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.corollary__proof { margin: 0; font: 400 0.95rem/1.6 var(--f-sans); color: var(--ink-2); text-wrap: pretty; }
+.corollary__proof i { font: italic 400 1.15em/1 var(--f-display); color: var(--sumi); margin-right: 0.2em; }
+.tokens__sky { display: block; width: 100%; height: auto; }
+.tokens .agent-claude { fill: var(--agent-claude); background: var(--agent-claude); }
+.tokens .agent-codex { fill: var(--agent-codex); background: var(--agent-codex); }
+.tokens .agent-pi { fill: var(--agent-pi); background: var(--agent-pi); }
+.tokens .agent-other { fill: var(--ink-3); background: var(--ink-3); }
+.tokens .kind-cache { fill: var(--kind-cache); background: var(--kind-cache); }
+.tokens .kind-input { fill: var(--ink-2); background: var(--ink-2); }
+.tokens .kind-write { fill: var(--ink-3); background: var(--ink-3); }
+.tokens .kind-output { fill: var(--ink-4); background: var(--ink-4); }
+.tokens .sky-windows { fill: url(#sky-lit); pointer-events: none; }
+.tokens #sky-lit rect { fill: var(--paper); opacity: 0.55; }
+.tokens .sky-peak { font: 400 9px var(--f-mono); letter-spacing: 0.04em; fill: var(--ink-2); text-anchor: middle; }
+.tokens .sky-month { font: 400 9px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink-3); }
+.tokens .sky-ground { stroke: var(--rule-strong); stroke-width: 0.5; }
+.tokens__at { fill: none; stroke: var(--sumi); stroke-width: 1; pointer-events: none; }
+.tokens__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 18px; margin-top: 8px; color: var(--ink-2); }
+.tokens__foot p { margin: 0; }
+.tokens__key { display: flex; gap: 12px; color: var(--ink-3); }
+.tokens__key span { display: inline-flex; align-items: center; gap: 5px; }
+.tokens__key i { width: 9px; height: 9px; }
+
+/* Three rings in a row, each named and read out beside itself. */
+.pies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 30px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
+.pie__title { margin: 0 0 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.pie svg { display: block; width: 100%; max-width: 132px; height: auto; }
+.pie__slice { stroke: var(--paper); stroke-width: 1.4; stroke-linejoin: round; }
+.pie__middle { font: 400 13px var(--f-display); fill: var(--sumi); text-anchor: middle; dominant-baseline: middle; }
+.pie__key { margin: 10px 0 0; padding: 0; list-style: none; font-size: 10px; color: var(--ink-2); }
+.pie__key li { display: grid; grid-template-columns: 9px 1fr auto; align-items: center; gap: 6px; padding: 2px 0; }
+.pie__key i { width: 9px; height: 9px; }
+.pie__key b { font-weight: 500; color: var(--sumi); font-variant-numeric: tabular-nums; }
+@container (max-width: 380px) {
+  .pies { gap: 12px; }
+  .pie__key { font-size: 9px; }
+}
+.tokens figcaption [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); }
+
 @media (max-width: 900px) {
-  .toc, .foreword, .heatmap { grid-column: 1 / -1; }
-  .frontmatter { grid-template-rows: none; }
-  .frontmatter .foreword, .heatmap { grid-row: auto; }
+  .toc, .foreword { grid-column: 1 / -1; }
   .foreword { margin-top: 64px; }
-  .heatmap { margin-top: 56px; }
+  .charts { margin-top: 56px; }
+  .charts .heatmap, .charts .tokens { grid-column: 1 / -1; position: static; }
+  .charts .tokens { margin-top: 52px; }
 }
 
 /* ------------------------------------------------------------------ feature opener + route map */
@@ -549,15 +616,13 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .dg-lbl { font: 500 11px var(--f-mono); fill: var(--sumi); letter-spacing: 0.06em; }
 .dg-sub { font: 400 10px var(--f-mono); fill: var(--ink-2); }
 
-/* The Tokensbeat section is drawn in ink only: solid for what runs, dashed for what is drawn. */
+/* The Tokensbeat plan is drawn in ink only; the open bay, room for the next app, is dashed. */
 .diagram--plan { padding: clamp(10px, 1.2vw, 16px); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .diagram--plan svg { min-width: 600px; }
 .pl-box { fill: var(--paper); stroke: var(--sumi); stroke-width: 1.2; }
-.pl-box--drawn { stroke-dasharray: 5 4; }
 .pl-box--vacant { fill: none; stroke: var(--ink-3); stroke-dasharray: 2 4; }
 .pl-slab { fill: var(--paper-2); stroke: var(--sumi); stroke-width: 1.6; }
 .pl-link { fill: none; stroke: var(--sumi); stroke-width: 1.2; }
-.pl-link--drawn { stroke-dasharray: 4 4; }
 .pl-link--vacant { stroke: var(--ink-3); stroke-dasharray: 2 4; }
 .pl-ground, .pl-pile { fill: none; stroke: var(--sumi); stroke-width: 1.2; }
 .pl-hatch { fill: none; stroke: var(--ink-3); stroke-width: 0.8; }
@@ -569,7 +634,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .pl-level__name { font-size: 8.5px; fill: var(--ink-2); letter-spacing: 0.08em; }
 .pl-slab-name { font: 600 16px var(--f-sans); fill: var(--sumi); letter-spacing: 0.24em; text-anchor: middle; }
 .pl-model { font: 400 9.5px var(--f-mono); fill: var(--sumi); text-anchor: middle; }
-.pl-key, .pl-legend { font: 400 9px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.04em; }
+.pl-legend { font: 400 9px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.04em; }
 
 .asciidiagram {
   margin: 0; padding: 18px; overflow-x: auto;
@@ -779,6 +844,9 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
     /* the heatmap's year fills in from the left, just behind its label's rule */
     .heatmap__plot { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; }
     @keyframes fill-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+    /* and the token skyline goes up from its ground under it */
+    .tokens__sky { animation: rise linear both; animation-timeline: view(); animation-range: entry 10% cover 35%; }
+    @keyframes rise { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
   }
 }
 

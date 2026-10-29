@@ -1,44 +1,36 @@
 import { useState, type PointerEvent } from "react";
-import github from "@/content/github.json";
+import {
+  CAL,
+  CELL,
+  DAYS,
+  LEFT,
+  MONTHS,
+  OFFSET,
+  STEP,
+  TOP,
+  W,
+  WEEKDAYS,
+  WEEKS,
+  dayOf,
+  long,
+  short,
+  thousands,
+  weekOf,
+} from "@/lib/calendar";
 
 /*
  * The editor's last year on GitHub, a square a day, shaded as the profile page
  * shades it. scripts/github-data.py copies the counts into src/content/github.json
  * when the issue is built, so the squares are in the prerendered page and the
- * reader's browser never asks GitHub for anything.
+ * reader's browser never asks GitHub for anything. The grid is lib/calendar.ts.
  */
 
-type Calendar = { login: string; total: number; start: string; counts: number[]; levels: number[] };
-const CAL: Calendar = github;
-
-const CELL = 8; // a day's square
-const STEP = 10; // square to square
-const LEFT = 26; // room for the weekday names
-const TOP = 14; // room for the month names
-
-const MONTHS = "January February March April May June July August September October November December".split(" ");
-const WEEKDAYS = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" ");
-const DAY = 86_400_000;
-
-// Weeks run Sunday to Saturday, top to bottom, as on GitHub.
-const FIRST = Date.parse(CAL.start);
-const OFFSET = new Date(FIRST).getUTCDay();
-const DAYS = CAL.counts.length;
-const WEEKS = Math.ceil((OFFSET + DAYS) / 7);
-// The last gap stays, as room for the outline round the day under the pointer.
-const W = LEFT + WEEKS * STEP;
 const H = TOP + 7 * STEP;
 
-/* Dates in UTC and spelt out by hand, so the server and every browser print the same. */
-const dayOf = (i: number) => new Date(FIRST + i * DAY);
-const long = (d: Date) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-const short = (d: Date) =>
-  `${WEEKDAYS[d.getUTCDay()].slice(0, 3)} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}`;
-const thousands = (n: number) => n.toLocaleString("en-US");
 const contributions = (n: number) =>
   n === 0 ? "No contributions" : n === 1 ? "1 contribution" : `${thousands(n)} contributions`;
 
-const x = (i: number) => LEFT + Math.floor((i + OFFSET) / 7) * STEP;
+const x = (i: number) => LEFT + weekOf(i) * STEP;
 const y = (i: number) => TOP + ((i + OFFSET) % 7) * STEP;
 
 /** Each month's name over the first week that starts in it, where there is room before the next. */

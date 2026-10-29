@@ -24,7 +24,7 @@ only hydrates it.
 | --- | --- |
 | `src/App.tsx` | The issue, section by section |
 | `src/components/` | Cover, contents, features, cities, workshop, departures, colophon |
-| `src/components/TokensbeatFigures.tsx` | The section drawing in the Tokensbeat feature: the platform, its tenants, and the models under it |
+| `src/components/TokensbeatFigures.tsx` | The plan in the Tokensbeat feature, drawn as a building section: apps moving in on the foundation, the models under it |
 | `src/components/canvasui/` | Canvas UI effects (Ripple, Magnify, Frost, Glitch, ParticleScroll), patched; see below |
 | `src/components/effects.tsx` | Where those effects meet the photographs and section titles, and the frost over the page |
 | `src/components/Metro2Line.tsx`, `src/hooks/useMetro2Line.ts`, `src/lib/metro.ts` | Metro2Line, playable, on the cover: ride twelve metro networks or guess a city |
@@ -129,6 +129,26 @@ so the published page is at most a day behind. If GitHub cannot be reached or
 its page has changed shape, the script writes nothing and exits 1, and the
 build goes on with the snapshot in the repo. Local builds use that snapshot
 too; commit a fresh one now and then so it does not drift far.
+
+## Token skyline
+
+Under the GitHub heatmap, the editor's tokens with coding agents: a total and
+its value at API list prices, a building a week from the first week there was
+any, stacked by agent, and three pies for the shares (tokens and value by
+agent, tokens by kind) (`src/components/TokenSkyline.tsx`). Money is the cost
+cc-switch recorded; rows it left at $0 for want of a price are priced from the
+fullest price table among the machines. `scripts/token-data.py` counts them from
+cc-switch's usage database on each machine (this one, and others over SSH) and
+writes only the totals, per agent per day, to `src/content/tokens.json`:
+
+```bash
+python3 -I scripts/token-data.py ~/.cc-switch/cc-switch.db ssh://user@host:port/root/.cc-switch/cc-switch.db
+python3 -I scripts/token-data.py ... --sync   # first bring in the latest session logs
+```
+
+The machines are private, so the deploy workflow cannot run this; run it, then
+commit the new `tokens.json`. A day that cc-switch holds both as a rollup and as
+request rows counts once, at the larger figure, so the total is a floor.
 
 ## Deploy
 

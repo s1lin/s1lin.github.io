@@ -2,6 +2,7 @@ import * as typewriter from "ascii.rest/pieces/typewriter";
 import { AsciiArt } from "@/components/AsciiArt";
 import { Folio, Roundel } from "@/components/bits";
 import { GitHubHeatmap } from "@/components/GitHubHeatmap";
+import { TokenSkyline } from "@/components/TokenSkyline";
 
 const FEATURES: { href: string; letter: string; name: string; page: string }[] = [
   { href: "#tokensbeat", letter: "T", name: "Tokensbeat", page: "08" },
@@ -116,7 +117,10 @@ export function Contents() {
         </article>
 
         {/* Under the contents list, beside the namenote; after the foreword on a phone. */}
-        <GitHubHeatmap />
+        <div className="charts">
+          <GitHubHeatmap />
+          <TokenSkyline />
+        </div>
       </div>
       <Folio page="04" />
     </section>

@@ -1,45 +1,43 @@
-/** Tokensbeat figure: a building section of the platform, tenants upstairs and models under the foundation. */
+/** Tokensbeat figure: the plan, drawn as a building section. Apps upstairs, the foundation, the models beneath. */
 
 const BAYS = [76, 232, 388, 544];
 const BAY_W = 144;
 const RIGHT = BAYS[3] + BAY_W;
-const ROWS = { app: 48, agent: 112, gateway: 176 };
-const ROW_H = 48;
-const SLAB = { y: 244, h: 52 };
-const GROUND = 312;
+const ROWS = { app: 48, agent: 104, backend: 160, gateway: 216 };
+const ROW_H = 44;
+const TOP = ROWS.app;
+const BOTTOM = ROWS.gateway + ROW_H;
+const SLAB = { y: 280, h: 50 };
+const GROUND = 346;
 const MODELS = ["Claude", "OpenAI", "Gemini", "Grok", "Kimi", "DeepSeek", "GLM", "Qwen", "own GPUs"];
 
-type State = "running" | "drawn";
-
-function Room({ x, y, w = BAY_W, name, note, state }: { x: number; y: number; w?: number; name: string; note: string; state: State }) {
+function Room({ x, y, h = ROW_H, name, note, open }: { x: number; y: number; h?: number; name: string; note: string; open?: boolean }) {
   return (
     <g>
-      <rect className={state === "drawn" ? "pl-box pl-box--drawn" : "pl-box"} x={x} y={y} width={w} height={ROW_H} />
-      <text className="pl-name" x={x + w / 2} y={y + 21}>
+      <rect className={open ? "pl-box pl-box--vacant" : "pl-box"} x={x} y={y} width={BAY_W} height={h} />
+      <text className="pl-name" x={x + BAY_W / 2} y={y + h / 2 - 2}>
         {name}
       </text>
-      <text className="pl-note" x={x + w / 2} y={y + 36}>
+      <text className="pl-note" x={x + BAY_W / 2} y={y + h / 2 + 13}>
         {note}
       </text>
     </g>
   );
 }
 
-/** The links down one bay: app to agent, agent to gateway, gateway to the foundation. */
-function Links({ x, state, keyed }: { x: number; state: State; keyed?: boolean }) {
+/** A tenant's bay: its app, and the three rooms the building gives it, tied down to the foundation. */
+function Tenant({ x, app, what, agent }: { x: number; app: string; what: string; agent: string }) {
   const cx = x + BAY_W / 2;
-  const cls = state === "drawn" ? "pl-link pl-link--drawn" : "pl-link";
   return (
     <g>
       <path
-        className={cls}
-        d={`M${cx} ${ROWS.app + ROW_H} V${ROWS.agent} M${cx} ${ROWS.agent + ROW_H} V${ROWS.gateway} M${cx} ${ROWS.gateway + ROW_H} V${SLAB.y}`}
+        className="pl-link"
+        d={[ROWS.app, ROWS.agent, ROWS.backend].map((y) => `M${cx} ${y + ROW_H} v${12}`).join(" ") + ` M${cx} ${BOTTOM} V${SLAB.y}`}
       />
-      {keyed && (
-        <text className="pl-key" x={cx + 6} y={ROWS.gateway + ROW_H + 14}>
-          1 key
-        </text>
-      )}
+      <Room x={x} y={ROWS.app} name={app} note={what} />
+      <Room x={x} y={ROWS.agent} name={agent} note="its own agent" />
+      <Room x={x} y={ROWS.backend} name="Backend" note="looked after for it" />
+      <Room x={x} y={ROWS.gateway} name="Gateway" note="its own, one key up" />
     </g>
   );
 }
@@ -60,35 +58,37 @@ function Level({ y, at, children }: { y: number; at: string; children: string })
 }
 
 function Section() {
-  const [pub, wg, ifa, vacant] = BAYS;
-  const pileStep = (RIGHT - pub) / MODELS.length;
+  const [people, wg, ifa, next] = BAYS;
+  const pileStep = (RIGHT - people) / MODELS.length;
   return (
-    <svg viewBox="0 0 700 430" role="img" aria-labelledby="tb-t tb-d">
-      <title id="tb-t">Section through Tokensbeat</title>
+    <svg viewBox="0 0 700 462" role="img" aria-labelledby="tb-t tb-d">
+      <title id="tb-t">The plan for Tokensbeat, as a building section</title>
       <desc id="tb-d">
-        A building section. The foundation is the Tokensbeat gateway: one wallet, one ledger, one key per tenant. Under
-        it, piles reach down to the models: Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM, Qwen and GPUs I run
-        myself. Above it stand four bays, each with an app, an agent on Pi and a gateway. The public bay, Aha, is
-        running. WorkGo and InclusifAI are tenants whose own gateways and agents are drawn but not yet open; WorkGo also
-        takes Automation, the managed backend. The fourth bay is to let.
+        What I want Tokensbeat to be. The foundation is one gateway to every model, with one wallet and one ledger; under
+        it, piles reach down to Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM, Qwen and GPUs I run myself. On it
+        stand bays: Aha, an agent app for people; WorkGo and InclusifAI, each with its own agent (Obi, Aria), a backend
+        looked after for it and its own gateway; and room for the next app.
       </desc>
 
       {[
-        ["PUBLIC", pub],
+        ["FOR PEOPLE", people],
         ["TENANT", wg],
         ["TENANT", ifa],
-        ["TENANT", vacant],
+        ["NEXT", next],
       ].map(([head, x]) => (
         <text key={x} className="pl-head" x={Number(x) + BAY_W / 2} y="34">
           {head}
         </text>
       ))}
 
-      <Level y={ROWS.app + ROW_H / 2} at="+3">
+      <Level y={ROWS.app + ROW_H / 2} at="+4">
         APP
       </Level>
-      <Level y={ROWS.agent + ROW_H / 2} at="+2">
+      <Level y={ROWS.agent + ROW_H / 2} at="+3">
         AGENT
+      </Level>
+      <Level y={ROWS.backend + ROW_H / 2} at="+2">
+        BACKEND
       </Level>
       <Level y={ROWS.gateway + ROW_H / 2} at="+1">
         GATEWAY
@@ -100,43 +100,27 @@ function Section() {
         MODELS
       </Level>
 
-      <Links x={pub} state="running" />
-      <Room x={pub} y={ROWS.app} name="Aha" note="an agent app for people" state="running" />
-      <Room x={pub} y={ROWS.agent} name="Pi" note="the agent runtime" state="running" />
-      <Room x={pub} y={ROWS.gateway} name="Public API" note="OpenAI-compatible" state="running" />
+      <path className="pl-link" d={`M${people + BAY_W / 2} ${BOTTOM} V${SLAB.y}`} />
+      <Room x={people} y={TOP} h={BOTTOM - TOP} name="Aha" note="an agent app for people" />
 
-      <Links x={wg} state="drawn" keyed />
-      <Room x={wg} y={ROWS.app} w={74} name="WorkGo" note="career OS" state="running" />
-      <Room x={wg + 80} y={ROWS.app} w={BAY_W - 80} name="Backend" note="Automation" state="drawn" />
-      <Room x={wg} y={ROWS.agent} name="Obi" note="on Pi, next" state="drawn" />
-      <Room x={wg} y={ROWS.gateway} name="Private gateway" note="own console, own prices" state="drawn" />
+      <Tenant x={wg} app="WorkGo" what="career OS" agent="Obi" />
+      <Tenant x={ifa} app="InclusifAI" what="funding for founders" agent="Aria" />
 
-      <Links x={ifa} state="drawn" keyed />
-      <Room x={ifa} y={ROWS.app} name="InclusifAI" note="founder app" state="running" />
-      <Room x={ifa} y={ROWS.agent} name="Aria" note="on Pi, behind a flag" state="drawn" />
-      <Room x={ifa} y={ROWS.gateway} name="Private gateway" note="one key upstream" state="drawn" />
+      <path className="pl-link pl-link--vacant" d={`M${next + BAY_W / 2} ${BOTTOM} V${SLAB.y}`} />
+      <Room x={next} y={TOP} h={BOTTOM - TOP} name="Next app" note="moves in the same way" open />
 
-      <path className="pl-link pl-link--vacant" d={`M${vacant + BAY_W / 2} ${ROWS.gateway + ROW_H} V${SLAB.y}`} />
-      <rect className="pl-box pl-box--vacant" x={vacant} y={ROWS.app} width={BAY_W} height={ROWS.gateway + ROW_H - ROWS.app} />
-      <text className="pl-name" x={vacant + BAY_W / 2} y={ROWS.agent + 21}>
-        To let
-      </text>
-      <text className="pl-note" x={vacant + BAY_W / 2} y={ROWS.agent + 36}>
-        an app that isn't mine
-      </text>
-
-      <rect className="pl-slab" x={pub} y={SLAB.y} width={RIGHT - pub} height={SLAB.h} />
-      <text className="pl-slab-name" x={(pub + RIGHT) / 2} y={SLAB.y + 24}>
+      <rect className="pl-slab" x={people} y={SLAB.y} width={RIGHT - people} height={SLAB.h} />
+      <text className="pl-slab-name" x={(people + RIGHT) / 2} y={SLAB.y + 23}>
         TOKENSBEAT
       </text>
-      <text className="pl-note" x={(pub + RIGHT) / 2} y={SLAB.y + 40}>
-        one gateway · one wallet · one ledger · one key per tenant
+      <text className="pl-note" x={(people + RIGHT) / 2} y={SLAB.y + 39}>
+        one gateway to every model · one wallet · one ledger
       </text>
 
       <path className="pl-ground" d={`M12 ${GROUND} H${RIGHT}`} />
       <path className="pl-hatch" d={Array.from({ length: 68 }, (_, i) => `M${19 + i * 10} ${GROUND} l-7 8`).join(" ")} />
       {MODELS.map((m, i) => {
-        const cx = pub + pileStep * (i + 0.5);
+        const cx = people + pileStep * (i + 0.5);
         return (
           <g key={m}>
             <path className="pl-pile" d={`M${cx} ${SLAB.y + SLAB.h} V${GROUND + 50} m-5 0 h10`} />
@@ -147,16 +131,8 @@ function Section() {
         );
       })}
 
-      <text className="pl-legend" x="12" y="420">
-        SECTION A–A · TOKENSBEAT · 26.10.2026
-      </text>
-      <path className="pl-link" d="M430 416 h22" />
-      <text className="pl-legend" x="458" y="420">
-        running
-      </text>
-      <path className="pl-link pl-link--drawn" d="M516 416 h22" />
-      <text className="pl-legend" x="544" y="420">
-        drawn, not yet open
+      <text className="pl-legend" x="12" y="452">
+        PLAN · TOKENSBEAT
       </text>
     </svg>
   );
@@ -169,7 +145,8 @@ export function TokensbeatSection() {
         <Section />
       </div>
       <figcaption>
-        Section through Tokensbeat, as drawn in October 2026. A tenant takes any of the rooms in its bay, not a bundle.
+        What I want Tokensbeat to be: one foundation that every model plugs into, and apps that move in on top of it, each
+        with its own agent, backend and gateway. People use the same building through Aha.
       </figcaption>
     </figure>
   );

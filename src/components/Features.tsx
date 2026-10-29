@@ -65,7 +65,7 @@ export function Features() {
               src="/assets/img/web-tokensbeat-home.webp"
               alt="Tokensbeat home page: 'All your agents, in one orbit.' beside an ASCII-art orbit labelled API, Claude, Research, Workspaces and Video."
             >
-              tokensbeat.com, launch week. The storefront for people; the section above is what apps move into.
+              tokensbeat.com, launch week. The storefront for people; the plan above is what apps move into.
             </Shot>
           </>
         }
