@@ -17,7 +17,7 @@ const ITEMS: Item[] = [
     title: "Brick Locator",
     meta: "2025.12 · PyMuPDF · PDF.js · AGPL 3.0",
     text: "A leftover LEGO piece, traced back to every step that adds it and marked on the page. The site ships an index of the booklet and a two-page sample. You bring the PDF from LEGO, and your browser draws every other page from your copy. One booklet so far: the Vespa.",
-    link: { href: "/brick-locator/", label: "Find a piece ↗" },
+    link: { href: "#cover", label: "Play it on the cover ↑" },
   },
   {
     no: "02",
@@ -25,7 +25,7 @@ const ITEMS: Item[] = [
     meta: "2025.12 · Flask · Overpass · Leaflet",
     text: (
       <>
-        Pulls metro lines out of OpenStreetMap and redraws a city's network. Twelve cities are on the cover; to draw
+        Pulls metro lines out of OpenStreetMap and redraws a city's network. Five cities are on the cover; to draw
         your own, explore it and adjust it, take it to <a href={MAKE_YOUR_OWN}>aha.tokensbeat.com</a>.
       </>
     ),

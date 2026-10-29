@@ -30,16 +30,9 @@ JOIN = 40  # metres: way ends closer than this connect
 CITIES = [
     ("montreal", "Montréal", (45.42, -73.92, 45.62, -73.45)),
     ("tokyo", "Tokyo", (35.60, 139.60, 35.80, 139.90)),
-    ("paris", "Paris", (48.79, 2.22, 48.93, 2.48)),
-    ("london", "London", (51.40, -0.40, 51.65, 0.15)),
-    ("new-york", "New York", (40.56, -74.08, 40.90, -73.74)),
     ("chengdu", "Chengdu", (30.50, 103.90, 30.82, 104.25)),
-    ("shanghai", "Shanghai", (31.05, 121.25, 31.42, 121.75)),
-    ("beijing", "Beijing", (39.78, 116.20, 40.08, 116.60)),
     ("hong-kong", "Hong Kong", (22.24, 113.92, 22.45, 114.30)),
-    ("berlin", "Berlin", (52.40, 13.20, 52.62, 13.62)),
-    ("madrid", "Madrid", (40.33, -3.80, 40.52, -3.57)),
-    ("toronto", "Toronto", (43.62, -79.56, 43.80, -79.20)),
+    ("new-york", "New York", (40.56, -74.08, 40.90, -73.74)),
 ]
 
 

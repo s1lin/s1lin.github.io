@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Mark } from "@/components/Mark";
 import { useDark } from "@/hooks/useDark";
 
 const CJK = /[぀-ヿ㐀-鿿]/;
@@ -50,6 +51,7 @@ export function Runhead() {
     <header className="runhead">
       <div className="wrap">
         <a className="runhead__brand" href="#cover">
+          <Mark className="runhead__mark" />
           <b>S1LIN</b>
           <span lang="ja">設計</span>
         </a>

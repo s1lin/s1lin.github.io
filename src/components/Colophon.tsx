@@ -3,6 +3,7 @@ import * as alpineDawn from "ascii.rest/pieces/alpine-dawn";
 import * as tokyoRain from "ascii.rest/pieces/tokyo-rain";
 import { AsciiArt } from "@/components/AsciiArt";
 import { GlitchTitle } from "@/components/effects";
+import { MarkSetOut } from "@/components/Mark";
 import { useMedia } from "@/hooks/useMedia";
 import { useNear } from "@/hooks/useNear";
 
@@ -98,6 +99,18 @@ export function Colophon() {
             <dd>Vol. 30, Autumn 2026: why I am an architect.</dd>
             <dt>Editor, architect</dt>
             <dd>s1lin, Montreal</dd>
+            <dt>The mark</dt>
+            <dd className="okuzuke__mark">
+              <MarkSetOut />
+              <span>
+                A cross on a block of ink, three marks in one: the cross of Saint John's, the Benedictine school where I
+                studied; the registration mark a printer lines plates up by, at the corners of every spread here; and a
+                locator, the + on a plan that says build here. Medieval illuminators painted God as the architect of
+                the world, compasses in hand (the <i>Bible moralisée</i>, about 1220). An architect's mark should be
+                drawn with them too: a circle struck from the centre through the corners, and the cross on its centre
+                lines.
+              </span>
+            </dd>
             <dt>Type</dt>
             <dd>Instrument Serif, Inter Tight, JetBrains Mono, Shippori Mincho B1 and Zen Kaku Gothic New, from Google Fonts</dd>
             <dt>ASCII</dt>
@@ -114,8 +127,10 @@ export function Colophon() {
             </dd>
             <dt>Cover</dt>
             <dd>
-              Metro2Line, playable. Metro networks © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap
-              contributors</a> (ODbL), pulled in October 2026
+              Two machines, playable. Metro2Line: metro networks © <a href="https://www.openstreetmap.org/copyright">
+              OpenStreetMap contributors</a> (ODbL), pulled in October 2026. <a href="/brick-locator/">Brick
+              Locator</a>: its sample, two pages © the LEGO Group, shown unaltered and served from the tool's own
+              page; the full tool draws every other page from the reader's own booklet
             </dd>
             <dt>Contents</dt>
             <dd>
@@ -134,8 +149,9 @@ export function Colophon() {
             <dd>GitHub Pages. No trackers, no ads, no cookies.</dd>
             <dt>Small print</dt>
             <dd>
-              Cities: Skylines is a trademark of Paradox Interactive. Company names belong to their companies; the
-              opinions here are mine.
+              Cities: Skylines is a trademark of Paradox Interactive. LEGO® is a trademark of the LEGO Group of
+              companies which does not sponsor, authorize or endorse this site. Company names belong to their
+              companies; the opinions here are mine.
             </dd>
           </dl>
         </div>

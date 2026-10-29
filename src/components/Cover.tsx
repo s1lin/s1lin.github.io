@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react";
 import { banner } from "ascii.rest/banner";
 import { AsciiArt } from "@/components/AsciiArt";
 import { Roundel } from "@/components/bits";
+import { BrickMachine } from "@/components/BrickLocator";
 import { MetroBar, MetroCaption, MetroMap } from "@/components/Metro2Line";
 import { ARCH_BANNER } from "@/content/ascii-stills";
 import { useMetro2Line } from "@/hooks/useMetro2Line";
@@ -19,14 +20,10 @@ const LINES: { href: string; letter: string; title: string; sub: string; page: s
 ];
 
 export function Cover() {
-  const card = useRef<HTMLDivElement>(null);
-  // Frame the network below the city's name and above the card that overlaps the plate.
+  // Frame the network below the city's name and clear of the vertical title.
   const insets = useCallback((canvas: HTMLCanvasElement): Insets => {
-    const plate = canvas.getBoundingClientRect();
-    const box = card.current?.getBoundingClientRect();
-    const under = box && box.top < plate.bottom ? plate.bottom - box.top : 0;
-    const narrow = plate.width < 600;
-    return { top: narrow ? 64 : 84, right: narrow ? 48 : 96, bottom: under + 16, left: 16 };
+    const narrow = canvas.getBoundingClientRect().width < 560;
+    return { top: narrow ? 64 : 84, right: narrow ? 48 : 88, bottom: 16, left: 16 };
   }, []);
   const plate = useRef<HTMLElement>(null);
   const map = useRef<HTMLCanvasElement>(null);
@@ -55,14 +52,31 @@ export function Cover() {
         </div>
       </div>
 
-      <figure className="cover__plate" ref={plate}>
-        <MetroBar m={m} />
-        <MetroMap m={m} canvas={map} className="cover__photo">
-          <p className="cover__tate" lang="ja">
-            街を描く。<small lang="en">Draw the city</small>
-          </p>
-        </MetroMap>
-        <div className="cover__card" ref={card}>
+      <div className="wrap cover__play">
+        <p className="cover__play-label">
+          <span lang="ja">遊</span> Two working models, not renderings. Try them.
+        </p>
+        <figure className="machine machine--metro" ref={plate}>
+          <header className="machine__head">
+            <p className="machine__no">
+              <span lang="ja">路線</span> No. 01
+            </p>
+            <h2 className="machine__name">Metro2Line</h2>
+            <p className="machine__how">Ride a city's metro as it is drawn, or guess the city from its lines alone.</p>
+          </header>
+          <MetroBar m={m} />
+          <MetroMap m={m} canvas={map} className="machine__screen">
+            <p className="cover__tate" lang="ja">
+              街を描く。<small lang="en">Draw the city</small>
+            </p>
+          </MetroMap>
+          <MetroCaption m={m} lead="Plate —" />
+        </figure>
+        <BrickMachine />
+      </div>
+
+      <div className="wrap cover__band">
+        <div className="cover__feature">
           <p className="kicker">
             <span lang="ja">特集</span> Special feature
           </p>
@@ -70,29 +84,26 @@ export function Cover() {
           <p className="cover__ruby">
             <span lang="ja">建築</span> &nbsp;/&nbsp; deciding where the weight goes, before anything stands
           </p>
-          <ol className="coverlines">
-            {LINES.map((l) => (
-              <li key={l.href}>
-                <a href={l.href}>
-                  <Roundel>{l.letter}</Roundel>
-                  <span className="coverlines__t">
-                    {l.title}
-                    <small>{l.sub}</small>
-                  </span>
-                  <em>p.{l.page}</em>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="cover__foot">
-          <MetroCaption m={m} lead="Cover —" />
           <div className="barcode" aria-hidden="true">
             <i />
             <span>4 910 2026 10 23</span>
           </div>
         </div>
-      </figure>
+        <ol className="coverlines">
+          {LINES.map((l) => (
+            <li key={l.href}>
+              <a href={l.href}>
+                <Roundel>{l.letter}</Roundel>
+                <span className="coverlines__t">
+                  {l.title}
+                  <small>{l.sub}</small>
+                </span>
+                <em>p.{l.page}</em>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

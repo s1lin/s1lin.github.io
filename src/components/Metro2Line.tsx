@@ -16,9 +16,6 @@ export function MetroBar({ m }: { m: Metro2Line }) {
   const { quiz } = m;
   return (
     <div className="m2l-bar">
-      <p className="m2l-bar__label mono">
-        <span lang="ja">路線</span> Metro2Line, playable
-      </p>
       <div className="m2l-bar__group" role="group" aria-label="Mode">
         <button type="button" aria-pressed={!quiz} onClick={() => m.ride(m.slug)}>
           Ride
@@ -119,7 +116,7 @@ export function MetroCaption({ m, lead }: { m: Metro2Line; lead: string }) {
   const n = m.numbers;
   return (
     <figcaption>
-      {lead}{" "}
+      {lead && `${lead} `}
       {m.riddle
         ? "a metro network in ink. Which city is it?"
         : `${nameOf(m.shown)}'s metro${n ? `: ${n.lines} lines, ${n.km} km, ${n.stops} stations` : ""}, drawn by Metro2Line. Point at a line to name it, click to ride it alone.`}{" "}
