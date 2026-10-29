@@ -1,136 +1,480 @@
+import { useState } from "react";
 import { Folio, Kicker } from "@/components/bits";
 import { GlitchTitle } from "@/components/effects";
 
 /*
- * Route map of my work. The x axis is compressed before 2025:
- *   x = year < 2025 ? 80 + (year - 2020) * 60 : 380 + (year - 2025) * 305
- * so October 2026 (NOW) sits at x = 929. A line with `end` closed there.
- * Tokensbeat is drawn first; a dotted link drops from it to its tenants.
+ * Route map of my work, drawn as a network map along time: left to right runs
+ * from 2003 to past NOW, not to scale (WHEN maps dates to x, for the ruler).
+ * The schools are vertical terminals, set where their lines set out. Lines on
+ * the same stack at the same time stop at one station. Pioneer runs on into
+ * McGill, where AwakeAI sets out carrying its Java; AwakeAI closes into a
+ * junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught.
+ * Around it all runs the City builder loop, since the first road in 2003. A bar
+ * ends a line that has closed; dashes are unfinished: Tokensbeat before it
+ * opened, and everything past NOW.
+ *
+ * Everything is drawn 90 units in from the left, leaving room for the loop.
  */
+const WHEN: [number, number][] = [
+  [2003, -40], [2014, 20], [2015, 60], [2017, 230], [2018, 340], [2018.6, 370], [2019, 420], [2019.7, 470], [2020.92, 505],
+  [2022, 680], [2023, 740], [2025, 800], [2025.55, 870], [2025.79, 930], [2025.95, 990], [2026, 1000],
+  [2026.3, 1110], [2026.62, 1260], [2026.75, 1300], [2026.83, 1340], [2027, 1420], [2027.2, 1500],
+];
+function x(t: number) {
+  const i = Math.max(1, WHEN.findIndex(([w]) => w >= t));
+  const [[t0, x0], [t1, x1]] = [WHEN[i - 1], WHEN[i]];
+  return x0 + ((t - t0) / (t1 - t0)) * (x1 - x0);
+}
+const NOW = 1340;
+const EDGE = 1500;
+const RULER = 330;
+/** The City builder loop, around everything: its sides, and the radius of its corners. */
+const LOOP = { left: -60, right: 1515, top: 44, bottom: 300, r: 28 };
 
-type Station = { x: number; label: string; above?: boolean; lx?: number };
-type Route = {
-  letter: string;
-  name: string;
-  y: number;
-  from: number;
-  end?: { x: number; label: string; above?: boolean };
-  stations: Station[];
-  nameAtMargin?: boolean;
+type Key = "t" | "w" | "i" | "h" | "a" | "p" | "y";
+type LineKey = Key | "c";
+type Anchor = "start" | "middle" | "end";
+type Label = { x: number; y: number; anchor?: Anchor };
+
+/**
+ * A line: its track in service and any track still to build. Its code, name and
+ * dates go in the key under the map; on the track it carries only its marker.
+ */
+type Line = { key: Key; code: string; name: string; since: string; live: string; planned?: string; end?: string };
+/** A stop on one line, or on the loop. */
+type Stop = { line: LineKey; x: number; y: number; label: string; at: Label; planned?: boolean };
+/** A station several lines run through side by side, from the top track to the bottom one. */
+type Station = {
+  x: number;
+  top: number;
+  bottom: number;
+  lines: LineKey[];
+  label: string;
+  sub?: string;
+  at: Label;
+  planned?: boolean;
+};
+/** A school: a vertical terminal, its kanji set vertically above it and its name below. */
+type School = { kanji: string; name: string; note: string; x: number; lines: LineKey[] };
+
+const SCHOOLS: School[] = [
+  // where YoueData sets out on graduating, and Pioneer, begun there, runs through
+  { kanji: "大学", name: "Saint John's", note: "B.A. 2014–2017 · HPC · robotics", x: 230, lines: ["p", "y"] },
+  // where Pioneer runs in, in 2019, and AwakeAI sets out, in December 2020
+  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["p", "a"] },
+];
+const TERMINAL = { top: 122, bottom: 198, w: 22 };
+
+// Drawn in this order, so WorkGo crosses over Tokensbeat where it leaves the corridor.
+const LINES: Line[] = [
+  { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: "M60 160 H470" },
+  { key: "y", code: "Y", name: "YoueData", since: "2017–2018", live: "M230 144 H370", end: "M370 135 V153" },
+  { key: "a", code: "A", name: "AwakeAI", since: "2020–2025", live: "M470 160 H870" },
+  {
+    key: "h", code: "H", name: "HiRain", since: "2026–",
+    // out of the junction, along to its own start in 2026
+    live: `M870 172 V240 Q870 260 890 260 H${NOW}`, planned: `M${NOW} 260 H${EDGE}`,
+  },
+  {
+    key: "t", code: "T", name: "Tokensbeat", since: "2026–, opened Oct",
+    // under construction from 2026 until it opened, then in service until NOW
+    planned: `M1000 76 H1021 L1087 142 H1320 M${NOW} 142 H${EDGE}`, live: `M1320 142 H${NOW}`,
+  },
+  {
+    key: "i", code: "I", name: "InclusifAI", since: "2025.10–",
+    live: `M870 166 L898 194 H950 L978 166 H1190 L1202 154 H${NOW}`, planned: `M${NOW} 154 H${EDGE}`,
+  },
+  {
+    key: "w", code: "W", name: "WorkGo", since: "2025.10–",
+    live: `M870 154 L898 126 H950 L978 154 H1180 L1234 100 H${NOW}`, planned: `M${NOW} 100 H1364 L1394 130 H${EDGE}`,
+  },
+];
+
+/** The key to the lines, in the order they opened: the loop first, then each line. */
+const KEY: { key: LineKey; code: string; name: string; since: string }[] = [
+  { key: "c", code: "C", name: "City builder", since: "2003–" },
+  ...(["p", "y", "a", "w", "i", "t", "h"] as Key[]).map((k) => LINES.find((l) => l.key === k)!),
+];
+const CODE = Object.fromEntries(KEY.map((l) => [l.key, l.code])) as Record<LineKey, string>;
+
+/**
+ * Each line's marker, set on a stretch of its own track with no stop on it, as a
+ * Japanese map sets the line symbol: filled, so it never reads as a station.
+ */
+const MARKERS: { line: LineKey; x: number; y: number }[] = [
+  { line: "c", x: LOOP.left, y: 172 },
+  { line: "p", x: 175, y: 160 },
+  { line: "y", x: 287, y: 144 },
+  { line: "a", x: 580, y: 160 },
+  { line: "w", x: 924, y: 126 },
+  { line: "i", x: 924, y: 194 },
+  { line: "t", x: 1054, y: 109 },
+  { line: "h", x: 1000, y: 260 },
+];
+
+const STATIONS: Station[] = [
+  { x: 340, top: 144, bottom: 160, lines: ["p", "y"], label: "Java", at: { x: 340, y: 184 } },
+  // AwakeAI closes here; WorkGo, InclusifAI and HiRain open out of it with what it taught
+  {
+    x: 870, top: 154, bottom: 166, lines: ["a", "w", "i", "h"], label: "architecture · cloud ops",
+    sub: "React · TypeScript · Python", at: { x: 856, y: 110, anchor: "end" },
+  },
+  { x: 1020, top: 154, bottom: 166, lines: ["w", "i"], label: "Supabase · Clerk", at: { x: 1020, y: 190 } },
+  { x: 1110, top: 142, bottom: 154, lines: ["t", "w"], label: "Go · Gin", at: { x: 1110, y: 124 } },
+  { x: 1160, top: 142, bottom: 166, lines: ["t", "w", "i"], label: "PostgreSQL · Stripe", at: { x: 1160, y: 190 } },
+  { x: 1300, top: 142, bottom: 154, lines: ["t", "i"], label: "Azure", at: { x: 1300, y: 124 } },
+  {
+    x: 1420, top: 130, bottom: 154, lines: ["t", "w", "i"], label: "Pi: Obi, Aria move in",
+    at: { x: EDGE, y: 178, anchor: "end" }, planned: true,
+  },
+];
+
+const STOPS: Stop[] = [
+  { line: "p", x: 95, y: 160, label: "bidding system", at: { x: 95, y: 144 } },
+  { line: "a", x: 690, y: 160, label: "Dobson Cup", at: { x: 690, y: 144 } },
+  { line: "a", x: 745, y: 160, label: "architect", at: { x: 745, y: 184 } },
+  { line: "a", x: 800, y: 160, label: "COO", at: { x: 800, y: 144 } },
+  { line: "w", x: 1260, y: 100, label: "2.0", at: { x: 1260, y: 84 } },
+  { line: "i", x: 1250, y: 154, label: "Partner Hub", at: { x: 1250, y: 178 } },
+  { line: "h", x: 1110, y: 260, label: "5 points", at: { x: 1110, y: 284 } },
+  { line: "h", x: 1300, y: 260, label: "bird's-eye", at: { x: 1300, y: 284 } },
+  { line: "h", x: 1430, y: 260, label: "ARC-AGI-3: 8.8 of 10", at: { x: 1430, y: 284 }, planned: true },
+  { line: "t", x: 1460, y: 142, label: "managed backend", at: { x: EDGE, y: 112, anchor: "end" }, planned: true },
+  // the loop, from the Cities section and the workshop
+  { line: "c", x: -20, y: LOOP.top, label: "first road · SimCity 4", at: { x: -46, y: 32, anchor: "start" } },
+  { line: "c", x: x(2020.79), y: LOOP.top, label: "featured by Cities: Skylines", at: { x: x(2020.79), y: 32 } },
+  { line: "c", x: 990, y: LOOP.top, label: "Metro2Line", at: { x: 990, y: 32 } },
+  { line: "c", x: 1300, y: LOOP.top, label: "5,000 hours", at: { x: 1300, y: 32 } },
+];
+
+/**
+ * Each line's timetable (時刻表), stop by stop: the year, the month where it is
+ * known, the station, the lines to change to, and a note. Station numbers are
+ * the line's code and its place on the line, as Tokyo numbers its stations.
+ */
+type Row = { year: string; month?: string; name: string; ja?: string; via?: LineKey[]; note?: string; planned?: boolean };
+const TIMETABLE: Record<LineKey, Row[]> = {
+  c: [
+    { year: "2003", name: "first road, SimCity 4", note: "sets out" },
+    { year: "2020", month: "10", name: "featured by the Cities: Skylines account" },
+    { year: "2025", month: "12", name: "Metro2Line" },
+    { year: "2026", month: "10", name: "5,000 hours", note: "now, and still going round" },
+  ],
+  p: [
+    { year: "2015", name: "bidding system", note: "sets out, a databases course project" },
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["y"], note: "B.A." },
+    { year: "2018", name: "Java", via: ["y"] },
+    { year: "2019", name: "McGill", ja: "大学院", via: ["a"], note: "runs in; its Java goes on with AwakeAI" },
+  ],
+  y: [
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["p"], note: "sets out on graduating" },
+    { year: "2018", name: "Java", via: ["p"], note: "HDFS; the line closes" },
+  ],
+  a: [
+    { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p"], note: "sets out, with Pioneer's Java" },
+    { year: "2022", name: "Dobson Cup", note: "third place" },
+    { year: "2023", name: "architect" },
+    { year: "2025", month: "01", name: "COO" },
+    {
+      year: "2025", month: "07", name: "architecture · cloud ops · React · TypeScript · Python", via: ["w", "i", "h"],
+      note: "the line closes into the junction",
+    },
+  ],
+  w: [
+    { year: "2025", month: "10", name: "the junction", via: ["a", "i", "h"], note: "sets out" },
+    { year: "2025", name: "Supabase · Clerk", via: ["i"] },
+    { year: "2026", name: "Go · Gin", via: ["t"] },
+    { year: "2026", name: "PostgreSQL · Stripe", via: ["t", "i"] },
+    { year: "2026", month: "08", name: "2.0", note: "begun again from an empty repository" },
+    { year: "2027", name: "Pi: Obi moves in", via: ["t", "i"], planned: true },
+  ],
+  i: [
+    { year: "2025", month: "10", name: "the junction", via: ["a", "w", "h"], note: "sets out" },
+    { year: "2025", name: "Supabase · Clerk", via: ["w"] },
+    { year: "2026", name: "PostgreSQL · Stripe", via: ["t", "w"] },
+    { year: "2026", name: "Partner Hub" },
+    { year: "2026", month: "10", name: "Azure", via: ["t"] },
+    { year: "2027", name: "Pi: Aria moves in", via: ["t", "w"], planned: true },
+  ],
+  t: [
+    { year: "2026", name: "Go · Gin", via: ["w"], note: "under construction" },
+    { year: "2026", name: "PostgreSQL · Stripe", via: ["w", "i"] },
+    { year: "2026", month: "10", name: "Azure", via: ["i"], note: "opens" },
+    { year: "2027", name: "Pi: Obi and Aria move in", via: ["w", "i"], planned: true },
+    { year: "2027", name: "managed backend", note: "built in the lab, not yet open", planned: true },
+  ],
+  h: [
+    { year: "2026", name: "edge vision", via: ["a"], note: "sets out from the junction" },
+    { year: "2026", name: "5 points" },
+    { year: "2026", name: "bird's-eye" },
+    { year: "2027", name: "ARC-AGI-3", note: "8.8 of the 10 points I set as the bar", planned: true },
+  ],
 };
 
-const NOW = 929;
-
-const TENANCY = { x: 915, from: 70, to: [135, 200] };
-
-const ROUTES: Route[] = [
-  { letter: "T", name: "Tokensbeat", y: 70, from: 915, stations: [] },
-  { letter: "W", name: "WorkGo", y: 135, from: 609, stations: [{ x: 868, label: "2.0" }] },
-  { letter: "I", name: "InclusifAI", y: 200, from: 609, stations: [{ x: 877, label: "Partner Hub" }] },
-  {
-    letter: "H",
-    name: "HiRain",
-    y: 265,
-    from: 697,
-    stations: [
-      { x: 776, label: "5 points" },
-      { x: 905, label: "bird's-eye", lx: 896 },
-    ],
-  },
-  {
-    letter: "A",
-    name: "AwakeAI",
-    y: 320,
-    from: 137,
-    end: { x: 532, label: "July 2025", above: true },
-    nameAtMargin: true,
-    stations: [
-      { x: 224, label: "Dobson Cup", above: true },
-      { x: 308, label: "architect", above: true },
-      { x: 380, label: "COO", above: true },
-    ],
-  },
-];
-
 const TICKS: [number, string][] = [
-  [80, "2020"],
-  [140, "21"],
-  [200, "22"],
-  [260, "23"],
-  [320, "24"],
-  [380, "2025"],
-  [532, ".5"],
-  [685, "2026"],
-  [837, ".5"],
-  [990, "2027"],
+  [2003, "2003"], [2014, "2014"], [2015, "15"], [2016, "16"], [2017, "17"], [2018, "18"], [2019, "19"], [2020, "20"],
+  [2021, "21"], [2022, "22"], [2023, "23"], [2024, "24"], [2025, "2025"], [2026, "2026"], [2026.5, ".5"], [2027, "2027"],
 ];
 
-function RouteMap() {
-  return (
-    <svg viewBox="0 0 1040 380" role="img" aria-labelledby="rm-t rm-d">
-      <title id="rm-t">Route map of my work, 2020 to 2026</title>
-      <desc id="rm-d">
-        Five lines. Tokensbeat, at the top, opened in October 2026, and a dotted link drops from it to WorkGo and
-        InclusifAI, its first tenants. WorkGo and InclusifAI run from October 2025 to now, HiRain from January 2026.
-        AwakeAI ran from December 2020 to July 2025, when it closed. The axis is compressed before 2025.
-      </desc>
-      <g className="rm-axis-g">
-        <line className="rm-axis" x1="80" y1="350" x2="1000" y2="350" />
-        <g className="rm-tick">
-          {TICKS.map(([x, t]) => (
-            <text key={x} x={x} y="370">
-              {t}
-            </text>
-          ))}
-        </g>
-        <path className="rm-axis" d="M350 344 l8 12 M356 344 l8 12" />
-      </g>
-      <line className="rm-now" x1={NOW} y1="28" x2={NOW} y2="350" />
-      <path className="rm-tenancy" d={`M${TENANCY.x} ${TENANCY.from} V${Math.max(...TENANCY.to)}`} />
-      <text className="rm-nowlbl" x={NOW} y="20" textAnchor="middle">
-        NOW · 2026.10
-      </text>
+const { left: L, right: R, top: T, bottom: B, r } = LOOP;
+// in service as far as NOW, both ways round; planned beyond it
+const LOOP_LIVE = `M${NOW} ${T} H${L + r} A${r} ${r} 0 0 0 ${L} ${T + r} V${B - r} A${r} ${r} 0 0 0 ${L + r} ${B} H${NOW}`;
+const LOOP_PLANNED = `M${NOW} ${T} H${R - r} A${r} ${r} 0 0 1 ${R} ${T + r} V${B - r} A${r} ${r} 0 0 1 ${R - r} ${B} H${NOW}`;
 
-      {ROUTES.map((r) => (
-        <g key={r.letter} className={r.end ? "rm-closed" : undefined}>
-          <path className="rm-line" d={`M${r.from} ${r.y} H${r.end?.x ?? NOW}`} />
-          {r.end && (
-            <>
-              <path className="rm-end" d={`M${r.end.x} ${r.y - 10} V${r.y + 10}`} />
-              <text className="rm-lbl" x={r.end.x} y={r.end.above ? r.y - 18 : r.y + 26} textAnchor="middle">
-                {r.end.label}
-              </text>
-            </>
-          )}
-          {r.stations.map((s) => (
-            <g key={s.x}>
-              <circle className="rm-st" cx={s.x} cy={r.y} r="5" />
-              <text className="rm-lbl" x={s.lx ?? s.x} y={s.above ? r.y - 18 : r.y + 26} textAnchor="middle">
-                {s.label}
+/** A line's marker: its code on a disc of its colour. */
+function Marker({ line, x, y }: { line: LineKey; x: number; y: number }) {
+  return (
+    <g className={`rm-marker rm-${line}`}>
+      <circle cx={x} cy={y} r="9.5" />
+      <text x={x} y={y}>
+        {CODE[line]}
+      </text>
+    </g>
+  );
+}
+
+/** With a line chosen, everything not on it steps back. */
+const dim = (on: LineKey | null, lines: LineKey[]) => (on && !lines.includes(on) ? " is-dim" : "");
+
+function RouteMap({ on }: { on: LineKey | null }) {
+  return (
+    <svg viewBox="0 0 1620 396" role="img" aria-labelledby="rm-t rm-d">
+      <title id="rm-t">Route map of my work, 2003 to now</title>
+      <desc id="rm-d">
+        A network map along time, from 2003 to past now, inside a loop. The loop is City builder: my first road in
+        SimCity 4 in 2003, a city featured by the Cities: Skylines account in October 2020, Metro2Line in December 2025
+        and 5,000 hours by now. Inside it, two vertical terminals: Saint John's, university, B.A. 2014 to 2017, where
+        Pioneer, from 2015 to 2019, runs through and YoueData, 2017 to 2018, sets out; the two share Java. Pioneer
+        runs on into McGill, graduate school, M.Sc. 2019 to 2022, where AwakeAI sets out with its Java in December
+        2020, through the Dobson Cup, architect and COO. AwakeAI closes in July 2025 into a junction of architecture,
+        cloud ops, React, TypeScript and Python, out of which WorkGo and InclusifAI open in October 2025, and HiRain,
+        carrying edge vision, in 2026. WorkGo and InclusifAI share Supabase and Clerk. Tokensbeat, under construction
+        from 2026, joins them: Go and Gin with WorkGo, PostgreSQL and Stripe with both, then Azure with InclusifAI after
+        WorkGo leaves for its 2.0 stop in August 2026. Tokensbeat opened in October 2026. Past now, all of it is
+        planned: Obi and Aria move onto Pi, the managed backend opens, and HiRain's ARC-AGI-3 harness, at 8.8 points,
+        aims for 10. Each line's timetable is in the key below the map.
+      </desc>
+
+      <g transform="translate(90 0)">
+        <line className="rm-now" x1={NOW} y1="20" x2={NOW} y2={RULER} />
+        <text className="rm-nowlbl" x={NOW} y="14" textAnchor="middle">
+          NOW · 2026.10
+        </text>
+        <g className="rm-ruler">
+          <line x1={x(2003)} y1={RULER} x2={EDGE} y2={RULER} />
+          <path d={`M${x(2003) + 26} ${RULER - 6} l6 12 M${x(2003) + 32} ${RULER - 6} l6 12`} />
+          {TICKS.map(([t, label]) => (
+            <g key={t}>
+              <line x1={x(t)} y1={RULER - 4} x2={x(t)} y2={RULER} />
+              <text x={x(t)} y={RULER + 18}>
+                {label}
               </text>
             </g>
           ))}
-          <circle className="rm-roundel" cx={r.from} cy={r.y} r="15" />
-          {TENANCY.to.includes(r.y) && <circle className="rm-st" cx={TENANCY.x} cy={r.y} r="5" />}
-          <text className="rm-letter" x={r.from} y={r.y}>
-            {r.letter}
-          </text>
-          {r.nameAtMargin ? (
-            <text className="rm-name" x="38" y={r.y + 5}>
-              {r.name}
-            </text>
-          ) : (
-            <text className="rm-name" x={r.from - 26} y={r.y + 5} textAnchor="end">
-              {r.name}
-            </text>
-          )}
         </g>
-      ))}
+
+        {/* the loop: a double rail, so it never rests on its colour alone */}
+        <g className={`rm-loop${dim(on, ["c"])}`}>
+          <path className="rm-casing" d={`${LOOP_LIVE} ${LOOP_PLANNED}`} />
+          <path d={LOOP_LIVE} />
+          <path className="rm-rail" d={LOOP_LIVE} />
+          <path className="rm-planned" d={LOOP_PLANNED} />
+        </g>
+
+        {LINES.map((l) => (
+          <g key={l.key} className={`rm-line rm-${l.key}${dim(on, [l.key])}`}>
+            {/* a casing in the paper's colour, so a crossing reads as one line over the other */}
+            <path className="rm-casing" d={[l.live, l.planned].filter(Boolean).join(" ")} />
+            <path d={l.live} />
+            {l.planned && <path className="rm-planned" d={l.planned} />}
+            {l.end && <path className="rm-end" d={l.end} />}
+          </g>
+        ))}
+        {/* what the connections carry: Java into AwakeAI, edge vision into HiRain */}
+        <text className={`rm-lbl rm-xlbl${dim(on, ["p", "y", "a"])}`} x="430" y="144" textAnchor="middle">
+          Java
+        </text>
+        <text className={`rm-lbl rm-xlbl${dim(on, ["a", "h"])}`} x="935" y="278" textAnchor="middle">
+          edge vision
+        </text>
+
+        {MARKERS.map((m) => (
+          <g key={m.line} className={dim(on, [m.line]).trim() || undefined}>
+            <Marker {...m} />
+          </g>
+        ))}
+
+        {SCHOOLS.map((sc) => (
+          <g key={sc.name} className={`rm-terminal${dim(on, sc.lines)}`}>
+            <rect x={sc.x - TERMINAL.w / 2} y={TERMINAL.top} width={TERMINAL.w} height={TERMINAL.bottom - TERMINAL.top} rx={TERMINAL.w / 2} />
+            {[...sc.kanji].map((ch, i) => (
+              <text key={i} className="rm-kanji" lang="ja" x={sc.x} y={TERMINAL.top - 8 - (sc.kanji.length - 1 - i) * 18}>
+                {ch}
+              </text>
+            ))}
+            <text className="rm-name" x={sc.x} y={TERMINAL.bottom + 18} textAnchor="middle">
+              {sc.name}
+            </text>
+            <text className="rm-since" x={sc.x} y={TERMINAL.bottom + 32} textAnchor="middle">
+              {sc.note}
+            </text>
+          </g>
+        ))}
+
+        {STOPS.map((s) => (
+          <g key={`${s.line}${s.x}`} className={`rm-${s.line}${dim(on, [s.line])}`}>
+            <circle className={s.planned ? "rm-stop rm-planned-stop" : "rm-stop"} cx={s.x} cy={s.y} r="5.5">
+              <title>{s.label}</title>
+            </circle>
+            <text className="rm-lbl" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
+              {s.label}
+            </text>
+          </g>
+        ))}
+
+        {STATIONS.map((st) => (
+          <g key={st.x} className={dim(on, st.lines).trim() || undefined}>
+            <rect
+              className={st.planned ? "rm-station rm-planned-stop" : "rm-station"}
+              x={st.x - 6.5}
+              y={st.top - 6.5}
+              width="13"
+              height={st.bottom - st.top + 13}
+              rx="6.5"
+            >
+              <title>{st.sub ? `${st.label} · ${st.sub}` : st.label}</title>
+            </rect>
+            <text className="rm-lbl rm-xlbl" x={st.at.x} y={st.at.y} textAnchor={st.at.anchor ?? "middle"}>
+              {st.label}
+            </text>
+            {st.sub && (
+              <text className="rm-lbl rm-xlbl" x={st.at.x} y={st.at.y + 14} textAnchor={st.at.anchor ?? "middle"}>
+                {st.sub}
+              </text>
+            )}
+          </g>
+        ))}
+
+        <g className="rm-legend" transform="translate(-40 376)">
+          <path className="rm-key" d="M0 0 H26" />
+          <text x="34" y="4">in service</text>
+          <path className="rm-key rm-planned" d="M120 0 H146" />
+          <text x="154" y="4">unfinished or planned</text>
+          <path className="rm-key rm-key-closed" d="M320 0 H340 M341 -9 V9" />
+          <text x="354" y="4">closed</text>
+          <circle className="rm-stop-key" cx="428" cy="0" r="5" />
+          <text x="442" y="4">stop</text>
+          <path className="rm-key" d="M500 -6 H526 M500 6 H526" />
+          <rect className="rm-station" x="506.5" y="-12.5" width="13" height="25" rx="6.5" />
+          <text x="534" y="4">interchange: a stack they share</text>
+          <rect className="rm-terminal-key" x="770" y="-11" width="12" height="22" rx="6" />
+          <text x="790" y="4">school, a terminal</text>
+          <g className="rm-loop rm-loop-key">
+            <path d="M930 0 H956" />
+            <path className="rm-rail" d="M930 0 H956" />
+          </g>
+          <text x="964" y="4">the loop</text>
+          <g className="rm-marker rm-a">
+            <circle cx="1070" cy="0" r="9.5" />
+            <text x="1070" y="0">
+              A
+            </text>
+          </g>
+          <text x="1088" y="4">line marker</text>
+        </g>
+      </g>
     </svg>
   );
 }
 
+/** A line's code as a badge in running text: its letter on its colour. */
+function Code({ line }: { line: LineKey }) {
+  return (
+    <span className={`rm-code rm-${line}`} aria-hidden="true">
+      {CODE[line]}
+    </span>
+  );
+}
+
+/** The chosen line's timetable, set as a Japanese station timetable: the year as the hour, the month as the minute. */
+function Timetable({ on }: { on: LineKey }) {
+  const line = KEY.find((l) => l.key === on)!;
+  const rows = TIMETABLE[on];
+  return (
+    <section className={`rm-tt rm-${on}`} aria-labelledby="rm-tt-h">
+      <header className="rm-tt__head">
+        <Code line={on} />
+        <h3 id="rm-tt-h">
+          {line.name} <span>{line.since}</span>
+        </h3>
+        <p>
+          <span lang="ja">時刻表</span> Timetable
+        </p>
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">
+              <span lang="ja">年</span> Year
+            </th>
+            <th scope="col">
+              <span lang="ja">月</span>
+            </th>
+            <th scope="col">No.</th>
+            <th scope="col">
+              <span lang="ja">駅</span> Station
+            </th>
+            <th scope="col">
+              <span lang="ja">乗換</span> Change for
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => {
+            const first = i === 0 || rows[i - 1].year !== row.year;
+            const span = first ? rows.slice(i).findIndex((r2) => r2.year !== row.year) : 0;
+            return (
+              <tr key={i} className={row.planned ? "is-planned" : undefined}>
+                {first && (
+                  <th scope="row" className="rm-tt__year" rowSpan={span === -1 ? rows.length - i : span}>
+                    {row.year}
+                  </th>
+                )}
+                <td className="rm-tt__month">{row.month ?? "·"}</td>
+                <td>
+                  <span className="rm-tt__no">
+                    <b>{line.code}</b>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </td>
+                <td className="rm-tt__station">
+                  {row.name}
+                  {row.ja && (
+                    <span lang="ja" className="rm-tt__ja">
+                      {row.ja}
+                    </span>
+                  )}
+                  {(row.note || row.planned) && (
+                    <small>{[row.planned ? "planned" : null, row.note].filter(Boolean).join(" · ")}</small>
+                  )}
+                </td>
+                <td className="rm-tt__via">
+                  {row.via?.map((v) => (
+                    <Code key={v} line={v} />
+                  ))}
+                  {row.via && <span className="visually-hidden">{row.via.map((v) => KEY.find((l) => l.key === v)!.name).join(", ")}</span>}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 export function FeatureOpener() {
+  const [on, setOn] = useState<LineKey | null>(null);
   return (
     <section className="spread feature-open" id="feature" data-run="特集 · Architecture">
       <div className="wrap">
@@ -146,10 +490,35 @@ export function FeatureOpener() {
         </p>
 
         <figure className="routemap">
-          <RouteMap />
+          <RouteMap on={on} />
+          <div className="rm-keys" role="group" aria-label="Lines: choose one to read its timetable">
+            {KEY.map((l) => (
+              <button
+                key={l.key}
+                type="button"
+                className={`rm-keybtn rm-${l.key}`}
+                aria-pressed={on === l.key}
+                onClick={() => setOn(on === l.key ? null : l.key)}
+              >
+                <Code line={l.key} />
+                <b>{l.name}</b>
+                <span>{l.since}</span>
+              </button>
+            ))}
+          </div>
+          {on ? (
+            <Timetable on={on} />
+          ) : (
+            <p className="rm-tt-hint">Choose a line in the key to light it on the map and read its timetable.</p>
+          )}
           <figcaption>
-            Route map, not to scale before 2025. The dotted link marks tenancy. The grey line closed in July 2025, when I
-            resigned from AwakeAI, where I first held the title of architect.
+            Route map, left to right in time, not to scale. The schools are its terminals, set vertically:{" "}
+            <span lang="ja">大学</span> and <span lang="ja">大学院</span>. Where lines run on the same stack at the
+            same time, they share a station. Pioneer runs on into McGill, where AwakeAI sets out with its Java; AwakeAI
+            closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. Around it all
+            runs the loop: city builder, since my first road in SimCity 4 in 2003. A bar marks a line that has closed;
+            dashes are unfinished: Tokensbeat before it opened, and everything past now. AwakeAI closed in July 2025,
+            when I resigned from the company where I first held the title of architect.
           </figcaption>
         </figure>
       </div>

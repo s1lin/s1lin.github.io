@@ -569,22 +569,127 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .feature-open .display { max-width: 16ch; }
 .routemap { margin-top: clamp(40px, 5vw, 72px); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .routemap svg { min-width: 760px; width: 100%; height: auto; color: var(--sumi); }
-.routemap .rm-axis { stroke: var(--rule-strong); stroke-width: 0.6; }
-.routemap .rm-tick { font: 400 10px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.06em; }
-.routemap .rm-line { fill: none; stroke: var(--sumi); stroke-width: 3; stroke-linecap: round; }
-.routemap .rm-st { fill: var(--paper); stroke: var(--sumi); stroke-width: 1.5; }
-.routemap .rm-lbl { font: 400 10.5px var(--f-mono); fill: var(--ink-2); }
+/* Metro colours, as the user assigned them (2026-10-29): AwakeAI orange, Pioneer red, Tokensbeat darker
+   green, WorkGo purple, YoueData light blue; InclusifAI aqua, HiRain blue, and the City builder loop a light
+   Yamanote green. Steps from the dataviz skill's palette and ramps; every pair of lines that touch passes its
+   checks in light. In dark, Tokensbeat beside InclusifAI sits just under the floor (13.5): Tokensbeat is
+   dashed through the corridor, and every line is labelled. */
+.routemap {
+  --rm-p: #b3192f; --rm-y: #6da7ec; --rm-a: #eb6834; --rm-w: #6250d6; --rm-t: #0b6e2e; --rm-i: #1baf7a;
+  --rm-h: #256abf; --rm-c: #7cc242;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .routemap {
+    --rm-p: #c2185b; --rm-y: #86b6ef; --rm-a: #d95926; --rm-w: #9085e9; --rm-t: #287800; --rm-i: #199e70;
+    --rm-h: #3987e5; --rm-c: #b8e070;
+  }
+}
+:root[data-theme="dark"] .routemap {
+  --rm-p: #c2185b; --rm-y: #86b6ef; --rm-a: #d95926; --rm-w: #9085e9; --rm-t: #287800; --rm-i: #199e70;
+  --rm-h: #3987e5; --rm-c: #b8e070;
+}
+.routemap .rm-p { --c: var(--rm-p); } .routemap .rm-y { --c: var(--rm-y); } .routemap .rm-a { --c: var(--rm-a); }
+.routemap .rm-w { --c: var(--rm-w); } .routemap .rm-t { --c: var(--rm-t); } .routemap .rm-i { --c: var(--rm-i); }
+.routemap .rm-h { --c: var(--rm-h); } .routemap .rm-c { --c: var(--rm-c); }
+.routemap .rm-line path { fill: none; stroke: var(--c); stroke-width: 6; stroke-linecap: round; }
+.routemap .rm-line .rm-planned { stroke-dasharray: 9 7; stroke-linecap: butt; }
+.routemap .rm-line .rm-end { stroke-width: 4; }
+.routemap .rm-line .rm-casing { stroke: var(--paper); stroke-width: 12; stroke-linecap: butt; }
+.routemap .rm-stop { fill: var(--paper); stroke: var(--c); stroke-width: 2.5; }
+.routemap .rm-station { fill: var(--paper); stroke: var(--sumi); stroke-width: 2.5; }
+.routemap .rm-planned-stop { stroke-dasharray: 3 2.5; }
+/* a halo in the paper colour, where a label crosses a line or the NOW rule */
+.routemap .rm-lbl { font: 400 10.5px var(--f-mono); fill: var(--ink-2); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
+.routemap .rm-xlbl { fill: var(--sumi); font-weight: 500; }
 .routemap .rm-name { font: 600 14px var(--f-sans); fill: var(--sumi); }
-.routemap .rm-roundel { fill: var(--paper); stroke: var(--sumi); stroke-width: 1.5; }
-.routemap .rm-letter { font: 600 13px var(--f-sans); fill: var(--sumi); text-anchor: middle; dominant-baseline: central; }
+.routemap .rm-since { font: 400 10px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.04em; }
+/* a line's marker on its own track, like a Japanese line symbol: filled, so it never reads as a station */
+.routemap .rm-marker circle { fill: var(--c); stroke: var(--paper); stroke-width: 2; }
+.routemap .rm-marker text {
+  font: 700 11px var(--f-sans); fill: #fff; text-anchor: middle; dominant-baseline: central;
+  paint-order: stroke; stroke: rgb(0 0 0 / 0.35); stroke-width: 1.5px;
+}
+/* with a line chosen in the key, the rest of the network steps back */
+.routemap svg :is(g, text) { transition: opacity 0.2s; }
+.routemap .is-dim { opacity: 0.12; }
+
+/* the key: one button per line, which lights the line and opens its timetable */
+.rm-code {
+  display: inline-grid; place-items: center; flex: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--c); color: #fff; font: 700 11px/1 var(--f-sans); text-shadow: 0 0 2px rgb(0 0 0 / 0.45);
+}
+.rm-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
+.rm-keybtn {
+  appearance: none; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  text-align: left; color: var(--sumi); background: transparent; border: 0.5px solid var(--rule-strong); border-left: 6px solid var(--c);
+}
+.rm-keybtn b { font: 600 0.95rem/1.2 var(--f-sans); white-space: nowrap; }
+.rm-keybtn span:last-child { margin-left: auto; font: 400 10.5px/1.2 var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.rm-keybtn:hover { background: var(--paper-2); }
+.rm-keybtn[aria-pressed="true"] { background: var(--paper-2); outline: 2px solid var(--c); outline-offset: -2px; }
+@media (max-width: 760px) {
+  .rm-keys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* the dates go under the name, so neither is cut */
+  .rm-keybtn { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; row-gap: 2px; }
+  .rm-keybtn .rm-code { grid-row: span 2; }
+  .rm-keybtn span:last-child { margin-left: 0; }
+  .rm-tt__year { width: 3.4em; font-size: 1.15rem; }
+  .rm-tt__head p { display: none; }
+}
+
+/* the chosen line's timetable (時刻表): the year as the hour, the month as the minute, Tokyo's station numbers */
+.rm-tt-hint { margin: 14px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+.rm-tt { margin-top: 14px; border-top: 6px solid var(--c); background: var(--paper); }
+.rm-tt__head { display: flex; align-items: baseline; gap: 12px; padding: 12px 0 10px; border-bottom: 0.5px solid var(--rule-strong); }
+.rm-tt__head .rm-code { align-self: center; width: 28px; height: 28px; font-size: 14px; }
+.rm-tt__head h3 { margin: 0; font: 400 clamp(1.5rem, 2.2vw, 2rem)/1 var(--f-display); }
+.rm-tt__head h3 span { font: 400 11px var(--f-mono); color: var(--ink-2); margin-left: 6px; }
+.rm-tt__head p { margin: 0 0 0 auto; font: 500 11px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); }
+.rm-tt__head p [lang="ja"] { font: 700 15px var(--f-mincho); letter-spacing: 0.2em; color: var(--sumi); text-transform: none; }
+.rm-tt table { width: 100%; border-collapse: collapse; font: 400 13px/1.35 var(--f-sans); }
+.rm-tt thead th {
+  padding: 6px 8px; text-align: left; font: 500 10px var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-2); border-bottom: 0.5px solid var(--rule);
+}
+.rm-tt thead th [lang="ja"] { font: 700 12px var(--f-mincho); letter-spacing: 0.1em; color: var(--sumi); text-transform: none; }
+.rm-tt tbody td, .rm-tt tbody th { padding: 7px 8px; border-bottom: 0.5px solid var(--rule); vertical-align: middle; }
+.rm-tt__year {
+  width: 4.6em; text-align: right; vertical-align: top !important; border-right: 2px solid var(--c);
+  font: 700 1.5rem/1 var(--f-mono); font-variant-numeric: tabular-nums; color: var(--sumi);
+}
+.rm-tt__month { width: 2.6em; font: 500 13px var(--f-mono); color: var(--ink-2); }
+.rm-tt__no {
+  display: inline-grid; place-items: center; width: 34px; height: 34px; border: 3px solid var(--c); border-radius: 50%;
+  font: 700 11px/1 var(--f-sans); text-align: center; background: var(--paper);
+}
+.rm-tt__no b { display: block; font-size: 9px; margin-bottom: 1px; }
+.rm-tt__station { font-weight: 500; }
+.rm-tt__ja { margin-left: 8px; font: 700 12px var(--f-mincho); letter-spacing: 0.15em; color: var(--ink-2); }
+.rm-tt__station small { display: block; margin-top: 2px; font: 400 10.5px var(--f-mono); color: var(--ink-2); }
+.rm-tt__via { white-space: nowrap; }
+.rm-tt__via .rm-code { margin-right: 4px; }
+.rm-tt .is-planned td { color: var(--ink-3); border-bottom-style: dashed; }
+.rm-tt .is-planned .rm-tt__no { border-style: dashed; color: var(--ink-2); }
+.rm-tt .is-planned .rm-tt__station { font-style: italic; }
 .routemap .rm-now { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 4; }
-.routemap .rm-tenancy { fill: none; stroke: var(--sumi); stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; }
 .routemap .rm-nowlbl { font: 500 10px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.1em; }
-.routemap .rm-break { stroke: var(--paper); stroke-width: 6; }
-.routemap .rm-end { fill: none; stroke: var(--sumi); stroke-width: 3; stroke-linecap: round; }
-/* a line that has closed, in grey */
-.routemap .rm-closed :is(.rm-line, .rm-end, .rm-st, .rm-roundel) { stroke: var(--ink-3); }
-.routemap .rm-closed :is(.rm-letter, .rm-name) { fill: var(--ink-3); }
+.routemap .rm-legend text { font: 400 10.5px var(--f-mono); fill: var(--ink-2); }
+.routemap .rm-legend .rm-key { fill: none; stroke: var(--sumi); stroke-width: 6; }
+.routemap .rm-legend .rm-key.rm-planned { stroke-dasharray: 9 7; }
+.routemap .rm-legend .rm-key-closed { stroke-width: 3; }
+.routemap .rm-stop-key { fill: var(--paper); stroke: var(--sumi); stroke-width: 2.5; }
+/* a school: a terminal building the first lines set out from */
+.routemap .rm-terminal rect, .routemap .rm-terminal-key { fill: var(--paper); stroke: var(--sumi); stroke-width: 3; }
+/* the City builder loop: a double rail, so it is never told by its green alone */
+.routemap .rm-loop path { fill: none; stroke: var(--rm-c); stroke-width: 7; }
+.routemap .rm-loop .rm-casing { stroke: var(--paper); stroke-width: 13; }
+.routemap .rm-loop .rm-rail { stroke: var(--paper); stroke-width: 2; }
+.routemap .rm-loop .rm-planned { stroke-width: 6; stroke-dasharray: 9 7; }
+.routemap .rm-kanji { font: 700 16px var(--f-mincho); fill: var(--sumi); text-anchor: middle; }
+.routemap .rm-transfer { fill: none; stroke: var(--ink-2); stroke-width: 2.5; stroke-dasharray: 0 6; stroke-linecap: round; }
+.routemap .rm-ruler line { stroke: var(--rule-strong); stroke-width: 0.6; }
+.routemap .rm-ruler text { font: 400 10px var(--f-mono); fill: var(--ink-2); text-anchor: middle; letter-spacing: 0.04em; }
+.routemap .rm-tag { paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
 
 /* ------------------------------------------------------------------ feature articles */
 
