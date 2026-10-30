@@ -171,14 +171,21 @@ too; commit a fresh one now and then so it does not drift far.
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and
 its value at API list prices, the weeks as a town plan from the first week there
 was any (a treemap kept in time order: a month to a district, a week to a block,
-each block divided by agent), and a flow from each agent to the kinds of token it
+each block divided by model, a company to a hue and its models in shades of
+it), a "by model" chart under it that doubles as the key, each company under
+its mark (`src/content/logos.ts`, from LobeHub Icons, MIT), and a flow from each agent to the kinds of token it
 spent (cache reads, fresh input, cache writes, output), each agent's value
 beside it (`src/components/TokenSkyline.tsx`). Money is the cost
 cc-switch recorded; rows it left at $0 for want of a price are priced from the
 fullest price table among the machines. `scripts/token-data.py` counts them from
 cc-switch's usage database on each machine (this one, and others over SSH) and
-writes only the totals, per agent per day and per agent per kind, to
-`src/content/tokens.json`:
+writes only the totals, per agent per day, per model per day (the models
+and their companies named in `FAMILIES`, Claude model by model, the rest as
+Other) and per agent per kind, to
+`src/content/tokens.json`. Cursor keeps no database there: pass its usage CSV exports with
+`--cursor file.csv` (repeatable; a row in two exports counts once). Only daily totals reach
+the site, and Cursor counts as unpriced, as its export has plan billing and no list prices.
+Keep the CSVs out of the repo:
 
 ```bash
 python3 -I scripts/token-data.py ~/.cc-switch/cc-switch.db ssh://user@host:port/root/.cc-switch/cc-switch.db

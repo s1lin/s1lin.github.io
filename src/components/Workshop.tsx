@@ -60,7 +60,7 @@ const ITEMS: Item[] = [
     no: "05",
     title: "Pioneer Network",
     meta: "2015–2019 · Spring Boot · Vue · ~1,250 commits",
-    text: "Began as a bidding system for a databases course and grew into the administration system for an education company in Chengdu, where I was project manager and engineer.",
+    text: "Began as a bidding system for a databases course and grew into the administration system for an education company in Chengdu, where I was project manager and engineer, then a consultant from 2018 to 2019.",
   },
   {
     no: "06",
