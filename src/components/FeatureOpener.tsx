@@ -603,7 +603,7 @@ export function FeatureOpener() {
       <div className="wrap">
         <Kicker ja="特集">Feature · pp. 06–27</Kicker>
         <GlitchTitle className="display">
-          Five lines, <em>one proof.</em>
+          Nine lines, <em>one proof.</em>
         </GlitchTitle>
         <p className="dek">
           I work on several lines at once, the way a city runs several metro lines, and each line is one lemma of the

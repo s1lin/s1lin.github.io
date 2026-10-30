@@ -44,7 +44,7 @@ function useRunningHead(initial: string) {
 
 /** The running head. Off the issue's page (the blog), `home` leads back to it and `label` holds still. */
 export function Runhead({
-  label: initial = "特集 · Architecture — five lines, one proof",
+  label: initial = "特集 · Architecture — nine lines, one proof",
   home = "#cover",
 }: {
   label?: string;

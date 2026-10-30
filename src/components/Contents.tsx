@@ -56,7 +56,7 @@ export function Contents() {
           </h2>
           <ol>
             <Entry href="#foreword" title="Foreword" ja="巻頭言" page="04" />
-            <Entry href="#feature" title="Five lines, one proof" ja="特集" page="06" />
+            <Entry href="#feature" title="Nine lines, one proof" ja="特集" page="06" />
             <li className="toc__sub">
               <ol>
                 {FEATURES.map((f) => (
