@@ -37,6 +37,8 @@ without JavaScript and the client only hydrates them.
 | `public/assets/img/` | Photographs and screenshots, WebP |
 | `blog/`, `src/blog.tsx`, `src/components/Blog.tsx` | The blog at `/blog/`, outside the issue: its index, and a page per post |
 | `src/content/posts/` | The posts, newest first in `index.ts`, one file each |
+| `life/`, `src/life.tsx`, `src/components/Life.tsx`, `src/components/life/` | Life at `/life/`, outside the issue: the four rules, ARC-style puzzles, a playground, a study of the game |
+| `src/lib/life/` | Its engine, levels and creatures, with no dependencies (`life.ts`, `levels.ts`, `patterns.ts`), and the two 160×135 glider-gun seeds from the Java original (`seeds/`) |
 
 ## UI components
 
@@ -165,6 +167,26 @@ so the published page is at most a day behind. If GitHub cannot be reached or
 its page has changed shape, the script writes nothing and exits 1, and the
 build goes on with the snapshot in the repo. Local builds use that snapshot
 too; commit a fresh one now and then so it does not drift far.
+
+## Life
+
+`/life/` is Conway's Game of Life as a grid puzzle in the manner of ARC-AGI, lifted from a Java program (built on
+the ACM graphics library) into TypeScript. The Java gave two seed grids, `GliderGun` and `TwoGliderGuns`, 160 by
+135 cells of 0 and 1; they are in `src/lib/life/seeds/` and load into the playground as "Gun" and "Two guns".
+The page, set on a visible twelve-column grid (the Grid button), has four parts:
+
+- **The rules**: four cards, each a 3×3 neighbourhood drawn by the engine, so the picture cannot disagree with the rule.
+- **Puzzles**: `levels.ts` lists them as a start grid and a number of generations; the answer is the engine's.
+  Nothing is explained, and solving counts actions.
+- **Playground**: a 160×135 board with a brush, the creatures of `patterns.ts`, a random soup and the two guns.
+  Cells are coloured by age.
+- **The study**: the field's history, a table of creatures and a reading list.
+
+The engine (`life.ts`: B3/S23, bounded or wrapped) has no dependencies. Its tests live beside the source in the
+author's Life repository: they check that each creature's period and movement match its entry in `patterns.ts`,
+that the gun fires every 30 generations, that Diehard dies at generation 130, and that the seeds round-trip. Any new
+creature or level needs its numbers checked the same way before it is listed. The page is drawn on canvases and is
+not prerendered. The ACM library itself is not used and not included.
 
 ## Token skyline
 

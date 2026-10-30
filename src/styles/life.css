@@ -1,24 +1,94 @@
-/* Life: an ARC-style board on the issue's paper. Boards stay black in both themes. */
-.life { padding-block: 64px 96px; }
-.life__title { font: 400 clamp(56px, 9vw, 120px)/0.9 var(--f-display); margin: 0 0 12px; }
-.life__lede { max-width: 46ch; color: var(--ink-2); margin: 0 0 28px; }
-.life__tabs { display: flex; gap: 8px; margin-bottom: 24px; }
-.life__tabs button, .life__btn {
-  font: 500 12px/1 var(--f-mono); padding: 9px 12px; background: none; color: var(--sumi);
-  border: 1px solid var(--rule-strong); cursor: pointer;
+/* Life: a magazine page on a visible twelve-column grid, in the primaries. Boards stay black in both themes. */
+.life { --red: #d62d20; --blue: #1d56b8; --yellow: #f2b705; position: relative; padding-bottom: 96px; }
+.life .wrap { position: relative; z-index: 1; }
+.life__cols { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); margin-inline: auto; max-width: var(--max); padding-inline: var(--gutter); opacity: 0; transition: opacity .2s; }
+.life[data-guides="on"] .life__cols { opacity: 1; }
+.life__cols i { background: color-mix(in srgb, var(--red) 7%, transparent); border-inline: 1px solid color-mix(in srgb, var(--red) 22%, transparent); }
+.life__guides { position: fixed; right: var(--gutter); bottom: 16px; z-index: 5; font: 500 11px/1 var(--f-mono); padding: 8px 10px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer; }
+
+.life__masthead { padding-block: 56px 40px; display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
+.life__kicker { grid-column: 1 / -1; font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; margin: 0; }
+.life__title { grid-column: 1 / span 8; font: 400 clamp(88px, 20vw, 280px)/.82 var(--f-display); margin: 0; letter-spacing: -.02em; }
+.life__o { display: inline-block; width: .62em; height: .62em; border-radius: 50%; background: var(--red); margin-inline: .02em; transform: translateY(.02em); animation: life-o 6s steps(1) infinite; }
+@keyframes life-o { 0% { background: var(--red); } 33% { background: var(--blue); border-radius: 0; } 66% { background: var(--yellow); border-radius: 0 50% 0 50%; } }
+.life__lede { grid-column: 9 / -1; align-self: end; font: 400 clamp(17px, 1.6vw, 22px)/1.4 var(--f-sans); margin: 0; }
+@media (max-width: 800px) { .life__title, .life__lede { grid-column: 1 / -1; } }
+
+.life__sec { padding-block: 40px; border-top: 2px solid var(--sumi); }
+.life__h { font: 400 clamp(32px, 5vw, 56px)/1 var(--f-display); margin: 0 0 16px; display: flex; gap: .4em; align-items: baseline; }
+.life__h [lang="ja"] { font: 700 .5em/1 var(--f-mincho); letter-spacing: .1em; }
+.life__intro { max-width: 62ch; color: var(--ink-2); margin: 0 0 28px; font-size: 16px; line-height: 1.55; }
+.life__small { max-width: 62ch; color: var(--ink-3); font: 500 12px/1.6 var(--f-mono); margin-top: 24px; }
+
+.life__rules { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+@media (max-width: 900px) { .life__rules { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .life__rules { grid-template-columns: 1fr; } }
+.life__rule { position: relative; padding: 16px; border: 2px solid var(--sumi); background: var(--paper); }
+.life__rule::before { content: ""; position: absolute; top: -2px; right: -2px; width: 28px; height: 28px; }
+.life__rule--red::before { background: var(--red); border-radius: 50%; top: 8px; right: 8px; }
+.life__rule--blue::before { background: var(--blue); }
+.life__rule--yellow::before { background: var(--yellow); clip-path: polygon(50% 0, 100% 100%, 0 100%); top: 8px; right: 8px; }
+.life__rule--black::before { background: var(--sumi); border-radius: 0 100% 0 0; }
+.life__rule-no { font: 400 56px/1 var(--f-display); }
+.life__rule-pair { display: flex; align-items: center; gap: 10px; margin: 12px 0; font: 400 24px/1 var(--f-display); }
+.life__rule .life__board { width: 84px; height: 84px; }
+.life__rule h3 { font: 800 15px/1 var(--f-sans); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
+.life__rule p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+
+.life__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.life__tabs button, .life__btn, .life__stamps button, .life__steps button {
+  font: 500 12px/1 var(--f-mono); padding: 9px 12px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer;
 }
-.life__tabs button[aria-pressed="true"], .life__btn[aria-pressed="true"], .life__btn--go { background: var(--sumi); color: var(--paper); }
-.life__meta { display: flex; gap: 20px; font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin: 0 0 16px; }
+.life__tabs button[aria-pressed="true"], .life__stamps button[aria-pressed="true"], .life__steps button[aria-current], .life__btn--go { background: var(--sumi); color: var(--paper); }
+.life__btn--go { box-shadow: 4px 4px 0 var(--red); }
+.life__btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--red); }
+
+.life__steps { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0 0 18px; flex-wrap: wrap; }
+.life__steps button { width: 34px; padding: 9px 0; }
 .life__pair { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
 .life__pair figure { margin: 0; }
 .life__pair figcaption { font: 500 11px/1 var(--f-mono); color: var(--ink-3); margin-top: 6px; text-transform: uppercase; }
-.life__arrow { font: 400 28px/1 var(--f-display); }
-.life__board { display: block; max-width: 100%; height: auto; background: #000; image-rendering: pixelated; touch-action: manipulation; }
+.life__arrow { display: grid; justify-items: center; font-family: var(--f-display); }
+.life__arrow b { font: 400 52px/1 var(--f-display); color: var(--red); }
+.life__arrow i { font: 500 11px/1 var(--f-mono); }
+.life__board { display: block; max-width: 100%; height: auto; background: #000; image-rendering: pixelated; touch-action: none; }
 .life__board[data-live] { cursor: crosshair; }
-.life__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0; }
+.life__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0; }
 .life__opt { font: 500 12px/1 var(--f-mono); color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
 .life__verdict { font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin-left: 8px; }
 .life__verdict[data-v="yes"] { color: #1f9d33; }
-.life__verdict[data-v="no"] { color: #d6281d; }
-.life__foot { max-width: 60ch; margin-top: 48px; font-size: 13px; color: var(--ink-3); }
-.life__sandbox .life__board { width: 100%; max-width: 800px; }
+.life__verdict[data-v="no"] { color: var(--red); }
+.life__stamps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.life__big { width: 100%; max-width: 800px; border: 2px solid var(--sumi); }
+.life__stats { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin-top: 12px; }
+.life__legend i { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 10px; }
+.life__spark { width: 160px; height: 24px; color: var(--red); }
+
+.life__study { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
+.life__prose { grid-column: 1 / span 7; columns: 2 280px; column-gap: var(--gap); column-rule: 1px solid var(--rule); font-size: 15px; line-height: 1.6; }
+.life__prose p { margin: 0 0 12px; break-inside: avoid-column; }
+.life__drop::first-letter { float: left; font: 400 64px/.8 var(--f-display); padding: 6px 8px 0 0; color: var(--red); }
+.life__pull { column-span: all; margin: 8px 0 16px; padding: 12px 0; border-block: 3px solid var(--sumi); font: 400 clamp(24px, 3vw, 34px)/1.15 var(--f-display); font-style: italic; }
+.life__time { grid-column: 9 / -1; }
+.life__time h3, .life__sub { font: 500 12px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 12px; }
+.life__time ol { list-style: none; margin: 0; padding: 0; border-left: 3px solid var(--blue); }
+.life__time li { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 0 0 14px 12px; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.life__time b { font: 500 12px/1.4 var(--f-mono); color: var(--sumi); }
+@media (max-width: 900px) { .life__prose, .life__time { grid-column: 1 / -1; } }
+
+.life__zoo { width: 100%; border-collapse: collapse; margin: 40px 0; font-size: 13px; }
+.life__zoo caption { text-align: left; font: 500 12px/1 var(--f-mono); color: var(--ink-3); margin-bottom: 10px; }
+.life__zoo th, .life__zoo td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.life__zoo thead th { font: 500 11px/1 var(--f-mono); text-transform: uppercase; border-bottom: 2px solid var(--sumi); }
+.life__zoo tbody th { font-weight: 800; }
+.life__zoo canvas { background: #000; }
+@media (max-width: 800px) { .life__zoo td:nth-child(3), .life__zoo th:nth-child(3), .life__zoo td:nth-child(7), .life__zoo th:nth-child(7) { display: none; } }
+.life__read { max-width: 70ch; padding-left: 1.2em; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.life__read li { margin-bottom: 8px; }
+.life__foot { padding-block: 32px; border-top: 2px solid var(--sumi); font-size: 13px; color: var(--ink-3); max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { .life__o { animation: none; } }
+
+/* Switching between puzzles and playground, and between levels: a short rise and fade. */
+.life__swap, .life__puzzle { animation: life-in 280ms ease-out both; }
+@keyframes life-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .life__swap, .life__puzzle { animation: none; } }

@@ -75,6 +75,13 @@ const ITEMS: Item[] = [
     text: "A free game theory course recorded during the pandemic, and a blog called All AND Nothing with friends. Teaching is building too, just slower.",
     link: { href: "https://www.bilibili.com/video/BV15v411i7Mj", label: "Watch on Bilibili" },
   },
+  {
+    no: "08",
+    title: "Life",
+    meta: "2026 · TypeScript · lifted from Java · MIT",
+    text: "Conway's Game of Life, lifted from a Java program and its two glider-gun seeds into TypeScript, and set as an ARC-style puzzle: a grid in, the grid it becomes out, the rule left to find. The four rules, a playground with a gun, and a short study of what the game turned out to be.",
+    link: { href: "/life/", label: "Play Life →" },
+  },
 ];
 
 function ItemText({ item }: { item: Item }) {
