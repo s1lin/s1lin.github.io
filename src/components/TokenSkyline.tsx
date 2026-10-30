@@ -169,8 +169,9 @@ const MODEL_FILL = T.models.map((_, k) => {
   const hue = MAKER_HUE[T.makers[k]];
   if (!hue) return "var(--ink-3)";
   const kin = T.makers.flatMap((maker, j) => (maker === T.makers[k] ? [j] : []));
-  const step = kin.length > 1 ? Math.min(30, 60 / (kin.length - 1)) : 0;
-  return `color-mix(in oklab, ${hue} ${92 - kin.indexOf(k) * step}%, var(--paper))`;
+  const step = kin.length > 1 ? Math.min(24, 40 / (kin.length - 1)) : 0;
+  // Never fainter than 68% of the hue, so no model washes out to paper.
+  return `color-mix(in oklab, ${hue} ${96 - kin.indexOf(k) * step}%, var(--paper))`;
 });
 /**
  * The champion: the model with the most tokens, which dwarfs the rest, so it

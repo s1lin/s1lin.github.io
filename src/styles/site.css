@@ -536,11 +536,11 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* The town by model (the owner, 2026-10-30): a company to a hue, the dataviz palette's
    first five slots in their validated order, so companies that touch stay apart; its
    models in shades of it, mixed toward the paper (MODEL_FILL in TokenSkyline.tsx). */
-.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #e34948; --agent-cursor: #eda100; }
+.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #7fd18b; --agent-cursor: #7fd18b; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #e66767; --agent-cursor: #c98500; }
+  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #5fbf72; --agent-cursor: #5fbf72; }
 }
-:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #e66767; --agent-cursor: #c98500; }
+:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #5fbf72; --agent-cursor: #5fbf72; }
 
 /* By model, under the town: the companies in two columns, each under its mark, every model a bar on one scale. */
 .models { margin: 18px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
@@ -1216,4 +1216,17 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   .spread { padding-block: 32px; break-inside: avoid-page; }
   .post { break-inside: auto; }
   .post__head { position: static; }
+}
+
+/* Moving between the issue, the blog and Life: a fade out and a fade in, as one cross-document view transition. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 160ms ease-in both page-out; }
+::view-transition-new(root) { animation: 320ms ease-out 60ms both page-in; }
+@keyframes page-out { to { opacity: 0; } }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } }
+/* Where the browser cannot do that, the page at least fades in. */
+@supports not (view-transition-name: none) { body { animation: page-in 320ms ease-out both; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  body { animation: none !important; }
 }

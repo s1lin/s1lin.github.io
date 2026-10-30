@@ -1,290 +1,251 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { Board } from "@/components/life/Board";
+import { ARC } from "@/lib/life/palette";
+import { Playground } from "@/components/life/Playground";
+import { Puzzle } from "@/components/life/Puzzle";
 import { Runhead } from "@/components/Runhead";
-import { advance, clone, equals, make, parse, step, type Grid } from "@/lib/life/life";
-import { LEVELS, answer, given } from "@/lib/life/levels";
-import gliderGun from "@/lib/life/seeds/glider-gun.txt?raw";
-import twoGliderGuns from "@/lib/life/seeds/two-glider-guns.txt?raw";
+import { make, step, stamp, type Grid } from "@/lib/life/life";
+import { PATTERNS } from "@/lib/life/patterns";
 
-/** The ARC palette: 0 black, 1 blue, 2 red, 3 green, 4 yellow. */
-const ARC = { black: "#000000", blue: "#0074D9", red: "#FF4136", green: "#2ECC40", yellow: "#FFDC00", grid: "#3a3a3a" };
+/** The four rules, each as a 3×3 neighbourhood: the cell in the middle, who is around it, what becomes of it. */
+const RULES: { no: string; name: string; text: string; around: number; alive: boolean; tone: "red" | "blue" | "yellow" | "black" }[] = [
+  { no: "1", name: "Loneliness", text: "A living cell with fewer than two living neighbours dies.", around: 1, alive: true, tone: "red" },
+  { no: "2", name: "Company", text: "A living cell with two or three living neighbours lives on.", around: 2, alive: true, tone: "blue" },
+  { no: "3", name: "Crowding", text: "A living cell with more than three living neighbours dies.", around: 4, alive: true, tone: "yellow" },
+  { no: "4", name: "Birth", text: "A dead cell with exactly three living neighbours comes alive.", around: 3, alive: false, tone: "black" },
+];
 
-function Board({
-  grid,
-  color,
-  cell,
-  onToggle,
-  ghost,
-  label,
-}: {
-  grid: Grid;
-  color: string;
-  cell: number;
-  onToggle?: (x: number, y: number) => void;
-  ghost?: Grid | null;
-  label: string;
-}) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const lines = cell >= 8;
-  useEffect(() => {
-    const c = ref.current!;
-    const ctx = c.getContext("2d")!;
-    ctx.fillStyle = ARC.black;
-    ctx.fillRect(0, 0, c.width, c.height);
-    for (let y = 0; y < grid.h; y++) {
-      for (let x = 0; x < grid.w; x++) {
-        const on = grid.cells[y * grid.w + x];
-        const bad = ghost && on !== ghost.cells[y * grid.w + x];
-        if (!on && !bad) continue;
-        ctx.fillStyle = bad ? ARC.red : color;
-        ctx.fillRect(x * cell, y * cell, cell, cell);
-      }
-    }
-    if (lines) {
-      ctx.fillStyle = ARC.grid;
-      for (let i = 0; i <= grid.w; i++) ctx.fillRect(i * cell, 0, 1, c.height);
-      for (let j = 0; j <= grid.h; j++) ctx.fillRect(0, j * cell, c.width, 1);
-    }
-  }, [grid, color, cell, ghost, lines]);
-  const hit = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!onToggle) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const x = Math.floor(((e.clientX - r.left) / r.width) * grid.w);
-    const y = Math.floor(((e.clientY - r.top) / r.height) * grid.h);
-    if (x >= 0 && y >= 0 && x < grid.w && y < grid.h) onToggle(x, y);
-  };
+/** The ring around the middle of a 3×3, clockwise from the top left. */
+const RING = [0, 1, 2, 5, 8, 7, 6, 3];
+
+function neighbourhood(around: number, alive: boolean): Grid {
+  const g = make(3, 3);
+  RING.slice(0, around).forEach((i) => (g.cells[i] = 1));
+  g.cells[4] = alive ? 1 : 0;
+  return g;
+}
+
+function RuleCard({ r }: { r: (typeof RULES)[number] }) {
+  const before = neighbourhood(r.around, r.alive);
+  // The engine decides: only the middle cell is shown after, the others have their own fates.
+  const after = make(3, 3);
+  after.cells[4] = step(before).cells[4];
   return (
-    <canvas
-      ref={ref}
-      className="life__board"
-      width={grid.w * cell}
-      height={grid.h * cell}
-      role="img"
-      aria-label={label}
-      data-live={onToggle ? "" : undefined}
-      onPointerDown={hit}
-    />
+    <article className={`life__rule life__rule--${r.tone}`}>
+      <span className="life__rule-no">{r.no}</span>
+      <div className="life__rule-pair">
+        <Board grid={before} color={ARC.blue} cell={30} label={`Before: the middle cell is ${r.alive ? "alive" : "dead"} with ${r.around} living neighbours`} />
+        <span aria-hidden>→</span>
+        <Board grid={after} color={ARC.green} cell={30} label={`After: the middle cell is ${after.cells[4] ? "alive" : "dead"}`} />
+      </div>
+      <h3>{r.name}</h3>
+      <p>{r.text}</p>
+    </article>
   );
 }
 
-const store = {
-  read(): number {
-    try {
-      return Math.min(LEVELS.length, Number(localStorage.getItem("life-level")) || 0);
-    } catch {
-      return 0;
-    }
-  },
-  write(n: number) {
-    try {
-      localStorage.setItem("life-level", String(n));
-    } catch {
-      /* private mode: progress lasts until reload */
-    }
-  },
-};
-
-function Puzzle({ onDone }: { onDone: () => void }) {
-  const [index, setIndex] = useState(() => store.read());
-  const next = () => {
-    const n = index + 1;
-    store.write(n);
-    if (n >= LEVELS.length) onDone();
-    else setIndex(n);
-  };
-  // Keyed by level, so each starts with fresh state.
-  return <Round key={index} index={index} next={next} />;
+function Thumb({ art }: { art: string[] }) {
+  const w = Math.max(...art.map((r) => r.length)) + 2;
+  const g = stamp(w, art.length + 2, art, 1, 1);
+  return <Board grid={g} color={ARC.blue} cell={Math.max(4, Math.floor(84 / Math.max(w, art.length + 2)))} label="" />;
 }
 
-function Round({ index, next }: { index: number; next: () => void }) {
-  const [actions, setActions] = useState(0);
-  const [tries, setTries] = useState(0);
-  const [verdict, setVerdict] = useState<"" | "no" | "yes">("");
-  const level = LEVELS[Math.min(index, LEVELS.length - 1)];
-  const start = useMemo(() => given(level), [level]);
-  const target = useMemo(() => answer(level), [level]);
-  const [mine, setMine] = useState<Grid>(() => clone(start));
-  const undo = useRef<Grid[]>([]);
+const TIMELINE: { year: string; text: React.ReactNode }[] = [
+  { year: "1940s", text: "John von Neumann, with Stanislaw Ulam's idea of a grid of cells, designs a self-reproducing automaton: a machine on a grid that builds a copy of itself. It needs twenty-nine states per cell." },
+  { year: "1970", text: "John Conway sets out to find a rule as simple as it can be that still does something. In October Martin Gardner puts it in Scientific American, and readers begin to explore it." },
+  { year: "1970", text: "Bill Gosper finds the glider gun, a pattern that fires a glider every 30 generations for ever. Life's population can grow without bound." },
+  { year: "1982", text: "Winning Ways, by Berlekamp, Conway and Guy, sketches why Life can compute anything a computer can: gliders carry signals, guns make clocks, collisions make logic." },
+  { year: "1984", text: "Gosper's Hashlife remembers every pattern it has seen, so that it can skip a million generations at once." },
+  { year: "2000", text: "Paul Rendell builds a working Turing machine out of Life's cells." },
+  { year: "2006", text: "Brice Due's OTCA metapixel is a Life pattern, 2,058 cells to a side, that behaves as one cell of Life. Life runs inside Life." },
+  { year: "2020", text: "Conway dies on 11 April. The game he called a toy has outlived the toys around it." },
+];
 
-  const toggle = useCallback((x: number, y: number) => {
-    setMine((g) => {
-      undo.current.push(g);
-      const n = clone(g);
-      n.cells[y * g.w + x] ^= 1;
-      return n;
-    });
-    setActions((a) => a + 1);
-    setVerdict("");
-  }, []);
-  const back = useCallback(() => {
-    const prev = undo.current.pop();
-    if (prev) {
-      setMine(prev);
-      setActions((a) => a + 1);
-    }
-  }, []);
-  const submit = useCallback(() => {
-    if (equals(mine, target)) {
-      setVerdict("yes");
-    } else {
-      setVerdict("no");
-      setTries((t) => t + 1);
-    }
-  }, [mine, target]);
-  const reset = () => {
-    setMine(clone(start));
-    undo.current = [];
-    setVerdict("");
-  };
-
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "Enter") (verdict === "yes" ? next : submit)();
-      else if (e.key === "z" || e.key === "Z") back();
-      else if (e.key === "r" || e.key === "R") reset();
-    };
-    addEventListener("keydown", key);
-    return () => removeEventListener("keydown", key);
-  });
-
-  const cell = start.w > 10 ? 22 : 28;
-  return (
-    <div className="life__puzzle">
-      <p className="life__meta">
-        <span>
-          Level {index + 1} / {LEVELS.length}
-        </span>
-        <span>Actions {actions}</span>
-        <span>Wrong {tries}</span>
-      </p>
-      <div className="life__pair">
-        <figure>
-          <Board grid={start} color={ARC.blue} cell={cell} label="Given grid" />
-          <figcaption>in</figcaption>
-        </figure>
-        <span className="life__arrow" aria-hidden>
-          → {level.gens}
-        </span>
-        <figure>
-          <Board grid={mine} color={ARC.green} cell={cell} onToggle={toggle} label="Your grid: click cells to flip them" />
-          <figcaption>out</figcaption>
-        </figure>
-      </div>
-      <div className="life__bar">
-        {verdict === "yes" ? (
-          <button type="button" className="life__btn life__btn--go" onClick={next}>
-            Solved · next ⏎
-          </button>
-        ) : (
-          <button type="button" className="life__btn life__btn--go" onClick={submit}>
-            Submit ⏎
-          </button>
-        )}
-        <button type="button" className="life__btn" onClick={back}>
-          Undo Z
-        </button>
-        <button type="button" className="life__btn" onClick={reset}>
-          Reset R
-        </button>
-        <span className="life__verdict" aria-live="polite" data-v={verdict}>
-          {verdict === "no" ? "Not that." : verdict === "yes" ? `Solved in ${actions} actions.` : ""}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-const SEEDS = { "Glider gun": gliderGun, "Two glider guns": twoGliderGuns, Empty: "" } as const;
-
-function Sandbox() {
-  const [seed, setSeed] = useState<keyof typeof SEEDS>("Glider gun");
-  const [grid, setGrid] = useState<Grid>(() => parse(SEEDS["Glider gun"]));
-  const [gen, setGen] = useState(0);
-  const [run, setRun] = useState(true);
-  const [wrap, setWrap] = useState(false);
-  const [fps, setFps] = useState(20);
-  const load = (s: keyof typeof SEEDS) => {
-    setSeed(s);
-    setGrid(s === "Empty" ? make(160, 135) : parse(SEEDS[s]));
-    setGen(0);
-  };
-  useEffect(() => {
-    if (!run) return;
-    const t = setInterval(() => {
-      setGrid((g) => step(g, wrap));
-      setGen((n) => n + 1);
-    }, 1000 / fps);
-    return () => clearInterval(t);
-  }, [run, wrap, fps]);
-  const flip = useCallback((x: number, y: number) => {
-    setGrid((g) => {
-      const n = clone(g);
-      n.cells[y * g.w + x] ^= 1;
-      return n;
-    });
-  }, []);
-  return (
-    <div className="life__sandbox">
-      <div className="life__bar">
-        {Object.keys(SEEDS).map((s) => (
-          <button key={s} type="button" className="life__btn" aria-pressed={seed === s} onClick={() => load(s as keyof typeof SEEDS)}>
-            {s}
-          </button>
-        ))}
-        <button type="button" className="life__btn life__btn--go" onClick={() => setRun((r) => !r)}>
-          {run ? "Pause" : "Run"}
-        </button>
-        <button
-          type="button"
-          className="life__btn"
-          onClick={() => {
-            setRun(false);
-            setGrid((g) => step(g, wrap));
-            setGen((n) => n + 1);
-          }}
-        >
-          Step
-        </button>
-        <label className="life__opt">
-          <input type="checkbox" checked={wrap} onChange={(e) => setWrap(e.target.checked)} /> wrap edges
-        </label>
-        <label className="life__opt">
-          speed <input type="range" min={2} max={60} value={fps} onChange={(e) => setFps(Number(e.target.value))} />
-        </label>
-        <span className="life__verdict">gen {gen}</span>
-      </div>
-      <Board grid={grid} color={ARC.green} cell={5} onToggle={flip} label="Life board, 160 by 135: click to flip a cell" />
-    </div>
-  );
-}
+const READING: React.ReactNode[] = [
+  <>Martin Gardner, “Mathematical Games: The fantastic combinations of John Conway’s new solitaire game ‘life’”, <i>Scientific American</i> 223 (4), October 1970, pp. 120–123.</>,
+  <>E. R. Berlekamp, J. H. Conway and R. K. Guy, <i>Winning Ways for your Mathematical Plays</i>, vol. 2, 1982, chapter 25, “What is Life?”.</>,
+  <>R. W. Gosper, “Exploiting regularities in large cellular spaces”, <i>Physica D</i> 10, 1984, pp. 75–80.</>,
+  <>Paul Rendell, “Turing universality of the Game of Life”, in A. Adamatzky (ed.), <i>Collision-Based Computing</i>, Springer, 2002.</>,
+  <>The <a href="https://conwaylife.com/wiki/">LifeWiki</a>, the catalogue of everything found so far, and <a href="https://golly.sourceforge.io/">Golly</a>, the program that runs it fast.</>,
+];
 
 export function LifePage() {
-  const [mode, setMode] = useState<"puzzle" | "sandbox">("puzzle");
-  // Kept so a solver can check their own reading of the rule against the engine.
+  const [guides, setGuides] = useState(true);
+  const [mode, setMode] = useState<"puzzle" | "play">("puzzle");
   useEffect(() => {
-    (window as unknown as { life: object }).life = { step, advance, parse };
+    // Kept so a solver can check their own reading of the rule against the engine.
+    (window as unknown as { life: object }).life = { step, make, stamp };
   }, []);
   return (
     <>
       <Runhead label="ライフ · Life — a grid, a rule, no instructions" home="/" />
-      <main className="life wrap">
-        <h1 className="life__title">Life</h1>
-        <p className="life__lede">
-          A grid goes in. Work out what it becomes. The rule is not stated; the grid is the only evidence you get.
-        </p>
-        <nav className="life__tabs" aria-label="Mode">
-          <button type="button" aria-pressed={mode === "puzzle"} onClick={() => setMode("puzzle")}>
-            Puzzles
-          </button>
-          <button type="button" aria-pressed={mode === "sandbox"} onClick={() => setMode("sandbox")}>
-            Glider guns
-          </button>
-        </nav>
-        {mode === "puzzle" ? <Puzzle onDone={() => setMode("sandbox")} /> : <Sandbox />}
-        <p className="life__foot">
-          Lifted from a Java Game of Life built on the ACM graphics library, and its two glider-gun seeds, into TypeScript. The
-          engine is MIT-licensed and has no dependencies.
-        </p>
+      <main className="life" data-guides={guides ? "on" : "off"}>
+        <div className="life__cols" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, i) => (
+            <i key={i} />
+          ))}
+        </div>
+        <button type="button" className="life__guides" aria-pressed={guides} onClick={() => setGuides((g) => !g)}>
+          Grid {guides ? "on" : "off"}
+        </button>
+
+        <header className="life__masthead wrap">
+          <p className="life__kicker">
+            <span lang="ja">ライフ</span> · A game with no players · 1970
+          </p>
+          <h1 className="life__title">
+            Li<span className="life__o" aria-hidden />fe
+          </h1>
+          <p className="life__lede">
+            A grid of cells, each alive or dead. Four rules, no dice, no players. Set it going and it does what it does:
+            it blinks, it walks, it builds machines. You never get told which rule produces which.
+          </p>
+        </header>
+
+        <section className="life__sec wrap" aria-labelledby="rules-h">
+          <h2 id="rules-h" className="life__h">
+            <span lang="ja">規則</span> The rules
+          </h2>
+          <p className="life__intro">
+            Every cell has eight neighbours: up, down, left, right and the four corners. All cells change at the same
+            moment, by looking at how many of those eight are alive. That is the whole game. In the pictures, the cell in
+            the middle is the one that is judged.
+          </p>
+          <div className="life__rules">
+            {RULES.map((r) => (
+              <RuleCard key={r.no} r={r} />
+            ))}
+          </div>
+          <p className="life__small">
+            The same four sentences can be said as two: a cell is alive next time if it has three living neighbours, or
+            if it is alive now and has two. In the notation the field uses, B3/S23: born on 3, survives on 2 or 3.
+          </p>
+        </section>
+
+        <section className="life__sec wrap" aria-labelledby="play-h">
+          <h2 id="play-h" className="life__h">
+            <span lang="ja">遊</span> Play
+          </h2>
+          <nav className="life__tabs" aria-label="Mode">
+            <button type="button" aria-pressed={mode === "puzzle"} onClick={() => setMode("puzzle")}>
+              Puzzles: predict it
+            </button>
+            <button type="button" aria-pressed={mode === "play"} onClick={() => setMode("play")}>
+              Playground: make it
+            </button>
+          </nav>
+          <div key={mode} className="life__swap">
+          {mode === "puzzle" ? (
+            <>
+              <p className="life__intro">
+                A grid goes in. Paint the grid it becomes after the number of generations shown. As in the ARC-AGI
+                puzzles, nothing is explained: the rules above are all the help there is, and a clean solve costs few
+                actions.
+              </p>
+              <Puzzle onDone={() => setMode("play")} />
+            </>
+          ) : (
+            <>
+              <p className="life__intro">
+                Draw with the mouse, shift-drag to rub out, or pick a creature and click to put it down. Start with the
+                gun, then stand in its way. Cells are coloured by age: yellow for newborn, green, blue, and magenta for
+                the ones that have outlasted everything.
+              </p>
+              <Playground />
+            </>
+          )}
+          </div>
+        </section>
+
+        <section className="life__sec wrap" aria-labelledby="study-h">
+          <h2 id="study-h" className="life__h">
+            <span lang="ja">研究</span> The study of Life
+          </h2>
+          <div className="life__study">
+            <div className="life__prose">
+              <p className="life__drop">
+                Conway was after a game that nobody could predict by looking: simple enough to play with pencil and
+                graph paper, rich enough that no one could say whether a pattern would grow for ever. What he got is
+                the best-known cellular automaton, and a quiet argument that complexity needs very little.
+              </p>
+              <p>
+                Patterns fall into families. <b>Still lifes</b> do not change. <b>Oscillators</b> repeat in place.{" "}
+                <b>Spaceships</b> repeat while moving; the glider is the smallest, and none can outrun one cell a
+                generation, nor go straight faster than half of that. <b>Methuselahs</b> are small and take a very long time to
+                settle. Of all of them the R-pentomino, five cells, is the most watched.
+              </p>
+              <blockquote className="life__pull">Rules that fit on a card, and a question no program can answer.</blockquote>
+              <p>
+                The last part is a theorem, not a figure of speech. Because Life can build a computer out of gliders
+                and guns, asking whether an arbitrary pattern will ever reach a given state is the halting problem in
+                disguise, and has no general answer. You can only run it and see. The same freedom produces patterns
+                with no past: <i>Gardens of Eden</i>, which no earlier generation can lead to, and which can only appear if
+                someone puts them there.
+              </p>
+              <p>
+                That is also why it suits a puzzle in the ARC manner. Each puzzle here has a single, exact answer that
+                you can reach by reasoning from four sentences; a solver that has only seen the examples would have to
+                work the sentences out for itself.
+              </p>
+            </div>
+            <aside className="life__time" aria-label="Timeline">
+              <h3>Timeline</h3>
+              <ol>
+                {TIMELINE.map((t, i) => (
+                  <li key={i}>
+                    <b>{t.year}</b>
+                    <span>{t.text}</span>
+                  </li>
+                ))}
+              </ol>
+            </aside>
+          </div>
+
+          <table className="life__zoo">
+            <caption>A few of them. Period and movement are checked against this page’s engine.</caption>
+            <thead>
+              <tr>
+                <th scope="col" />
+                <th scope="col">Name</th>
+                <th scope="col">Kind</th>
+                <th scope="col">Cells</th>
+                <th scope="col">Period</th>
+                <th scope="col">Moves</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PATTERNS.map((p) => (
+                <tr key={p.id}>
+                  <td>
+                    <Thumb art={p.art} />
+                  </td>
+                  <th scope="row">{p.name}</th>
+                  <td>{p.kind}</td>
+                  <td>{p.art.join("").replace(/\./g, "").length}</td>
+                  <td>{p.period || "—"}</td>
+                  <td>{p.shift[0] || p.shift[1] ? `${Math.abs(p.shift[0]) || Math.abs(p.shift[1])} ${p.shift[0] && p.shift[1] ? "diag." : p.shift[0] < 0 ? "left" : "right"}` : "—"}</td>
+                  <td>{p.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <h3 className="life__sub">Reading</h3>
+          <ul className="life__read">
+            {READING.map((r, i) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
+        </section>
+
+        <footer className="life__foot wrap">
+          <p>
+            Lifted from a Java Game of Life built on the ACM graphics library, with its two glider-gun seeds, into
+            TypeScript. The engine, the puzzles and the creatures are MIT-licensed and have no dependencies; the tests
+            check the period of every creature in the table. <a href="/">← Back to the issue</a>
+          </p>
+        </footer>
       </main>
     </>
   );

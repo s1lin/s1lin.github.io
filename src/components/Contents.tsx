@@ -68,6 +68,20 @@ export function Contents() {
             </li>
             <Entry href="#cities" title="5,000 hours" ja="都市" page="28" />
             <Entry href="#workshop" title="The workshop" ja="工房" page="36" />
+            <li className="toc__sub">
+              <ol>
+                <li>
+                  <a href="/life/">
+                    <span className="toc__t">
+                      <Roundel>L</Roundel>
+                      {"  "}
+                      Life, a grid puzzle
+                    </span>
+                    <span className="toc__p">→</span>
+                  </a>
+                </li>
+              </ol>
+            </li>
             <Entry href="#departures" title="Departures" ja="年表" page="44" />
             <Entry href="#colophon" title="Colophon" ja="奥付" page="48" />
             <Entry href="/blog/" title="Blog, between issues" ja="随筆" page="→" />
