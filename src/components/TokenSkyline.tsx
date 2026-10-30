@@ -169,6 +169,8 @@ const MODEL_FILL = T.models.map((_, k) => {
   const hue = MAKER_HUE[T.makers[k]];
   if (!hue) return "var(--ink-3)";
   const kin = T.makers.flatMap((maker, j) => (maker === T.makers[k] ? [j] : []));
+  // Cursor's light green keeps two full tints of its own: a paler one would read as paper.
+  if (T.makers[k] === "Cursor") return kin.indexOf(k) === 0 ? "var(--co-8)" : "var(--co-8b)";
   const step = kin.length > 1 ? Math.min(24, 40 / (kin.length - 1)) : 0;
   // Never fainter than 68% of the hue, so no model washes out to paper.
   return `color-mix(in oklab, ${hue} ${96 - kin.indexOf(k) * step}%, var(--paper))`;
@@ -294,7 +296,7 @@ function Town({ scale }: { scale: number }) {
         </text>
         {d.blocks.map((b) =>
           b.lots.map((l) => (
-            <rect key={`${b.week}-${l.k}`} style={{ fill: MODEL_FILL[l.k] }} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
+            <rect key={`${b.week}-${l.k}`} style={{ fill: MODEL_FILL[l.k], stroke: MODEL_FILL[l.k] }} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
           )),
         )}
       </g>

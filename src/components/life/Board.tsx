@@ -38,10 +38,10 @@ export function Board({
         ctx.fillRect(x * cell, y * cell, cell, cell);
       }
     }
-    if (cell >= 8) {
-      ctx.fillStyle = ARC.grid;
-      for (let i = 0; i <= grid.w; i++) ctx.fillRect(i * cell, 0, 1, c.height);
-      for (let j = 0; j <= grid.h; j++) ctx.fillRect(0, j * cell, c.width, 1);
+    if (cell >= 4) {
+      ctx.fillStyle = cell >= 8 ? ARC.grid : "#222222";
+      for (let i = 0; i <= grid.w; i++) ctx.fillRect(Math.min(i * cell, c.width - 1), 0, 1, c.height);
+      for (let j = 0; j <= grid.h; j++) ctx.fillRect(0, Math.min(j * cell, c.height - 1), c.width, 1);
     }
   });
   const hit = (e: React.PointerEvent<HTMLCanvasElement>) => {
