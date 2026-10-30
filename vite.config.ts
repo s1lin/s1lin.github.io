@@ -18,6 +18,6 @@ export default defineConfig({
     alias: { "@": here("./src") },
   },
   build: {
-    rolldownOptions: { input: [here("index.html"), here("blog/index.html"), ...posts] },
+    rolldownOptions: { input: [here("index.html"), here("blog/index.html"), here("life/index.html"), ...posts] },
   },
 });

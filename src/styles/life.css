@@ -1,0 +1,24 @@
+/* Life: an ARC-style board on the issue's paper. Boards stay black in both themes. */
+.life { padding-block: 64px 96px; }
+.life__title { font: 400 clamp(56px, 9vw, 120px)/0.9 var(--f-display); margin: 0 0 12px; }
+.life__lede { max-width: 46ch; color: var(--ink-2); margin: 0 0 28px; }
+.life__tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.life__tabs button, .life__btn {
+  font: 500 12px/1 var(--f-mono); padding: 9px 12px; background: none; color: var(--sumi);
+  border: 1px solid var(--rule-strong); cursor: pointer;
+}
+.life__tabs button[aria-pressed="true"], .life__btn[aria-pressed="true"], .life__btn--go { background: var(--sumi); color: var(--paper); }
+.life__meta { display: flex; gap: 20px; font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin: 0 0 16px; }
+.life__pair { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.life__pair figure { margin: 0; }
+.life__pair figcaption { font: 500 11px/1 var(--f-mono); color: var(--ink-3); margin-top: 6px; text-transform: uppercase; }
+.life__arrow { font: 400 28px/1 var(--f-display); }
+.life__board { display: block; max-width: 100%; height: auto; background: #000; image-rendering: pixelated; touch-action: manipulation; }
+.life__board[data-live] { cursor: crosshair; }
+.life__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0; }
+.life__opt { font: 500 12px/1 var(--f-mono); color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.life__verdict { font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin-left: 8px; }
+.life__verdict[data-v="yes"] { color: #1f9d33; }
+.life__verdict[data-v="no"] { color: #d6281d; }
+.life__foot { max-width: 60ch; margin-top: 48px; font-size: 13px; color: var(--ink-3); }
+.life__sandbox .life__board { width: 100%; max-width: 800px; }
