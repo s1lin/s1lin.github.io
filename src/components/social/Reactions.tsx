@@ -52,10 +52,10 @@ export function Reactions({ target, state, onState, c, comments }: { target: str
           {comments}
         </span>
       )}
-      <button type="button" className="soc__react" aria-pressed={state.reposted} onClick={() => toggle("repost")} title={state.reposted ? c.reposted : c.repost}>
+      <button type="button" className="soc__react" aria-pressed={state.reposted} onClick={() => toggle("repost")} title={state.reposted ? c.repostedTitle : c.repostTitle}>
         <Icon name="repost" />
         <span>{state.reposts}</span>
-        <span className="soc__sr">{state.reposted ? c.reposted : c.repost}</span>
+        <span className="soc__sr">{state.reposted ? c.repostedTitle : c.repostTitle}</span>
       </button>
       <button type="button" className="soc__react soc__react--like" aria-pressed={state.liked} onClick={() => toggle("like")} title={state.liked ? c.liked : c.like}>
         <Icon name="heart" />

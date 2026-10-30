@@ -1,5 +1,5 @@
 /* Comments, reactions and shapes (components/social). On the blog's paper and ink; on the Life page the primaries of .life. */
-.soc { --soc-red: var(--red, #d62d20); --soc-blue: var(--blue, #1d56b8); margin: 56px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule-strong); text-align: left; font-family: var(--f-sans); color: var(--sumi); }
+.soc { --soc-red: var(--red, #d62d20); --soc-blue: var(--blue, #1d56b8); --soc-yellow: var(--yellow, #f2b705); margin: 56px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule-strong); text-align: left; font-family: var(--f-sans); color: var(--sumi); }
 .soc * { text-indent: 0; text-align: left; letter-spacing: normal; }
 .soc h2 { font: 400 clamp(26px, 3.4vw, 38px)/1.1 var(--f-display); margin: 0; }
 .soc h3 { font: 800 15px/1.2 var(--f-sans); margin: 10px 0 4px; }
@@ -10,6 +10,7 @@
 .soc__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .soc__btn, .soc__link { font: 500 12px/1 var(--f-mono); cursor: pointer; }
 .soc__btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 40px; padding: 0 16px; line-height: 1; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); text-decoration: none; }
+.soc .soc__btn { text-align: center; }
 .soc__btn--go { background: var(--sumi); color: var(--paper); box-shadow: 3px 3px 0 var(--soc-red); }
 .soc__btn:disabled { opacity: 0.5; cursor: default; }
 .soc__btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--soc-red); }
@@ -17,7 +18,6 @@
 .soc__signin { margin: 12px 0; padding: 14px 16px; border: 1px solid var(--rule-strong); background: var(--paper-2); }
 .soc__signin p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
 .soc__who { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 10px 0; font: 500 12px/1.4 var(--f-mono); color: var(--ink-2); }
-.soc__form { display: grid; gap: 8px; margin: 12px 0; }
 .soc textarea, .soc input { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--f-sans); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); padding: 10px 12px; border-radius: 0; resize: vertical; }
 .soc textarea { font-size: 16px; line-height: 1.55; padding: 14px 16px; }
 .soc textarea:focus-visible, .soc input:focus-visible, .soc__btn:focus-visible, .soc__react:focus-visible, .soc__link:focus-visible, .soc__shape-open:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
@@ -66,29 +66,128 @@
 .life__social { display: grid; gap: 8px; }
 .life__social .soc { border-top: 2px solid var(--sumi); }
 
-/* Revise with AI: a suggestion under the comment box, never a post. */
-.soc__revise { display: grid; gap: 8px; }
-.soc__revpanel { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--rule-strong); background: var(--paper-2); }
-.soc__revpanel .soc__small, .soc__revpanel .soc__note { margin: 0; }
-.soc__revrow { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; }
-.soc__revrow .soc__field { flex: 1 1 180px; min-width: 0; }
-.soc__revrow .soc__btn { flex: none; }
-.soc select { width: 100%; box-sizing: border-box; min-height: 40px; font: 400 14px/1.3 var(--f-sans); text-transform: none; color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); padding: 0 10px; border-radius: 0; }
-.soc select:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
-.soc__compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.soc__compare figure { margin: 0; padding: 10px 12px; border: 1px solid var(--rule-strong); background: var(--paper); min-width: 0; }
-.soc__compare--new { border-color: var(--soc-blue) !important; border-width: 2px !important; }
-.soc__compare figcaption { font: 500 11px/1.3 var(--f-mono); text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
-.soc__compare-actions { grid-column: 1 / -1; }
-.soc__spin { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: soc-spin 0.7s linear infinite; }
-@keyframes soc-spin { to { transform: rotate(360deg); } }
-@media (max-width: 640px) {
-  .soc__compare { grid-template-columns: minmax(0, 1fr); }
-  .soc__revrow .soc__btn { flex: 1 1 100%; }
-}
-@media (prefers-reduced-motion: reduce) { .soc__spin { animation: none; border-right-color: currentColor; opacity: 0.6; } }
+/* At night the primaries lift, so the blue marks stay readable on the dark paper. */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .soc { --soc-blue: #6f9bf2; --soc-red: #f0574b; } }
+:root[data-theme="dark"] .soc { --soc-blue: #6f9bf2; --soc-red: #f0574b; }
 
 /* On the blog the thread sits under the text, in its column. */
 .post__social { grid-column: 6 / span 6; min-width: 0; }
 @media (max-width: 900px) { .post__social { grid-column: 1 / -1; } }
 @media (prefers-reduced-motion: reduce) { .soc__btn:active:not(:disabled) { transform: none; } }
+
+/* Who reposted this target: one quiet line under the heading, wrapping on a phone. */
+.soc__by { margin: 6px 0 0; font: 500 12px/1.5 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
+.soc__by a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------------------------------------------------------------- the composer
+   One box, like a chat composer: the thread with Aha (while revising), the draft, and a toolbar inside the box.
+   The focus ring belongs to the box, not to the field. */
+.soc__compose { margin: 14px 0 6px; }
+.soc__compose--reply { margin: 12px 0 4px; }
+.soc__box { position: relative; background: var(--paper); border: 1px solid var(--rule-strong); }
+.soc__box:focus-within { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
+.soc__box.is-out { background: var(--paper-2); }
+.soc .soc__box textarea { display: block; border: 0; background: transparent; padding: 14px 16px 6px; resize: none; overflow-y: hidden; font: 400 16px/1.55 var(--f-sans); }
+.soc .soc__box textarea:focus-visible { outline: none; }
+.soc .soc__box textarea:disabled { cursor: not-allowed; color: var(--ink-3); }
+.soc .soc__box textarea::placeholder { color: var(--ink-3); }
+
+.soc__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 10px 10px; }
+.soc__bar-start, .soc__bar-end, .soc__bar-out { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.soc__bar-end { margin-left: auto; gap: 12px; }
+.soc__bar-out { margin-left: auto; }
+.soc__bar .soc__btn { min-height: 36px; padding: 0 14px; }
+.soc__btn--sm { min-height: 30px !important; padding: 0 10px !important; font-size: 11px; }
+.soc__len { margin-left: 0; font: 400 11px/1 var(--f-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.soc__len.is-over { color: var(--soc-red); font-weight: 600; }
+
+/* The model chip and the Revise button: pills, quieter than Post. */
+.soc__chipwrap { position: relative; display: inline-flex; }
+.soc__chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px 0 8px; font: 500 12px/1 var(--f-mono); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 999px; cursor: pointer; text-decoration: none; max-width: 100%; }
+.soc__chip:hover { background: var(--paper-2); }
+.soc__chip[aria-expanded="true"] { background: var(--paper-2); }
+.soc__chip.is-quiet { color: var(--ink-3); border-style: dashed; cursor: default; }
+.soc__chip--add { border-style: dashed; }
+.soc__chip .soc__icon--half { color: var(--soc-blue); }
+.soc__chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
+.soc__chip:focus-visible, .soc__aha-btn:focus-visible, .soc__tone:focus-visible, .soc__x:focus-visible, .soc__say-go:focus-visible, .soc__opt:focus-visible, .soc__earlier:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
+.soc__aha-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 12px; font: 500 12px/1 var(--f-mono); color: var(--sumi); background: transparent; border: 1px solid var(--sumi); border-radius: 999px; cursor: pointer; }
+.soc__aha-btn .soc__icon--spark { color: var(--soc-blue); }
+.soc__aha-btn:hover:not(:disabled), .soc__aha-btn[aria-expanded="true"] { background: color-mix(in srgb, var(--soc-blue) 10%, var(--paper)); }
+.soc__aha-btn:disabled { opacity: 0.45; cursor: default; }
+
+/* The model popover: opens upward from the toolbar, like Aha's own. */
+.soc__pop { position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 30; width: min(320px, calc(100vw - 40px)); max-height: min(360px, 60vh); overflow: auto; padding: 12px 0 6px; background: var(--paper); border: 1px solid var(--sumi); box-shadow: 4px 4px 0 var(--soc-blue); }
+.soc__pop--down { bottom: auto; top: calc(100% + 8px); }
+.soc__pop-title { margin: 0 14px; font: 800 13px/1.2 var(--f-sans); }
+.soc__pop-note { margin: 4px 14px 8px; font: 400 11px/1.45 var(--f-mono); color: var(--ink-2); }
+.soc__pop-group { padding: 4px 0; border-top: 1px solid var(--rule); }
+.soc__pop-key { margin: 6px 14px 2px; font: 500 10px/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.soc__opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 14px; font: 400 13px/1.2 var(--f-mono); color: var(--sumi); background: none; border: 0; cursor: pointer; text-align: left; }
+.soc__opt:hover, .soc__opt:focus-visible { background: var(--paper-2); }
+.soc__opt:focus-visible { outline-offset: -2px; }
+.soc__opt-dot { flex: none; width: 10px; height: 10px; border: 1.5px solid var(--sumi); border-radius: 50%; }
+.soc__opt[aria-selected="true"] { font-weight: 600; }
+.soc__opt[aria-selected="true"] .soc__opt-dot { background: var(--soc-blue); border-color: var(--soc-blue); }
+
+/* The revision thread: a short chat with Aha above the draft. */
+.soc__rev { background: var(--paper-2); border-bottom: 1px solid var(--rule); }
+.soc__earlier { display: block; margin: 0 auto; padding: 8px 12px 0; font: 500 11px/1 var(--f-mono); color: var(--ink-2); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.soc__turns { list-style: none; margin: 0; padding: 14px 14px 6px; display: grid; gap: 14px; max-height: min(50vh, 460px); overflow-y: auto; overscroll-behavior: contain; }
+.soc__turn { display: grid; gap: 8px; }
+.soc__ask { display: inline-flex; align-items: center; gap: 7px; justify-self: end; max-width: 80%; margin: 0; padding: 6px 12px; font: 500 12px/1.4 var(--f-mono); color: var(--paper); background: var(--sumi); border-radius: 14px 14px 2px 14px; overflow-wrap: anywhere; }
+.soc__aha { justify-self: start; display: grid; gap: 6px; max-width: min(100%, 62ch); min-width: 0; }
+.soc__aha-head { display: inline-flex; align-items: center; gap: 6px; margin: 0; font: 500 11px/1 var(--f-mono); color: var(--ink-2); }
+.soc__aha-head .soc__icon--spark { color: var(--soc-blue); }
+.soc__bubble { margin: 0; padding: 10px 12px; background: var(--paper); border: 1px solid var(--rule-strong); border-left: 3px solid var(--soc-blue); }
+.soc__bubble.soc__text { font-size: 15px; }
+.soc__bubble--wait { display: inline-flex; align-items: center; gap: 10px; font: 400 12px/1 var(--f-mono); color: var(--ink-2); }
+.soc__bubble--err { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; background: transparent; border: 1px dashed var(--soc-red); border-left: 3px solid var(--soc-red); font: 400 13px/1.5 var(--f-sans); color: var(--ink-2); }
+.soc__turn-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.soc__inbox { font: 500 11px/1 var(--f-mono); color: #1f8f33; }
+/* Aha at work: three dots in the primaries. */
+.soc__dots { display: inline-flex; gap: 4px; }
+.soc__dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--soc-blue); animation: soc-dot 1s ease-in-out infinite; }
+.soc__dots i:nth-child(2) { background: var(--soc-red); animation-delay: 0.15s; }
+.soc__dots i:nth-child(3) { background: var(--soc-yellow); animation-delay: 0.3s; }
+@keyframes soc-dot { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-3px); opacity: 1; } }
+
+/* Quick revisions, an instruction in words, and close. Each quick revision wears a Bauhaus mark, as the rules do. */
+.soc__asks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px 10px; border-top: 1px solid var(--rule); }
+.soc__chips { display: flex; gap: 6px; flex: none; }
+.soc__tone { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; font: 500 11px/1 var(--f-mono); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.soc__tone::before { content: ""; width: 8px; height: 8px; flex: none; }
+.soc__ask[class*="soc__tone--"]::before { content: ""; width: 8px; height: 8px; flex: none; }
+.soc__ask.soc__tone--clearer::before { background: var(--paper); }
+.soc__tone--polish::before { background: var(--soc-red); border-radius: 50%; }
+.soc__tone--shorter::before { background: var(--soc-blue); }
+.soc__tone--friendlier::before { background: var(--soc-yellow); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.soc__tone--clearer::before { background: var(--sumi); border-radius: 0 100% 0 0; }
+.soc__tone:hover:not(:disabled) { background: var(--paper-2); border-color: var(--sumi); }
+.soc__tone:disabled { opacity: 0.45; cursor: default; }
+.soc__say { display: flex; align-items: center; flex: 1 1 200px; min-width: 0; background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 999px; padding: 0 4px 0 12px; }
+.soc__say:focus-within { border-color: var(--soc-blue); }
+.soc .soc__say input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 7px 0; font: 400 13px/1.3 var(--f-sans); }
+.soc .soc__say input:focus-visible { outline: none; }
+.soc__say-go, .soc__x { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; padding: 0; color: var(--sumi); background: none; border: 0; border-radius: 50%; cursor: pointer; }
+.soc__say-go:hover:not(:disabled), .soc__x:hover { background: var(--paper-2); }
+.soc__say-go:disabled { opacity: 0.35; cursor: default; }
+.soc__x { margin-left: auto; }
+
+.soc__under { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 8px 0 0; font: 500 12px/1.4 var(--f-mono); color: var(--ink-2); }
+.soc__hint { color: var(--ink-3); }
+.soc__notes { display: grid; gap: 2px; margin-top: 4px; }
+.soc__notes .soc__small, .soc__notes .soc__note { margin: 2px 0; }
+
+@media (max-width: 560px) {
+  /* The toolbar wraps: the chip and Revise on one line, the count and Post on the next. */
+  .soc__bar-start { flex: 1 1 100%; }
+  .soc__bar-end { flex: 1 1 100%; justify-content: flex-end; }
+  .soc__bar-out { flex: 1 1 100%; }
+  .soc__bar-out .soc__btn { flex: 1 1 0; }
+  .soc__chips { flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; mask-image: linear-gradient(to right, #000 85%, transparent); }
+  .soc__chips::-webkit-scrollbar { display: none; }
+  .soc__ask { max-width: 92%; }
+  .soc__hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .soc__dots i { animation: none; opacity: 0.8; } }

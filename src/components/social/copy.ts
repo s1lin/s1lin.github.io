@@ -10,13 +10,20 @@ export interface SocialCopy {
   liked: string;
   repost: string;
   reposted: string;
+  /** The honest title of the repost button: what a repost does. */
+  repostTitle: string;
+  repostedTitle: string;
+  /** "Reposted by A, B and 3 more": the words before the names, the join, the "and N more", and the words after. */
+  repostedByPre: string;
+  repostedByJoin: string;
+  repostedByMore: (n: number) => string;
+  repostedByPost: string;
   reply: string;
   cancel: string;
   send: string;
   sending: string;
   placeholder: string;
   replyPlaceholder: string;
-  moderation: string;
   signInPrompt: string;
   createAccount: string;
   signIn: string;
@@ -58,27 +65,45 @@ export interface SocialCopy {
   shapePending: string;
   shapeRejected: (reason: string) => string;
   close: string;
+  /** The composer: the box, its toolbar, and what sits under it. */
+  signedOutPlaceholder: string;
+  reviewNote: string;
+  postHint: string;
+  overLimit: string;
+  /** "Revise with Aha": the button, the model chip and its popover, the thread with Aha. */
   revise: string;
-  reviseHide: string;
-  reviseModel: string;
-  reviseTone: string;
+  reviseTitle: string;
+  modelsTitle: string;
+  modelsNote: string;
+  modelsLoading: string;
+  modelsError: string;
+  addModel: string;
+  modelChip: (model: string) => string;
+  quick: string;
   tones: { polish: string; shorter: string; friendlier: string; clearer: string };
-  reviseGo: string;
-  revising: string;
-  reviseNote: string;
-  reviseLoadingModels: string;
-  reviseNoKey: string;
-  reviseNoKeyLink: string;
-  reviseYours: string;
-  reviseSuggestion: (model: string) => string;
-  reviseUse: string;
-  reviseUndo: string;
-  reviseAgain: string;
-  reviseDiscard: string;
-  reviseApplied: string;
-  reviseRate: string;
-  reviseRefused: (reason: string) => string;
-  reviseFailed: string;
+  sayPlaceholder: string;
+  sayLabel: string;
+  saySend: string;
+  you: string;
+  aha: (model: string) => string;
+  thinking: string;
+  stop: string;
+  use: string;
+  inBox: string;
+  again: string;
+  closeThread: string;
+  earlier: (n: number) => string;
+  undo: string;
+  undoTitle: string;
+  usedNote: string;
+  errNoKey: string;
+  errRate: string;
+  errRefused: (reason: string) => string;
+  errFailed: string;
+  errOffline: string;
+  errAuth: string;
+  openConsole: string;
+  revisionNote: string;
 }
 
 const EN: SocialCopy = {
@@ -90,13 +115,18 @@ const EN: SocialCopy = {
   liked: "Liked",
   repost: "Repost",
   reposted: "Reposted",
+  repostTitle: "Repost: shows this on your Aha page",
+  repostedTitle: "Reposted: it is on your Aha page. Press to undo",
+  repostedByPre: "Reposted by ",
+  repostedByJoin: ", ",
+  repostedByMore: (n) => ` and ${n} more`,
+  repostedByPost: "",
   reply: "Reply",
   cancel: "Cancel",
-  send: "Post comment",
-  sending: "Sending…",
+  send: "Post",
+  sending: "Posting…",
   placeholder: "Add a comment. Be kind, be specific.",
   replyPlaceholder: "Write a reply",
-  moderation: "Comments are screened first. Most appear at once; a few wait for a person to look.",
   signInPrompt: "Sign in with TokensBeat to comment, like and repost.",
   createAccount: "Create a TokensBeat account",
   signIn: "Sign in",
@@ -138,27 +168,43 @@ const EN: SocialCopy = {
   shapePending: "Thank you. A person will look at your shape before it appears.",
   shapeRejected: (r) => `Not published: ${r}`,
   close: "Close",
-  revise: "Revise with AI",
-  reviseHide: "Hide AI revise",
-  reviseModel: "Model",
-  reviseTone: "Tone",
+  signedOutPlaceholder: "Sign in to join the conversation",
+  reviewNote: "Comments are reviewed before they appear.",
+  postHint: "⌘/Ctrl ↵ to post",
+  overLimit: "Too long to post: cut it to 2,000 characters.",
+  revise: "Revise with Aha",
+  reviseTitle: "Aha rewrites your draft with your own model. Nothing is posted until you press Post.",
+  modelsTitle: "Your models",
+  modelsNote: "Runs on your own TokensBeat key and is billed to your balance.",
+  modelsLoading: "Models…",
+  modelsError: "Models unavailable · retry",
+  addModel: "Add a model",
+  modelChip: (m) => `Model for Revise with Aha: ${m}. Change model`,
+  quick: "Quick revisions",
   tones: { polish: "Polish", shorter: "Shorter", friendlier: "Friendlier", clearer: "Clearer" },
-  reviseGo: "Revise",
-  revising: "Revising…",
-  reviseNote: "Your own model, on your own key, rewrites your draft. Nothing is posted until you press the post button, and a posted comment is still screened.",
-  reviseLoadingModels: "Loading your models…",
-  reviseNoKey: "You have no model key to revise with yet. Sign in to TokensBeat and add a key in your console, then come back.",
-  reviseNoKeyLink: "Open TokensBeat",
-  reviseYours: "Your draft",
-  reviseSuggestion: (m) => (m ? `Suggestion from ${m}` : "Suggestion"),
-  reviseUse: "Use this",
-  reviseUndo: "Undo",
-  reviseAgain: "Try again",
-  reviseDiscard: "Discard",
-  reviseApplied: "Your draft was replaced.",
-  reviseRate: "Too many revisions just now. Wait a moment and try again.",
-  reviseRefused: (r) => `That model is not available on your plan or balance${r ? `: ${r}` : "."}`,
-  reviseFailed: "The model did not answer. Try again, or pick another model.",
+  sayPlaceholder: "Or tell Aha what to change…",
+  sayLabel: "Tell Aha what to change",
+  saySend: "Ask Aha",
+  you: "You",
+  aha: (m) => (m ? `Aha · ${m}` : "Aha"),
+  thinking: "Aha is revising…",
+  stop: "Stop",
+  use: "Use this",
+  inBox: "In the box",
+  again: "Try again",
+  closeThread: "Close the revision",
+  earlier: (n) => `Show ${n} earlier`,
+  undo: "Undo",
+  undoTitle: "Put back your draft from before Aha's text",
+  usedNote: "Aha's text is in the box. Edit it, or post when you are ready.",
+  errNoKey: "You have no model to revise with yet.",
+  errRate: "Too many revisions just now; try again in a minute.",
+  errRefused: (r) => r || "That model is not available on your plan or balance.",
+  errFailed: "Aha could not revise this. Try again.",
+  errOffline: "No connection to TokensBeat. Try again.",
+  errAuth: "Your sign-in has expired. Sign in again.",
+  openConsole: "Open your TokensBeat console",
+  revisionNote: "Aha only suggests: your draft changes when you choose Use this, and a posted comment is still reviewed."
 };
 
 const ZH: SocialCopy = {
@@ -170,13 +216,18 @@ const ZH: SocialCopy = {
   liked: "已喜欢",
   repost: "转发",
   reposted: "已转发",
+  repostTitle: "转发:会显示在你的 Aha 页面上",
+  repostedTitle: "已转发:它在你的 Aha 页面上。再按一次撤销",
+  repostedByPre: "转发者:",
+  repostedByJoin: "、",
+  repostedByMore: (n) => ` 等 ${n} 人`,
+  repostedByPost: "",
   reply: "回复",
   cancel: "取消",
-  send: "发表评论",
+  send: "发表",
   sending: "发送中…",
   placeholder: "写下你的评论。友善,具体。",
   replyPlaceholder: "写下回复",
-  moderation: "评论会先经过审核。大多数会立即显示,少数需要人工查看。",
   signInPrompt: "用 TokensBeat 登录后才能评论、喜欢和转发。",
   createAccount: "创建 TokensBeat 账号",
   signIn: "登录",
@@ -218,27 +269,43 @@ const ZH: SocialCopy = {
   shapePending: "谢谢。你的图案会先由人工查看,再显示出来。",
   shapeRejected: (r) => `未发布:${r}`,
   close: "关闭",
-  revise: "用 AI 润色",
-  reviseHide: "收起 AI 润色",
-  reviseModel: "模型",
-  reviseTone: "语气",
+  signedOutPlaceholder: "登录后加入讨论",
+  reviewNote: "评论会先经过审核再显示。",
+  postHint: "⌘/Ctrl ↵ 发表",
+  overLimit: "太长了,发表前请删到 2,000 字以内。",
+  revise: "让 Aha 改一改",
+  reviseTitle: "Aha 用你自己的模型改写草稿。按下发表之前,不会发出任何内容。",
+  modelsTitle: "你的模型",
+  modelsNote: "使用你自己的 TokensBeat 密钥运行,费用从你的余额扣除。",
+  modelsLoading: "模型…",
+  modelsError: "模型不可用 · 重试",
+  addModel: "添加模型",
+  modelChip: (m) => `“让 Aha 改一改”使用的模型:${m}。更换模型`,
+  quick: "快捷修改",
   tones: { polish: "润色", shorter: "更简短", friendlier: "更友善", clearer: "更清楚" },
-  reviseGo: "润色",
-  revising: "润色中…",
-  reviseNote: "用你自己的模型、你自己的密钥改写草稿。点发表之前不会发出任何内容,发表后的评论仍会经过审核。",
-  reviseLoadingModels: "正在读取你的模型…",
-  reviseNoKey: "你还没有可用来润色的模型密钥。请登录 TokensBeat,在控制台里添加密钥,再回来。",
-  reviseNoKeyLink: "打开 TokensBeat",
-  reviseYours: "你的草稿",
-  reviseSuggestion: (m) => (m ? `${m} 的建议` : "建议"),
-  reviseUse: "采用",
-  reviseUndo: "撤销",
-  reviseAgain: "再试一次",
-  reviseDiscard: "放弃",
-  reviseApplied: "草稿已替换。",
-  reviseRate: "润色太频繁了,请稍等再试。",
-  reviseRefused: (r) => `你的套餐或余额不能使用这个模型${r ? `:${r}` : "。"}`,
-  reviseFailed: "模型没有回应。请重试,或换一个模型。",
+  sayPlaceholder: "或者告诉 Aha 要怎么改…",
+  sayLabel: "告诉 Aha 要怎么改",
+  saySend: "发给 Aha",
+  you: "你",
+  aha: (m) => (m ? `Aha · ${m}` : "Aha"),
+  thinking: "Aha 正在修改…",
+  stop: "停止",
+  use: "采用",
+  inBox: "已放进输入框",
+  again: "再试一次",
+  closeThread: "关闭修改",
+  earlier: (n) => `显示更早的 ${n} 条`,
+  undo: "撤销",
+  undoTitle: "恢复 Aha 改写之前的草稿",
+  usedNote: "Aha 的文字已放进输入框。可以再改,准备好了就发表。",
+  errNoKey: "你还没有可以用来修改的模型。",
+  errRate: "修改太频繁了,一分钟后再试。",
+  errRefused: (r) => r || "你的套餐或余额不能使用这个模型。",
+  errFailed: "Aha 没能改好这段,请再试一次。",
+  errOffline: "连不上 TokensBeat,请重试。",
+  errAuth: "登录已过期,请重新登录。",
+  openConsole: "打开 TokensBeat 控制台",
+  revisionNote: "Aha 只给建议:选“采用”才会替换你的草稿,发表的评论仍会经过审核。"
 };
 
 const JA: SocialCopy = {
@@ -250,13 +317,18 @@ const JA: SocialCopy = {
   liked: "いいね済み",
   repost: "リポスト",
   reposted: "リポスト済み",
+  repostTitle: "リポスト:あなたの Aha ページに表示されます",
+  repostedTitle: "リポスト済み:Aha ページに載っています。もう一度押すと取り消し",
+  repostedByPre: "",
+  repostedByJoin: "、",
+  repostedByMore: (n) => ` ほか${n}人`,
+  repostedByPost: "がリポスト",
   reply: "返信",
   cancel: "キャンセル",
-  send: "コメントする",
+  send: "投稿",
   sending: "送信中…",
   placeholder: "コメントを書く。やさしく、具体的に。",
   replyPlaceholder: "返信を書く",
-  moderation: "コメントは先に審査されます。ほとんどはすぐ表示され、一部は人が確認します。",
   signInPrompt: "コメント、いいね、リポストには TokensBeat へのログインが必要です。",
   createAccount: "TokensBeat アカウントを作る",
   signIn: "ログイン",
@@ -298,27 +370,43 @@ const JA: SocialCopy = {
   shapePending: "ありがとうございます。表示される前に人が確認します。",
   shapeRejected: (r) => `公開されませんでした:${r}`,
   close: "閉じる",
-  revise: "AI で推敲",
-  reviseHide: "AI 推敲を閉じる",
-  reviseModel: "モデル",
-  reviseTone: "トーン",
+  signedOutPlaceholder: "ログインして会話に加わる",
+  reviewNote: "コメントは表示される前に審査されます。",
+  postHint: "⌘/Ctrl ↵ で投稿",
+  overLimit: "長すぎます。2,000 文字以内にしてから投稿してください。",
+  revise: "Aha で推敲",
+  reviseTitle: "Aha があなた自身のモデルで下書きを書き直します。投稿を押すまで何も送られません。",
+  modelsTitle: "あなたのモデル",
+  modelsNote: "あなた自身の TokensBeat キーで動き、残高から支払われます。",
+  modelsLoading: "モデル…",
+  modelsError: "モデルを使えません · 再試行",
+  addModel: "モデルを追加",
+  modelChip: (m) => `「Aha で推敲」のモデル:${m}。モデルを変える`,
+  quick: "すばやい推敲",
   tones: { polish: "整える", shorter: "短く", friendlier: "やわらかく", clearer: "わかりやすく" },
-  reviseGo: "推敲する",
-  revising: "推敲中…",
-  reviseNote: "あなた自身のモデルが、あなた自身のキーで下書きを書き直します。投稿ボタンを押すまで何も送られず、投稿したコメントは審査されます。",
-  reviseLoadingModels: "モデルを読み込み中…",
-  reviseNoKey: "推敲に使えるモデルキーがまだありません。TokensBeat にサインインし、コンソールでキーを追加してから戻ってきてください。",
-  reviseNoKeyLink: "TokensBeat を開く",
-  reviseYours: "あなたの下書き",
-  reviseSuggestion: (m) => (m ? `${m} の提案` : "提案"),
-  reviseUse: "これを使う",
-  reviseUndo: "元に戻す",
-  reviseAgain: "もう一度",
-  reviseDiscard: "破棄",
-  reviseApplied: "下書きを置き換えました。",
-  reviseRate: "推敲の回数が多すぎます。少し待ってからもう一度。",
-  reviseRefused: (r) => `このモデルはあなたのプランまたは残高では使えません${r ? `:${r}` : "。"}`,
-  reviseFailed: "モデルが応答しませんでした。もう一度試すか、別のモデルを選んでください。",
+  sayPlaceholder: "または、どう直すか Aha に伝える…",
+  sayLabel: "どう直すか Aha に伝える",
+  saySend: "Aha に送る",
+  you: "あなた",
+  aha: (m) => (m ? `Aha · ${m}` : "Aha"),
+  thinking: "Aha が推敲しています…",
+  stop: "止める",
+  use: "これを使う",
+  inBox: "入力欄に入れました",
+  again: "もう一度",
+  closeThread: "推敲を閉じる",
+  earlier: (n) => `前の ${n} 件を表示`,
+  undo: "元に戻す",
+  undoTitle: "Aha の文に置き換える前の下書きに戻す",
+  usedNote: "Aha の文が入力欄に入りました。直してもいいし、そのまま投稿しても。",
+  errNoKey: "推敲に使えるモデルがまだありません。",
+  errRate: "推敲が多すぎます。1分後にもう一度。",
+  errRefused: (r) => r || "このモデルはあなたのプランまたは残高では使えません。",
+  errFailed: "Aha はこれを推敲できませんでした。もう一度試してください。",
+  errOffline: "TokensBeat に接続できません。もう一度。",
+  errAuth: "ログインの期限が切れました。もう一度ログインしてください。",
+  openConsole: "TokensBeat コンソールを開く",
+  revisionNote: "Aha は提案するだけです。「これを使う」で下書きが置き換わり、投稿したコメントは審査されます。"
 };
 
 export const SOCIAL_COPY: Record<Lang, SocialCopy> = { en: EN, zh: ZH, ja: JA };

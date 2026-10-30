@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { clearSession, connect, createSocial, loadSession, resolveBase, saveSession, type Session, type Social, type SocialConfig } from "./client.ts";
+import { clearSession, connect, createSocial, loadSession, resolveBase, saveSession, type ModelCatalog, type Session, type Social, type SocialConfig } from "./client.ts";
 
 declare global {
   interface Window {
@@ -118,3 +118,38 @@ export function useSocialConfig(): SocialConfig | null {
   return cfg;
 }
 
+
+// The reader's own models, read once per sign-in and shared by every composer on the page.
+let models: { token: string; promise: Promise<ModelCatalog> } | null = null;
+
+export type ModelsState = { state: "loading" } | { state: "ready"; cat: ModelCatalog } | { state: "error" };
+
+/** The signed-in reader's keys and chat models, for "Revise with Aha"; nothing is read while signed out. */
+export function useModels(): { models: ModelsState | null; reload: () => void } {
+  const { session } = useSession();
+  const token = session?.token ?? "";
+  const [got, setGot] = useState<{ token: string; value: ModelsState } | null>(null);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!token) return;
+    let live = true;
+    if (!models || models.token !== token) models = { token, promise: social().models() };
+    const mine = models;
+    mine.promise
+      .then((cat) => live && setGot({ token, value: { state: "ready", cat } }))
+      .catch(() => {
+        if (models === mine) models = null;
+        if (live) setGot({ token, value: { state: "error" } });
+      });
+    return () => {
+      live = false;
+    };
+  }, [token, tick]);
+  const reload = useCallback(() => {
+    models = null;
+    setGot(null);
+    setTick((t) => t + 1);
+  }, []);
+  if (!token) return { models: null, reload };
+  return { models: got && got.token === token ? got.value : { state: "loading" }, reload };
+}
