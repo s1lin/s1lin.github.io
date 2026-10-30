@@ -39,6 +39,13 @@ const PHRASES = {
   ],
 };
 
+/** The builds in the workshop that have a place of their own: the page they sit on, or the page they are. */
+const WORKSHOP = [
+  { href: "#brick-locator", letter: "B", name: "Brick Locator", page: "36" },
+  { href: "#metro2line", letter: "M", name: "Metro2Line", page: "37" },
+  { href: "/life/", letter: "L", name: "Life, a grid puzzle", page: "→" },
+];
+
 export function Contents() {
   return (
     <section className="spread" id="contents" data-run="目次 · Contents">
@@ -70,16 +77,18 @@ export function Contents() {
             <Entry href="#workshop" title="The workshop" ja="工房" page="36" />
             <li className="toc__sub">
               <ol>
-                <li>
-                  <a href="/life/">
-                    <span className="toc__t">
-                      <Roundel>L</Roundel>
-                      {"  "}
-                      Life, a grid puzzle
-                    </span>
-                    <span className="toc__p">→</span>
-                  </a>
-                </li>
+                {WORKSHOP.map((w) => (
+                  <li key={w.href}>
+                    <a href={w.href}>
+                      <span className="toc__t">
+                        <Roundel>{w.letter}</Roundel>
+                        {"  "}
+                        {w.name}
+                      </span>
+                      <span className="toc__p">{w.page}</span>
+                    </a>
+                  </li>
+                ))}
               </ol>
             </li>
             <Entry href="#departures" title="Departures" ja="年表" page="44" />

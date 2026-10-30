@@ -522,6 +522,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .corollary__proof { margin: 0; font: 400 0.95rem/1.6 var(--f-sans); color: var(--ink-2); text-wrap: pretty; }
 .corollary__proof i { font: italic 400 1.15em/1 var(--f-display); color: var(--sumi); margin-right: 0.2em; }
 .tokens__sky { display: block; width: 100%; height: auto; }
+/* A hairline in each block's own colour, so a thin week does not fade into the paper between blocks. */
+.tokens__sky rect:not(.tokens__at) { stroke-width: 0.6px; vector-effect: non-scaling-stroke; }
 .tokens .agent-claude { fill: var(--agent-claude); background: var(--agent-claude); }
 .tokens .agent-codex { fill: var(--agent-codex); background: var(--agent-codex); }
 .tokens .agent-pi { fill: var(--agent-pi); background: var(--agent-pi); }
@@ -536,11 +538,11 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* The town by model (the owner, 2026-10-30): a company to a hue, the dataviz palette's
    first five slots in their validated order, so companies that touch stay apart; its
    models in shades of it, mixed toward the paper (MODEL_FILL in TokenSkyline.tsx). */
-.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #7fd18b; --agent-cursor: #7fd18b; }
+.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #4fcf6e; --co-8b: #2fae52; --agent-cursor: #4fcf6e; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #5fbf72; --agent-cursor: #5fbf72; }
+  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; }
 }
-:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #5fbf72; --agent-cursor: #5fbf72; }
+:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; }
 
 /* By model, under the town: the companies in two columns, each under its mark, every model a bar on one scale. */
 .models { margin: 18px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
@@ -1230,3 +1232,34 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   body { animation: none !important; }
 }
+
+/* ------------------------------------------------------------------ workshop slider */
+/* The workshop's two playable builds as a row to swipe: scroll-snap, so touch needs no script;
+   a mouse drags it (WorkshopSlider.tsx). The next slide peeks in from the right. */
+.ws-slider { grid-column: 1 / -1; margin-top: clamp(32px, 4vw, 56px); border-top: 0.5px solid var(--rule-strong); min-width: 0; }
+.ws-slider__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+.ws-slider__label { margin: 0; font: 500 11px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.ws-slider__nav { display: flex; align-items: center; gap: 10px; font: 500 11px/1 var(--f-mono); color: var(--ink-2); }
+.ws-slider__nav button { font: 400 15px/1 var(--f-mono); color: var(--sumi); background: none; border: 0.5px solid var(--rule-strong); padding: 6px 10px; cursor: pointer; }
+.ws-slider__nav button:disabled { opacity: 0.3; cursor: default; }
+.ws-slider__track {
+  list-style: none; margin: 0; padding: 0; display: flex; gap: var(--gap); overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; cursor: grab; touch-action: pan-x pan-y;
+}
+.ws-slider__track::-webkit-scrollbar { display: none; }
+.ws-slider__track:focus-visible { outline: 1px solid var(--sumi); outline-offset: 4px; }
+.ws-slider__track.is-dragging { scroll-snap-type: none; cursor: grabbing; user-select: none; }
+.ws-slider__track.is-dragging a { pointer-events: none; }
+.ws-slide { flex: 0 0 min(88%, 640px); scroll-snap-align: start; padding: 4px 0 24px; border-bottom: 0.5px solid var(--rule); min-width: 0; }
+.ws-slide h3 { margin: 4px 0 6px; font: 400 clamp(1.5rem, 1.4vw + 1rem, 2.1rem)/1.1 var(--f-display); display: flex; align-items: center; gap: 8px; }
+.ws-slide p { margin: 0 0 10px; font-size: 0.95rem; color: var(--ink-2); }
+.ws-slide .item__meta { margin-top: 12px; font-size: 11px; }
+.ws-slide .item__link { padding-top: 4px; }
+.ws-mini { position: relative; aspect-ratio: 8 / 5; background: var(--paper-2); border: 0.5px solid var(--rule-strong); overflow: hidden; }
+.ws-mini canvas { display: block; width: 100%; height: 100%; }
+.ws-mini--life { background: #000; }
+.ws-mini__tag { position: absolute; left: 8px; bottom: 8px; font: 500 10px/1 var(--f-mono); letter-spacing: 0.06em; padding: 6px 8px; color: var(--sumi); background: var(--paper); border: 0.5px solid var(--rule-strong); cursor: pointer; }
+.ws-slider__dots { display: flex; gap: 8px; padding-top: 12px; }
+.ws-slider__dots button { width: 8px; height: 8px; padding: 0; border-radius: 50%; border: 0.5px solid var(--sumi); background: transparent; cursor: pointer; }
+.ws-slider__dots button[aria-selected="true"] { background: var(--sumi); }
+@media (prefers-reduced-motion: reduce) { .ws-slider__track { scroll-behavior: auto; } }

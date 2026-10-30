@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Board } from "@/components/life/Board";
+import { useCopy } from "@/components/life/lang";
 import { ARC } from "@/lib/life/palette";
 import { clone, equals, type Grid } from "@/lib/life/life";
 import { LEVELS, answer, given } from "@/lib/life/levels";
@@ -35,6 +36,7 @@ export function Puzzle({ onDone }: { onDone: () => void }) {
 }
 
 function Round({ index, next, jump }: { index: number; next: () => void; jump: (n: number) => void }) {
+  const copy = useCopy().play;
   const level = LEVELS[index];
   const start = useMemo(() => given(level), [level]);
   const target = useMemo(() => answer(level), [level]);
@@ -88,7 +90,7 @@ function Round({ index, next, jump }: { index: number; next: () => void; jump: (
   const cell = start.w > 10 ? 24 : 32;
   return (
     <div className="life__puzzle">
-      <ol className="life__steps" aria-label="Levels">
+      <ol className="life__steps" aria-label={copy.levels}>
         {LEVELS.map((l, i) => (
           <li key={l.id}>
             <button type="button" aria-current={i === index ? "step" : undefined} onClick={() => jump(i)}>
@@ -99,30 +101,30 @@ function Round({ index, next, jump }: { index: number; next: () => void; jump: (
       </ol>
       <div className="life__pair">
         <figure>
-          <Board grid={start} color={ARC.blue} cell={cell} label="Given grid" />
-          <figcaption>in</figcaption>
+          <Board grid={start} color={ARC.blue} cell={cell} label={copy.inLabel} />
+          <figcaption>{copy.inLabel}</figcaption>
         </figure>
-        <span className="life__arrow" aria-label={`${level.gens} generations later`}>
+        <span className="life__arrow" aria-label={`${level.gens} ${copy.gens(level.gens)}`}>
           <b>{level.gens}</b>
-          <i>gen{level.gens > 1 ? "s" : ""} →</i>
+          <i>{copy.gens(level.gens)}</i>
         </span>
         <figure>
-          <Board grid={mine} color={ARC.green} cell={cell} onPointer={(x, y, e) => e.type === "pointerdown" && flip(x, y)} label="Your grid: click cells to flip them" />
-          <figcaption>out</figcaption>
+          <Board grid={mine} color={ARC.green} cell={cell} onPointer={(x, y, e) => e.type === "pointerdown" && flip(x, y)} label={copy.outLabel} />
+          <figcaption>{copy.outLabel}</figcaption>
         </figure>
       </div>
       <div className="life__bar">
         <button type="button" className="life__btn life__btn--go" onClick={verdict === "yes" ? next : submit}>
-          {verdict === "yes" ? "Solved · next ⏎" : "Submit ⏎"}
+          {verdict === "yes" ? copy.next : copy.submit}
         </button>
         <button type="button" className="life__btn" onClick={back}>
-          Undo Z
+          {copy.undo}
         </button>
         <button type="button" className="life__btn" onClick={reset}>
-          Reset R
+          {copy.reset}
         </button>
         <span className="life__verdict" aria-live="polite" data-v={verdict}>
-          {verdict === "no" ? "Not that. Look again." : verdict === "yes" ? `Solved in ${actions} actions, ${tries} wrong.` : `Actions ${actions} · Wrong ${tries}`}
+          {verdict === "no" ? copy.wrong : verdict === "yes" ? copy.solved(actions, tries) : copy.status(actions, tries)}
         </span>
       </div>
     </div>
