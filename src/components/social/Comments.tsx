@@ -1,63 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Avatar, Icon, SignInBar } from "@/components/social/common";
+import { Avatar, Icon } from "@/components/social/common";
+import { Composer } from "@/components/social/Composer";
 import { errorText, when } from "@/components/social/helpers";
 import { Reactions, type ReactionState } from "@/components/social/Reactions";
-import { Revise } from "@/components/social/Revise";
 import { SOCIAL_COPY, type SocialCopy } from "@/components/social/copy";
 import type { Lang } from "@/components/life/copy";
-import type { SocialComment, Thread } from "@/lib/social/client.ts";
+import { moreReposters, reposterUrl, type Reposter, type SocialComment, type Thread } from "@/lib/social/client.ts";
 import { social, useSession } from "@/lib/social/useSocial";
-
-type Outcome = { tone: "ok" | "wait" | "bad"; text: string } | null;
-
-/** The comment box: one text area, sent to be screened, with what came of it told plainly. */
-function Compose({ target, parentId, c, onDone, onCancel, placeholder }: { target: string; parentId?: string; c: SocialCopy; onDone: () => void; onCancel?: () => void; placeholder: string }) {
-  const [body, setBody] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [out, setOut] = useState<Outcome>(null);
-  const send = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = body.trim();
-    if (!text || busy) return;
-    setBusy(true);
-    setOut(null);
-    try {
-      const v = await social().comment(target, text, parentId);
-      if (v.status === "rejected") setOut({ tone: "bad", text: c.rejectedNote(v.reason ?? "") });
-      else {
-        setBody("");
-        setOut(v.status === "approved" ? { tone: "ok", text: c.approvedNote } : { tone: "wait", text: c.pendingNote });
-        onDone();
-      }
-    } catch (err) {
-      setOut({ tone: "bad", text: errorText(err, c) });
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <form className="soc__form" onSubmit={send}>
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} maxLength={2000} rows={parentId ? 4 : 8} placeholder={placeholder} aria-label={placeholder} />
-      <Revise c={c} draft={body} setDraft={setBody} disabled={busy} />
-      <div className="soc__row">
-        <button type="submit" className="soc__btn soc__btn--go" disabled={busy || !body.trim()}>
-          {busy ? c.sending : c.send}
-        </button>
-        {onCancel && (
-          <button type="button" className="soc__btn" onClick={onCancel}>
-            {c.cancel}
-          </button>
-        )}
-        <span className="soc__len">{body.length}/2000</span>
-      </div>
-      {out && (
-        <p className={`soc__note soc__note--${out.tone}`} role="status">
-          {out.text}
-        </p>
-      )}
-    </form>
-  );
-}
 
 function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: SocialComment; c: SocialCopy; lang: Lang; target: string; liked: boolean; onChanged: () => void; reply: boolean }) {
   const { session } = useSession();
@@ -83,10 +32,11 @@ function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: Soc
           )}
         </div>
         {replying && (
-          <Compose
+          <Composer
             target={target}
             parentId={cm.id}
             c={c}
+            lang={lang}
             placeholder={c.replyPlaceholder}
             onCancel={() => setReplying(false)}
             onDone={() => {
@@ -142,6 +92,31 @@ function CommentLike({ id, st, setSt, c }: { id: string; st: ReactionState; setS
   );
 }
 
+/** "Reposted by A, B and 3 more": names are plain text; a name is a link only when it has a handle. */
+function RepostedBy({ by, total, c }: { by: Reposter[]; total: number; c: SocialCopy }) {
+  if (by.length === 0) return null;
+  const more = moreReposters(by.length, total);
+  return (
+    <p className="soc__by">
+      {c.repostedByPre}
+      {by.map((r, i) => (
+        <span key={`${r.name}:${i}`}>
+          {i > 0 && c.repostedByJoin}
+          {r.handle ? (
+            <a href={reposterUrl(r.handle)} target="_blank" rel="noopener">
+              {r.name}
+            </a>
+          ) : (
+            r.name
+          )}
+        </span>
+      ))}
+      {more > 0 && c.repostedByMore(more)}
+      {c.repostedByPost}
+    </p>
+  );
+}
+
 /** A thread under a page: reactions to the page itself, the comment box, then the comments. */
 export function Comments({ target, lang }: { target: string; lang: Lang }) {
   const c = SOCIAL_COPY[lang];
@@ -192,9 +167,8 @@ export function Comments({ target, lang }: { target: string; lang: Lang }) {
         <Reactions target={target} state={page} onState={setPage} c={c} comments={thread?.counts.comments ?? 0} />
       </header>
 
-      <SignInBar c={c} />
-      {session && <Compose target={target} c={c} placeholder={c.placeholder} onDone={reload} />}
-      <p className="soc__small">{c.moderation}</p>
+      <RepostedBy by={thread?.repostedBy ?? []} total={page.reposts} c={c} />
+      <Composer target={target} c={c} lang={lang} placeholder={c.placeholder} onDone={reload} />
 
       {state === "loading" && <p className="soc__small">{c.loading}</p>}
       {state === "error" && (

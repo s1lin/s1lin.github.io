@@ -1,8 +1,9 @@
 // A stand-in for the Aha Social API (agent-ui/SOCIAL.md), for developing and testing the page without Aha.
 //   node scripts/social-mock.mjs [port]      then open the site on localhost with ?social=http://127.0.0.1:<port>
 // Keywords in a comment steer the verdict: "spam" is rejected, "review" waits, "limit" is rate-limited.
-// Revise with AI: keywords in the draft steer it too: "plan" -> 402 (not on the plan), "limit" -> 429, "broken" -> 502,
-// "slow" answers after 2 s. Start with NOKEY=1 for a reader who has no key (GET /api/social/models gives keys: []).
+// Revise with Aha: answers after DELAY ms (default 900, like a model typing). Keywords in the text or the instruction
+// steer it: "plan" -> 402 (not on the plan), "limit" -> 429, "broken" -> 502, "nokey" -> 400 no_key, "slow" -> 4 s.
+// Start with NOKEY=1 for a reader who has no key (GET /api/social/models gives keys: []), ONEKEY=1 for a single key.
 import { createServer } from "node:http";
 
 const port = Number(process.argv[2] ?? 8799);
@@ -37,24 +38,38 @@ createServer(async (req, res) => {
   }
   const authed = /^Bearer \S{16,}$/.test(req.headers.authorization ?? "");
   if (u.pathname === "/api/public/social/config") return json(res, 200, { signInUrl: "https://tokensbeat.com/?aff=EL8RSC36GVWT", connectUrl: "http://127.0.0.1/#/social-connect", origins: [] }, origin);
-  if (u.pathname === "/api/public/social/thread") return json(res, 200, { counts: { likes: 12, reposts: 3, comments: comments.length }, comments, me: authed ? { liked: false, reposted: true, likedComments: ["c2"] } : undefined, next: null }, origin);
+  if (/^\/api\/public\/blog\/[^/]+\/reposts$/.test(u.pathname)) return json(res, 200, { items: [{ kind: "site", target: "site:s1lin:life", title: "Life", url: "https://s1lin.tokensbeat.com/life/", excerpt: "A grid, a rule.", author: "s1lin", at: "2026-10-30T12:00:00Z" }], next: null }, origin);
+  if (u.pathname === "/api/public/social/thread") return json(res, 200, { counts: { likes: 12, reposts: 11, comments: comments.length }, repostedBy: [{ name: "Ada <b>L</b>", handle: "ada" }, { name: "Grace", handle: null }, { name: "Linus", handle: "bad handle!" }], comments, me: authed ? { liked: false, reposted: true, likedComments: ["c2"] } : undefined, next: null }, origin);
   if (u.pathname === "/api/public/social/shapes") return json(res, 200, { shapes, next: null }, origin);
   if (u.pathname.startsWith("/api/social/")) {
     if (!authed) return json(res, 401, { error: "sign in" }, origin);
     if (u.pathname === "/api/social/models") {
       if (process.env.NOKEY) return json(res, 200, { keys: [] }, origin);
-      return json(res, 200, { keys: [{ id: 3, name: "Default", models: ["qwen3.8", "claude-sonnet-5-5"] }, { id: 7, name: "Work key", models: ["gpt-6-astra"] }], defaultKeyId: 3, defaultModel: "qwen3.8" }, origin);
+      if (process.env.ONEKEY) return json(res, 200, { keys: [{ id: 3, name: "Default", models: ["qwen3.8", "claude-sonnet-5-5"] }], defaultKeyId: 3, defaultModel: "qwen3.8" }, origin);
+      return json(res, 200, { keys: [{ id: 3, name: "Default", models: ["qwen3.8", "claude-sonnet-5-5", "deepseek-v4.1-flash"] }, { id: 7, name: "Work key", models: ["gpt-6-astra", "kimi-k3"] }], defaultKeyId: 3, defaultModel: "qwen3.8" }, origin);
     }
     if (u.pathname === "/api/social/revise") {
       const t = String(body.text ?? "");
-      const low = t.toLowerCase();
-      if (low.includes("limit")) return json(res, 429, { error: { message: "too many revisions" } }, origin);
-      if (low.includes("plan")) return json(res, 402, { error: { message: "qwen3.8 is not on this key's plan" } }, origin);
-      if (low.includes("broken")) return json(res, 502, { error: { message: "model failed" } }, origin);
+      const said = String(body.instruction ?? "").slice(0, 300);
+      const low = `${t} ${said}`.toLowerCase();
+      const later = (fn) => setTimeout(fn, low.includes("slow") ? 4000 : Number(process.env.DELAY ?? 900));
+      if (low.includes("nokey")) return later(() => json(res, 400, { error: { code: "no_key", message: "You have no usable key." } }, origin));
+      if (low.includes("limit")) return later(() => json(res, 429, { error: { message: "too many revisions" } }, origin));
+      if (low.includes("plan")) return later(() => json(res, 402, { error: { message: `${body.model ?? "qwen3.8"} is not on this key's plan.` } }, origin));
+      if (low.includes("broken")) return later(() => json(res, 502, { error: { message: "model failed" } }, origin));
+      const tidy = (x) => {
+        const s = x.trim().replace(/\s+/g, " ").replace(/\bi\b/g, "I");
+        return `${s.charAt(0).toUpperCase()}${s.slice(1)}${/[.!?]$/.test(s) ? "" : "."}`;
+      };
+      const first = (x) => tidy((x.match(/[^.!?]+[.!?]?/) ?? [x])[0]);
       const tone = body.tone ?? "polish";
-      const out = tone === "shorter" ? t.split(/[.!?]/)[0].trim() + "." : `${t.charAt(0).toUpperCase()}${t.slice(1)}${/[.!?]$/.test(t) ? "" : "."} (${tone})`;
-      const reply = () => json(res, 200, { text: out, model: body.model ?? "qwen3.8", keyId: body.keyId ?? 3 }, origin);
-      return low.includes("slow") ? void setTimeout(reply, 2000) : reply();
+      let out;
+      if (said) out = `${tidy(t)} (${said})`;
+      else if (tone === "shorter") out = first(t);
+      else if (tone === "friendlier") out = `Thanks for writing this. ${tidy(t)}`;
+      else if (tone === "clearer") out = `In short: ${first(t).charAt(0).toLowerCase()}${first(t).slice(1)}`;
+      else out = tidy(t);
+      return later(() => json(res, 200, { text: out, model: body.model ?? "qwen3.8", keyId: body.keyId ?? 3 }, origin));
     }
     if (u.pathname === "/api/social/comments" || u.pathname === "/api/social/shapes") {
       const t = `${body.body ?? ""} ${body.note ?? ""} ${body.title ?? ""}`.toLowerCase();

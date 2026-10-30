@@ -194,6 +194,8 @@ Blog posts and the Life page take comments, likes and reposts, and Life takes sh
 pad. None of it is stored here: the site is static, so it all goes to **Aha Social**, the API the TokensBeat BFF
 serves (contract: `agent-ui/SOCIAL.md` in the sub2api repository).
 
+A repost is real: it lists the thing on the reposter's Aha page, and the thread shows "Reposted by …" (public names, a link when the member has a handle; `src/lib/social/client.ts` `repostedBy`, `reposts(handle)`).
+
 - **API base:** `https://aha.tokensbeat.com` (`AHA_BASE` in `src/lib/social/client.ts`). A page can set
   `window.__SOCIAL_BASE__` before the app loads; on localhost `?social=http://127.0.0.1:8799` works too (nowhere else).
   The BFF must allow this site's origin (`AGENTUI_SOCIAL_ORIGINS`: `https://s1lin.tokensbeat.com`, `https://s1lin.github.io`).
@@ -209,13 +211,17 @@ serves (contract: `agent-ui/SOCIAL.md` in the sub2api repository).
   `site:s1lin:life`, a shape is `shape:<id>`. Comments load in the browser, so prerendered pages carry no thread.
 - **Try it without Aha:** `node scripts/social-mock.mjs 8799`, then open `/life/?social=http://127.0.0.1:8799` on localhost
   (a token for the mock is any 16+ character string in `localStorage` under `tokensbeat-social-token`).
-- **Tests:** `npm test` (`node --test test/*.test.ts`): token and origin checks, error mapping, request shape, shape cropping.
-- **Revise with AI:** a signed-in reader can have a draft rewritten by their own model on their own key
-  (`GET /api/social/models` lists their keys and models, `POST /api/social/revise {text, keyId, model, tone}` answers
-  with the rewrite). It only suggests: the reader compares it with the draft, uses or discards it, and still presses post,
-  and what they post is screened like any comment. The last model and tone are kept in `localStorage`
-  (`tokensbeat-social-revise`). `scripts/social-mock.mjs` answers both calls (keywords `plan`, `limit`, `broken`,
-  `slow` in the draft steer the errors; `NOKEY=1` gives a reader with no key).
+- **Tests:** `npm test` (`node --test test/*.test.ts`): token and origin checks, error mapping, request shape, shape cropping,
+  the revision thread.
+- **The composer** (`Composer.tsx`) is one box, like a chat composer: the draft, and a toolbar inside it with the model
+  chip, **Revise with Aha** and Post (⌘/Ctrl ↵). Revise opens a short thread with Aha above the draft: quick revisions
+  (Polish, Shorter, Friendlier, Clearer) or an instruction in words, each a request and an answer; a follow-up revises the
+  latest answer, as in a chat, until the reader types in the box again. Aha only suggests: "Use this" puts the answer in
+  the box (with Undo), nothing is posted until the reader presses Post, and a posted comment is screened like any other.
+  It runs on the reader's own key and model (`GET /api/social/models`, `POST /api/social/revise {text, keyId, model,
+  tone?, instruction?}`); the model chosen is kept in `localStorage` (`tokensbeat-social-revise`). The thread's state is a
+  pure reducer (`src/lib/social/revision.ts`) under `npm test`. `scripts/social-mock.mjs` answers both calls after
+  `DELAY` ms (keywords `plan`, `limit`, `broken`, `nokey`, `slow` steer the errors; `NOKEY=1`, `ONEKEY=1` change the keys).
 
 
 ## Token skyline

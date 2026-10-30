@@ -259,3 +259,150 @@ test("revise: the last choice is kept, a bad one is ignored, and the start falls
   assert.deepEqual(pickModel({ keys: [{ id: 9, name: "C", models: ["m"] }] }, {}), { keyId: 9, model: "m" });
   assert.equal(pickModel({ keys: [] }, {}), null);
 });
+
+import { createSocial as createSocialRepost, moreReposters, reposterUrl } from "../src/lib/social/client.ts";
+
+const repostEnv = (body: unknown) => {
+  const urls: string[] = [];
+  const fetchImpl = (async (url: string) => {
+    urls.push(String(url));
+    return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+  }) as unknown as typeof fetch;
+  return { urls, api: createSocialRepost({ base: "https://aha.test", fetch: fetchImpl, storage: null }) };
+};
+
+test("repostedBy: parsed, names kept as plain text, a link only with a plain handle, missing means none", async () => {
+  const { api } = repostEnv({ counts: { likes: 1, reposts: 11, comments: 0 }, comments: [], repostedBy: [{ name: "Ada <b>L</b>", handle: "ada" }, { name: "Grace", handle: null }, { name: "Linus", handle: "bad handle!" }, { name: "" }, 5] });
+  const t = await api.thread("site:s1lin:life");
+  assert.deepEqual(t.repostedBy.map((r) => [r.name, r.handle]), [["Ada <b>L</b>", "ada"], ["Grace", null], ["Linus", null]]);
+  assert.equal(reposterUrl("ada"), "https://aha.tokensbeat.com/#/blog/@ada");
+  assert.equal(moreReposters(t.repostedBy.length, t.counts.reposts), 8);
+  assert.equal(moreReposters(3, 2), 0);
+  const none = await repostEnv({ counts: { likes: 0, reposts: 0, comments: 0 }, comments: [] }).api.thread("x");
+  assert.deepEqual(none.repostedBy, []);
+  const many = await repostEnv({ counts: {}, comments: [], repostedBy: Array.from({ length: 20 }, (_, i) => ({ name: `n${i}`, handle: null })) }).api.thread("x");
+  assert.equal(many.repostedBy.length, 8);
+});
+
+test("reposts(handle): the member's list is parsed, hostile handles are not requested", async () => {
+  const { api, urls } = repostEnv({ items: [{ kind: "site", target: "site:s1lin:life", title: "Life", url: "https://s1lin.tokensbeat.com/life/", at: "2026-10-30T12:00:00Z" }, { nope: 1 }], next: "c2" });
+  const r = await api.reposts("@ada");
+  assert.equal(r.items.length, 1);
+  assert.equal(r.next, "c2");
+  assert.match(urls[0]!, /\/api\/public\/blog\/ada\/reposts$/);
+  const bad = await api.reposts("../x");
+  assert.deepEqual(bad, { items: [], next: null });
+  assert.equal(urls.length, 1);
+});
+
+import { MAX_INSTRUCTION } from "../src/lib/social/client.ts";
+import { MAX_TURNS, baseFor, countLabel, initialRevision, revisionReducer, turnError, waitingTurn, type RevAction, type RevState } from "../src/lib/social/revision.ts";
+
+test("Revise with Aha: an instruction goes trimmed and capped; a blank one is left out; tone and instruction may go together", async () => {
+  const sent: unknown[] = [];
+  const api = createSocial({ base: "https://a.test", storage: signedIn(), fetch: (async (_u: string, init: RequestInit) => { sent.push(JSON.parse(init.body as string)); return reply(200, { text: "ok", model: "m" }); }) as unknown as typeof fetch });
+  await api.revise({ text: "draft", instruction: "  make it funnier  " });
+  await api.revise({ text: "draft", tone: "shorter", instruction: "   " });
+  await api.revise({ text: "draft", tone: "polish", instruction: "x".repeat(500) });
+  assert.deepEqual(sent[0], { text: "draft", instruction: "make it funnier" });
+  assert.deepEqual(sent[1], { text: "draft", tone: "shorter" });
+  assert.equal((sent[2] as { instruction: string }).instruction.length, MAX_INSTRUCTION);
+  assert.equal((sent[2] as { tone: string }).tone, "polish");
+});
+
+test("Revise with Aha: a stopped request is 'aborted', not a network failure; the server's code is kept", async () => {
+  const api = createSocial({
+    base: "https://a.test",
+    storage: signedIn(),
+    fetch: ((_u: string, init: RequestInit) => new Promise((_res, rej) => init.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))))) as unknown as typeof fetch,
+  });
+  const ac = new AbortController();
+  const p = api.revise({ text: "x" }, ac.signal);
+  ac.abort();
+  await assert.rejects(p, (e: SocialError) => e.kind === "aborted");
+  assert.equal(mapError(400, { error: { code: "no_key", message: "no key" } }).code, "no_key");
+  assert.equal(mapError(400, { code: "BAD CODE" }).code, undefined);
+});
+
+const step = (s: RevState, ...as: RevAction[]) => as.reduce(revisionReducer, s);
+
+test("the revision thread: the first ask revises the draft; a follow-up revises the latest suggestion, as in a chat", () => {
+  let s = step(initialRevision, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "hello there" });
+  assert.equal(s.open, true);
+  assert.equal(waitingTurn(s)?.input, "hello there");
+  s = step(s, { type: "answer", id: 1, text: "Hello there.", model: "qwen3.8" });
+  assert.equal(waitingTurn(s), undefined);
+  // the draft is unchanged, so "Shorter" works on Aha's answer, not on the draft
+  assert.equal(baseFor(s, "hello there"), "Hello there.");
+  s = step(s, { type: "ask", ask: { kind: "tone", tone: "shorter" }, draft: "hello there" });
+  assert.equal(s.turns.at(-1)?.input, "Hello there.");
+  s = step(s, { type: "answer", id: 2, text: "Hi.", model: "qwen3.8" });
+  s = step(s, { type: "ask", ask: { kind: "say", text: "make it funnier" }, draft: "hello there" });
+  assert.equal(s.turns.at(-1)?.input, "Hi.");
+  assert.deepEqual(s.turns.at(-1)?.ask, { kind: "say", text: "make it funnier" });
+});
+
+test("the revision thread: when the reader types in the box, the next ask starts from what they typed", () => {
+  let s = step(initialRevision, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "one" }, { type: "answer", id: 1, text: "One.", model: "m" });
+  assert.equal(baseFor(s, "one, two"), "one, two");
+  s = step(s, { type: "ask", ask: { kind: "tone", tone: "clearer" }, draft: "one, two" });
+  assert.equal(s.turns.at(-1)?.input, "one, two");
+  s = step(s, { type: "answer", id: 2, text: "One and two.", model: "m" });
+  assert.equal(baseFor(s, "one, two"), "One and two.");
+});
+
+test("the revision thread: one request at a time; Stop removes it; a late answer is ignored; Try again repeats the same input", () => {
+  let s = step(initialRevision, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "a b" });
+  const busy = step(s, { type: "ask", ask: { kind: "tone", tone: "shorter" }, draft: "a b" });
+  assert.equal(busy, s);
+  s = step(s, { type: "abort", id: 1 });
+  assert.equal(s.turns.length, 0);
+  assert.equal(step(s, { type: "answer", id: 1, text: "late", model: "m" }), s);
+  s = step(s, { type: "ask", ask: { kind: "tone", tone: "friendlier" }, draft: "a b" }, { type: "fail", id: 2, error: { kind: "failed" } });
+  assert.equal(s.turns.at(-1)?.state, "error");
+  s = step(s, { type: "again", draft: "a b" });
+  const t = s.turns.at(-1);
+  assert.equal(t?.state, "waiting");
+  assert.equal(t?.input, "a b");
+  assert.deepEqual(t?.ask, { kind: "tone", tone: "friendlier" });
+  // an empty draft asks nothing
+  assert.equal(step(initialRevision, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "   " }), initialRevision);
+});
+
+test("the revision thread: Use this keeps the first draft for Undo; close keeps Undo; posting clears everything", () => {
+  let s = step(initialRevision, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "first" }, { type: "answer", id: 1, text: "First.", model: "m" });
+  s = step(s, { type: "use", id: 1, draft: "first" });
+  assert.deepEqual(s.undo, { before: "first", applied: "First." });
+  // the box now holds Aha's text: a follow-up builds on it
+  assert.equal(baseFor(s, "First."), "First.");
+  s = step(s, { type: "ask", ask: { kind: "tone", tone: "shorter" }, draft: "First." }, { type: "answer", id: 2, text: "1st.", model: "m" }, { type: "use", id: 2, draft: "First." });
+  assert.deepEqual(s.undo, { before: "first", applied: "1st." });
+  // a turn that is not done cannot be used
+  const w = step(s, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "1st." });
+  assert.equal(step(w, { type: "use", id: 3, draft: "1st." }), w);
+  s = step(s, { type: "close" });
+  assert.equal(s.open, false);
+  assert.equal(s.turns.length, 0);
+  assert.deepEqual(s.undo, { before: "first", applied: "1st." });
+  assert.equal(step(s, { type: "undo" }).undo, null);
+  assert.deepEqual(step(s, { type: "posted" }), initialRevision);
+});
+
+test("the revision thread keeps at most MAX_TURNS turns", () => {
+  let s = initialRevision;
+  for (let i = 1; i <= MAX_TURNS + 5; i++) s = step(s, { type: "ask", ask: { kind: "tone", tone: "polish" }, draft: "x" }, { type: "answer", id: i, text: `v${i}`, model: "m" });
+  assert.equal(s.turns.length, MAX_TURNS);
+  assert.equal(s.turns.at(-1)?.text, `v${MAX_TURNS + 5}`);
+});
+
+test("a failed revision becomes what the composer explains, and a stopped one becomes nothing", () => {
+  assert.equal(turnError(new SocialError("aborted", 0, "aborted")), null);
+  assert.deepEqual(turnError(mapError(400, { error: { code: "no_key", message: "no key" } })), { kind: "nokey" });
+  assert.deepEqual(turnError(mapError(402, { error: { message: "not on your plan" } })), { kind: "refused", reason: "not on your plan" });
+  assert.deepEqual(turnError(mapError(429, {})), { kind: "rate" });
+  assert.deepEqual(turnError(mapError(401, {})), { kind: "auth" });
+  assert.deepEqual(turnError(mapError(502, {})), { kind: "failed" });
+  assert.deepEqual(turnError(new SocialError("network", 0, "network")), { kind: "offline" });
+  assert.deepEqual(turnError(new Error("x")), { kind: "failed" });
+  assert.equal(countLabel(1240, 2000, "en"), "1,240 / 2,000");
+});
