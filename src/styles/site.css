@@ -532,6 +532,13 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .tokens .kind-output { fill: var(--ink-4); background: var(--ink-4); }
 .tokens .sky-month { font: 400 9px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink-3); }
 .tokens__at { fill: none; stroke: var(--sumi); stroke-width: 1.5; pointer-events: none; }
+/* The town a shade down from the agents' own colours (the owner found them too bright,
+   2026-10-30): its blocks, and the key under it, at 60% over the paper. */
+.tokens__sky rect:not(.tokens__at) { fill-opacity: 0.6; }
+.tokens__key i { opacity: 0.6; }
+/* Codex's blue held brighter than the rest (the owner, 2026-10-30) */
+.tokens__sky rect.agent-codex { fill-opacity: 0.9; }
+.tokens__key i.agent-codex { opacity: 0.9; }
 .tokens__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 18px; margin-top: 8px; color: var(--ink-2); }
 .tokens__foot p { margin: 0; }
 .tokens__key { display: flex; gap: 12px; color: var(--ink-3); }
@@ -584,24 +591,25 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
    green, WorkGo purple, YoueData light blue; InclusifAI aqua, HiRain blue, and the City builder loop a light
    Yamanote green. Steps from the dataviz skill's palette and ramps; every pair of lines that touch passes its
    checks in light. In dark, Tokensbeat beside InclusifAI sits just under the floor (13.5): Tokensbeat is
-   dashed through the corridor, and every line is labelled. */
+   dashed through the corridor, and every line is labelled. EchoSonic (2026-10-30, the user's choice of brown):
+   a chestnut that clears AwakeAI and HiRain, the two lines it runs beside, in each mode. */
 .routemap {
   --rm-p: #b3192f; --rm-y: #6da7ec; --rm-a: #eb6834; --rm-w: #6250d6; --rm-t: #0b6e2e; --rm-i: #1baf7a;
-  --rm-h: #256abf; --rm-c: #7cc242;
+  --rm-h: #256abf; --rm-c: #7cc242; --rm-e: #824717;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .routemap {
     --rm-p: #c2185b; --rm-y: #86b6ef; --rm-a: #d95926; --rm-w: #9085e9; --rm-t: #287800; --rm-i: #199e70;
-    --rm-h: #3987e5; --rm-c: #b8e070;
+    --rm-h: #3987e5; --rm-c: #b8e070; --rm-e: #8a5619;
   }
 }
 :root[data-theme="dark"] .routemap {
   --rm-p: #c2185b; --rm-y: #86b6ef; --rm-a: #d95926; --rm-w: #9085e9; --rm-t: #287800; --rm-i: #199e70;
-  --rm-h: #3987e5; --rm-c: #b8e070;
+  --rm-h: #3987e5; --rm-c: #b8e070; --rm-e: #8a5619;
 }
 .routemap .rm-p { --c: var(--rm-p); } .routemap .rm-y { --c: var(--rm-y); } .routemap .rm-a { --c: var(--rm-a); }
 .routemap .rm-w { --c: var(--rm-w); } .routemap .rm-t { --c: var(--rm-t); } .routemap .rm-i { --c: var(--rm-i); }
-.routemap .rm-h { --c: var(--rm-h); } .routemap .rm-c { --c: var(--rm-c); }
+.routemap .rm-h { --c: var(--rm-h); } .routemap .rm-c { --c: var(--rm-c); } .routemap .rm-e { --c: var(--rm-e); }
 .routemap .rm-line path { fill: none; stroke: var(--c); stroke-width: 6; stroke-linecap: round; }
 .routemap .rm-line .rm-planned { stroke-dasharray: 9 7; stroke-linecap: butt; }
 .routemap .rm-line .rm-end { stroke-width: 4; }
@@ -612,6 +620,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* a halo in the paper colour, where a label crosses a line or the NOW rule */
 .routemap .rm-lbl { font: 400 10.5px var(--f-mono); fill: var(--ink-2); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
 .routemap .rm-xlbl { fill: var(--sumi); font-weight: 500; }
+.routemap .rm-link { fill: var(--sumi); text-decoration: underline; text-underline-offset: 2px; }
+.routemap a:hover .rm-link { fill: var(--ink-3); }
 .routemap .rm-name { font: 600 14px var(--f-sans); fill: var(--sumi); }
 .routemap .rm-since { font: 400 10px var(--f-mono); fill: var(--ink-2); letter-spacing: 0.04em; }
 /* a line's marker on its own track, like a Japanese line symbol: filled, so it never reads as a station */
@@ -1003,10 +1013,14 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .posts__title { grid-column: 4 / span 5; font: 400 clamp(1.6rem, 1.4vw + 1.1rem, 2.6rem)/1.2 var(--f-display); text-wrap: balance; }
 .posts__dek { grid-column: 9 / span 4; font-size: 0.95rem; color: var(--ink-2); }
 
+.post__main { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+.post__main > * { min-width: 0; }
 .post__head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--head-h) + 28px); }
 .post__head .kicker a { text-decoration: none; }
 .post__title { margin: 0; font: 400 clamp(2.4rem, 4vw, 4.2rem)/1.15 var(--f-display); text-wrap: balance; }
 .posts__title[lang="zh-Hans"], .post__title[lang="zh-Hans"] { font-family: "Noto Serif SC", var(--f-mincho); letter-spacing: 0.02em; }
+/* a title of a whole sentence is set a size down, so it does not stand five lines tall */
+.post__title--long { font-size: clamp(2rem, 2.6vw, 3rem); line-height: 1.25; }
 .post__head .dek { margin-top: 22px; font-size: clamp(1.05rem, 0.4vw + 0.95rem, 1.3rem); }
 .post__head .spec { margin-top: 32px; }
 .post__head .spec dd { font-size: 0.88rem; }
@@ -1018,7 +1032,11 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* width 0 and min-width 100%: the stretched drawing fills the id's width and never sets it */
 .code svg { display: block; width: 0; min-width: 100%; height: 26px; fill: var(--sumi); }
 .code__id { font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: none; color: var(--ink-2); white-space: nowrap; }
-.toc .code svg { width: 56px; min-width: 0; height: 11px; }
+.toc .code svg { width: 96px; min-width: 0; height: 9px; }
+.toc a.toc__post { align-items: start; }
+.toc a.toc__post::after { content: none; }
+.toc__post .toc__no { padding-top: 0.25em; }
+.toc__post-t { display: grid; gap: 6px; justify-items: start; }
 
 .post__text { grid-column: 6 / span 6; }
 .post__text p { margin: 0; text-align: justify; }
@@ -1029,13 +1047,24 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .post__text[lang="zh-Hans"] > p { text-indent: 2em; }
 
 .post__text figure { margin: 2.2em 0; }
-/* Pictures fill the column, except small ones, which keep their own size rather than blur. */
+/* Pictures stand at the left of the column and the text runs round them (the owner's
+   choice, 2026-10-30); small ones keep their own size rather than blur. The epigraph
+   and the frames for pictures shown elsewhere stay across the column. */
+.post__text figure:not(.elsewhere, .post__epigraph) { float: left; width: 46%; margin: 0.45em 1.6em 1em 0; }
 .post__text figure img { width: auto; max-width: 100%; background: var(--paper-2); }
+.post__text h2, .post__text h3, .post__text .tex--block, .post__text .elsewhere,
+.post__signed, .post__refs, .post__note { clear: both; }
+/* a quotation beside a picture narrows to the room left, so its rule is never under it */
+.post__text > blockquote { display: flow-root; font-style: italic; }
+.post__epigraph blockquote { font-style: italic; }
+@media (max-width: 640px) {
+  .post__text figure:not(.elsewhere, .post__epigraph) { float: none; width: auto; margin: 2em 0; }
+}
 
 /* Inside a post: section heads, quoted passages, lists of short lines, and a line set as a formula. */
 .post__text h2 {
   margin: 2.6em 0 1.2em; padding-bottom: 10px; border-bottom: 0.5px solid var(--rule-strong);
-  font: 700 1.3em/1.3 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.2em;
+  font: 700 1.3em/1.45 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.08em;
 }
 .post__text > blockquote { margin: 1.4em 0; padding-left: 1.4em; border-left: 0.5px solid var(--rule-strong); color: var(--ink-2); }
 .post__text > blockquote p { text-indent: 0 !important; }
@@ -1059,6 +1088,16 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 
 .post__signed { margin-top: 2.4em !important; text-align: right !important; text-indent: 0 !important; line-height: 1.7; }
 .post__signed [lang="en"] { font: 500 0.9em/1 var(--f-mono); letter-spacing: 0.08em; }
+/* Pictures that belong to others, not reproduced: named and linked in a dashed
+   frame, as the plan dashes a bay still empty (Elsewhere in bits.tsx). */
+.post__text .elsewhere { padding: 14px 16px 12px; border: 0.5px dashed var(--rule-strong); }
+.post__text .elsewhere__label { margin: 0 0 8px; font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); text-indent: 0 !important; text-align: left; }
+.post__text .elsewhere ul { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; padding: 0; }
+.post__text .elsewhere a { font-size: 0.92em; }
+.post__text li + li { margin-top: 0.4em; }
+.post__text .elsewhere li + li { margin-top: 0; }
+.post__text h3 { margin: 2em 0 0.8em; font: 700 1.08em/1.5 "Noto Serif SC", var(--f-mincho); letter-spacing: 0.06em; }
+
 /* Sources: a bracketed number in the text, and the list under it, links in mono since they are addresses. */
 .ref { font: 500 0.62em/0 var(--f-mono); letter-spacing: 0; vertical-align: 0.6em; }
 .ref a { text-decoration: none; color: var(--ink-2); }

@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import { bayes } from "./bayes";
 import { bigAndSmall } from "./big-and-small";
 import { moonLanding } from "./moon-landing";
 import { whyExploreSpace } from "./why-explore-space";
+import { withoutNightCity } from "./without-night-city";
 
 /** One post on the blog. Each needs its HTML shell at blog/<slug>/index.html, with its own title and meta tags. */
 export type Post = {
@@ -26,4 +28,4 @@ export type Post = {
 };
 
 /** Newest first. */
-export const POSTS: Post[] = [moonLanding, whyExploreSpace, bigAndSmall];
+export const POSTS: Post[] = [withoutNightCity, moonLanding, whyExploreSpace, bigAndSmall, bayes];

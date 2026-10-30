@@ -99,3 +99,26 @@ export function Barcode({ id, label = true }: { id: string; label?: boolean }) {
     </span>
   );
 }
+
+/**
+ * A figure whose pictures belong to someone else and are not reproduced here:
+ * each named and linked to where it can be seen, in a dashed frame, with the
+ * figure's caption under them.
+ */
+export function Elsewhere({ pictures, children }: { pictures: [string, string][]; children: ReactNode }) {
+  return (
+    <figure className="elsewhere">
+      <p className="elsewhere__label mono" lang="en">
+        Pictures at their sources
+      </p>
+      <ul>
+        {pictures.map(([name, href]) => (
+          <li key={name}>
+            <a href={href}>{name}&nbsp;↗</a>
+          </li>
+        ))}
+      </ul>
+      <figcaption>{children}</figcaption>
+    </figure>
+  );
+}

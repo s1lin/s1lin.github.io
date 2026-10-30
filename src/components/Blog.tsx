@@ -77,53 +77,56 @@ function PostPage({ post }: { post: Post }) {
       <main>
         <article className="spread post">
           <div className="wrap grid">
-            <header className="post__head">
-              <Kicker ja="随筆">
-                <a href="/blog/">Blog</a> · No. {post.no}
-              </Kicker>
-              <h1 className="post__title" lang={post.lang}>
-                {post.title}
-              </h1>
-              <p className="dek">{post.dek}</p>
-              <dl className="spec">
-                {post.spec.map(([dt, dd]) => (
-                  <Fragment key={dt}>
-                    <dt>{dt}</dt>
-                    <dd>{dd}</dd>
-                  </Fragment>
-                ))}
-              </dl>
-              <p className="post__code">
-                <Barcode id={post.id} />
-              </p>
-            </header>
-
-            <div className="post__text figs" id="text" lang={post.lang}>
-              {post.epigraph && (
-                <figure className="post__epigraph">
-                  <blockquote>{post.epigraph.text}</blockquote>
-                  <figcaption>—— {post.epigraph.by}</figcaption>
-                </figure>
-              )}
-              {post.body}
-              <p className="post__signed">{post.signed}</p>
-              {post.refs && (
-                <section className="post__refs" aria-labelledby="refs-h">
-                  <h2 id="refs-h">引用</h2>
-                  <ol>
-                    {post.refs.map((r, i) => (
-                      <li key={i} id={`ref-${i + 1}`}>
-                        {r}
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              )}
-              {post.note && (
-                <p className="post__note" lang="en">
-                  {post.note}
+            {/* its own grid, so the head held on the left stops with the text, short of the foot */}
+            <div className="post__main">
+              <header className="post__head">
+                <Kicker ja="随筆">
+                  <a href="/blog/">Blog</a> · No. {post.no}
+                </Kicker>
+                <h1 className={post.title.length > 16 ? "post__title post__title--long" : "post__title"} lang={post.lang}>
+                  {post.title}
+                </h1>
+                <p className="dek">{post.dek}</p>
+                <dl className="spec">
+                  {post.spec.map(([dt, dd]) => (
+                    <Fragment key={dt}>
+                      <dt>{dt}</dt>
+                      <dd>{dd}</dd>
+                    </Fragment>
+                  ))}
+                </dl>
+                <p className="post__code">
+                  <Barcode id={post.id} />
                 </p>
-              )}
+              </header>
+
+              <div className="post__text figs" id="text" lang={post.lang}>
+                {post.epigraph && (
+                  <figure className="post__epigraph">
+                    <blockquote>{post.epigraph.text}</blockquote>
+                    <figcaption>—— {post.epigraph.by}</figcaption>
+                  </figure>
+                )}
+                {post.body}
+                <p className="post__signed">{post.signed}</p>
+                {post.refs && (
+                  <section className="post__refs" aria-labelledby="refs-h">
+                    <h2 id="refs-h">引用</h2>
+                    <ol>
+                      {post.refs.map((r, i) => (
+                        <li key={i} id={`ref-${i + 1}`}>
+                          {r}
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                )}
+                {post.note && (
+                  <p className="post__note" lang="en">
+                    {post.note}
+                  </p>
+                )}
+              </div>
             </div>
 
             <Endmark back />
