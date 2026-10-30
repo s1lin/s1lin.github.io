@@ -49,9 +49,9 @@ export function SignInBar({ c, note }: { c: SocialCopy; note?: ReactNode }) {
       <p>{note ?? c.signInPrompt}</p>
       <div className="soc__row">
         <a className="soc__btn soc__btn--go" href={cfg?.signInUrl ?? "https://tokensbeat.com/?aff=EL8RSC36GVWT"} target="_blank" rel="noopener">
-          {c.createAccount} ↗
+          {c.createAccount}
         </a>
-        <button type="button" className="soc__btn" onClick={go} disabled={busy}>
+        <button type="button" className="soc__btn soc__btn--go" onClick={go} disabled={busy}>
           {busy ? c.waitingPopup : c.signIn}
         </button>
       </div>

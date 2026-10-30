@@ -129,7 +129,7 @@ function PostPage({ post }: { post: Post }) {
                 )}
               </div>
               <div className="post__social">
-                <Comments target={`site:s1lin:blog/${post.slug}`} lang={post.lang === "zh-Hans" ? "zh" : "en"} />
+                <Comments target={`site:s1lin:blog/${post.slug}`} lang="en" />
               </div>
             </div>
 

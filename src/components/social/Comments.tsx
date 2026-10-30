@@ -36,7 +36,7 @@ function Compose({ target, parentId, c, onDone, onCancel, placeholder }: { targe
   };
   return (
     <form className="soc__form" onSubmit={send}>
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} maxLength={2000} rows={parentId ? 2 : 4} placeholder={placeholder} aria-label={placeholder} />
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} maxLength={2000} rows={parentId ? 4 : 8} placeholder={placeholder} aria-label={placeholder} />
       <div className="soc__row">
         <button type="submit" className="soc__btn soc__btn--go" disabled={busy || !body.trim()}>
           {busy ? c.sending : c.send}
