@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { BlogPage } from "@/components/Blog";
 import "./index.css";
+import "./styles/tex.css";
 
 // Each page's shell names its post on the root (blog/<slug>/index.html); the blog's index names none.
 const root = document.getElementById("root")!;

@@ -19,7 +19,7 @@ function Shot({ bar, src, alt, children }: { bar: string; src: string; alt: stri
   );
 }
 
-const b = (lead: string, rest: string) => (
+const b = (lead: string, rest: ReactNode) => (
   <>
     <b>{lead}</b> {rest}
   </>
@@ -226,7 +226,14 @@ export function Features() {
         built={[
           b("2022.", "Dobson Cup, 3rd place in the Health Science track. Dobson X-1 accelerator."),
           b("2023.", "NEXT Canada, Centech, Collision, ALL IN and CELS. I take over the system architecture."),
-          b("2024.", "Startup Mila status. RESI at the J.P. Morgan Healthcare Conference."),
+          b(
+            "2024.",
+            <>
+              Startup Mila status. RESI at the J.P. Morgan Healthcare Conference. Patent application{" "}
+              <a href="https://patents.google.com/patent/CN119296029A/en">CN119296029A</a>: image processing for
+              care-work recorders, private details removed on the device.
+            </>,
+          ),
           b("2025.", "COO from January. I also built the company website. I resigned in July."),
         ]}
         folio="24"

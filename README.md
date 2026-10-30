@@ -110,6 +110,25 @@ and meta tags and `data-post="<slug>"` on the root. Vite builds every shell
 under `blog/`, and the build fails if a listed post has no shell. Images go in
 `public/assets/img/blog-*.webp`.
 
+Maths is LaTeX, set by KaTeX when the pages are prerendered, so readers get
+finished HTML (with MathML for screen readers) and no KaTeX script; only the
+blog's pages load KaTeX's stylesheet, and its fonts load only where they are
+used (`src/components/Tex.tsx`, `src/styles/tex.css`). Write the source with
+`String.raw` so its backslashes stay, inline or on its own line:
+
+```tsx
+<Tex>{String.raw`P(A \mid B) = 80\%`}</Tex>
+<Tex block>{String.raw`P(A \mid B)\,P(B) = P(B \mid A)\,P(A)`}</Tex>
+```
+
+A mistake in the source shows in red in its place rather than failing the
+build. A wide equation scrolls sideways inside its own line on a phone; on a
+desktop, break it into steps with `aligned` so it fits the column.
+
+Pictures that belong to someone else are not rehosted: `<Elsewhere>` (in
+`src/components/bits.tsx`) names each and links to where it can be seen, with
+the figure's caption.
+
 The issue loads Noto Serif SC only for the characters it shows. When a post's
 title is Chinese, add its characters to the `text=` list of that font in the
 root `index.html`, or the title falls back to a system font in the contents.

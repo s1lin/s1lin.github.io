@@ -75,12 +75,11 @@ export function Contents() {
               <ol>
                 {POSTS.map((p) => (
                   <li key={p.slug}>
-                    <a href={`/blog/${p.slug}/`}>
-                      <span className="toc__t">
-                        <span className="toc__no">{p.no}</span>
+                    {/* a post has no page in the issue: no leader, and its barcode under its title */}
+                    <a href={`/blog/${p.slug}/`} className="toc__post">
+                      <span className="toc__no">{p.no}</span>
+                      <span className="toc__post-t">
                         <span lang={p.lang}>{p.title}</span>
-                      </span>
-                      <span className="toc__p">
                         <Barcode id={p.id} label={false} />
                       </span>
                     </a>

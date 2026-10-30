@@ -34,7 +34,7 @@ const RULER = 330;
 /** The City builder loop, around everything: its sides, and the radius of its corners. */
 const LOOP = { left: -60, right: 1515, top: 44, bottom: 300, r: 28 };
 
-type Key = "t" | "w" | "i" | "h" | "a" | "p" | "y";
+type Key = "t" | "w" | "i" | "h" | "a" | "p" | "y" | "e";
 type LineKey = Key | "c";
 type Anchor = "start" | "middle" | "end";
 type Label = { x: number; y: number; anchor?: Anchor };
@@ -44,8 +44,10 @@ type Label = { x: number; y: number; anchor?: Anchor };
  * dates go in the key under the map; on the track it carries only its marker.
  */
 type Line = { key: Key; code: string; name: string; since: string; live: string; planned?: string; end?: string };
-/** A stop on one line, or on the loop. */
-type Stop = { line: LineKey; x: number; y: number; label: string; at: Label; planned?: boolean };
+/** A stop on one line, or on the loop; its label may lead somewhere. */
+type Stop = { line: LineKey; x: number; y: number; label: string; at: Label; planned?: boolean; href?: string };
+/** AwakeAI's patent application, filed September 2024. */
+const PATENT = "https://patents.google.com/patent/CN119296029A/en";
 /** A station several lines run through side by side, from the top track to the bottom one. */
 type Station = {
   x: number;
@@ -61,13 +63,17 @@ type Station = {
  * A school: a vertical terminal from the loop's top rail down through the lines
  * that set out from it, its kanji set vertically inside and its name below.
  */
-type School = { kanji: string; name: string; note: string; x: number; lines: LineKey[] };
+type School = { kanji: string; name: string; note: string; more?: string; x: number; lines: LineKey[] };
 
 const SCHOOLS: School[] = [
   // where YoueData sets out on graduating, and Pioneer, begun there, runs through
-  { kanji: "大学", name: "Saint John's", note: "B.A. 2014–2017 · HPC · robotics", x: 230, lines: ["c", "p", "y"] },
+  // Pioneer began here, as a bidding system for a databases course
+  {
+    kanji: "大学", name: "Saint John's", note: "B.A. 2014–2017 · HPC · robotics", more: "bidding system, a databases course",
+    x: 230, lines: ["c", "p", "y"],
+  },
   // where Pioneer runs in, in 2019, and AwakeAI sets out, in December 2020
-  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["c", "p", "a"] },
+  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["c", "p", "a", "e"] },
 ];
 // The loop's top rail crosses the straight of the terminal, not its rounded end.
 const TERMINAL = { top: LOOP.top - 18, bottom: 198, w: 22 };
@@ -85,6 +91,12 @@ const LINES: Line[] = [
   { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: `M${HIGH_SCHOOL.right} 160 H470` },
   { key: "y", code: "Y", name: "YoueData", since: "2017–2018", live: "M230 144 H370", end: "M370 135 V153" },
   { key: "a", code: "A", name: "AwakeAI", since: "2020–2025", live: "M470 160 H870" },
+  {
+    key: "e", code: "E", name: "EchoSonic", since: "2022–2023",
+    // out of McGill under AwakeAI, then into the junction on HiRain's way down, with embedded work on STM32
+    // straight out past McGill's name, then down under AwakeAI's labels
+    live: "M470 184 H510 L540 214 H870",
+  },
   {
     key: "h", code: "H", name: "HiRain", since: "2026–",
     // out of the junction, along to its own start in 2026
@@ -108,7 +120,7 @@ const LINES: Line[] = [
 /** The key to the lines, in the order they opened: the loop first, then each line. */
 const KEY: { key: LineKey; code: string; name: string; since: string }[] = [
   { key: "c", code: "C", name: "City builder", since: "2003–" },
-  ...(["p", "y", "a", "w", "i", "t", "h"] as Key[]).map((k) => LINES.find((l) => l.key === k)!),
+  ...(["p", "y", "a", "e", "w", "i", "t", "h"] as Key[]).map((k) => LINES.find((l) => l.key === k)!),
 ];
 const CODE = Object.fromEntries(KEY.map((l) => [l.key, l.code])) as Record<LineKey, string>;
 
@@ -125,6 +137,7 @@ const MARKERS: { line: LineKey; x: number; y: number }[] = [
   { line: "i", x: 924, y: 194 },
   { line: "t", x: 1054, y: 109 },
   { line: "h", x: 1000, y: 260 },
+  { line: "e", x: 600, y: 214 },
 ];
 
 const STATIONS: Station[] = [
@@ -134,6 +147,8 @@ const STATIONS: Station[] = [
     x: 870, top: 154, bottom: 166, lines: ["a", "w", "i", "h"], label: "architecture · cloud ops",
     sub: "React · TypeScript · Python", at: { x: 856, y: 110, anchor: "end" },
   },
+  // EchoSonic closes here, on HiRain's way down; HiRain takes its embedded work to the roadside
+  { x: 870, top: 214, bottom: 214, lines: ["e", "h"], label: "embedded · STM32", at: { x: 884, y: 219, anchor: "start" } },
   { x: 1020, top: 154, bottom: 166, lines: ["w", "i"], label: "Supabase · Clerk", at: { x: 1020, y: 190 } },
   { x: 1110, top: 142, bottom: 154, lines: ["t", "w"], label: "Go · Gin", at: { x: 1110, y: 124 } },
   { x: 1160, top: 142, bottom: 166, lines: ["t", "w", "i"], label: "PostgreSQL · Stripe", at: { x: 1160, y: 190 } },
@@ -145,10 +160,12 @@ const STATIONS: Station[] = [
 ];
 
 const STOPS: Stop[] = [
-  { line: "p", x: 95, y: 160, label: "bidding system", at: { x: 95, y: 144 } },
   { line: "a", x: 690, y: 160, label: "Dobson Cup", at: { x: 690, y: 144 } },
-  { line: "a", x: 745, y: 160, label: "architect", at: { x: 745, y: 184 } },
-  { line: "a", x: 800, y: 160, label: "COO", at: { x: 800, y: 144 } },
+  { line: "e", x: x(2022.5), y: 214, label: "sound recognition", at: { x: x(2022.5), y: 238 } },
+  // labels take turns above and below the line, so neighbours never meet
+  { line: "a", x: 735, y: 160, label: "architect", at: { x: 735, y: 184 } },
+  { line: "a", x: 765, y: 160, label: "patent ↗", href: PATENT, at: { x: 765, y: 144 } },
+  { line: "a", x: 800, y: 160, label: "COO", at: { x: 800, y: 184 } },
   { line: "w", x: 1260, y: 100, label: "2.0", at: { x: 1260, y: 84 } },
   { line: "i", x: 1250, y: 154, label: "Partner Hub", at: { x: 1250, y: 178 } },
   { line: "h", x: 1110, y: 260, label: "5 points", at: { x: 1110, y: 284 } },
@@ -168,32 +185,35 @@ const STOPS: Stop[] = [
  * known, the station, the lines to change to, and a note. Station numbers are
  * the line's code and its place on the line, as Tokyo numbers its stations.
  */
-type Row = { year: string; month?: string; name: string; ja?: string; via?: LineKey[]; note?: string; planned?: boolean };
+type Row = { year: string; month?: string; name: string; ja?: string; via?: LineKey[]; note?: string; planned?: boolean; href?: string };
 const TIMETABLE: Record<LineKey, Row[]> = {
   c: [
     { year: "2003", name: "first road, SimCity 4", note: "sets out" },
     { year: "—", name: "Pioneer High School", ja: "高校", via: ["p"] },
     { year: "2017", name: "Saint John's", ja: "大学", via: ["p", "y"] },
-    { year: "2019", name: "McGill", ja: "大学院", via: ["p", "a"] },
+    { year: "2019", name: "McGill", ja: "大学院", via: ["p", "a", "e"] },
     { year: "2020", month: "10", name: "featured by the Cities: Skylines account" },
     { year: "2025", month: "12", name: "Metro2Line" },
     { year: "2026", month: "10", name: "5,000 hours", note: "now, and still going round" },
   ],
   p: [
     { year: "—", name: "Pioneer High School", ja: "高校", via: ["c"], note: "sets out from the school it shares its name with" },
-    { year: "2015", name: "bidding system", note: "a databases course project" },
-    { year: "2017", name: "Saint John's", ja: "大学", via: ["y", "c"], note: "B.A." },
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["y", "c"], note: "B.A.; begun there in 2015 as a bidding system for a databases course" },
     { year: "2018", name: "Java", via: ["y"] },
-    { year: "2019", name: "McGill", ja: "大学院", via: ["a", "c"], note: "runs in; its Java goes on with AwakeAI" },
+    { year: "2019", name: "McGill", ja: "大学院", via: ["a", "e", "c"], note: "runs in; its Java goes on with AwakeAI" },
   ],
   y: [
     { year: "2017", name: "Saint John's", ja: "大学", via: ["p", "c"], note: "sets out on graduating" },
     { year: "2018", name: "Java", via: ["p"], note: "HDFS; the line closes" },
   ],
   a: [
-    { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p", "c"], note: "sets out, with Pioneer's Java" },
+    { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p", "e", "c"], note: "sets out, with Pioneer's Java" },
     { year: "2022", name: "Dobson Cup", note: "third place" },
     { year: "2023", name: "architect" },
+    {
+      year: "2024", month: "09", name: "patent application CN119296029A", href: PATENT,
+      note: "image processing for care-work recorders: private details removed on the device, actions read in the cloud",
+    },
     { year: "2025", month: "01", name: "COO" },
     {
       year: "2025", month: "07", name: "architecture · cloud ops · React · TypeScript · Python", via: ["w", "i", "h"],
@@ -223,8 +243,14 @@ const TIMETABLE: Record<LineKey, Row[]> = {
     { year: "2027", name: "Pi: Obi and Aria move in", via: ["w", "i"], planned: true },
     { year: "2027", name: "managed backend", note: "built in the lab, not yet open", planned: true },
   ],
+  e: [
+    { year: "2022", name: "McGill", ja: "大学院", via: ["p", "a", "c"], note: "sets out beside the parallel solvers research" },
+    { year: "2022", name: "sound recognition", note: "on-device audio, embedded on STM32" },
+    { year: "2023", name: "embedded · STM32", via: ["h"], note: "the line closes; HiRain takes it to the roadside" },
+  ],
   h: [
     { year: "2026", name: "edge vision", via: ["a"], note: "sets out from the junction" },
+    { year: "2026", name: "embedded · STM32", via: ["e"], note: "2.5D detection on edge chips" },
     { year: "2026", name: "5 points" },
     { year: "2026", name: "bird's-eye" },
     { year: "2027", name: "ARC-AGI-3", note: "8.8 of the 10 points I set as the bar", planned: true },
@@ -268,9 +294,11 @@ function RouteMap({ on }: { on: LineKey | null }) {
         at both: Saint John's, university, B.A. 2014 to 2017, where
         Pioneer, from 2015 to 2019, runs through and YoueData, 2017 to 2018, sets out; the two share Java. Pioneer
         runs on into McGill, graduate school, M.Sc. 2019 to 2022, where AwakeAI sets out with its Java in December
-        2020, through the Dobson Cup, architect and COO. AwakeAI closes in July 2025 into a junction of architecture,
+        2020, through the Dobson Cup, architect, a patent application in September 2024 (CN119296029A, image processing for
+        care-work recorders) and COO. AwakeAI closes in July 2025 into a junction of architecture,
         cloud ops, React, TypeScript and Python, out of which WorkGo and InclusifAI open in October 2025, and HiRain,
-        carrying edge vision, in 2026. WorkGo and InclusifAI share Supabase and Clerk. Tokensbeat, under construction
+        carrying edge vision, in 2026. EchoSonic, 2022 to 2023, sets out from McGill beside AwakeAI, sound recognition
+        on STM32, and closes into HiRain on its way down, carrying embedded work. WorkGo and InclusifAI share Supabase and Clerk. Tokensbeat, under construction
         from 2026, joins them: Go and Gin with WorkGo, PostgreSQL and Stripe with both, then Azure with InclusifAI after
         WorkGo leaves for its 2.0 stop in August 2026. Tokensbeat opened in October 2026. Past now, all of it is
         planned: Obi and Aria move onto Pi, the managed backend opens, and HiRain's ARC-AGI-3 harness, at 8.8 points,
@@ -357,6 +385,11 @@ function RouteMap({ on }: { on: LineKey | null }) {
             <text className="rm-since" x={sc.x} y={TERMINAL.bottom + 32} textAnchor="middle">
               {sc.note}
             </text>
+            {sc.more && (
+              <text className="rm-since" x={sc.x} y={TERMINAL.bottom + 46} textAnchor="middle">
+                {sc.more}
+              </text>
+            )}
           </g>
         ))}
 
@@ -365,9 +398,17 @@ function RouteMap({ on }: { on: LineKey | null }) {
             <circle className={s.planned ? "rm-stop rm-planned-stop" : "rm-stop"} cx={s.x} cy={s.y} r="5.5">
               <title>{s.label}</title>
             </circle>
-            <text className="rm-lbl" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
-              {s.label}
-            </text>
+            {s.href ? (
+              <a href={s.href}>
+                <text className="rm-lbl rm-link" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
+                  {s.label}
+                </text>
+              </a>
+            ) : (
+              <text className="rm-lbl" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
+                {s.label}
+              </text>
+            )}
           </g>
         ))}
 
@@ -487,7 +528,7 @@ function Timetable({ on }: { on: LineKey }) {
                   </span>
                 </td>
                 <td className="rm-tt__station">
-                  {row.name}
+                  {row.href ? <a href={row.href}>{row.name}</a> : row.name}
                   {row.ja && (
                     <span lang="ja" className="rm-tt__ja">
                       {row.ja}
@@ -566,7 +607,11 @@ export function FeatureOpener() {
             from it; the universities, <span lang="ja">大学</span> and <span lang="ja">大学院</span>, stand up through
             its top. Where lines run on the same stack at the
             same time, they share a station. Pioneer runs on into McGill, where AwakeAI sets out with its Java; AwakeAI
-            closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. Around it all
+            closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. On the way, in September 2024, AwakeAI filed patent application{" "}
+            <a href={PATENT}>CN119296029A</a>, image processing for care-work recorders that removes private details on the
+            device. EchoSonic sets
+            out from McGill in 2022, sound recognition on STM32, and closes into HiRain, whose 2.5D detection runs on edge
+            chips. Around it all
             runs the loop: city builder, since my first road in SimCity 4 in 2003. A bar marks a line that has closed;
             dashes are unfinished: Tokensbeat before it opened, and everything past now. AwakeAI closed in July 2025,
             when I resigned from the company where I first held the title of architect.
