@@ -1,3 +1,5 @@
+import { SOCIAL_COPY, type SocialCopy } from "@/components/social/copy";
+
 export type Lang = "en" | "zh" | "ja";
 export const LANGS: { id: Lang; label: string }[] = [
   { id: "en", label: "EN" },
@@ -73,6 +75,8 @@ export interface Copy {
   };
   creatures: Record<string, { name: string; note: string }>;
   footer: string;
+  /** Comments, reactions and shapes (src/components/social). */
+  social: SocialCopy;
 }
 
 const EN: Copy = {
@@ -198,6 +202,7 @@ const EN: Copy = {
   },
   footer:
     "Lifted from a Java Game of Life built on the ACM graphics library, with its two glider-gun seeds, into TypeScript. The engine, the puzzles and the creatures are MIT-licensed and have no dependencies; the tests check the period of every creature in the table.",
+  social: SOCIAL_COPY.en,
 };
 
 const ZH: Copy = {
@@ -319,6 +324,7 @@ const ZH: Copy = {
     diehard: { name: "死硬派", note: "七个格子，终会消失，但要等到第130代。" },
   },
   footer: "从一个基于 ACM 图形库的 Java 生命游戏，连同它的两个滑翔机枪种子，搬到了 TypeScript。引擎、谜题和生物均以 MIT 许可发布，没有依赖;测试核验表中每个生物的周期。",
+  social: SOCIAL_COPY.zh,
 };
 
 const JA: Copy = {
@@ -440,6 +446,7 @@ const JA: Copy = {
     diehard: { name: "ダイハード", note: "七つのセルがやがて消えますが、130世代目までは消えません。" },
   },
   footer: "ACM グラフィックスライブラリで作られた Java 版ライフゲームと、その二つのグライダー・ガンの種を、TypeScript に移したものです。エンジン、パズル、生き物は MIT ライセンスで依存関係なし。テストが表の全生き物の周期を確認します。",
+  social: SOCIAL_COPY.ja,
 };
 
 export const COPY: Record<Lang, Copy> = { en: EN, zh: ZH, ja: JA };
