@@ -672,7 +672,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   display: inline-grid; place-items: center; flex: none; width: 22px; height: 22px; border-radius: 50%;
   background: var(--c); color: #fff; font: 700 11px/1 var(--f-sans); text-shadow: 0 0 2px rgb(0 0 0 / 0.45);
 }
-.rm-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
+/* nine lines, three by three */
+.rm-keys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
 .rm-keybtn {
   /* wraps, so a date too long for a narrow button goes under the name rather than over the next button */
   appearance: none; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; padding: 8px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -683,11 +684,10 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .rm-keybtn:hover { background: var(--paper-2); }
 .rm-keybtn[aria-pressed="true"] { background: var(--paper-2); outline: 2px solid var(--c); outline-offset: -2px; }
 @media (max-width: 760px) {
-  .rm-keys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  /* the dates go under the name, so neither is cut */
-  .rm-keybtn { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; row-gap: 2px; }
-  .rm-keybtn .rm-code { grid-row: span 2; }
-  .rm-keybtn span:last-child { margin-left: 0; }
+  /* still three by three: the roundel, the name and the dates stack in each button, so none is cut */
+  .rm-keybtn { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 3px; padding: 7px 8px; border-left-width: 4px; }
+  .rm-keybtn b { white-space: normal; }
+  .rm-keybtn span:last-child { margin-left: 0; white-space: normal; }
   .rm-tt__year { width: 3.4em; font-size: 1.15rem; }
   .rm-tt__head p { display: none; }
 }
