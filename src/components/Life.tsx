@@ -5,6 +5,8 @@ import { LANGS } from "@/components/life/copy";
 import { useLang } from "@/components/life/lang";
 import { LangProvider } from "@/components/life/LangProvider";
 import { Playground } from "@/components/life/Playground";
+import { Comments } from "@/components/social/Comments";
+import { ShapeGallery } from "@/components/social/ShapeGallery";
 import { Puzzle } from "@/components/life/Puzzle";
 import { Rich } from "@/components/life/Rich";
 import { Thumb } from "@/components/life/Thumb";
@@ -81,6 +83,14 @@ function Page() {
   useEffect(() => {
     // Kept so a solver can check their own reading of the rule against the engine.
     (window as unknown as { life: object }).life = { step, make, stamp };
+    // A shape picked in the gallery: open the launch pad, which takes it, and scroll to it.
+    const open = () => {
+      setMode("play");
+      const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      document.getElementById("play-h")?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+    };
+    window.addEventListener("life:load-shape", open);
+    return () => window.removeEventListener("life:load-shape", open);
   }, []);
   const s = copy.study;
   return (
@@ -235,6 +245,11 @@ function Page() {
             ))}
           </ul>
         </section>
+
+        <div className="life__sec wrap life__social">
+          <ShapeGallery lang={lang} />
+          <Comments target="site:s1lin:life" lang={lang} />
+        </div>
 
         <footer className="life__foot wrap">
           <p>
