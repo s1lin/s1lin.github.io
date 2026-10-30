@@ -94,7 +94,9 @@
 @media (prefers-reduced-motion: reduce) { .life__swap, .life__puzzle { animation: none; } }
 
 /* ---- Language switch, "why it is here", CJK, and the launch pad ---- */
-.life__lang { grid-column: 1 / -1; display: flex; gap: 6px; }
+.life__lang { grid-column: 1 / -1; display: flex; gap: 6px; position: relative; z-index: 3; }
+.life__title { pointer-events: none; }
+.life__title a, .life__title button { pointer-events: auto; }
 .life__lang button { font: 500 12px/1 var(--f-mono); padding: 8px 12px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer; }
 .life__lang button[aria-pressed="true"] { background: var(--blue); color: #fff; border-color: var(--blue); }
 .life__title[data-lang="zh"], .life__title[data-lang="ja"] { font-size: clamp(64px, 13vw, 180px); line-height: 1; letter-spacing: 0; }
