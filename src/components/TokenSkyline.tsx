@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { LOGOS } from "@/content/logos";
 import tokens from "@/content/tokens.json";
 import { useMedia } from "@/hooks/useMedia";
 import { useScale } from "@/hooks/useScale";
@@ -27,15 +28,19 @@ type Tokens = {
   parts: Parts;
   partsByApp: Record<string, Parts>;
   since: string | null;
-  days: [string, number[], number[]][];
+  /** Models, in the order the town stacks them, and the company that makes each; the last is "Other". */
+  models: string[];
+  makers: string[];
+  byModel: Record<string, number>;
+  days: [string, number[], number[], number[]][];
 };
 // JSON imports type its rows as loose arrays; scripts/token-data.py writes them as this shape.
 const T = tokens as unknown as Tokens;
 
-const NAMES: Record<string, string> = { claude: "Claude", codex: "Codex", pi: "Pi", gemini: "Gemini", opencode: "OpenCode" };
+const NAMES: Record<string, string> = { claude: "Claude", codex: "Codex", pi: "Pi", cursor: "Cursor", gemini: "Gemini", opencode: "OpenCode" };
 const named = (app: string) => NAMES[app] ?? app;
 /** The agent's colour class; an agent with no colour of its own is drawn in ink. */
-const hue = (app: string) => (["claude", "codex", "pi"].includes(app) ? `agent-${app}` : "agent-other");
+const hue = (app: string) => (["claude", "codex", "pi", "cursor"].includes(app) ? `agent-${app}` : "agent-other");
 const MACHINES = ["no machines", "one machine", "my two machines", "my three machines"][T.machines] ?? `${T.machines} machines`;
 
 /** 47,944,236,992 → "47.9B". */
@@ -75,10 +80,11 @@ const FIRST = Date.parse(T.since ?? T.fetched);
 const START = FIRST - new Date(FIRST).getUTCDay() * DAY; // the Sunday on or before the first day
 const LAST = Date.parse(T.days.at(-1)?.[0] ?? T.fetched);
 const WEEKS = Math.floor((LAST - START) / (7 * DAY)) + 1;
-const WEEK = Array.from({ length: WEEKS }, () => ({ tokens: T.apps.map(() => 0), usd: 0 }));
-for (const [day, counts, usd] of T.days) {
+const WEEK = Array.from({ length: WEEKS }, () => ({ tokens: T.apps.map(() => 0), models: T.models.map(() => 0), usd: 0 }));
+for (const [day, counts, usd, models] of T.days) {
   const w = WEEK[Math.floor((Date.parse(day) - START) / (7 * DAY))];
   counts.forEach((c, k) => (w.tokens[k] += c));
+  models.forEach((c, k) => (w.models[k] += c));
   w.usd += usd.reduce((a, b) => a + b, 0);
 }
 const SUM = WEEK.map((w) => w.tokens.reduce((a, b) => a + b, 0));
@@ -89,7 +95,8 @@ const weekStart = (w: number) => new Date(START + w * 7 * DAY);
 /*
  * The weeks as a town seen from above, a treemap kept in time order: a month
  * to a district, left to right, as wide as its tokens; its weeks as blocks
- * down it, each as tall as its tokens; each block divided among the agents.
+ * down it, each as tall as its tokens; each block divided among the models,
+ * a company to a hue and its models in shades of it (MODEL_FILL), Other in grey.
  * The streets between are paper: two units between blocks, twice that
  * between districts, a hairline between one agent's lot and the next.
  */
@@ -123,10 +130,10 @@ const DISTRICTS: District[] = (() => {
     let y = TOP;
     const blocks = weeks.map((week) => {
       const h = (tall * SUM[week]) / total;
-      const agents = WEEK[week].tokens.filter(Boolean).length;
-      const room = Math.max(0, w - (agents - 1));
+      const models = WEEK[week].models.filter(Boolean).length;
+      const room = Math.max(0, w - (models - 1));
       let lx = x;
-      const lots = WEEK[week].tokens.flatMap((n, k) => {
+      const lots = WEEK[week].models.flatMap((n, k) => {
         if (!n) return [];
         const lot = { k, x: lx, w: (room * n) / SUM[week] };
         lx += lot.w + 1;
@@ -142,6 +149,128 @@ const DISTRICTS: District[] = (() => {
   });
 })();
 const BLOCKS = DISTRICTS.flatMap((d) => d.blocks);
+/** A company to a hue: the dataviz palette's first five slots, in their validated order (site.css). */
+const MAKER_HUE: Record<string, string> = {
+  OpenAI: "var(--co-1)",
+  Anthropic: "var(--co-2)",
+  DeepSeek: "var(--co-3)",
+  Alibaba: "var(--co-4)",
+  Zhipu: "var(--co-5)",
+  xAI: "var(--co-6)",
+  Google: "var(--co-7)",
+  Cursor: "var(--co-8)",
+};
+const MAKER_NAME: Record<string, string> = { Zhipu: "Zhipu AI" };
+/**
+ * Each model's colour: its company's hue, in its own shade, the first model the
+ * strongest and each next a step toward the paper; Other in grey.
+ */
+const MODEL_FILL = T.models.map((_, k) => {
+  const hue = MAKER_HUE[T.makers[k]];
+  if (!hue) return "var(--ink-3)";
+  const kin = T.makers.flatMap((maker, j) => (maker === T.makers[k] ? [j] : []));
+  const step = kin.length > 1 ? Math.min(30, 60 / (kin.length - 1)) : 0;
+  return `color-mix(in oklab, ${hue} ${92 - kin.indexOf(k) * step}%, var(--paper))`;
+});
+/**
+ * The champion: the model with the most tokens, which dwarfs the rest, so it
+ * stands in a row of its own (the owner's call, 2026-10-30) and the bars below
+ * are scaled to the runner-up.
+ */
+const CHAMPION = T.models.reduce((best, m, k) => ((T.byModel[m] ?? 0) > (T.byModel[T.models[best]] ?? 0) ? k : best), 0);
+/** The companies, the biggest first, each with its models but the champion, the biggest first. */
+const BY_MAKER = [...new Set(T.makers)]
+  .map((maker) => {
+    const all = T.models
+      .map((name, k) => ({ name, k, n: T.byModel[name] ?? 0 }))
+      .filter(({ k, n }) => T.makers[k] === maker && n > 0)
+      .sort((a, b) => b.n - a.n);
+    return { maker, models: all.filter((m) => m.k !== CHAMPION), n: all.reduce((a, m) => a + m.n, 0) };
+  })
+  .filter((m) => m.n > 0)
+  .sort((a, b) => (a.maker === "Other" ? 1 : b.maker === "Other" ? -1 : b.n - a.n));
+const BIGGEST = Math.max(1, ...T.models.filter((_, k) => k !== CHAMPION).map((m) => T.byModel[m] ?? 0));
+
+/** A company's mark, in the ink colour; a plain dot where there is none. */
+function Mark({ maker }: { maker: string }) {
+  const paths = LOGOS[maker];
+  return paths ? (
+    <svg className="models__mark" viewBox="0 0 24 24" aria-hidden="true">
+      {paths.map((d, i) => (
+        <path key={i} fillRule="evenodd" d={d} />
+      ))}
+    </svg>
+  ) : (
+    <span className="models__mark models__mark--none" aria-hidden="true" />
+  );
+}
+
+/**
+ * The key to the town, as a chart of its own: the champion in a row of its
+ * own, then each company under its mark, each other model a bar on one scale.
+ */
+function ByModel() {
+  const champ = T.models[CHAMPION];
+  const n = T.byModel[champ] ?? 0;
+  return (
+    <div className="models">
+      <p className="flows__title mono">By model</p>
+      <div className="champion">
+        <p className="champion__label mono">
+          <span lang="ja">王者</span> Champion
+        </p>
+        <p className="champion__name">
+          <Mark maker={T.makers[CHAMPION]} />
+          {champ}
+        </p>
+        <p className="champion__n mono">
+          {compact(n)} tokens · {percent(n, T.total)} of all
+        </p>
+        {/* its bar is of all the tokens, not on the scale below */}
+        <span className="champion__bar" aria-hidden="true">
+          <i style={{ width: `${(100 * n) / T.total}%`, background: MODEL_FILL[CHAMPION] }} />
+        </span>
+      </div>
+      <p className="models__scale mono">The rest, on a scale of their own</p>
+      <div className="models__makers">
+        {BY_MAKER.map(({ maker, models, n }) => (
+          <section className="models__maker" key={maker}>
+            <h4 className="mono">
+              <Mark maker={maker} />
+              {MAKER_NAME[maker] ?? maker}
+              <span className="models__share">{percent(n, T.total)}</span>
+            </h4>
+            {/* Other is one row already; its heading says all of it */}
+            {maker !== "Other" && (
+            <ul>
+              {models.map((m) => (
+                <li key={m.name}>
+                  <span className="models__name">{m.name}</span>
+                  <span className="models__bar">
+                    <i style={{ width: `${(100 * m.n) / BIGGEST}%`, background: MODEL_FILL[m.k] }} />
+                  </span>
+                  <span className="models__n mono">
+                    {compact(m.n)} · {percent(m.n, T.total)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            )}
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+/** A week's three biggest families, for the line under the town. */
+const topModels = (week: number) =>
+  WEEK[week].models
+    .map((n, k) => [T.models[k], n] as const)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([m, n]) => `${m} ${compact(n)}`)
+    .join(", ");
 /**
  * A district's name over it, and its tokens beside the name, as much as fits
  * before the next district's name. Names are set at 9px whatever the plan's
@@ -164,7 +293,7 @@ function Town({ scale }: { scale: number }) {
         </text>
         {d.blocks.map((b) =>
           b.lots.map((l) => (
-            <rect key={`${b.week}-${l.k}`} className={hue(T.apps[l.k])} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
+            <rect key={`${b.week}-${l.k}`} style={{ fill: MODEL_FILL[l.k] }} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
           )),
         )}
       </g>
@@ -175,7 +304,6 @@ function Town({ scale }: { scale: number }) {
 
 // ---------------------------------------------------------------- the flow
 
-const BY_AGENT = T.apps.map((a) => ({ label: named(a), value: T.byApp[a] }));
 const KINDS: { key: keyof Parts; label: string; cls: string }[] = [
   // Cache reads are most of it, so they alone take a colour; the other kinds stay in ink.
   { key: "cacheRead", label: "Cache reads", cls: "kind-cache" },
@@ -281,7 +409,7 @@ function Flow() {
             <li key={a} style={{ top: FROM_Y[i] }} {...hold({ app: i })}>
               <b>{named(a)}</b>
               <span>
-                {compact(T.byApp[a])} · {dollars(T.usdByApp[a] ?? 0)}
+                {compact(T.byApp[a])} · {T.usdByApp[a] ? dollars(T.usdByApp[a]) : "unpriced"}
               </span>
             </li>
           ))}
@@ -459,7 +587,7 @@ export function TokenSkyline() {
           if (e.pointerType === "mouse") setAt(null);
         }}
       >
-        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as a town plan, a month to a district and a week to a block: ${DISTRICTS.map((d) => `${MONTHS[d.month]} ${compact(d.total)}`).join(", ")}. By agent: ${BY_AGENT.map((s) => `${s.label} ${compact(s.value)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
+        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as a town plan, a month to a district and a week to a block: ${DISTRICTS.map((d) => `${MONTHS[d.month]} ${compact(d.total)}`).join(", ")}. By model: ${T.models.map((m) => `${m} ${compact(T.byModel[m] ?? 0)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
         <Town scale={scale} />
         {block && (
           <rect className="tokens__at" x={r2(block.x - 1.5)} y={r2(block.y - 1.5)} width={r2(block.w + 3)} height={r2(block.h + 3)} />
@@ -469,29 +597,22 @@ export function TokenSkyline() {
         <p>
           {at === null
             ? `${compact(T.total)} tokens since ${since}`
-            : `Week of ${short(weekStart(at))} · ${compact(SUM[at])} · ${dollars(WEEK[at].usd)} · ` +
-              T.apps.map((a, k) => (WEEK[at].tokens[k] ? `${named(a)} ${compact(WEEK[at].tokens[k])}` : "")).filter(Boolean).join(", ")}
-        </p>
-        <p className="tokens__key" aria-hidden>
-          {T.apps.map((a) => (
-            <span key={a}>
-              <i className={hue(a)} />
-              {named(a)}
-            </span>
-          ))}
+            : `Week of ${short(weekStart(at))} · ${compact(SUM[at])} · ${dollars(WEEK[at].usd)} · ${topModels(at)}`}
         </p>
       </div>
+
+      <ByModel />
 
       {/* Every week's numbers, for readers who cannot see the plan; a table hides inside a box, not by itself. */}
       <div className="visually-hidden">
         <table>
-          <caption>Tokens a week, by agent</caption>
+          <caption>Tokens a week, by model</caption>
           <thead>
             <tr>
               <th scope="col">Week of</th>
-              {T.apps.map((a) => (
-                <th key={a} scope="col">
-                  {named(a)}
+              {T.models.map((m) => (
+                <th key={m} scope="col">
+                  {m}
                 </th>
               ))}
               <th scope="col">All tokens</th>
@@ -502,7 +623,7 @@ export function TokenSkyline() {
             {BLOCKS.map(({ week }) => (
               <tr key={week}>
                 <th scope="row">{short(weekStart(week))}</th>
-                {WEEK[week].tokens.map((n, k) => (
+                {WEEK[week].models.map((n, k) => (
                   <td key={k}>{thousands(n)}</td>
                 ))}
                 <td>{thousands(SUM[week])}</td>
@@ -518,9 +639,9 @@ export function TokenSkyline() {
       <figcaption>
         <span lang="ja">街</span>, town: the weeks from above, from the first there were any. A month of tokens is a
         district, as wide as its tokens; a week is a block in it, as tall as its tokens; each block is divided among the
-        agents, and the streets between are only paper. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
-        cache, or written back as output. Counted by cc-switch on {MACHINES}, cache reads included, to {long(new Date(T.fetched))}. The money is what the
-        tokens are worth at API list prices, not what I paid; models no price table knows count at nothing, so it is a
+        models, and the streets between are only paper. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
+        cache, or written back as output. Counted by cc-switch on {MACHINES}, and from Cursor's own usage exports, cache reads included, to {long(new Date(T.fetched))}. The money is what the
+        tokens are worth at API list prices, not what I paid; models no price table knows, Cursor's Auto among them, count at nothing, so it is a
         floor. The typist types 40 words a minute, 230 days a year, and a token is about three-quarters of a word.
       </figcaption>
     </figure>

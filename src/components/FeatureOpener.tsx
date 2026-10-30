@@ -12,8 +12,9 @@ import { GlitchTitle } from "@/components/effects";
  * the same stack at the same time stop at one station. Pioneer runs on into
  * McGill, where AwakeAI sets out carrying its Java; AwakeAI closes into a
  * junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught.
- * Around it all runs the City builder loop, since the first road in 2003. A bar
- * ends a line that has closed; dashes are unfinished: Tokensbeat before it
+ * YoueData runs on past McGill into AwakeAI at a Java interchange, Java being
+ * what the two built on. Around it all runs the City builder loop, since the
+ * first road in 2003. Dashes are unfinished: Tokensbeat before it
  * opened, and everything past NOW.
  *
  * Everything is drawn 90 units in from the left, leaving room for the loop.
@@ -28,6 +29,39 @@ function x(t: number) {
   const [[t0, x0], [t1, x1]] = [WHEN[i - 1], WHEN[i]];
   return x0 + ((t - t0) / (t1 - t0)) * (x1 - x0);
 }
+/*
+ * Before 2025 the map is drawn closer together than the dates above give it
+ * (the owner's choice, 2026-10-30): the empty track from the high school to
+ * Saint John's most, the stretch between the schools least, so their notes
+ * still clear each other. From 2025 on it keeps its shape and only moves left,
+ * so its 45° diagonals stay true. Every x in this file is in the dates' space;
+ * the drawing passes each through sq, and each path through sqPath.
+ */
+const SQUEEZE: [number, number][] = [[-4, -4], [230, 125], [470, 353], [680, 479], [800, 593]];
+const SHIFT = 800 - 593;
+function sq(v: number) {
+  if (v <= SQUEEZE[0][0]) return v;
+  if (v >= 800) return v - SHIFT;
+  const i = SQUEEZE.findIndex(([a]) => a >= v);
+  const [[a0, b0], [a1, b1]] = [SQUEEZE[i - 1], SQUEEZE[i]];
+  return Math.round((b0 + ((v - a0) / (a1 - a0)) * (b1 - b0)) * 100) / 100;
+}
+/** A path's absolute x coordinates through sq; relative steps keep their size. */
+function sqPath(d: string) {
+  let cmd = "";
+  let i = 0;
+  return d.replace(/[A-Za-z]|-?\d*\.?\d+/g, (tok) => {
+    if (/[A-Za-z]/.test(tok)) {
+      cmd = tok;
+      i = 0;
+      return tok;
+    }
+    const isX = "MLTQC".includes(cmd) ? i % 2 === 0 : cmd === "H" ? true : cmd === "A" ? i % 7 === 5 : false;
+    i++;
+    return isX ? String(sq(Number(tok))) : tok;
+  });
+}
+
 const NOW = 1340;
 const EDGE = 1500;
 const RULER = 330;
@@ -73,7 +107,8 @@ const SCHOOLS: School[] = [
     x: 230, lines: ["c", "p", "y"],
   },
   // where Pioneer runs in, in 2019, and AwakeAI sets out, in December 2020
-  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["c", "p", "a", "e"] },
+  // its note in two lines, so it clears Saint John's now the schools stand closer
+  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022", more: "parallel solvers", x: 470, lines: ["c", "p", "a", "e"] },
 ];
 // The loop's top rail crosses the straight of the terminal, not its rounded end.
 const TERMINAL = { top: LOOP.top - 18, bottom: 198, w: 22 };
@@ -89,13 +124,14 @@ const kanjiY = (i: number, n: number) => 101 + (i - (n - 1) / 2) * 18;
 // Drawn in this order, so WorkGo crosses over Tokensbeat where it leaves the corridor.
 const LINES: Line[] = [
   { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: `M${HIGH_SCHOOL.right} 160 H470` },
-  { key: "y", code: "Y", name: "YoueData", since: "2017–2018", live: "M230 144 H370", end: "M370 135 V153" },
+  // on past its close, through McGill, into AwakeAI at the Java interchange
+  { key: "y", code: "Y", name: "YoueData", since: "2017–2018", live: "M230 144 H520" },
   { key: "a", code: "A", name: "AwakeAI", since: "2020–2025", live: "M470 160 H870" },
   {
     key: "e", code: "E", name: "EchoSonic", since: "2022–2023",
     // out of McGill under AwakeAI, then into the junction on HiRain's way down, with embedded work on STM32
     // straight out past McGill's name, then down under AwakeAI's labels
-    live: "M470 184 H510 L540 214 H870",
+    live: "M470 184 H500 L550 214 H870", // the drop is 45° once squeezed
   },
   {
     key: "h", code: "H", name: "HiRain", since: "2026–",
@@ -141,7 +177,13 @@ const MARKERS: { line: LineKey; x: number; y: number }[] = [
 ];
 
 const STATIONS: Station[] = [
-  { x: 340, top: 144, bottom: 160, lines: ["p", "y"], label: "Java", at: { x: 340, y: 184 } },
+  // what Pioneer and YoueData shared; labelled above YoueData, leaving room under Pioneer for its consultant stop
+  {
+    x: 340, top: 144, bottom: 160, lines: ["p", "y"], label: "Vue · database", sub: "full stack",
+    at: { x: 340, y: 114 },
+  },
+  // YoueData closes into AwakeAI here, just after McGill: the Java they both built on
+  { x: 520, top: 144, bottom: 160, lines: ["y", "a"], label: "Java", at: { x: 520, y: 128 } },
   // AwakeAI closes here; WorkGo, InclusifAI and HiRain open out of it with what it taught
   {
     x: 870, top: 154, bottom: 166, lines: ["a", "w", "i", "h"], label: "architecture · cloud ops",
@@ -162,6 +204,7 @@ const STATIONS: Station[] = [
 const STOPS: Stop[] = [
   { line: "a", x: 690, y: 160, label: "Dobson Cup", at: { x: 690, y: 144 } },
   { line: "e", x: x(2022.5), y: 214, label: "sound recognition", at: { x: x(2022.5), y: 238 } },
+  { line: "p", x: x(2019), y: 160, label: "consultant", at: { x: x(2019), y: 184 } },
   // labels take turns above and below the line, so neighbours never meet
   { line: "a", x: 735, y: 160, label: "architect", at: { x: 735, y: 184 } },
   { line: "a", x: 765, y: 160, label: "patent ↗", href: PATENT, at: { x: 765, y: 144 } },
@@ -175,7 +218,7 @@ const STOPS: Stop[] = [
   // the loop, from the Cities section and the workshop
   { line: "c", x: -20, y: LOOP.top, label: "first road · SimCity 4", at: { x: -46, y: 32, anchor: "start" } },
   // set off to the right, clear of McGill's terminal on the rail
-  { line: "c", x: x(2020.79), y: LOOP.top, label: "featured by Cities: Skylines", at: { x: x(2020.79) - 10, y: 32, anchor: "start" } },
+  { line: "c", x: x(2020.79), y: LOOP.top, label: "featured by Cities: Skylines", at: { x: x(2020.79), y: 32, anchor: "start" } },
   { line: "c", x: 990, y: LOOP.top, label: "Metro2Line", at: { x: 990, y: 32 } },
   { line: "c", x: 1300, y: LOOP.top, label: "5,000 hours", at: { x: 1300, y: 32 } },
 ];
@@ -199,15 +242,18 @@ const TIMETABLE: Record<LineKey, Row[]> = {
   p: [
     { year: "—", name: "Pioneer High School", ja: "高校", via: ["c"], note: "sets out from the school it shares its name with" },
     { year: "2017", name: "Saint John's", ja: "大学", via: ["y", "c"], note: "B.A.; begun there in 2015 as a bidding system for a databases course" },
-    { year: "2018", name: "Java", via: ["y"] },
+    { year: "2018", name: "Vue · database · full stack", via: ["y"] },
+    { year: "2018", name: "consultant", note: "2018–2019" },
     { year: "2019", name: "McGill", ja: "大学院", via: ["a", "e", "c"], note: "runs in; its Java goes on with AwakeAI" },
   ],
   y: [
     { year: "2017", name: "Saint John's", ja: "大学", via: ["p", "c"], note: "sets out on graduating" },
-    { year: "2018", name: "Java", via: ["p"], note: "HDFS; the line closes" },
+    { year: "2018", name: "Vue · database · full stack", via: ["p"], note: "HDFS" },
+    { year: "2020", month: "12", name: "Java", via: ["a"], note: "the line closes into AwakeAI, which carries its Java on" },
   ],
   a: [
     { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p", "e", "c"], note: "sets out, with Pioneer's Java" },
+    { year: "2020", month: "12", name: "Java", via: ["y"], note: "YoueData's Java comes aboard" },
     { year: "2022", name: "Dobson Cup", note: "third place" },
     { year: "2023", name: "architect" },
     {
@@ -258,7 +304,7 @@ const TIMETABLE: Record<LineKey, Row[]> = {
 };
 
 const TICKS: [number, string][] = [
-  [2003, "2003"], [2014, "2014"], [2015, "15"], [2016, "16"], [2017, "17"], [2018, "18"], [2019, "19"], [2020, "20"],
+  [2003, "2003"], [2014, "14"], [2015, "15"], [2016, "16"], [2017, "17"], [2018, "18"], [2019, "19"], [2020, "20"],
   [2021, "21"], [2022, "22"], [2023, "23"], [2024, "24"], [2025, "2025"], [2026, "2026"], [2026.5, ".5"], [2027, "2027"],
 ];
 
@@ -284,7 +330,7 @@ const dim = (on: LineKey | null, lines: LineKey[]) => (on && !lines.includes(on)
 
 function RouteMap({ on }: { on: LineKey | null }) {
   return (
-    <svg viewBox="0 0 1620 396" role="img" aria-labelledby="rm-t rm-d">
+    <svg viewBox={`0 0 ${1620 - SHIFT} 396`} role="img" aria-labelledby="rm-t rm-d">
       <title id="rm-t">Route map of my work, 2003 to now</title>
       <desc id="rm-d">
         A network map along time, from 2003 to past now, inside a loop. The loop is City builder: my first road in
@@ -292,7 +338,9 @@ function RouteMap({ on }: { on: LineKey | null }) {
         and 5,000 hours by now. Across its left side lies a horizontal terminal, Pioneer High School, out of which
         Pioneer, sharing its name, sets out. Inside it, two vertical terminals that reach up to the loop, which stops
         at both: Saint John's, university, B.A. 2014 to 2017, where
-        Pioneer, from 2015 to 2019, runs through and YoueData, 2017 to 2018, sets out; the two share Java. Pioneer
+        Pioneer, from 2015 to 2019, runs through and YoueData, 2017 to 2018, sets out; the two share Vue, databases and full-stack work, and Pioneer
+        goes on with a consultant's role from 2018 to 2019. YoueData's track runs on
+        into AwakeAI, just after McGill, at a Java interchange. Pioneer
         runs on into McGill, graduate school, M.Sc. 2019 to 2022, where AwakeAI sets out with its Java in December
         2020, through the Dobson Cup, architect, a patent application in September 2024 (CN119296029A, image processing for
         care-work recorders) and COO. AwakeAI closes in July 2025 into a junction of architecture,
@@ -306,17 +354,17 @@ function RouteMap({ on }: { on: LineKey | null }) {
       </desc>
 
       <g transform="translate(90 0)">
-        <line className="rm-now" x1={NOW} y1="20" x2={NOW} y2={RULER} />
-        <text className="rm-nowlbl" x={NOW} y="14" textAnchor="middle">
+        <line className="rm-now" x1={sq(NOW)} y1="20" x2={sq(NOW)} y2={RULER} />
+        <text className="rm-nowlbl" x={sq(NOW)} y="14" textAnchor="middle">
           NOW · 2026.10
         </text>
         <g className="rm-ruler">
-          <line x1={x(2003)} y1={RULER} x2={EDGE} y2={RULER} />
+          <line x1={x(2003)} y1={RULER} x2={sq(EDGE)} y2={RULER} />
           <path d={`M${x(2003) + 26} ${RULER - 6} l6 12 M${x(2003) + 32} ${RULER - 6} l6 12`} />
           {TICKS.map(([t, label]) => (
             <g key={t}>
-              <line x1={x(t)} y1={RULER - 4} x2={x(t)} y2={RULER} />
-              <text x={x(t)} y={RULER + 18}>
+              <line x1={sq(x(t))} y1={RULER - 4} x2={sq(x(t))} y2={RULER} />
+              <text x={sq(x(t))} y={RULER + 18}>
                 {label}
               </text>
             </g>
@@ -325,32 +373,29 @@ function RouteMap({ on }: { on: LineKey | null }) {
 
         {/* the loop: a double rail, so it never rests on its colour alone */}
         <g className={`rm-loop${dim(on, ["c"])}`}>
-          <path className="rm-casing" d={`${LOOP_LIVE} ${LOOP_PLANNED}`} />
-          <path d={LOOP_LIVE} />
-          <path className="rm-rail" d={LOOP_LIVE} />
-          <path className="rm-planned" d={LOOP_PLANNED} />
+          <path className="rm-casing" d={sqPath(`${LOOP_LIVE} ${LOOP_PLANNED}`)} />
+          <path d={sqPath(LOOP_LIVE)} />
+          <path className="rm-rail" d={sqPath(LOOP_LIVE)} />
+          <path className="rm-planned" d={sqPath(LOOP_PLANNED)} />
         </g>
 
         {LINES.map((l) => (
           <g key={l.key} className={`rm-line rm-${l.key}${dim(on, [l.key])}`}>
             {/* a casing in the paper's colour, so a crossing reads as one line over the other */}
-            <path className="rm-casing" d={[l.live, l.planned].filter(Boolean).join(" ")} />
-            <path d={l.live} />
-            {l.planned && <path className="rm-planned" d={l.planned} />}
-            {l.end && <path className="rm-end" d={l.end} />}
+            <path className="rm-casing" d={sqPath([l.live, l.planned].filter(Boolean).join(" "))} />
+            <path d={sqPath(l.live)} />
+            {l.planned && <path className="rm-planned" d={sqPath(l.planned)} />}
+            {l.end && <path className="rm-end" d={sqPath(l.end)} />}
           </g>
         ))}
-        {/* what the connections carry: Java into AwakeAI, edge vision into HiRain */}
-        <text className={`rm-lbl rm-xlbl${dim(on, ["p", "y", "a"])}`} x="430" y="144" textAnchor="middle">
-          Java
-        </text>
-        <text className={`rm-lbl rm-xlbl${dim(on, ["a", "h"])}`} x="935" y="278" textAnchor="middle">
+        {/* what the connection carries: edge vision into HiRain */}
+        <text className={`rm-lbl rm-xlbl${dim(on, ["a", "h"])}`} x={sq(935)} y="278" textAnchor="middle">
           edge vision
         </text>
 
         {MARKERS.map((m) => (
           <g key={m.line} className={dim(on, [m.line]).trim() || undefined}>
-            <Marker {...m} />
+            <Marker {...m} x={sq(m.x)} />
           </g>
         ))}
 
@@ -373,20 +418,20 @@ function RouteMap({ on }: { on: LineKey | null }) {
 
         {SCHOOLS.map((sc) => (
           <g key={sc.name} className={`rm-terminal${dim(on, sc.lines)}`}>
-            <rect x={sc.x - TERMINAL.w / 2} y={TERMINAL.top} width={TERMINAL.w} height={TERMINAL.bottom - TERMINAL.top} rx={TERMINAL.w / 2} />
+            <rect x={sq(sc.x) - TERMINAL.w / 2} y={TERMINAL.top} width={TERMINAL.w} height={TERMINAL.bottom - TERMINAL.top} rx={TERMINAL.w / 2} />
             {[...sc.kanji].map((ch, i) => (
-              <text key={i} className="rm-kanji" lang="ja" x={sc.x} y={kanjiY(i, sc.kanji.length)}>
+              <text key={i} className="rm-kanji" lang="ja" x={sq(sc.x)} y={kanjiY(i, sc.kanji.length)}>
                 {ch}
               </text>
             ))}
-            <text className="rm-name" x={sc.x} y={TERMINAL.bottom + 18} textAnchor="middle">
+            <text className="rm-name" x={sq(sc.x)} y={TERMINAL.bottom + 18} textAnchor="middle">
               {sc.name}
             </text>
-            <text className="rm-since" x={sc.x} y={TERMINAL.bottom + 32} textAnchor="middle">
+            <text className="rm-since" x={sq(sc.x)} y={TERMINAL.bottom + 32} textAnchor="middle">
               {sc.note}
             </text>
             {sc.more && (
-              <text className="rm-since" x={sc.x} y={TERMINAL.bottom + 46} textAnchor="middle">
+              <text className="rm-since" x={sq(sc.x)} y={TERMINAL.bottom + 46} textAnchor="middle">
                 {sc.more}
               </text>
             )}
@@ -395,17 +440,17 @@ function RouteMap({ on }: { on: LineKey | null }) {
 
         {STOPS.map((s) => (
           <g key={`${s.line}${s.x}`} className={`rm-${s.line}${dim(on, [s.line])}`}>
-            <circle className={s.planned ? "rm-stop rm-planned-stop" : "rm-stop"} cx={s.x} cy={s.y} r="5.5">
+            <circle className={s.planned ? "rm-stop rm-planned-stop" : "rm-stop"} cx={sq(s.x)} cy={s.y} r="5.5">
               <title>{s.label}</title>
             </circle>
             {s.href ? (
               <a href={s.href}>
-                <text className="rm-lbl rm-link" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
+                <text className="rm-lbl rm-link" x={sq(s.at.x)} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
                   {s.label}
                 </text>
               </a>
             ) : (
-              <text className="rm-lbl" x={s.at.x} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
+              <text className="rm-lbl" x={sq(s.at.x)} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
                 {s.label}
               </text>
             )}
@@ -416,7 +461,7 @@ function RouteMap({ on }: { on: LineKey | null }) {
           <g key={st.x} className={dim(on, st.lines).trim() || undefined}>
             <rect
               className={st.planned ? "rm-station rm-planned-stop" : "rm-station"}
-              x={st.x - 6.5}
+              x={sq(st.x) - 6.5}
               y={st.top - 6.5}
               width="13"
               height={st.bottom - st.top + 13}
@@ -424,11 +469,11 @@ function RouteMap({ on }: { on: LineKey | null }) {
             >
               <title>{st.sub ? `${st.label} · ${st.sub}` : st.label}</title>
             </rect>
-            <text className="rm-lbl rm-xlbl" x={st.at.x} y={st.at.y} textAnchor={st.at.anchor ?? "middle"}>
+            <text className="rm-lbl rm-xlbl" x={sq(st.at.x)} y={st.at.y} textAnchor={st.at.anchor ?? "middle"}>
               {st.label}
             </text>
             {st.sub && (
-              <text className="rm-lbl rm-xlbl" x={st.at.x} y={st.at.y + 14} textAnchor={st.at.anchor ?? "middle"}>
+              <text className="rm-lbl rm-xlbl" x={sq(st.at.x)} y={st.at.y + 14} textAnchor={st.at.anchor ?? "middle"}>
                 {st.sub}
               </text>
             )}
@@ -440,27 +485,25 @@ function RouteMap({ on }: { on: LineKey | null }) {
           <text x="34" y="4">in service</text>
           <path className="rm-key rm-planned" d="M120 0 H146" />
           <text x="154" y="4">unfinished or planned</text>
-          <path className="rm-key rm-key-closed" d="M320 0 H340 M341 -9 V9" />
-          <text x="354" y="4">closed</text>
-          <circle className="rm-stop-key" cx="428" cy="0" r="5" />
-          <text x="442" y="4">stop</text>
-          <path className="rm-key" d="M500 -6 H526 M500 6 H526" />
-          <rect className="rm-station" x="506.5" y="-12.5" width="13" height="25" rx="6.5" />
-          <text x="534" y="4">interchange: a stack they share</text>
-          <rect className="rm-terminal-key" x="770" y="-11" width="12" height="22" rx="6" />
-          <text x="790" y="4">school, a terminal</text>
+          <circle className="rm-stop-key" cx="320" cy="0" r="5" />
+          <text x="334" y="4">stop</text>
+          <path className="rm-key" d="M392 -6 H418 M392 6 H418" />
+          <rect className="rm-station" x="398.5" y="-12.5" width="13" height="25" rx="6.5" />
+          <text x="426" y="4">interchange: a stack they share</text>
+          <rect className="rm-terminal-key" x="662" y="-11" width="12" height="22" rx="6" />
+          <text x="682" y="4">school, a terminal</text>
           <g className="rm-loop rm-loop-key">
-            <path d="M930 0 H956" />
-            <path className="rm-rail" d="M930 0 H956" />
+            <path d="M822 0 H848" />
+            <path className="rm-rail" d="M822 0 H848" />
           </g>
-          <text x="964" y="4">the loop</text>
+          <text x="856" y="4">the loop</text>
           <g className="rm-marker rm-a">
-            <circle cx="1070" cy="0" r="9.5" />
-            <text x="1070" y="0">
+            <circle cx="962" cy="0" r="9.5" />
+            <text x="962" y="0">
               A
             </text>
           </g>
-          <text x="1088" y="4">line marker</text>
+          <text x="980" y="4">line marker</text>
         </g>
       </g>
     </svg>
@@ -612,8 +655,8 @@ export function FeatureOpener() {
             device. EchoSonic sets
             out from McGill in 2022, sound recognition on STM32, and closes into HiRain, whose 2.5D detection runs on edge
             chips. Around it all
-            runs the loop: city builder, since my first road in SimCity 4 in 2003. A bar marks a line that has closed;
-            dashes are unfinished: Tokensbeat before it opened, and everything past now. AwakeAI closed in July 2025,
+            runs the loop: city builder, since my first road in SimCity 4 in 2003. YoueData runs on into AwakeAI at a Java
+            interchange, Java being what both were built on. Dashes are unfinished: Tokensbeat before it opened, and everything past now. AwakeAI closed in July 2025,
             when I resigned from the company where I first held the title of architect.
           </figcaption>
         </figure>

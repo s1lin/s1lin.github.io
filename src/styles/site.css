@@ -525,6 +525,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .tokens .agent-claude { fill: var(--agent-claude); background: var(--agent-claude); }
 .tokens .agent-codex { fill: var(--agent-codex); background: var(--agent-codex); }
 .tokens .agent-pi { fill: var(--agent-pi); background: var(--agent-pi); }
+.tokens .agent-cursor { fill: var(--agent-cursor); background: var(--agent-cursor); }
 .tokens .agent-other { fill: var(--ink-3); background: var(--ink-3); }
 .tokens .kind-cache { fill: var(--kind-cache); background: var(--kind-cache); }
 .tokens .kind-input { fill: var(--ink-2); background: var(--ink-2); }
@@ -532,18 +533,46 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .tokens .kind-output { fill: var(--ink-4); background: var(--ink-4); }
 .tokens .sky-month { font: 400 9px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink-3); }
 .tokens__at { fill: none; stroke: var(--sumi); stroke-width: 1.5; pointer-events: none; }
-/* The town a shade down from the agents' own colours (the owner found them too bright,
-   2026-10-30): its blocks, and the key under it, at 60% over the paper. */
-.tokens__sky rect:not(.tokens__at) { fill-opacity: 0.6; }
-.tokens__key i { opacity: 0.6; }
-/* Codex's blue held brighter than the rest (the owner, 2026-10-30) */
-.tokens__sky rect.agent-codex { fill-opacity: 0.9; }
-.tokens__key i.agent-codex { opacity: 0.9; }
+/* The town by model (the owner, 2026-10-30): a company to a hue, the dataviz palette's
+   first five slots in their validated order, so companies that touch stay apart; its
+   models in shades of it, mixed toward the paper (MODEL_FILL in TokenSkyline.tsx). */
+.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #e34948; --agent-cursor: #eda100; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #e66767; --agent-cursor: #c98500; }
+}
+:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #e66767; --agent-cursor: #c98500; }
+
+/* By model, under the town: the companies in two columns, each under its mark, every model a bar on one scale. */
+.models { margin: 18px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
+/* The champion, a row of its own over the rest; its bar is of all the tokens. */
+.champion { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 4px 14px; margin: 0 0 18px; padding: 12px 14px 14px; border: 0.5px solid var(--rule-strong); position: relative; }
+.champion::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+.champion p { margin: 0; }
+.champion__label { font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); }
+.champion__label [lang="ja"] { font: 700 12px/1 var(--f-mincho); letter-spacing: 0.2em; color: var(--sumi); margin-right: 4px; }
+.champion__name { display: flex; align-items: center; gap: 10px; font: 400 clamp(1.3rem, 4.4cqi, 1.8rem)/1.1 var(--f-display); }
+.champion__name .models__mark { width: 20px; height: 20px; }
+.champion__n { font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-2); text-transform: none; white-space: nowrap; }
+.champion__bar { grid-column: 1 / -1; display: block; height: 6px; margin-top: 6px; background: var(--paper-2); }
+.champion__bar i { display: block; height: 100%; border-radius: 0 2px 2px 0; }
+.models__scale { margin: 0 0 10px; font-size: 9.5px; letter-spacing: 0.1em; color: var(--ink-3); }
+@container (max-width: 420px) {
+  .champion { grid-template-columns: 1fr; }
+}
+.models__makers { columns: 2 250px; column-gap: 28px; }
+.models__maker { break-inside: avoid; margin: 0 0 16px; }
+.models__maker h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; padding-bottom: 5px; border-bottom: 0.5px solid var(--rule); font-size: 10.5px; letter-spacing: 0.12em; color: var(--sumi); }
+.models__share { margin-left: auto; font-weight: 400; color: var(--ink-3); }
+.models__mark { flex: none; width: 15px; height: 15px; fill: currentColor; }
+.models__mark--none { display: inline-block; width: 7px; height: 7px; margin: 0 4px; border-radius: 50%; background: var(--ink-3); }
+.models__maker ul { list-style: none; margin: 0; padding: 0; }
+.models__maker li { display: grid; grid-template-columns: minmax(0, 8.4em) minmax(0, 1fr) 7.4em; align-items: center; gap: 10px; padding: 3px 0; font-size: 0.82rem; }
+.models__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.models__bar { height: 9px; background: var(--paper-2); }
+.models__bar i { display: block; height: 100%; min-width: 2px; border-radius: 0 2px 2px 0; }
+.models__n { font-size: 10px; letter-spacing: 0.02em; color: var(--ink-2); white-space: nowrap; text-transform: none; text-align: right; }
 .tokens__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 18px; margin-top: 8px; color: var(--ink-2); }
 .tokens__foot p { margin: 0; }
-.tokens__key { display: flex; gap: 12px; color: var(--ink-3); }
-.tokens__key span { display: inline-flex; align-items: center; gap: 5px; }
-.tokens__key i { width: 9px; height: 9px; }
 
 /* The flow from agent to kind (Flow in TokenSkyline.tsx). The drawing stretches
    to the middle column while its height stays 168px, the same as FH, so the

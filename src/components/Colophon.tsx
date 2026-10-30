@@ -135,7 +135,8 @@ export function Colophon() {
             <dt>Contents</dt>
             <dd>
               The heatmap: contribution counts from <a href="https://github.com/s1lin">GitHub</a>, pulled when the issue
-              is built and again every day. Your browser never asks GitHub for them
+              is built and again every day. Your browser never asks GitHub for them. The model companies' marks under the
+              tokens are from <a href="https://lobehub.com/icons">LobeHub Icons</a> (MIT) and belong to their companies
             </dd>
             <dt>Built with</dt>
             <dd>React, Vite and Tailwind CSS, prerendered at build time</dd>
