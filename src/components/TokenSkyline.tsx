@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import tokens from "@/content/tokens.json";
 import { useMedia } from "@/hooks/useMedia";
+import { useScale } from "@/hooks/useScale";
 import { useNear } from "@/hooks/useNear";
 import { DAY, MONTHS, long, short, thousands } from "@/lib/calendar";
 
 /*
  * The editor's tokens with coding agents, under the GitHub heatmap: the total
- * and its value at API list prices, a skyline from the first week there was
- * any (a week to a building, stacked by agent), and a flow from each agent to
+ * and its value at API list prices, a town plan of the weeks from the first
+ * there was any (a treemap: a month to a district, a week to a block, divided
+ * among the agents), and a flow from each agent to
  * the kinds of token it spent. scripts/token-data.py counts it all from
  * cc-switch into src/content/tokens.json. Each agent keeps its own colour everywhere
  * (agent-claude and so on, in site.css) and is always named beside its marks.
@@ -67,7 +69,7 @@ const PER_DAY = T.total / Math.max(1, T.days.length);
 // word, typed at 40 words a minute, six hours a day, 230 days a year.
 const TYPING_YEARS = Math.round((T.parts.output * 0.75) / (40 * 60 * 6 * 230));
 
-// ---------------------------------------------------------------- the skyline's weeks
+// ---------------------------------------------------------------- the town's blocks
 
 const FIRST = Date.parse(T.since ?? T.fetched);
 const START = FIRST - new Date(FIRST).getUTCDay() * DAY; // the Sunday on or before the first day
@@ -84,52 +86,92 @@ const TALLEST = Math.max(1, ...SUM);
 const PEAK = SUM.indexOf(TALLEST);
 const weekStart = (w: number) => new Date(START + w * 7 * DAY);
 
-const W = 556; // as wide as the heatmap's drawing, so the two read at one scale
-const LEFT = 26; // the heatmap's grid starts here too
-const STEP = (W - LEFT) / WEEKS;
-const BAR = Math.min(24, Math.round(STEP * 0.72));
-const SKY = 76; // the tallest building
-const ROOF = 14; // room over it for its figure
-const GROUND = ROOF + SKY;
-const H = GROUND + 18; // and under the ground, the months
-const xOf = (w: number) => LEFT + w * STEP + (STEP - BAR) / 2;
-const height = (n: number) => (n / TALLEST) * SKY;
+/*
+ * The weeks as a town seen from above, a treemap kept in time order: a month
+ * to a district, left to right, as wide as its tokens; its weeks as blocks
+ * down it, each as tall as its tokens; each block divided among the agents.
+ * The streets between are paper: two units between blocks, twice that
+ * between districts, a hairline between one agent's lot and the next.
+ */
+const W = 556;
+const TOP = 22; // over the districts, their names
+const PLAN = 200;
+const H = TOP + PLAN;
+const STREET = 2;
+const r2 = (n: number) => Math.round(n * 100) / 100;
 
-/** Each month's name under the first week that starts in it (the first week, under the first day's month). */
-const MONTH_MARKS = WEEK.flatMap((_, w) => {
-  const month = (w === 0 ? new Date(FIRST) : weekStart(w)).getUTCMonth();
-  return w === 0 || month !== weekStart(w - 1).getUTCMonth() ? [{ w, label: MONTHS[month].slice(0, 3).toUpperCase() }] : [];
-});
+type Block = { week: number; x: number; y: number; w: number; h: number; lots: { k: number; x: number; w: number }[] };
+type District = { month: number; total: number; x: number; w: number; blocks: Block[] };
 
-const BUILDINGS = (
+/** Each week goes to the month it starts in (the first week, to the first day's month). */
+const DISTRICTS: District[] = (() => {
+  const months: { month: number; weeks: number[]; total: number }[] = [];
+  SUM.forEach((total, w) => {
+    if (!total) return;
+    const month = (w === 0 ? new Date(FIRST) : weekStart(w)).getUTCMonth();
+    const last = months.at(-1);
+    if (last?.month === month) {
+      last.weeks.push(w);
+      last.total += total;
+    } else months.push({ month, weeks: [w], total });
+  });
+  const wide = W - (months.length - 1) * 2 * STREET;
+  let x = 0;
+  return months.map(({ month, weeks, total }) => {
+    const w = (wide * total) / T.total;
+    const tall = PLAN - (weeks.length - 1) * STREET;
+    let y = TOP;
+    const blocks = weeks.map((week) => {
+      const h = (tall * SUM[week]) / total;
+      const agents = WEEK[week].tokens.filter(Boolean).length;
+      const room = Math.max(0, w - (agents - 1));
+      let lx = x;
+      const lots = WEEK[week].tokens.flatMap((n, k) => {
+        if (!n) return [];
+        const lot = { k, x: lx, w: (room * n) / SUM[week] };
+        lx += lot.w + 1;
+        return [lot];
+      });
+      const block = { week, x, y, w, h, lots };
+      y += h + STREET;
+      return block;
+    });
+    const district = { month, total, x, w, blocks };
+    x += w + 2 * STREET;
+    return district;
+  });
+})();
+const BLOCKS = DISTRICTS.flatMap((d) => d.blocks);
+/**
+ * A district's name over it, and its tokens beside the name, as much as fits
+ * before the next district's name. Names are set at 9px whatever the plan's
+ * width, about 5.9px a letter; `scale` is pixels to a unit.
+ */
+const districtName = (d: District, i: number, scale: number) => {
+  const room = ((DISTRICTS[i + 1]?.x ?? W) - d.x) * scale;
+  const name = MONTHS[d.month].slice(0, 3).toUpperCase();
+  const full = `${name} ${compact(d.total)}`;
+  return [full, name].find((s) => s.length * 5.9 + 10 <= room) ?? "";
+};
+
+function Town({ scale }: { scale: number }) {
+  return (
   <g>
-    {SUM.map((total, w) => {
-      if (!total) return null;
-      let top = GROUND;
-      return (
-        <g key={w}>
-          {WEEK[w].tokens.map((n, k) => {
-            if (!n) return null;
-            const h = height(n);
-            top -= h;
-            // a hairline of paper between one agent's floors and the next
-            return <rect key={k} className={hue(T.apps[k])} x={xOf(w)} y={top + (h > 2 ? 1 : 0)} width={BAR} height={h > 2 ? h - 1 : h} />;
-          })}
-          <rect className="sky-windows" x={xOf(w)} y={GROUND - height(total)} width={BAR} height={height(total)} />
-        </g>
-      );
-    })}
-    <text className="sky-peak" x={xOf(PEAK) + BAR / 2} y={GROUND - height(TALLEST) - 4}>
-      {compact(TALLEST)}
-    </text>
-    <line className="sky-ground" x1={LEFT} x2={W} y1={GROUND + 0.5} y2={GROUND + 0.5} />
-    {MONTH_MARKS.map(({ w, label }) => (
-      <text key={w} className="sky-month" x={xOf(w)} y={GROUND + 13}>
-        {label}
-      </text>
+    {DISTRICTS.map((d, i) => (
+      <g key={`${d.month}-${d.x}`}>
+        <text className="sky-month" x={r2(d.x)} y={TOP - 6} style={{ fontSize: r2(9 / scale) }}>
+          {districtName(d, i, scale)}
+        </text>
+        {d.blocks.map((b) =>
+          b.lots.map((l) => (
+            <rect key={`${b.week}-${l.k}`} className={hue(T.apps[l.k])} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
+          )),
+        )}
+      </g>
     ))}
   </g>
-);
+  );
+}
 
 // ---------------------------------------------------------------- the flow
 
@@ -152,7 +194,6 @@ const FH = 168;
 const NODE = 6;
 const GAP = 10;
 const PER = (FH - (KINDS.length - 1) * GAP) / T.total;
-const r2 = (n: number) => Math.round(n * 100) / 100;
 
 type Span = { y0: number; y1: number };
 /** Values stacked down one side, a gap between each, centred in the drawing. */
@@ -347,23 +388,29 @@ function Odometer({ value }: { value: number }) {
 
 /**
  * Tokens with coding agents: the total and what it is worth, the weeks as a
- * skyline, and the shares as a flow from agent to kind. The lines under the
- * skyline and the flow read out what the pointer is on.
+ * town, and the shares as a flow from agent to kind. The lines under the town
+ * and the flow read out what the pointer is on.
  */
 export function TokenSkyline() {
   const [at, setAt] = useState<number | null>(null);
+  const sky = useRef<SVGSVGElement>(null);
+  const scale = useScale(sky, W);
 
+  /** The block under the pointer, its street included, so a thin block can still be found. */
   function pick(e: PointerEvent<SVGSVGElement>) {
     const box = e.currentTarget.getBoundingClientRect();
-    const w = Math.floor((((e.clientX - box.left) * W) / box.width - LEFT) / STEP);
-    setAt(w >= 0 && w < WEEKS && SUM[w] > 0 ? w : null);
+    const x = ((e.clientX - box.left) * W) / box.width;
+    const y = ((e.clientY - box.top) * H) / box.height;
+    const b = BLOCKS.find((b) => x >= b.x - STREET && x <= b.x + b.w + STREET && y >= b.y - STREET && y <= b.y + b.h + STREET);
+    setAt(b ? b.week : null);
   }
+  const block = at === null ? undefined : BLOCKS.find((b) => b.week === at);
 
   const since = T.since ? long(new Date(T.since)) : "the start";
   return (
     <figure className="tokens">
       <h3 className="sect-label">
-        <span lang="ja">楼</span> With agents
+        <span lang="ja">街</span> With agents
       </h3>
       <p className="tokens__total">
         <Odometer value={T.total} />
@@ -401,6 +448,7 @@ export function TokenSkyline() {
       </div>
 
       <svg
+        ref={sky}
         className="tokens__sky"
         viewBox={`0 0 ${W} ${H}`}
         role="img"
@@ -411,15 +459,10 @@ export function TokenSkyline() {
           if (e.pointerType === "mouse") setAt(null);
         }}
       >
-        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, a building a week: ${BY_AGENT.map((s) => `${s.label} ${compact(s.value)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
-        <defs>
-          <pattern id="sky-lit" width="3" height="4" patternUnits="userSpaceOnUse">
-            <rect x="1" y="1.5" width="1" height="1.4" />
-          </pattern>
-        </defs>
-        {BUILDINGS}
-        {at !== null && (
-          <rect className="tokens__at" x={xOf(at) - 1.5} y={GROUND - height(SUM[at]) - 1.5} width={BAR + 3} height={height(SUM[at]) + 1.5} />
+        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as a town plan, a month to a district and a week to a block: ${DISTRICTS.map((d) => `${MONTHS[d.month]} ${compact(d.total)}`).join(", ")}. By agent: ${BY_AGENT.map((s) => `${s.label} ${compact(s.value)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
+        <Town scale={scale} />
+        {block && (
+          <rect className="tokens__at" x={r2(block.x - 1.5)} y={r2(block.y - 1.5)} width={r2(block.w + 3)} height={r2(block.h + 3)} />
         )}
       </svg>
       <div className="tokens__foot mono">
@@ -439,11 +482,43 @@ export function TokenSkyline() {
         </p>
       </div>
 
+      {/* Every week's numbers, for readers who cannot see the plan; a table hides inside a box, not by itself. */}
+      <div className="visually-hidden">
+        <table>
+          <caption>Tokens a week, by agent</caption>
+          <thead>
+            <tr>
+              <th scope="col">Week of</th>
+              {T.apps.map((a) => (
+                <th key={a} scope="col">
+                  {named(a)}
+                </th>
+              ))}
+              <th scope="col">All tokens</th>
+              <th scope="col">Value at list prices</th>
+            </tr>
+          </thead>
+          <tbody>
+            {BLOCKS.map(({ week }) => (
+              <tr key={week}>
+                <th scope="row">{short(weekStart(week))}</th>
+                {WEEK[week].tokens.map((n, k) => (
+                  <td key={k}>{thousands(n)}</td>
+                ))}
+                <td>{thousands(SUM[week])}</td>
+                <td>{dollars(WEEK[week].usd)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <Flow />
 
       <figcaption>
-        <span lang="ja">楼</span>, tower: a week of tokens to a building, stacked by agent, from the first week there were
-        any. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
+        <span lang="ja">街</span>, town: the weeks from above, from the first there were any. A month of tokens is a
+        district, as wide as its tokens; a week is a block in it, as tall as its tokens; each block is divided among the
+        agents, and the streets between are only paper. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
         cache, or written back as output. Counted by cc-switch on {MACHINES}, cache reads included, to {long(new Date(T.fetched))}. The money is what the
         tokens are worth at API list prices, not what I paid; models no price table knows count at nothing, so it is a
         floor. The typist types 40 words a minute, 230 days a year, and a token is about three-quarters of a word.

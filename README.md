@@ -150,8 +150,9 @@ too; commit a fresh one now and then so it does not drift far.
 ## Token skyline
 
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and
-its value at API list prices, a building a week from the first week there was
-any, stacked by agent, and a flow from each agent to the kinds of token it
+its value at API list prices, the weeks as a town plan from the first week there
+was any (a treemap kept in time order: a month to a district, a week to a block,
+each block divided by agent), and a flow from each agent to the kinds of token it
 spent (cache reads, fresh input, cache writes, output), each agent's value
 beside it (`src/components/TokenSkyline.tsx`). Money is the cost
 cc-switch recorded; rows it left at $0 for want of a price are priced from the

@@ -530,12 +530,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .tokens .kind-input { fill: var(--ink-2); background: var(--ink-2); }
 .tokens .kind-write { fill: var(--ink-3); background: var(--ink-3); }
 .tokens .kind-output { fill: var(--ink-4); background: var(--ink-4); }
-.tokens .sky-windows { fill: url(#sky-lit); pointer-events: none; }
-.tokens #sky-lit rect { fill: var(--paper); opacity: 0.55; }
-.tokens .sky-peak { font: 400 9px var(--f-mono); letter-spacing: 0.04em; fill: var(--ink-2); text-anchor: middle; }
 .tokens .sky-month { font: 400 9px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink-3); }
-.tokens .sky-ground { stroke: var(--rule-strong); stroke-width: 0.5; }
-.tokens__at { fill: none; stroke: var(--sumi); stroke-width: 1; pointer-events: none; }
+.tokens__at { fill: none; stroke: var(--sumi); stroke-width: 1.5; pointer-events: none; }
 .tokens__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 18px; margin-top: 8px; color: var(--ink-2); }
 .tokens__foot p { margin: 0; }
 .tokens__key { display: flex; gap: 12px; color: var(--ink-3); }
@@ -548,8 +544,9 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
    node is nudged below the one above it, into the room under the drawing. */
 .flows { margin: 30px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
 .flows__title { margin: 0 0 14px; font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); }
-.flow { display: grid; grid-template-columns: 8.4em minmax(0, 1fr) 11em; column-gap: 10px; height: 168px; margin-bottom: 18px; }
-.flow__side { position: relative; margin: 0; padding: 0; list-style: none; font-size: 10px; letter-spacing: 0.04em; }
+/* The label columns are in em of the labels' own size, set here, so they keep the drawing room on a phone. */
+.flow { display: grid; grid-template-columns: 9.4em minmax(0, 1fr) 11em; column-gap: 10px; height: 168px; margin-bottom: 18px; font-size: 10px; }
+.flow__side { position: relative; margin: 0; padding: 0; list-style: none; font-size: inherit; letter-spacing: 0.04em; }
 .flow__side li { position: absolute; inset-inline: 0; transform: translateY(-50%); line-height: 1.4; white-space: nowrap; cursor: default; }
 .flow__side--from li { text-align: right; }
 .flow__side b { font-weight: 500; color: var(--sumi); }
@@ -562,8 +559,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .flow__plot.is-picking .flow__link.is-on { opacity: 0.75; }
 .flows__read { margin: 0; min-height: 1.6em; color: var(--ink-2); }
 @container (max-width: 380px) {
-  .flow { grid-template-columns: 7.6em minmax(0, 1fr) 9.8em; column-gap: 6px; }
-  .flow__side { font-size: 9px; }
+  .flow { column-gap: 6px; font-size: 9px; }
 }
 .tokens figcaption [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); }
 
@@ -578,8 +574,12 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* ------------------------------------------------------------------ feature opener + route map */
 
 .feature-open .display { max-width: 16ch; }
-.routemap { margin-top: clamp(40px, 5vw, 72px); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.routemap { margin-top: clamp(40px, 5vw, 72px); }
+/* Only the drawing scrolls sideways, never the key under it. On a phone it is
+   drawn larger, so its words stay readable, and a line says it scrolls. */
+.routemap__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .routemap svg { min-width: 760px; width: 100%; height: auto; color: var(--sumi); }
+@media (max-width: 1180px) { .routemap svg { min-width: 1100px; } }
 /* Metro colours, as the user assigned them (2026-10-29): AwakeAI orange, Pioneer red, Tokensbeat darker
    green, WorkGo purple, YoueData light blue; InclusifAI aqua, HiRain blue, and the City builder loop a light
    Yamanote green. Steps from the dataviz skill's palette and ramps; every pair of lines that touch passes its
@@ -631,7 +631,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 }
 .rm-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
 .rm-keybtn {
-  appearance: none; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  /* wraps, so a date too long for a narrow button goes under the name rather than over the next button */
+  appearance: none; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; padding: 8px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent;
   text-align: left; color: var(--sumi); background: transparent; border: 0.5px solid var(--rule-strong); border-left: 6px solid var(--c);
 }
 .rm-keybtn b { font: 600 0.95rem/1.2 var(--f-sans); white-space: nowrap; }
@@ -702,6 +703,9 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .routemap .rm-loop .rm-rail { stroke: var(--paper); stroke-width: 2; }
 .routemap .rm-loop .rm-planned { stroke-width: 6; stroke-dasharray: 9 7; }
 .routemap .rm-kanji { font: 700 16px var(--f-mincho); fill: var(--sumi); text-anchor: middle; }
+.routemap .rm-kanji--across { letter-spacing: 0.2em; }
+/* a name set over the loop's rail, kept clear of it by a rim of paper */
+.routemap .rm-halo { paint-order: stroke; stroke: var(--paper); stroke-width: 5px; stroke-linejoin: round; }
 .routemap .rm-transfer { fill: none; stroke: var(--ink-2); stroke-width: 2.5; stroke-dasharray: 0 6; stroke-linecap: round; }
 .routemap .rm-ruler line { stroke: var(--rule-strong); stroke-width: 0.6; }
 .routemap .rm-ruler text { font: 400 10px var(--f-mono); fill: var(--ink-2); text-anchor: middle; letter-spacing: 0.04em; }
@@ -774,13 +778,22 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .dg-pt { fill: var(--paper); stroke: var(--dg-ground); stroke-width: 2; }
 .dg-up { stroke: var(--dg-height); fill: none; stroke-width: 2.4; stroke-dasharray: 5 4; }
 .dg-top { fill: var(--dg-height); stroke: var(--paper); stroke-width: 1.5; }
-.dg-lbl tspan { fill: var(--dg-height); }
-.dg-lbl { font: 500 11px var(--f-mono); fill: var(--sumi); letter-spacing: 0.06em; }
-.dg-sub { font: 400 10px var(--f-mono); fill: var(--ink-2); }
 
 /* The Tokensbeat plan is drawn in ink only; the open bay, room for the next app, is dashed. */
 .diagram--plan { padding: clamp(10px, 1.2vw, 16px); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .diagram--plan svg { min-width: 600px; }
+
+/* Under a drawing wider than the screen, which scrolls sideways in its frame. */
+.scroll-hint { display: none; margin: 8px 0 0; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-3); }
+@media (max-width: 1180px) { .routemap .scroll-hint { display: block; } }
+@media (max-width: 700px) { .diagram--plan + .scroll-hint { display: block; } }
+
+/* The HiRain schematic: three panels side by side, captioned in HTML so the
+   captions stay readable however small the drawings get. */
+.points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 2vw, 24px); }
+.points__lbl { margin: 6px 0 0; text-align: center; font: 500 11px/1.3 var(--f-mono); letter-spacing: 0.06em; color: var(--sumi); }
+.points__lbl span { color: var(--dg-height); }
+.points__sub { margin: 3px 0 0; text-align: center; font: 400 10px/1.35 var(--f-mono); color: var(--ink-2); }
 .pl-box { fill: var(--paper); stroke: var(--sumi); stroke-width: 1.2; }
 .pl-box--vacant { fill: none; stroke: var(--ink-3); stroke-dasharray: 2 4; }
 .pl-slab { fill: var(--paper-2); stroke: var(--sumi); stroke-width: 1.6; }
@@ -849,7 +862,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .item__meta { margin: 0 0 10px; font: 400 11px/1.5 var(--f-mono); color: var(--ink-2); letter-spacing: 0.04em; }
 .item p { margin: 0; font-size: 0.95rem; color: var(--ink-2); }
 .item__link { margin-top: auto; padding-top: 12px; font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.06em; }
-.item__link a { text-decoration: none; border-bottom: 0.5px solid currentColor; }
+.item__link a { text-decoration: none; border-bottom: 0.5px solid currentColor; overflow-wrap: anywhere; }
 
 @media (max-width: 900px) {
   .workshop__intro, .workshop__aside { grid-column: 1 / -1; }
@@ -1123,9 +1136,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
     /* the heatmap's year fills in from the left, just behind its label's rule */
     .heatmap__plot { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; }
     @keyframes fill-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
-    /* and the token skyline goes up from its ground under it */
-    .tokens__sky { animation: rise linear both; animation-timeline: view(); animation-range: entry 10% cover 35%; }
-    @keyframes rise { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+    /* and the token town is laid out under it in time order, from the left */
+    .tokens__sky { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 35%; }
   }
 }
 

@@ -5,7 +5,10 @@ import { GlitchTitle } from "@/components/effects";
 /*
  * Route map of my work, drawn as a network map along time: left to right runs
  * from 2003 to past NOW, not to scale (WHEN maps dates to x, for the ruler).
- * The schools are vertical terminals, set where their lines set out. Lines on
+ * The universities are vertical terminals, set where their lines set out, standing
+ * up through the City builder loop's top, which stops at both; the high school
+ * lies across its left side, and Pioneer, which shares its name, sets out from
+ * it. Lines on
  * the same stack at the same time stop at one station. Pioneer runs on into
  * McGill, where AwakeAI sets out carrying its Java; AwakeAI closes into a
  * junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught.
@@ -54,20 +57,32 @@ type Station = {
   at: Label;
   planned?: boolean;
 };
-/** A school: a vertical terminal, its kanji set vertically above it and its name below. */
+/**
+ * A school: a vertical terminal from the loop's top rail down through the lines
+ * that set out from it, its kanji set vertically inside and its name below.
+ */
 type School = { kanji: string; name: string; note: string; x: number; lines: LineKey[] };
 
 const SCHOOLS: School[] = [
   // where YoueData sets out on graduating, and Pioneer, begun there, runs through
-  { kanji: "大学", name: "Saint John's", note: "B.A. 2014–2017 · HPC · robotics", x: 230, lines: ["p", "y"] },
+  { kanji: "大学", name: "Saint John's", note: "B.A. 2014–2017 · HPC · robotics", x: 230, lines: ["c", "p", "y"] },
   // where Pioneer runs in, in 2019, and AwakeAI sets out, in December 2020
-  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["p", "a"] },
+  { kanji: "大学院", name: "McGill", note: "M.Sc. 2019–2022 · parallel solvers", x: 470, lines: ["c", "p", "a"] },
 ];
-const TERMINAL = { top: 122, bottom: 198, w: 22 };
+// The loop's top rail crosses the straight of the terminal, not its rounded end.
+const TERMINAL = { top: LOOP.top - 18, bottom: 198, w: 22 };
+/**
+ * The high school: a terminal lying across the loop's left side, as the
+ * universities stand across its top, its kanji set across it. Pioneer, which
+ * shares its name, sets out from its right end along Pioneer's own track.
+ */
+const HIGH_SCHOOL = { kanji: "高校", name: "Pioneer High School", y: 160, left: -84, right: -4, h: 22, lines: ["c", "p"] as LineKey[] };
+/** The kanji's baseline, centred between the loop's rail and the first line across the terminal. */
+const kanjiY = (i: number, n: number) => 101 + (i - (n - 1) / 2) * 18;
 
 // Drawn in this order, so WorkGo crosses over Tokensbeat where it leaves the corridor.
 const LINES: Line[] = [
-  { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: "M60 160 H470" },
+  { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: `M${HIGH_SCHOOL.right} 160 H470` },
   { key: "y", code: "Y", name: "YoueData", since: "2017–2018", live: "M230 144 H370", end: "M370 135 V153" },
   { key: "a", code: "A", name: "AwakeAI", since: "2020–2025", live: "M470 160 H870" },
   {
@@ -102,7 +117,7 @@ const CODE = Object.fromEntries(KEY.map((l) => [l.key, l.code])) as Record<LineK
  * Japanese map sets the line symbol: filled, so it never reads as a station.
  */
 const MARKERS: { line: LineKey; x: number; y: number }[] = [
-  { line: "c", x: LOOP.left, y: 172 },
+  { line: "c", x: LOOP.left, y: 236 }, // under the high school, on a stretch of rail with no stop
   { line: "p", x: 175, y: 160 },
   { line: "y", x: 287, y: 144 },
   { line: "a", x: 580, y: 160 },
@@ -142,7 +157,8 @@ const STOPS: Stop[] = [
   { line: "t", x: 1460, y: 142, label: "managed backend", at: { x: EDGE, y: 112, anchor: "end" }, planned: true },
   // the loop, from the Cities section and the workshop
   { line: "c", x: -20, y: LOOP.top, label: "first road · SimCity 4", at: { x: -46, y: 32, anchor: "start" } },
-  { line: "c", x: x(2020.79), y: LOOP.top, label: "featured by Cities: Skylines", at: { x: x(2020.79), y: 32 } },
+  // set off to the right, clear of McGill's terminal on the rail
+  { line: "c", x: x(2020.79), y: LOOP.top, label: "featured by Cities: Skylines", at: { x: x(2020.79) - 10, y: 32, anchor: "start" } },
   { line: "c", x: 990, y: LOOP.top, label: "Metro2Line", at: { x: 990, y: 32 } },
   { line: "c", x: 1300, y: LOOP.top, label: "5,000 hours", at: { x: 1300, y: 32 } },
 ];
@@ -156,22 +172,26 @@ type Row = { year: string; month?: string; name: string; ja?: string; via?: Line
 const TIMETABLE: Record<LineKey, Row[]> = {
   c: [
     { year: "2003", name: "first road, SimCity 4", note: "sets out" },
+    { year: "—", name: "Pioneer High School", ja: "高校", via: ["p"] },
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["p", "y"] },
+    { year: "2019", name: "McGill", ja: "大学院", via: ["p", "a"] },
     { year: "2020", month: "10", name: "featured by the Cities: Skylines account" },
     { year: "2025", month: "12", name: "Metro2Line" },
     { year: "2026", month: "10", name: "5,000 hours", note: "now, and still going round" },
   ],
   p: [
-    { year: "2015", name: "bidding system", note: "sets out, a databases course project" },
-    { year: "2017", name: "Saint John's", ja: "大学", via: ["y"], note: "B.A." },
+    { year: "—", name: "Pioneer High School", ja: "高校", via: ["c"], note: "sets out from the school it shares its name with" },
+    { year: "2015", name: "bidding system", note: "a databases course project" },
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["y", "c"], note: "B.A." },
     { year: "2018", name: "Java", via: ["y"] },
-    { year: "2019", name: "McGill", ja: "大学院", via: ["a"], note: "runs in; its Java goes on with AwakeAI" },
+    { year: "2019", name: "McGill", ja: "大学院", via: ["a", "c"], note: "runs in; its Java goes on with AwakeAI" },
   ],
   y: [
-    { year: "2017", name: "Saint John's", ja: "大学", via: ["p"], note: "sets out on graduating" },
+    { year: "2017", name: "Saint John's", ja: "大学", via: ["p", "c"], note: "sets out on graduating" },
     { year: "2018", name: "Java", via: ["p"], note: "HDFS; the line closes" },
   ],
   a: [
-    { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p"], note: "sets out, with Pioneer's Java" },
+    { year: "2020", month: "12", name: "McGill", ja: "大学院", via: ["p", "c"], note: "sets out, with Pioneer's Java" },
     { year: "2022", name: "Dobson Cup", note: "third place" },
     { year: "2023", name: "architect" },
     { year: "2025", month: "01", name: "COO" },
@@ -243,7 +263,9 @@ function RouteMap({ on }: { on: LineKey | null }) {
       <desc id="rm-d">
         A network map along time, from 2003 to past now, inside a loop. The loop is City builder: my first road in
         SimCity 4 in 2003, a city featured by the Cities: Skylines account in October 2020, Metro2Line in December 2025
-        and 5,000 hours by now. Inside it, two vertical terminals: Saint John's, university, B.A. 2014 to 2017, where
+        and 5,000 hours by now. Across its left side lies a horizontal terminal, Pioneer High School, out of which
+        Pioneer, sharing its name, sets out. Inside it, two vertical terminals that reach up to the loop, which stops
+        at both: Saint John's, university, B.A. 2014 to 2017, where
         Pioneer, from 2015 to 2019, runs through and YoueData, 2017 to 2018, sets out; the two share Java. Pioneer
         runs on into McGill, graduate school, M.Sc. 2019 to 2022, where AwakeAI sets out with its Java in December
         2020, through the Dobson Cup, architect and COO. AwakeAI closes in July 2025 into a junction of architecture,
@@ -304,11 +326,28 @@ function RouteMap({ on }: { on: LineKey | null }) {
           </g>
         ))}
 
+        <g className={`rm-terminal${dim(on, HIGH_SCHOOL.lines)}`}>
+          <rect
+            x={HIGH_SCHOOL.left}
+            y={HIGH_SCHOOL.y - HIGH_SCHOOL.h / 2}
+            width={HIGH_SCHOOL.right - HIGH_SCHOOL.left}
+            height={HIGH_SCHOOL.h}
+            rx={HIGH_SCHOOL.h / 2}
+          />
+          <text className="rm-kanji rm-kanji--across" lang="ja" x={(HIGH_SCHOOL.left + HIGH_SCHOOL.right) / 2} y={HIGH_SCHOOL.y + 6}>
+            {HIGH_SCHOOL.kanji}
+          </text>
+          {/* haloed, since it crosses the loop's left rail */}
+          <text className="rm-name rm-halo" x={HIGH_SCHOOL.left} y={HIGH_SCHOOL.y + HIGH_SCHOOL.h / 2 + 18}>
+            {HIGH_SCHOOL.name}
+          </text>
+        </g>
+
         {SCHOOLS.map((sc) => (
           <g key={sc.name} className={`rm-terminal${dim(on, sc.lines)}`}>
             <rect x={sc.x - TERMINAL.w / 2} y={TERMINAL.top} width={TERMINAL.w} height={TERMINAL.bottom - TERMINAL.top} rx={TERMINAL.w / 2} />
             {[...sc.kanji].map((ch, i) => (
-              <text key={i} className="rm-kanji" lang="ja" x={sc.x} y={TERMINAL.top - 8 - (sc.kanji.length - 1 - i) * 18}>
+              <text key={i} className="rm-kanji" lang="ja" x={sc.x} y={kanjiY(i, sc.kanji.length)}>
                 {ch}
               </text>
             ))}
@@ -490,7 +529,12 @@ export function FeatureOpener() {
         </p>
 
         <figure className="routemap">
-          <RouteMap on={on} />
+          <div className="routemap__scroll">
+            <RouteMap on={on} />
+          </div>
+          <p className="scroll-hint mono" aria-hidden="true">
+            Drag the map sideways for the rest of it →
+          </p>
           <div className="rm-keys" role="group" aria-label="Lines: choose one to read its timetable">
             {KEY.map((l) => (
               <button
@@ -517,8 +561,10 @@ export function FeatureOpener() {
             <p className="rm-tt-hint">Choose a line in the key to light it on the map and read its timetable.</p>
           )}
           <figcaption>
-            Route map, left to right in time, not to scale. The schools are its terminals, set vertically:{" "}
-            <span lang="ja">大学</span> and <span lang="ja">大学院</span>. Where lines run on the same stack at the
+            Route map, left to right in time, not to scale. The schools are its terminals: the high school,{" "}
+            <span lang="ja">高校</span>, lies across the loop's left side, and Pioneer, which shares its name, sets out
+            from it; the universities, <span lang="ja">大学</span> and <span lang="ja">大学院</span>, stand up through
+            its top. Where lines run on the same stack at the
             same time, they share a station. Pioneer runs on into McGill, where AwakeAI sets out with its Java; AwakeAI
             closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. Around it all
             runs the loop: city builder, since my first road in SimCity 4 in 2003. A bar marks a line that has closed;

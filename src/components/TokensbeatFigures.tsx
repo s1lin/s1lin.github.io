@@ -144,6 +144,9 @@ export function TokensbeatSection() {
       <div className="diagram diagram--plan">
         <Section />
       </div>
+      <p className="scroll-hint mono" aria-hidden="true">
+        Drag the plan sideways for the rest of it →
+      </p>
       <figcaption>
         What I want Tokensbeat to be: one foundation that every model plugs into, and apps that move in on top of it, each
         with its own agent, backend and gateway. People use the same building through Aha.
