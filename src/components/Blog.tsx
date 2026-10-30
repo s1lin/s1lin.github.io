@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Barcode, Kicker } from "@/components/bits";
 import { Runhead } from "@/components/Runhead";
+import { Comments } from "@/components/social/Comments";
 import { POSTS, type Post } from "@/content/posts";
 
 const RUN = "随筆 · Blog";
@@ -126,6 +127,9 @@ function PostPage({ post }: { post: Post }) {
                     {post.note}
                   </p>
                 )}
+              </div>
+              <div className="post__social">
+                <Comments target={`site:s1lin:blog/${post.slug}`} lang={post.lang === "zh-Hans" ? "zh" : "en"} />
               </div>
             </div>
 
