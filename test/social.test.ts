@@ -155,3 +155,107 @@ test("a shape is centred on a board and refused if it does not fit", () => {
   assert.equal(out!.reduce((a, b) => a + b, 0), 2);
   assert.equal(centre({ w: 9, h: 1, cells: ["1".repeat(9)] }, 6, 5), null);
 });
+
+import { REVISE_PREFS_KEY, loadRevisePrefs, pickModel, saveRevisePrefs, type ModelCatalog } from "../src/lib/social/client.ts";
+
+const signedIn = () => {
+  const st = memory();
+  saveSession(st, { token: TOKEN, user: { name: "Mina" } });
+  return st;
+};
+
+test("revise: the models are read with the bearer in a header only, and odd entries are dropped", async () => {
+  const seen: { url: string; init: RequestInit }[] = [];
+  const api = createSocial({
+    base: "https://a.test",
+    storage: signedIn(),
+    fetch: (async (url: string, init: RequestInit) => {
+      seen.push({ url, init });
+      return reply(200, { keys: [{ id: 3, name: "Default", models: ["qwen3.8", "bad model!", 5] }, { id: "x", name: "Empty", models: [] }, { nope: 1 }, { id: 7, models: ["gpt-6-astra"] }], defaultKeyId: 3, defaultModel: "qwen3.8" });
+    }) as unknown as typeof fetch,
+  });
+  const cat = await api.models();
+  assert.equal(seen[0].url, "https://a.test/api/social/models");
+  assert.equal(seen[0].init.method, "GET");
+  assert.equal((seen[0].init.headers as Record<string, string>).Authorization, `Bearer ${TOKEN}`);
+  assert.equal(seen[0].init.credentials, "omit");
+  assert.ok(!seen[0].url.includes(TOKEN));
+  assert.deepEqual(cat, { keys: [{ id: 3, name: "Default", models: ["qwen3.8"] }, { id: 7, name: "Key 7", models: ["gpt-6-astra"] }], defaultKeyId: 3, defaultModel: "qwen3.8" });
+});
+
+test("revise: the draft goes as JSON with the chosen key, model and tone, and the answer comes back as text", async () => {
+  const seen: { url: string; init: RequestInit }[] = [];
+  const api = createSocial({
+    base: "https://a.test",
+    storage: signedIn(),
+    fetch: (async (url: string, init: RequestInit) => {
+      seen.push({ url, init });
+      return reply(200, { text: "  A kinder draft.  ", model: "qwen3.8", keyId: 3 });
+    }) as unknown as typeof fetch,
+  });
+  const r = await api.revise({ text: "a draft", keyId: 3, model: "qwen3.8", tone: "friendlier" });
+  assert.deepEqual(r, { text: "A kinder draft.", model: "qwen3.8", keyId: 3 });
+  assert.equal(seen[0].url, "https://a.test/api/social/revise");
+  assert.equal(seen[0].init.method, "POST");
+  assert.equal((seen[0].init.headers as Record<string, string>).Authorization, `Bearer ${TOKEN}`);
+  assert.equal(seen[0].init.credentials, "omit");
+  assert.deepEqual(JSON.parse(seen[0].init.body as string), { text: "a draft", keyId: 3, model: "qwen3.8", tone: "friendlier" });
+});
+
+test("revise: signed out fails before any request; an empty or missing answer is a server error; a long one is cut", async () => {
+  let calls = 0;
+  const out = (body: unknown) => createSocial({ base: "https://a.test", storage: signedIn(), fetch: (async () => { calls++; return reply(200, body); }) as unknown as typeof fetch });
+  const anon = createSocial({ base: "https://a.test", storage: null, fetch: (async () => { calls++; return reply(200, {}); }) as unknown as typeof fetch });
+  await assert.rejects(anon.revise({ text: "x" }), (e: SocialError) => e.kind === "auth");
+  await assert.rejects(anon.models(), (e: SocialError) => e.kind === "auth");
+  assert.equal(calls, 0);
+  await assert.rejects(out({ text: "   " }).revise({ text: "x" }), (e: SocialError) => e.kind === "server");
+  await assert.rejects(out({}).revise({ text: "x" }), (e: SocialError) => e.kind === "server");
+  assert.equal((await out({ text: "y".repeat(3000), model: "m" }).revise({ text: "x" })).text.length, 2000);
+});
+
+test("revise: failures map to what the reader is told: 401 signs out, 429 rate, 402/403 plan with the server's words, 502 server", async () => {
+  const st = signedIn();
+  let status = 200;
+  let body: unknown = {};
+  const api = createSocial({ base: "https://a.test", storage: st, fetch: (async () => reply(status, body)) as unknown as typeof fetch });
+  status = 429;
+  await assert.rejects(api.revise({ text: "x" }), (e: SocialError) => e.kind === "rate");
+  status = 402;
+  body = { error: { message: "qwen3.8 is not on this key's plan" } };
+  await assert.rejects(api.revise({ text: "x" }), (e: SocialError) => e.kind === "invalid" && e.reason === "qwen3.8 is not on this key's plan");
+  status = 403;
+  body = { message: "balance too low" };
+  await assert.rejects(api.models(), (e: SocialError) => e.kind === "refused" && e.reason === "balance too low");
+  status = 502;
+  body = { error: { message: "model failed" } };
+  await assert.rejects(api.revise({ text: "x" }), (e: SocialError) => e.kind === "server" && e.status === 502);
+  assert.equal(loadSession(st)?.token, TOKEN);
+  status = 401;
+  await assert.rejects(api.revise({ text: "x" }), (e: SocialError) => e.kind === "auth");
+  assert.equal(st.data.size, 0);
+  assert.equal(mapError(400, { error: { message: "nested" } }).reason, "nested");
+});
+
+test("revise: the last choice is kept, a bad one is ignored, and the start falls back to the default, then the first model", () => {
+  const st = memory();
+  assert.deepEqual(loadRevisePrefs(st), {});
+  saveRevisePrefs(st, { keyId: 7, model: "gpt-6-astra", tone: "shorter" });
+  assert.ok(st.data.has(REVISE_PREFS_KEY));
+  assert.deepEqual(loadRevisePrefs(st), { keyId: 7, model: "gpt-6-astra", tone: "shorter" });
+  st.data.set(REVISE_PREFS_KEY, JSON.stringify({ keyId: {}, model: 5, tone: "rude" }));
+  assert.deepEqual(loadRevisePrefs(st), { keyId: undefined, model: undefined, tone: undefined });
+  st.data.set(REVISE_PREFS_KEY, "{not json");
+  assert.deepEqual(loadRevisePrefs(st), {});
+  assert.deepEqual(loadRevisePrefs(null), {});
+  const throwing: StorageLike = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); }, removeItem: () => {} };
+  assert.deepEqual(loadRevisePrefs(throwing), {});
+  assert.doesNotThrow(() => saveRevisePrefs(throwing, {}));
+
+  const cat: ModelCatalog = { keys: [{ id: 3, name: "A", models: ["qwen3.8", "claude-sonnet-5-5"] }, { id: 7, name: "B", models: ["gpt-6-astra"] }], defaultKeyId: 3, defaultModel: "qwen3.8" };
+  assert.deepEqual(pickModel(cat, { keyId: 7, model: "gpt-6-astra" }), { keyId: 7, model: "gpt-6-astra" });
+  assert.deepEqual(pickModel(cat, { keyId: 7, model: "gone" }), { keyId: 3, model: "qwen3.8" });
+  assert.deepEqual(pickModel({ ...cat, defaultKeyId: undefined }, {}), { keyId: 3, model: "qwen3.8" });
+  assert.deepEqual(pickModel({ keys: [{ id: 9, name: "C", models: ["m"] }] }, {}), { keyId: 9, model: "m" });
+  assert.equal(pickModel({ keys: [] }, {}), null);
+});

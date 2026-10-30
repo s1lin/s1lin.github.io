@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Avatar, Icon, SignInBar } from "@/components/social/common";
 import { errorText, when } from "@/components/social/helpers";
 import { Reactions, type ReactionState } from "@/components/social/Reactions";
+import { Revise } from "@/components/social/Revise";
 import { SOCIAL_COPY, type SocialCopy } from "@/components/social/copy";
 import type { Lang } from "@/components/life/copy";
 import type { SocialComment, Thread } from "@/lib/social/client.ts";
@@ -37,6 +38,7 @@ function Compose({ target, parentId, c, onDone, onCancel, placeholder }: { targe
   return (
     <form className="soc__form" onSubmit={send}>
       <textarea value={body} onChange={(e) => setBody(e.target.value)} maxLength={2000} rows={parentId ? 4 : 8} placeholder={placeholder} aria-label={placeholder} />
+      <Revise c={c} draft={body} setDraft={setBody} disabled={busy} />
       <div className="soc__row">
         <button type="submit" className="soc__btn soc__btn--go" disabled={busy || !body.trim()}>
           {busy ? c.sending : c.send}

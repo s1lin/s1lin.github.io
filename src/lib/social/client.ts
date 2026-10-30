@@ -62,6 +62,34 @@ export interface SocialConfig {
   origins?: string[];
 }
 
+/** What "Revise with AI" may do to a draft. */
+export const TONES = ["polish", "shorter", "friendlier", "clearer"] as const;
+export type Tone = (typeof TONES)[number];
+export const MAX_COMMENT = 2000;
+export interface ModelKey {
+  id: number | string;
+  name: string;
+  models: string[];
+}
+/** The commenter's own Aha keys and the chat models each can reach. No keys: nothing to revise with. */
+export interface ModelCatalog {
+  keys: ModelKey[];
+  defaultKeyId?: number | string;
+  defaultModel?: string;
+}
+export interface Revision {
+  text: string;
+  model: string;
+  keyId?: number | string;
+}
+/** The last model and tone the reader chose, kept in this browser. */
+export interface RevisePrefs {
+  keyId?: number | string;
+  model?: string;
+  tone?: Tone;
+}
+export const REVISE_PREFS_KEY = "tokensbeat-social-revise";
+
 export type ErrorKind = "auth" | "refused" | "rate" | "invalid" | "network" | "server";
 
 export class SocialError extends Error {
@@ -82,7 +110,8 @@ const text = (v: unknown, max = 500): string | undefined => (typeof v === "strin
 
 /** A failed response as an error: the kind says what the page should tell the reader. */
 export function mapError(status: number, body: unknown): SocialError {
-  const reason = isObject(body) ? text(body.reason) ?? text(body.message) ?? text(body.error) : undefined;
+  const nested = isObject(body) && isObject(body.error) ? text(body.error.message) : undefined;
+  const reason = isObject(body) ? text(body.reason) ?? text(body.message) ?? text(body.error) ?? nested : undefined;
   if (status === 401) return new SocialError("auth", status, "sign-in expired", reason);
   if (status === 403) return new SocialError("refused", status, "not allowed", reason);
   if (status === 429) return new SocialError("rate", status, "too many requests", reason);
@@ -171,6 +200,41 @@ export function clearSession(storage: StorageLike | null): void {
   } catch {
     /* nothing to clear */
   }
+}
+
+const isTone = (v: unknown): v is Tone => typeof v === "string" && (TONES as readonly string[]).includes(v);
+
+export function loadRevisePrefs(storage: StorageLike | null): RevisePrefs {
+  try {
+    const raw = storage?.getItem(REVISE_PREFS_KEY);
+    const d = raw ? (JSON.parse(raw) as unknown) : null;
+    if (!isObject(d)) return {};
+    return {
+      keyId: typeof d.keyId === "number" || typeof d.keyId === "string" ? d.keyId : undefined,
+      model: text(d.model, 128),
+      tone: isTone(d.tone) ? d.tone : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+export function saveRevisePrefs(storage: StorageLike | null, p: RevisePrefs): void {
+  try {
+    storage?.setItem(REVISE_PREFS_KEY, JSON.stringify(p));
+  } catch {
+    /* private mode: the choice lasts until reload */
+  }
+}
+
+/** The key and model to start from: the saved choice if it is still on offer, else the server's default, else the first. */
+export function pickModel(cat: ModelCatalog, prefs: RevisePrefs): { keyId: number | string; model: string } | null {
+  const has = (keyId: number | string | undefined, model: string | undefined) => {
+    const k = cat.keys.find((x) => x.id === keyId);
+    return k && model && k.models.includes(model) ? { keyId: k.id, model } : null;
+  };
+  const first = cat.keys.find((k) => k.models.length > 0);
+  return has(prefs.keyId, prefs.model) ?? has(cat.defaultKeyId, cat.defaultModel) ?? (first ? { keyId: first.id, model: first.models[0] } : null);
 }
 
 export const connectUrl = (base: string, siteOrigin: string) => `${base}/#/social-connect?origin=${encodeURIComponent(siteOrigin)}`;
@@ -333,6 +397,29 @@ export function createSocial(env: Env) {
     },
     async repost(on: boolean, target: string): Promise<void> {
       await call(on ? "POST" : "DELETE", "/api/social/repost", { auth: "need", body: { target } });
+    },
+    /** The signed-in reader's own keys and models, for "Revise with AI". */
+    async models(): Promise<ModelCatalog> {
+      const j = await call("GET", "/api/social/models", { auth: "need" });
+      const d = isObject(j) ? j : {};
+      const keys = (Array.isArray(d.keys) ? d.keys : []).flatMap((k): ModelKey[] => {
+        if (!isObject(k) || (typeof k.id !== "number" && typeof k.id !== "string")) return [];
+        const models = (Array.isArray(k.models) ? k.models : []).filter((m): m is string => typeof m === "string" && /^[A-Za-z0-9._:/@-]{1,128}$/.test(m));
+        return models.length ? [{ id: k.id, name: text(k.name, 64) ?? `Key ${k.id}`, models }] : [];
+      });
+      return {
+        keys,
+        defaultKeyId: typeof d.defaultKeyId === "number" || typeof d.defaultKeyId === "string" ? d.defaultKeyId : undefined,
+        defaultModel: text(d.defaultModel, 128),
+      };
+    },
+    /** A rewrite of the draft by the reader's own model on their own key. It posts nothing. */
+    async revise(req: { text: string; keyId?: number | string; model?: string; tone?: Tone }): Promise<Revision> {
+      const j = await call("POST", "/api/social/revise", { auth: "need", body: { text: req.text, keyId: req.keyId, model: req.model, tone: req.tone } });
+      const d = isObject(j) ? j : {};
+      const out = typeof d.text === "string" ? d.text.trim().slice(0, MAX_COMMENT) : "";
+      if (!out) throw new SocialError("server", 502, "empty revision");
+      return { text: out, model: text(d.model, 128) ?? req.model ?? "", keyId: typeof d.keyId === "number" || typeof d.keyId === "string" ? d.keyId : req.keyId };
     },
     async shapes(cursor?: string): Promise<ShapePage> {
       const j = await call("GET", `/api/public/social/shapes?${q({ cursor })}`, { auth: "if" });

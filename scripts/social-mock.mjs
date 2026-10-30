@@ -1,6 +1,8 @@
 // A stand-in for the Aha Social API (agent-ui/SOCIAL.md), for developing and testing the page without Aha.
 //   node scripts/social-mock.mjs [port]      then open the site on localhost with ?social=http://127.0.0.1:<port>
 // Keywords in a comment steer the verdict: "spam" is rejected, "review" waits, "limit" is rate-limited.
+// Revise with AI: keywords in the draft steer it too: "plan" -> 402 (not on the plan), "limit" -> 429, "broken" -> 502,
+// "slow" answers after 2 s. Start with NOKEY=1 for a reader who has no key (GET /api/social/models gives keys: []).
 import { createServer } from "node:http";
 
 const port = Number(process.argv[2] ?? 8799);
@@ -39,6 +41,21 @@ createServer(async (req, res) => {
   if (u.pathname === "/api/public/social/shapes") return json(res, 200, { shapes, next: null }, origin);
   if (u.pathname.startsWith("/api/social/")) {
     if (!authed) return json(res, 401, { error: "sign in" }, origin);
+    if (u.pathname === "/api/social/models") {
+      if (process.env.NOKEY) return json(res, 200, { keys: [] }, origin);
+      return json(res, 200, { keys: [{ id: 3, name: "Default", models: ["qwen3.8", "claude-sonnet-5-5"] }, { id: 7, name: "Work key", models: ["gpt-6-astra"] }], defaultKeyId: 3, defaultModel: "qwen3.8" }, origin);
+    }
+    if (u.pathname === "/api/social/revise") {
+      const t = String(body.text ?? "");
+      const low = t.toLowerCase();
+      if (low.includes("limit")) return json(res, 429, { error: { message: "too many revisions" } }, origin);
+      if (low.includes("plan")) return json(res, 402, { error: { message: "qwen3.8 is not on this key's plan" } }, origin);
+      if (low.includes("broken")) return json(res, 502, { error: { message: "model failed" } }, origin);
+      const tone = body.tone ?? "polish";
+      const out = tone === "shorter" ? t.split(/[.!?]/)[0].trim() + "." : `${t.charAt(0).toUpperCase()}${t.slice(1)}${/[.!?]$/.test(t) ? "" : "."} (${tone})`;
+      const reply = () => json(res, 200, { text: out, model: body.model ?? "qwen3.8", keyId: body.keyId ?? 3 }, origin);
+      return low.includes("slow") ? void setTimeout(reply, 2000) : reply();
+    }
     if (u.pathname === "/api/social/comments" || u.pathname === "/api/social/shapes") {
       const t = `${body.body ?? ""} ${body.note ?? ""} ${body.title ?? ""}`.toLowerCase();
       if (t.includes("limit") || ++posted > 40) return json(res, 429, { error: "rate" }, origin);

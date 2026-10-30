@@ -58,6 +58,27 @@ export interface SocialCopy {
   shapePending: string;
   shapeRejected: (reason: string) => string;
   close: string;
+  revise: string;
+  reviseHide: string;
+  reviseModel: string;
+  reviseTone: string;
+  tones: { polish: string; shorter: string; friendlier: string; clearer: string };
+  reviseGo: string;
+  revising: string;
+  reviseNote: string;
+  reviseLoadingModels: string;
+  reviseNoKey: string;
+  reviseNoKeyLink: string;
+  reviseYours: string;
+  reviseSuggestion: (model: string) => string;
+  reviseUse: string;
+  reviseUndo: string;
+  reviseAgain: string;
+  reviseDiscard: string;
+  reviseApplied: string;
+  reviseRate: string;
+  reviseRefused: (reason: string) => string;
+  reviseFailed: string;
 }
 
 const EN: SocialCopy = {
@@ -117,6 +138,27 @@ const EN: SocialCopy = {
   shapePending: "Thank you. A person will look at your shape before it appears.",
   shapeRejected: (r) => `Not published: ${r}`,
   close: "Close",
+  revise: "Revise with AI",
+  reviseHide: "Hide AI revise",
+  reviseModel: "Model",
+  reviseTone: "Tone",
+  tones: { polish: "Polish", shorter: "Shorter", friendlier: "Friendlier", clearer: "Clearer" },
+  reviseGo: "Revise",
+  revising: "Revising…",
+  reviseNote: "Your own model, on your own key, rewrites your draft. Nothing is posted until you press the post button, and a posted comment is still screened.",
+  reviseLoadingModels: "Loading your models…",
+  reviseNoKey: "You have no model key to revise with yet. Sign in to TokensBeat and add a key in your console, then come back.",
+  reviseNoKeyLink: "Open TokensBeat",
+  reviseYours: "Your draft",
+  reviseSuggestion: (m) => (m ? `Suggestion from ${m}` : "Suggestion"),
+  reviseUse: "Use this",
+  reviseUndo: "Undo",
+  reviseAgain: "Try again",
+  reviseDiscard: "Discard",
+  reviseApplied: "Your draft was replaced.",
+  reviseRate: "Too many revisions just now. Wait a moment and try again.",
+  reviseRefused: (r) => `That model is not available on your plan or balance${r ? `: ${r}` : "."}`,
+  reviseFailed: "The model did not answer. Try again, or pick another model.",
 };
 
 const ZH: SocialCopy = {
@@ -176,6 +218,27 @@ const ZH: SocialCopy = {
   shapePending: "谢谢。你的图案会先由人工查看,再显示出来。",
   shapeRejected: (r) => `未发布:${r}`,
   close: "关闭",
+  revise: "用 AI 润色",
+  reviseHide: "收起 AI 润色",
+  reviseModel: "模型",
+  reviseTone: "语气",
+  tones: { polish: "润色", shorter: "更简短", friendlier: "更友善", clearer: "更清楚" },
+  reviseGo: "润色",
+  revising: "润色中…",
+  reviseNote: "用你自己的模型、你自己的密钥改写草稿。点发表之前不会发出任何内容,发表后的评论仍会经过审核。",
+  reviseLoadingModels: "正在读取你的模型…",
+  reviseNoKey: "你还没有可用来润色的模型密钥。请登录 TokensBeat,在控制台里添加密钥,再回来。",
+  reviseNoKeyLink: "打开 TokensBeat",
+  reviseYours: "你的草稿",
+  reviseSuggestion: (m) => (m ? `${m} 的建议` : "建议"),
+  reviseUse: "采用",
+  reviseUndo: "撤销",
+  reviseAgain: "再试一次",
+  reviseDiscard: "放弃",
+  reviseApplied: "草稿已替换。",
+  reviseRate: "润色太频繁了,请稍等再试。",
+  reviseRefused: (r) => `你的套餐或余额不能使用这个模型${r ? `:${r}` : "。"}`,
+  reviseFailed: "模型没有回应。请重试,或换一个模型。",
 };
 
 const JA: SocialCopy = {
@@ -235,6 +298,27 @@ const JA: SocialCopy = {
   shapePending: "ありがとうございます。表示される前に人が確認します。",
   shapeRejected: (r) => `公開されませんでした:${r}`,
   close: "閉じる",
+  revise: "AI で推敲",
+  reviseHide: "AI 推敲を閉じる",
+  reviseModel: "モデル",
+  reviseTone: "トーン",
+  tones: { polish: "整える", shorter: "短く", friendlier: "やわらかく", clearer: "わかりやすく" },
+  reviseGo: "推敲する",
+  revising: "推敲中…",
+  reviseNote: "あなた自身のモデルが、あなた自身のキーで下書きを書き直します。投稿ボタンを押すまで何も送られず、投稿したコメントは審査されます。",
+  reviseLoadingModels: "モデルを読み込み中…",
+  reviseNoKey: "推敲に使えるモデルキーがまだありません。TokensBeat にサインインし、コンソールでキーを追加してから戻ってきてください。",
+  reviseNoKeyLink: "TokensBeat を開く",
+  reviseYours: "あなたの下書き",
+  reviseSuggestion: (m) => (m ? `${m} の提案` : "提案"),
+  reviseUse: "これを使う",
+  reviseUndo: "元に戻す",
+  reviseAgain: "もう一度",
+  reviseDiscard: "破棄",
+  reviseApplied: "下書きを置き換えました。",
+  reviseRate: "推敲の回数が多すぎます。少し待ってからもう一度。",
+  reviseRefused: (r) => `このモデルはあなたのプランまたは残高では使えません${r ? `:${r}` : "。"}`,
+  reviseFailed: "モデルが応答しませんでした。もう一度試すか、別のモデルを選んでください。",
 };
 
 export const SOCIAL_COPY: Record<Lang, SocialCopy> = { en: EN, zh: ZH, ja: JA };

@@ -210,6 +210,13 @@ serves (contract: `agent-ui/SOCIAL.md` in the sub2api repository).
 - **Try it without Aha:** `node scripts/social-mock.mjs 8799`, then open `/life/?social=http://127.0.0.1:8799` on localhost
   (a token for the mock is any 16+ character string in `localStorage` under `tokensbeat-social-token`).
 - **Tests:** `npm test` (`node --test test/*.test.ts`): token and origin checks, error mapping, request shape, shape cropping.
+- **Revise with AI:** a signed-in reader can have a draft rewritten by their own model on their own key
+  (`GET /api/social/models` lists their keys and models, `POST /api/social/revise {text, keyId, model, tone}` answers
+  with the rewrite). It only suggests: the reader compares it with the draft, uses or discards it, and still presses post,
+  and what they post is screened like any comment. The last model and tone are kept in `localStorage`
+  (`tokensbeat-social-revise`). `scripts/social-mock.mjs` answers both calls (keywords `plan`, `limit`, `broken`,
+  `slow` in the draft steer the errors; `NOKEY=1` gives a reader with no key).
+
 
 ## Token skyline
 
