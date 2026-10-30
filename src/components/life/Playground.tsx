@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Board } from "@/components/life/Board";
 import { ARC } from "@/lib/life/palette";
-import { useCopy } from "@/components/life/lang";
+import { useCopy, useLang } from "@/components/life/lang";
+import { ShapeSubmit } from "@/components/social/ShapeSubmit";
+import { centre, takePendingShape, type ShapeData } from "@/lib/social/shape.ts";
 import { Thumb } from "@/components/life/Thumb";
 import { PATTERNS, pattern } from "@/lib/life/patterns";
 import { clone, make, parse, population, step, type Grid } from "@/lib/life/life";
@@ -29,8 +31,26 @@ export function Playground() {
     const n = Number(new URLSearchParams(location.search).get("stage"));
     return n >= 1 && n <= 4 ? [4, n - 1] : [1, 0];
   })();
-  const [stage, setStage] = useState(first);
-  const [unlocked, setUnlocked] = useState(open);
+  // A shape from the gallery waits in takePendingShape() until this is open; a click on another while open comes as an event.
+  const [incoming, setIncoming] = useState<{ shape: ShapeData; n: number } | null>(() => {
+    const p = takePendingShape();
+    return p ? { shape: p, n: 1 } : null;
+  });
+  const fit = (sh: ShapeData) => Math.max(0, STAGES.findIndex((g) => g.w >= sh.w + 4 && g.h >= sh.h + 4));
+  const [stage, setStage] = useState(() => (incoming ? fit(incoming.shape) : first));
+  const [unlocked, setUnlocked] = useState(() => (incoming ? Math.max(open, fit(incoming.shape) + 1) : open));
+  useEffect(() => {
+    const on = () => {
+      const p = takePendingShape();
+      if (!p) return;
+      const i = fit(p);
+      setStage(i);
+      setUnlocked((u) => Math.max(u, i + 1));
+      setIncoming((c) => ({ shape: p, n: (c?.n ?? 0) + 1 }));
+    };
+    window.addEventListener("life:load-shape", on);
+    return () => window.removeEventListener("life:load-shape", on);
+  }, []);
   return (
     <div className="pad">
       <ol className="pad__stages" aria-label={copy.stageLabel}>
@@ -50,19 +70,22 @@ export function Playground() {
         ))}
       </ol>
       <p className="pad__goal">{copy.stages[stage].goal}</p>
-      <Pad key={stage} index={stage} onRan={() => setUnlocked((u) => Math.max(u, stage + 2))} />
+      <Pad key={`${stage}:${incoming?.n ?? 0}`} index={stage} shape={incoming?.shape} onRan={() => setUnlocked((u) => Math.max(u, stage + 2))} />
     </div>
   );
 }
 
-function Pad({ index, onRan }: { index: number; onRan: () => void }) {
+function Pad({ index, shape, onRan }: { index: number; shape?: ShapeData; onRan: () => void }) {
   const copy = useCopy();
+  const { lang } = useLang();
   const t = copy.pad;
   const cfg = STAGES[index];
   const { w: W, h: H } = cfg;
   const empty = () => make(W, H);
-  const [grid, setGrid] = useState<Grid>(empty);
-  const [ages, setAges] = useState<Uint16Array>(() => new Uint16Array(W * H));
+  // A shape picked in the gallery starts in the middle of the board.
+  const placed = shape ? centre(shape, W, H) : null;
+  const [grid, setGrid] = useState<Grid>(() => (placed ? { w: W, h: H, cells: placed } : empty()));
+  const [ages, setAges] = useState<Uint16Array>(() => (placed ? Uint16Array.from(placed) : new Uint16Array(W * H)));
   const [gen, setGen] = useState(0);
   const [run, setRun] = useState(false);
   const [wrap, setWrap] = useState(false);
@@ -126,6 +149,7 @@ function Pad({ index, onRan }: { index: number; onRan: () => void }) {
   };
 
   return (
+    <>
     <div className="pad__grid">
       <aside className="pad__tools" aria-label={t.toolbox}>
         <h3>{t.toolbox}</h3>
@@ -222,6 +246,8 @@ function Pad({ index, onRan }: { index: number; onRan: () => void }) {
         </label>
       </aside>
     </div>
+    <ShapeSubmit grid={grid} lang={lang} />
+    </>
   );
 }
 

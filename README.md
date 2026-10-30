@@ -188,6 +188,29 @@ that the gun fires every 30 generations, that Diehard dies at generation 130, an
 creature or level needs its numbers checked the same way before it is listed. The page is drawn on canvases and is
 not prerendered. The ACM library itself is not used and not included.
 
+## Comments and shapes
+
+Blog posts and the Life page take comments, likes and reposts, and Life takes shapes readers publish from the launch
+pad. None of it is stored here: the site is static, so it all goes to **Aha Social**, the API the TokensBeat BFF
+serves (contract: `agent-ui/SOCIAL.md` in the sub2api repository).
+
+- **API base:** `https://aha.tokensbeat.com` (`AHA_BASE` in `src/lib/social/client.ts`). A page can set
+  `window.__SOCIAL_BASE__` before the app loads; on localhost `?social=http://127.0.0.1:8799` works too (nowhere else).
+  The BFF must allow this site's origin (`AGENTUI_SOCIAL_ORIGINS`: `https://s1lin.tokensbeat.com`, `https://s1lin.github.io`).
+- **Signing in:** only TokensBeat users act. "Sign in" opens an Aha popup (`#/social-connect?origin=<this origin>`) that
+  posts back `{type: "tokensbeat-social", token, user}`; the page accepts it only from Aha's origin, keeps the token in
+  `localStorage`, and sends it as a bearer header, never in a URL. "Create a TokensBeat account" is the owner's referral
+  link, taken from `GET /api/public/social/config` (`signInUrl`).
+- **Moderation:** every comment and shape is screened by Qwen on the server: approved at once, held for the owner, or
+  refused with a reason the author sees. Comment text is shown as plain text, never as HTML.
+- **Where:** `src/lib/social/` (client, shape crop, hooks), `src/components/social/` (`Comments`, `Reactions`,
+  `ShapeGallery`, `ShapeSubmit`), `src/styles/social.css`; words in three languages in `src/components/social/copy.ts`
+  (the blog uses English or Chinese by the post's language). Blog threads are `site:s1lin:blog/<slug>`, Life's is
+  `site:s1lin:life`, a shape is `shape:<id>`. Comments load in the browser, so prerendered pages carry no thread.
+- **Try it without Aha:** `node scripts/social-mock.mjs 8799`, then open `/life/?social=http://127.0.0.1:8799` on localhost
+  (a token for the mock is any 16+ character string in `localStorage` under `tokensbeat-social-token`).
+- **Tests:** `npm test` (`node --test test/*.test.ts`): token and origin checks, error mapping, request shape, shape cropping.
+
 ## Token skyline
 
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and

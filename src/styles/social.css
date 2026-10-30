@@ -1,0 +1,71 @@
+/* Comments, reactions and shapes (components/social). On the blog's paper and ink; on the Life page the primaries of .life. */
+.soc { --soc-red: var(--red, #d62d20); --soc-blue: var(--blue, #1d56b8); margin: 56px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule-strong); text-align: left; font-family: var(--f-sans); color: var(--sumi); }
+.soc * { text-indent: 0; text-align: left; letter-spacing: normal; }
+.soc h2 { font: 400 clamp(26px, 3.4vw, 38px)/1.1 var(--f-display); margin: 0; }
+.soc h3 { font: 800 15px/1.2 var(--f-sans); margin: 10px 0 4px; }
+.soc h4 { font: 500 12px/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+.soc__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 14px; }
+.soc__small { font: 400 12px/1.5 var(--f-mono); color: var(--ink-3); margin: 10px 0; max-width: 62ch; }
+.soc__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.soc__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.soc__btn, .soc__link { font: 500 12px/1 var(--f-mono); cursor: pointer; }
+.soc__btn { display: inline-block; padding: 9px 12px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); text-decoration: none; }
+.soc__btn--go { background: var(--sumi); color: var(--paper); box-shadow: 3px 3px 0 var(--soc-red); }
+.soc__btn:disabled { opacity: 0.5; cursor: default; }
+.soc__btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--soc-red); }
+.soc__link { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.soc__signin { margin: 12px 0; padding: 14px 16px; border: 1px solid var(--rule-strong); background: var(--paper-2); }
+.soc__signin p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+.soc__who { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 10px 0; font: 500 12px/1.4 var(--f-mono); color: var(--ink-2); }
+.soc__form { display: grid; gap: 8px; margin: 12px 0; }
+.soc textarea, .soc input { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--f-sans); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); padding: 10px 12px; border-radius: 0; resize: vertical; }
+.soc textarea:focus-visible, .soc input:focus-visible, .soc__btn:focus-visible, .soc__react:focus-visible, .soc__link:focus-visible, .soc__shape-open:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
+.soc__len { margin-left: auto; font: 400 11px/1 var(--f-mono); color: var(--ink-3); }
+.soc__note { font: 500 12px/1.5 var(--f-mono); margin: 4px 0; }
+.soc__note--ok { color: #1f8f33; }
+.soc__note--wait { color: #8a6500; }
+.soc__note--bad { color: var(--soc-red); }
+.soc__empty { margin: 20px 0; color: var(--ink-2); font: italic 400 20px/1.3 var(--f-display); }
+
+.soc__reactions { display: flex; align-items: center; gap: 14px; position: relative; }
+.soc__react, .soc__count { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1 var(--f-mono); color: var(--ink-2); background: none; border: 0; padding: 6px 2px; cursor: pointer; position: relative; }
+.soc__count { cursor: default; }
+.soc__react[aria-pressed="true"] { color: #1f8f33; }
+.soc__react--like[aria-pressed="true"] { color: var(--soc-red); }
+.soc__react--like[aria-pressed="true"] .soc__icon { fill: currentColor; }
+.soc__react:hover { color: var(--sumi); }
+.soc__icon { flex: none; }
+
+.soc__list { list-style: none; margin: 18px 0; padding: 0; display: grid; gap: 18px; }
+.soc__list--replies { margin: 14px 0 0; padding-left: 14px; border-left: 2px solid var(--rule); gap: 14px; }
+.soc__comment { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+.soc__comment.is-pending { opacity: 0.75; }
+.soc__avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--paper-2); }
+.soc__avatar--initial { display: inline-grid; place-items: center; font: 800 12px/1 var(--f-sans); background: var(--sumi); color: var(--paper); }
+.soc__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0 0 4px; font: 400 12px/1.4 var(--f-mono); color: var(--ink-3); }
+.soc__meta b { font: 800 13px/1.2 var(--f-sans); color: var(--sumi); }
+.soc__tag { font-style: normal; padding: 2px 6px; border: 1px dashed var(--soc-red); color: var(--soc-red); }
+/* Whatever a reader typed, as typed: line breaks kept, long words broken. */
+.soc__text { margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.soc__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 4px; }
+
+.soc__shapes { list-style: none; margin: 18px 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px; }
+.soc__shape { border: 2px solid var(--sumi); padding: 12px; background: var(--paper); display: flex; flex-direction: column; gap: 6px; }
+.soc__shape .soc__meta { margin: 0; }
+.soc__shape-open { display: block; padding: 0; border: 0; background: #000; cursor: pointer; position: relative; }
+.soc__mini { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.soc__shape h3 { margin-top: 4px; }
+
+.soc__submit { margin-top: 14px; max-width: 560px; padding: 12px; border: 2px solid var(--sumi); background: var(--paper); display: grid; gap: 8px; }
+.soc__submit .soc__signin { margin: 0; padding: 10px; }
+.soc__field { display: grid; gap: 4px; font: 500 11px/1 var(--f-mono); text-transform: uppercase; color: var(--ink-2); }
+.soc__preview { margin: 0; }
+.soc__preview figcaption { font: 400 11px/1.4 var(--f-mono); color: var(--ink-3); margin-top: 4px; }
+.soc__publish { margin-top: 10px; }
+.life__social { display: grid; gap: 8px; }
+.life__social .soc { border-top: 2px solid var(--sumi); }
+
+/* On the blog the thread sits under the text, in its column. */
+.post__social { grid-column: 6 / span 6; min-width: 0; }
+@media (max-width: 900px) { .post__social { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .soc__btn:active:not(:disabled) { transform: none; } }
