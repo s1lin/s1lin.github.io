@@ -9,7 +9,7 @@
 .soc__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .soc__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .soc__btn, .soc__link { font: 500 12px/1 var(--f-mono); cursor: pointer; }
-.soc__btn { display: inline-block; padding: 9px 12px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); text-decoration: none; }
+.soc__btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 40px; padding: 0 16px; line-height: 1; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); text-decoration: none; }
 .soc__btn--go { background: var(--sumi); color: var(--paper); box-shadow: 3px 3px 0 var(--soc-red); }
 .soc__btn:disabled { opacity: 0.5; cursor: default; }
 .soc__btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--soc-red); }
@@ -19,6 +19,7 @@
 .soc__who { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 10px 0; font: 500 12px/1.4 var(--f-mono); color: var(--ink-2); }
 .soc__form { display: grid; gap: 8px; margin: 12px 0; }
 .soc textarea, .soc input { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--f-sans); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); padding: 10px 12px; border-radius: 0; resize: vertical; }
+.soc textarea { font-size: 16px; line-height: 1.55; padding: 14px 16px; }
 .soc textarea:focus-visible, .soc input:focus-visible, .soc__btn:focus-visible, .soc__react:focus-visible, .soc__link:focus-visible, .soc__shape-open:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
 .soc__len { margin-left: auto; font: 400 11px/1 var(--f-mono); color: var(--ink-3); }
 .soc__note { font: 500 12px/1.5 var(--f-mono); margin: 4px 0; }
