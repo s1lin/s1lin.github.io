@@ -191,10 +191,11 @@ not prerendered. The ACM library itself is not used and not included.
 ## Token skyline
 
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and
-its value at API list prices, the weeks as a town plan from the first week there
-was any (a treemap kept in time order: a month to a district, a week to a block,
-each block divided by model, a company to a hue and its models in shades of
-it), a "by model" chart under it that doubles as the key, each company under
+its value at API list prices, the weeks from the first week there
+was any (one equal-width column a week, each filled to full height with that
+week's mix of models, a company to a hue and its models in shades of it, so a
+quiet week still shows what it was spent on; a bar above each column, on a
+square-root scale, is how many tokens it used), a "by model" chart under it that doubles as the key, each company under
 its mark (`src/content/logos.ts`, from LobeHub Icons, MIT), and a flow from each agent to the kinds of token it
 spent (cache reads, fresh input, cache writes, output), each agent's value
 beside it (`src/components/TokenSkyline.tsx`). Money is the cost

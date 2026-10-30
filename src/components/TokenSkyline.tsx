@@ -8,9 +8,9 @@ import { DAY, MONTHS, long, short, thousands } from "@/lib/calendar";
 
 /*
  * The editor's tokens with coding agents, under the GitHub heatmap: the total
- * and its value at API list prices, a town plan of the weeks from the first
- * there was any (a treemap: a month to a district, a week to a block, divided
- * among the agents), and a flow from each agent to
+ * and its value at API list prices, the weeks from the first there was any
+ * (a column a week, each filled to full height with that week's mix of models,
+ * and a bar above it for how many tokens), and a flow from each agent to
  * the kinds of token it spent. scripts/token-data.py counts it all from
  * cc-switch into src/content/tokens.json. Each agent keeps its own colour everywhere
  * (agent-claude and so on, in site.css) and is always named beside its marks.
@@ -28,7 +28,7 @@ type Tokens = {
   parts: Parts;
   partsByApp: Record<string, Parts>;
   since: string | null;
-  /** Models, in the order the town stacks them, and the company that makes each; the last is "Other". */
+  /** Models, in the order the weeks stack them, and the company that makes each; the last is "Other". */
   models: string[];
   makers: string[];
   byModel: Record<string, number>;
@@ -74,7 +74,7 @@ const PER_DAY = T.total / Math.max(1, T.days.length);
 // word, typed at 40 words a minute, six hours a day, 230 days a year.
 const TYPING_YEARS = Math.round((T.parts.output * 0.75) / (40 * 60 * 6 * 230));
 
-// ---------------------------------------------------------------- the town's blocks
+// ---------------------------------------------------------------- the weeks
 
 const FIRST = Date.parse(T.since ?? T.fetched);
 const START = FIRST - new Date(FIRST).getUTCDay() * DAY; // the Sunday on or before the first day
@@ -93,62 +93,41 @@ const PEAK = SUM.indexOf(TALLEST);
 const weekStart = (w: number) => new Date(START + w * 7 * DAY);
 
 /*
- * The weeks as a town seen from above, a treemap kept in time order: a month
- * to a district, left to right, as wide as its tokens; its weeks as blocks
- * down it, each as tall as its tokens; each block divided among the models,
- * a company to a hue and its models in shades of it (MODEL_FILL), Other in grey.
- * The streets between are paper: two units between blocks, twice that
- * between districts, a hairline between one agent's lot and the next.
+ * The weeks as columns, one a week from the first there was any, all the same
+ * width. Each is filled to full height with that week's mix of models (a
+ * company to a hue and its models in shades of it, MODEL_FILL; Other in grey),
+ * so a week of a few thousand tokens still shows what it was spent on. Over
+ * it, a bar for how many tokens, on a square-root scale so the small weeks
+ * can be seen beside the huge ones. Months are named under the columns.
  */
 const W = 556;
-const TOP = 22; // over the districts, their names
-const PLAN = 200;
-const H = TOP + PLAN;
-const STREET = 2;
+const VOL = 44; // the bar over the columns
+const BAND = 6; // between the bars and the columns
+const MIX = 150; // the columns
+const NAMES_H = 16; // the months' names
+const H = VOL + BAND + MIX + NAMES_H;
+const COL = W / WEEKS;
+const SEAM = Math.min(1.5, COL / 5); // paper between columns
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
-type Block = { week: number; x: number; y: number; w: number; h: number; lots: { k: number; x: number; w: number }[] };
-type District = { month: number; total: number; x: number; w: number; blocks: Block[] };
+type Column = { week: number; x: number; w: number };
+type Month = { month: number; total: number; x: number };
 
-/** Each week goes to the month it starts in (the first week, to the first day's month). */
-const DISTRICTS: District[] = (() => {
-  const months: { month: number; weeks: number[]; total: number }[] = [];
-  SUM.forEach((total, w) => {
+const COLUMNS: Column[] = WEEK.map((_, week) => ({ week, x: week * COL, w: COL - SEAM }));
+/** The weeks with tokens, for the table and the picker. */
+const BLOCKS = COLUMNS.filter((c) => SUM[c.week] > 0);
+/** Each week goes to the month it starts in (the first week, to the first day's month); a month starts at its first week. */
+const MONTHS_AT: Month[] = (() => {
+  const months: Month[] = [];
+  SUM.forEach((total, week) => {
     if (!total) return;
-    const month = (w === 0 ? new Date(FIRST) : weekStart(w)).getUTCMonth();
+    const month = (week === 0 ? new Date(FIRST) : weekStart(week)).getUTCMonth();
     const last = months.at(-1);
-    if (last?.month === month) {
-      last.weeks.push(w);
-      last.total += total;
-    } else months.push({ month, weeks: [w], total });
+    if (last?.month === month) last.total += total;
+    else months.push({ month, total, x: week * COL });
   });
-  const wide = W - (months.length - 1) * 2 * STREET;
-  let x = 0;
-  return months.map(({ month, weeks, total }) => {
-    const w = (wide * total) / T.total;
-    const tall = PLAN - (weeks.length - 1) * STREET;
-    let y = TOP;
-    const blocks = weeks.map((week) => {
-      const h = (tall * SUM[week]) / total;
-      const models = WEEK[week].models.filter(Boolean).length;
-      const room = Math.max(0, w - (models - 1));
-      let lx = x;
-      const lots = WEEK[week].models.flatMap((n, k) => {
-        if (!n) return [];
-        const lot = { k, x: lx, w: (room * n) / SUM[week] };
-        lx += lot.w + 1;
-        return [lot];
-      });
-      const block = { week, x, y, w, h, lots };
-      y += h + STREET;
-      return block;
-    });
-    const district = { month, total, x, w, blocks };
-    x += w + 2 * STREET;
-    return district;
-  });
+  return months;
 })();
-const BLOCKS = DISTRICTS.flatMap((d) => d.blocks);
 /** A company to a hue: the dataviz palette's first five slots, in their validated order (site.css). */
 const MAKER_HUE: Record<string, string> = {
   OpenAI: "var(--co-1)",
@@ -209,7 +188,7 @@ function Mark({ maker }: { maker: string }) {
 }
 
 /**
- * The key to the town, as a chart of its own: the champion in a row of its
+ * The key to the weeks' colours, as a chart of its own: the champion in a row of its
  * own, then each company under its mark, each other model a bar on one scale.
  */
 function ByModel() {
@@ -265,7 +244,7 @@ function ByModel() {
     </div>
   );
 }
-/** A week's three biggest families, for the line under the town. */
+/** A week's three biggest families, for the line under the chart. */
 const topModels = (week: number) =>
   WEEK[week].models
     .map((n, k) => [T.models[k], n] as const)
@@ -275,33 +254,50 @@ const topModels = (week: number) =>
     .map(([m, n]) => `${m} ${compact(n)}`)
     .join(", ");
 /**
- * A district's name over it, and its tokens beside the name, as much as fits
- * before the next district's name. Names are set at 9px whatever the plan's
- * width, about 5.9px a letter; `scale` is pixels to a unit.
+ * A month's name under its first column, and its tokens beside the name, as
+ * much as fits before the next month's name. Names are set at 9px whatever the
+ * chart's width, about 5.9px a letter; `scale` is pixels to a unit.
  */
-const districtName = (d: District, i: number, scale: number) => {
-  const room = ((DISTRICTS[i + 1]?.x ?? W) - d.x) * scale;
-  const name = MONTHS[d.month].slice(0, 3).toUpperCase();
-  const full = `${name} ${compact(d.total)}`;
-  return [full, name].find((s) => s.length * 5.9 + 10 <= room) ?? "";
+const monthName = (m: Month, i: number, scale: number) => {
+  const room = ((MONTHS_AT[i + 1]?.x ?? W) - m.x) * scale;
+  const name = MONTHS[m.month].slice(0, 3).toUpperCase();
+  const full = `${name} ${compact(m.total)}`;
+  return [full, name].find((t) => t.length * 5.9 + 6 <= room) ?? "";
 };
 
-function Town({ scale }: { scale: number }) {
+function Weeks({ scale }: { scale: number }) {
+  const base = VOL; // the bars stand on this line
+  const top = VOL + BAND; // the columns start here
   return (
-  <g>
-    {DISTRICTS.map((d, i) => (
-      <g key={`${d.month}-${d.x}`}>
-        <text className="sky-month" x={r2(d.x)} y={TOP - 6} style={{ fontSize: r2(9 / scale) }}>
-          {districtName(d, i, scale)}
-        </text>
-        {d.blocks.map((b) =>
-          b.lots.map((l) => (
-            <rect key={`${b.week}-${l.k}`} style={{ fill: MODEL_FILL[l.k], stroke: MODEL_FILL[l.k] }} x={r2(l.x)} y={r2(b.y)} width={r2(l.w)} height={r2(b.h)} />
-          )),
-        )}
-      </g>
-    ))}
-  </g>
+    <g>
+      {COLUMNS.map((c) => {
+        const total = SUM[c.week];
+        if (!total) return <rect key={c.week} className="tokens__empty" x={r2(c.x)} y={top} width={r2(c.w)} height={MIX} />;
+        const bar = Math.max(1.5, VOL * Math.sqrt(total / TALLEST));
+        let y = top;
+        return (
+          <g key={c.week}>
+            <rect className="tokens__vol" x={r2(c.x)} y={r2(base - bar)} width={r2(c.w)} height={r2(bar)} />
+            {WEEK[c.week].models.map((n, k) => {
+              if (!n) return null;
+              const h = (MIX * n) / total;
+              const y0 = y;
+              y += h;
+              // a little overlap, so the models in one column never show a seam of paper between them
+              return <rect key={k} style={{ fill: MODEL_FILL[k] }} x={r2(c.x)} y={r2(y0)} width={r2(c.w)} height={r2(h + 0.5)} />;
+            })}
+          </g>
+        );
+      })}
+      {MONTHS_AT.map((m, i) => (
+        <g key={`${m.month}-${m.x}`}>
+          <line className="sky-tick" x1={r2(m.x)} x2={r2(m.x)} y1={top + MIX} y2={top + MIX + 4} />
+          <text className="sky-month" x={r2(m.x)} y={top + MIX + 13} style={{ fontSize: r2(9 / scale) }}>
+            {monthName(m, i, scale)}
+          </text>
+        </g>
+      ))}
+    </g>
   );
 }
 
@@ -518,8 +514,8 @@ function Odometer({ value }: { value: number }) {
 }
 
 /**
- * Tokens with coding agents: the total and what it is worth, the weeks as a
- * town, and the shares as a flow from agent to kind. The lines under the town
+ * Tokens with coding agents: the total and what it is worth, the weeks as
+ * columns, and the shares as a flow from agent to kind. The lines under the chart
  * and the flow read out what the pointer is on.
  */
 export function TokenSkyline() {
@@ -527,15 +523,15 @@ export function TokenSkyline() {
   const sky = useRef<SVGSVGElement>(null);
   const scale = useScale(sky, W);
 
-  /** The block under the pointer, its street included, so a thin block can still be found. */
+  /** The week under the pointer: its column, the bar over it, and the seam either side, so a thin week can still be found. */
   function pick(e: PointerEvent<SVGSVGElement>) {
     const box = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - box.left) * W) / box.width;
     const y = ((e.clientY - box.top) * H) / box.height;
-    const b = BLOCKS.find((b) => x >= b.x - STREET && x <= b.x + b.w + STREET && y >= b.y - STREET && y <= b.y + b.h + STREET);
-    setAt(b ? b.week : null);
+    const week = Math.floor(x / COL);
+    setAt(y <= VOL + BAND + MIX && SUM[week] > 0 ? week : null);
   }
-  const block = at === null ? undefined : BLOCKS.find((b) => b.week === at);
+  const column = at === null ? undefined : COLUMNS[at];
 
   const since = T.since ? long(new Date(T.since)) : "the start";
   return (
@@ -590,10 +586,10 @@ export function TokenSkyline() {
           if (e.pointerType === "mouse") setAt(null);
         }}
       >
-        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as a town plan, a month to a district and a week to a block: ${DISTRICTS.map((d) => `${MONTHS[d.month]} ${compact(d.total)}`).join(", ")}. By model: ${T.models.map((m) => `${m} ${compact(T.byModel[m] ?? 0)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
-        <Town scale={scale} />
-        {block && (
-          <rect className="tokens__at" x={r2(block.x - 1.5)} y={r2(block.y - 1.5)} width={r2(block.w + 3)} height={r2(block.h + 3)} />
+        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as one column a week, each filled with that week's mix of models, and a bar over it for how many tokens: ${MONTHS_AT.map((m) => `${MONTHS[m.month]} ${compact(m.total)}`).join(", ")}. By model: ${T.models.map((m) => `${m} ${compact(T.byModel[m] ?? 0)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
+        <Weeks scale={scale} />
+        {column && (
+          <rect className="tokens__at" x={r2(column.x - 1)} y={0.75} width={r2(column.w + 2)} height={VOL + BAND + MIX - 1.5} />
         )}
       </svg>
       <div className="tokens__foot mono">
@@ -640,9 +636,10 @@ export function TokenSkyline() {
       <Flow />
 
       <figcaption>
-        <span lang="ja">街</span>, town: the weeks from above, from the first there were any. A month of tokens is a
-        district, as wide as its tokens; a week is a block in it, as tall as its tokens; each block is divided among the
-        models, and the streets between are only paper. Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
+        <span lang="ja">週</span>, weeks: one column for each week since the first there were any, every column filled to full
+        height with that week's mix of models, so a week of a few thousand tokens still shows what it was spent on.
+        The bar above a column is how many tokens the week used, on a square-root scale so the small weeks show beside the huge ones.
+        Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
         cache, or written back as output. Counted by cc-switch on {MACHINES}, and from Cursor's own usage exports, cache reads included, to {long(new Date(T.fetched))}. The money is what the
         tokens are worth at API list prices, not what I paid; models no price table knows, Cursor's Auto among them, count at nothing, so it is a
         floor. The typist types 40 words a minute, 230 days a year, and a token is about three-quarters of a word.

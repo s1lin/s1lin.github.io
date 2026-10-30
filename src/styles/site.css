@@ -522,8 +522,10 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .corollary__proof { margin: 0; font: 400 0.95rem/1.6 var(--f-sans); color: var(--ink-2); text-wrap: pretty; }
 .corollary__proof i { font: italic 400 1.15em/1 var(--f-display); color: var(--sumi); margin-right: 0.2em; }
 .tokens__sky { display: block; width: 100%; height: auto; }
-/* A hairline in each block's own colour, so a thin week does not fade into the paper between blocks. */
-.tokens__sky rect:not(.tokens__at) { stroke-width: 0.6px; vector-effect: non-scaling-stroke; }
+/* A week is a column of models with a bar of ink over it; a week with no tokens is a plain tint. */
+.tokens__vol { fill: var(--sumi); }
+.tokens__empty { fill: var(--paper-2); }
+.tokens .sky-tick { stroke: var(--ink-3); stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .tokens .agent-claude { fill: var(--agent-claude); background: var(--agent-claude); }
 .tokens .agent-codex { fill: var(--agent-codex); background: var(--agent-codex); }
 .tokens .agent-pi { fill: var(--agent-pi); background: var(--agent-pi); }
