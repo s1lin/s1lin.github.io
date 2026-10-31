@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { cn } from "./cn";
 import { Glyph, type Status } from "./glyph";
 import { VisuallyHidden } from "./visually-hidden";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./toast.css";
 
@@ -68,9 +69,6 @@ export const toast = Object.assign(show, {
   },
 });
 
-/** What a screen reader hears before a toast's words, by status; the shape says it on screen. */
-const SAID: Record<Status, string> = { neutral: "", info: "Note: ", ok: "Done: ", warn: "Warning: ", bad: "Error: " };
-
 function One({ item, paused, dismissLabel, words }: { item: Item; paused: boolean; dismissLabel: string; words: Record<Status, string> }) {
   const ms = item.duration ?? (item.action ? Infinity : 5000);
   const left = useRef(ms);
@@ -131,7 +129,7 @@ type Props = {
   label?: string;
   /** The close buttons' name. */
   dismissLabel?: string;
-  /** The status words read first; translate them here. */
+  /** The status words read first, before a toast's words (the shape says it on screen). These three and the region's name come from S1Words by default. */
   statusLabels?: Record<Status, string>;
   className?: string;
 };
@@ -146,7 +144,9 @@ type Props = {
  * dismissed, so there is time to reach its button. Dismissing the toast that
  * has focus moves focus to the next one, or back to where it came from.
  */
-export function Toaster({ position = "bottom-end", label = "Notifications", dismissLabel = "Dismiss", statusLabels = SAID, className }: Props) {
+export function Toaster({ position = "bottom-end", label, dismissLabel, statusLabels, className }: Props) {
+  const w = useS1Words();
+  const said = statusLabels ?? { neutral: "", info: w.statusInfo, ok: w.statusOk, warn: w.statusWarn, bad: w.statusBad };
   // A frame late: a toast called as a modal dialog closes ("close(); toast(…)") then lands after the page
   // behind the dialog is no longer inert, so the live region still reads it. Empty in server HTML.
   const [list, setList] = useState<Item[]>([]);
@@ -184,7 +184,7 @@ export function Toaster({ position = "bottom-end", label = "Notifications", dism
     setHover(el.matches(":hover"));
   }, [list]);
   return (
-    <section className={cn("s1-toaster", `s1-toaster--${position}`, className)} aria-label={label}>
+    <section className={cn("s1-toaster", `s1-toaster--${position}`, className)} aria-label={label ?? w.notifications}>
       <ol
         ref={ol}
         aria-live="polite"
@@ -202,7 +202,7 @@ export function Toaster({ position = "bottom-end", label = "Notifications", dism
         }}
       >
         {list.map((t) => (
-          <One key={t.id} item={t} paused={hover || focus} dismissLabel={dismissLabel} words={statusLabels} />
+          <One key={t.id} item={t} paused={hover || focus} dismissLabel={dismissLabel ?? w.dismiss} words={said} />
         ))}
       </ol>
     </section>

@@ -4,11 +4,9 @@ import { useId, type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Skeleton } from "./skeleton";
 import { VisuallyHidden } from "./visually-hidden";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./stat.css";
-
-/** What a screen reader hears before the change, by its direction; the triangle says it on screen. */
-const SAID = { up: "Up", down: "Down", flat: "No change" } as const;
 
 export type StatProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   /** What is counted: "Spend this month". */
@@ -25,13 +23,15 @@ export type StatProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   note?: ReactNode;
   /** The number is still coming: a bar in its place. */
   loading?: boolean;
-  /** The words read for each trend; translate them here. */
+  /** What a screen reader hears before the change, by its direction (the triangle says it on screen); from S1Words by default. */
   trendLabels?: { up: string; down: string; flat: string };
 };
 
 /** One figure that matters: a label in mono caps, the number large in the display face, the change under it. */
-export function Stat({ label, value, unit, delta, trend, note, loading = false, trendLabels = SAID, className, ...rest }: StatProps) {
+export function Stat({ label, value, unit, delta, trend, note, loading = false, trendLabels, className, ...rest }: StatProps) {
   const id = useId();
+  const w = useS1Words();
+  const said = trendLabels ?? { up: w.trendUp, down: w.trendDown, flat: w.trendFlat };
   return (
     <div className={cn("s1-stat", className)} role="group" aria-labelledby={`${id}-label`} aria-busy={loading || undefined} {...rest}>
       <p className="s1-stat__label" id={`${id}-label`}>
@@ -50,7 +50,7 @@ export function Stat({ label, value, unit, delta, trend, note, loading = false, 
       {!loading && (delta || note) && (
         <p className="s1-stat__delta">
           {trend && <span className={cn("s1-stat__trend", `s1-stat__trend--${trend}`)} aria-hidden="true" />}
-          {trend && delta && <VisuallyHidden>{trendLabels[trend]} </VisuallyHidden>}
+          {trend && delta && <VisuallyHidden>{said[trend]} </VisuallyHidden>}
           {delta && <span>{delta}</span>}
           {note && <span className="s1-stat__note">{note}</span>}
         </p>

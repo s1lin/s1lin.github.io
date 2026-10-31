@@ -5,13 +5,14 @@ import { Button } from "./button";
 import { cn } from "./cn";
 import { Copy } from "./copy";
 import { VisuallyHidden } from "./visually-hidden";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./secret.css";
 
 type Props = {
   /** The secret: an API key, a token. */
   value: string;
-  /** What it is, for the buttons' names and screen readers: "API key". */
+  /** What it is, for the buttons' names and screen readers: "API key"; "Secret" from S1Words by default. */
   label?: string;
   /** Shown, when the reveal is controlled. */
   revealed?: boolean;
@@ -22,7 +23,7 @@ type Props = {
   keep?: [number, number];
   /** Leave out the Copy button. */
   noCopy?: boolean;
-  /** The words for Show, Hide and the hidden value; translate them here. */
+  /** The words for Show, Hide and the hidden value; from S1Words by default. */
   words?: { show: string; hide: string; hidden: string };
   className?: string;
 };
@@ -38,15 +39,18 @@ const DOTS = "••••••••••••";
  */
 export function Secret({
   value,
-  label = "Secret",
+  label: name,
   revealed,
   defaultRevealed = false,
   onRevealedChange,
   keep = [0, 4],
   noCopy = false,
-  words = { show: "Show", hide: "Hide", hidden: "hidden" },
+  words: given,
   className,
 }: Props) {
+  const w = useS1Words();
+  const label = name ?? w.secret;
+  const words = given ?? { show: w.show, hide: w.hide, hidden: w.hidden };
   const [own, setOwn] = useState(defaultRevealed);
   const shown = revealed ?? own;
   const text = useRef<HTMLElement>(null);
@@ -94,7 +98,7 @@ export function Secret({
         <Button size="sm" aria-label={`${shown ? words.hide : words.show} ${label}`} onClick={() => set(!shown)}>
           {shown ? words.hide : words.show}
         </Button>
-        {!noCopy && <Copy value={value} label={`Copy ${label}`} onCopy={(ok) => !ok && failed()} />}
+        {!noCopy && <Copy value={value} label={w.copyName(label)} onCopy={(ok) => !ok && failed()} />}
       </span>
     </div>
   );

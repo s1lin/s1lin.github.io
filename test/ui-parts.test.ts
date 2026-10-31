@@ -339,3 +339,67 @@ test("Copy, Code, Spinner, VisuallyHidden: the result is said in a status beside
   assert.match(html(h(Spinner, {})), /<span class="s1-spinner" role="status">.*<span class="s1-visually-hidden">Loading<\/span><\/span>$/);
   assert.match(html(h(Spinner, { decorative: true })), /^<span class="s1-spinner" aria-hidden="true">/);
 });
+
+test("S1Words: the parts say the words given, nested providers keep the outer words, and a part's own prop wins", async () => {
+  const { S1Words, S1_WORDS } = await part("words");
+  const { Copy } = await part("copy");
+  const { Pagination } = await part("pagination");
+  const { Secret } = await part("secret");
+  const { Spinner } = await part("spinner");
+  const { Notice } = await part("notice");
+  const { Stat } = await part("stat");
+  const { Menu } = await part("menu");
+  const zh = {
+    copy: "复制",
+    copyName: (name: string) => `复制${name}`,
+    pagination: "分页",
+    previous: "上一页",
+    next: "下一页",
+    page: (n: number) => `第 ${n} 页`,
+    pageOf: (n: number, count: number) => `第 ${n} 页，共 ${count} 页`,
+    show: "显示",
+    hidden: "已隐藏",
+    loading: "加载中",
+    statusWarn: "警告：",
+    trendUp: "上升",
+    moreActions: "更多操作",
+  };
+  const m = html(
+    h(
+      S1Words,
+      { words: zh },
+      h(Copy, { value: "x" }),
+      h(Pagination, { page: 1, pageCount: 12 }),
+      h(Secret, { value: "sk-0123456789abcdef", label: "API 密钥" }),
+      h(Spinner, {}),
+      h(Notice, { status: "warn", title: "余额不足" }),
+      h(Stat, { label: "用量", value: "12", delta: "+3%", trend: "up" }),
+      h(Menu, { items: [{ label: "删除" }] }),
+    ),
+  );
+  assert.match(m, />复制<\/button>/);
+  assert.match(m, /<nav class="s1-pages" aria-label="分页">/);
+  assert.match(m, /aria-label="上一页" aria-disabled="true">/);
+  assert.match(m, /aria-label="第 1 页" aria-current="page"/);
+  assert.match(m, /第 1 页，共 12 页/);
+  assert.match(m, /API 密钥, 已隐藏/);
+  assert.match(m, /aria-label="显示 API 密钥">显示</);
+  assert.match(m, /aria-label="复制API 密钥"/);
+  assert.match(m, /<span class="s1-visually-hidden">加载中<\/span>/);
+  assert.match(m, /<span class="s1-visually-hidden">警告：<\/span>余额不足/);
+  assert.match(m, /<span class="s1-visually-hidden">上升 <\/span>/);
+  assert.match(m, /aria-label="更多操作" aria-haspopup="menu"/);
+  // a word left out stays English; an inner provider changes only its own keys
+  const nested = html(h(S1Words, { words: zh }, h(S1Words, { words: { next: "下页" } }, h(Pagination, { page: 1, pageCount: 3 }), h(Secret, { value: "sk-0123456789abcdef", label: "API 密钥", revealed: true }))));
+  assert.match(nested, /aria-label="下页"/);
+  assert.match(nested, /aria-label="上一页"/);
+  assert.match(nested, /aria-label="Hide API 密钥">Hide</);
+  // a part's own prop wins over the provider
+  const own = html(h(S1Words, { words: zh }, h(Copy, { value: "x" }, "Copy the key"), h(Pagination, { page: 1, pageCount: 2, label: "Keys" }), h(Spinner, { label: "Saving" })));
+  assert.match(own, />Copy the key<\/button>/);
+  assert.match(own, /aria-label="Keys"/);
+  assert.match(own, />Saving<\/span>/);
+  // no provider: English, as S1_WORDS says
+  assert.equal(S1_WORDS.pageOf(3, 12), "Page 3 of 12");
+  assert.match(html(h(Menu, { items: [{ label: "Delete" }] })), /aria-label="More actions"/);
+});

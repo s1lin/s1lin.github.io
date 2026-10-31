@@ -28,6 +28,7 @@ import { Textarea } from "@/ui/textarea";
 import { toast } from "@/ui/toast";
 import { useOverflow } from "@/ui/use-overflow";
 import { VisuallyHidden } from "@/ui/visually-hidden";
+import { S1Words, type S1WordMap } from "@/ui/words";
 
 /*
  * The live examples of the console's parts: forms, data, overlays, feedback,
@@ -813,6 +814,52 @@ export function OverflowDemo() {
           A long line
         </Switch>
       </p>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ words
+
+/** The parts' words in Chinese, as an app would give them from its own dictionary. */
+const ZH: Partial<S1WordMap> = {
+  copy: "复制",
+  copied: "已复制",
+  copyFailed: "复制失败",
+  copiedMessage: "已复制到剪贴板",
+  copyFailedMessage: "无法复制：请选中文字后手动复制",
+  copyName: (name) => `复制${name}`,
+  pagination: "分页",
+  previous: "上一页",
+  next: "下一页",
+  page: (n) => `第 ${n} 页`,
+  pageOf: (n, count) => `第 ${n} 页，共 ${count} 页`,
+  show: "显示",
+  hide: "隐藏",
+  hidden: "已隐藏",
+};
+
+/** The same parts in English and in Chinese: only the provider around them changes. */
+export function WordsDemo() {
+  const [lang, setLang] = useState("zh");
+  const [page, setPage] = useState(3);
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <RadioGroup
+        legend="Language"
+        variant="segmented"
+        value={lang}
+        onValueChange={setLang}
+        options={[
+          { value: "en", label: "English" },
+          { value: "zh", label: "中文" },
+        ]}
+      />
+      <S1Words words={lang === "zh" ? ZH : {}}>
+        <div className="ud-stack ud-stack--wide" lang={lang === "zh" ? "zh-CN" : "en"}>
+          <Secret value={KEY} label={lang === "zh" ? "API 密钥" : "API key"} keep={[6, 4]} />
+          <Pagination page={page} pageCount={8} onPageChange={setPage} />
+        </div>
+      </S1Words>
     </div>
   );
 }

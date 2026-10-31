@@ -224,6 +224,43 @@ export const ENTRIES: Entry[] = [
       "Each part imports its own stylesheet, so there is nothing to set up. Class names begin `s1-` and variables `--s1-`, so nothing collides with Tailwind, Kumo or your own classes.",
     example: "guide",
   },
+  {
+    id: "words",
+    name: "Words",
+    group: "start",
+    item: "words",
+    exports: ["S1Words", "useS1Words", "S1_WORDS", "S1WordMap"],
+    summary:
+      "The words the parts say for themselves (Copy and Copied, a dialog's Close, Previous and Next, Show and Hide, Loading, and what a screen reader hears after a copy or before a status) come from one place, in English. Give your app's words once, with `S1Words` around it, and every part says them; a prop given to one part still wins there.",
+    example: "live",
+    usage: `import { S1Words, type S1WordMap } from "@/components/s1lin/words";
+
+// your dictionary: only the words you translate; the rest stay English
+const zh: Partial<S1WordMap> = {
+  copy: "复制", copied: "已复制", close: "关闭",
+  previous: "上一页", next: "下一页",
+  page: (n) => \`第 \${n} 页\`,
+  pageOf: (n, count) => \`第 \${n} 页，共 \${count} 页\`,
+};
+
+// inside whatever holds the language, so a switch gives the parts new words
+<S1Words words={lang === "zh" ? zh : {}}>
+  <App />
+</S1Words>
+
+// one place that needs other words: its prop wins
+<Dialog closeLabel="Close without saving" … />`,
+    props: [
+      { name: "words", type: "Partial<S1WordMap>", required: true, desc: "The words to say inside, by key; a key left out keeps the word around it (English at the top). The few that take a number or a name are functions: `page(n)`, `pageOf(n, count)`, `copyName(name)`." },
+      { name: "children", type: "ReactNode", desc: "Your app, or the part of it in that language." },
+      { name: "useS1Words", type: "() => S1WordMap", desc: "The words in force here, for a part of your own that should speak as the others do." },
+      { name: "S1_WORDS", type: "S1WordMap", desc: "The English, every key: the list of what there is to translate." },
+    ],
+    notes: [
+      { label: "Accessibility", text: "The words only a screen reader hears are here too: the status word before a notice or a toast, a trend's direction, a secret's \"hidden\", the message after a copy. Translate them with the rest, and set `lang` on the page." },
+      { label: "Server", text: "A React context, so server HTML is in the words given; with no provider it is in English." },
+    ],
+  },
 
   // ------------------------------------------------------------ parts
   {
@@ -679,9 +716,9 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     name: "Table",
     group: "data",
     item: "table",
-    exports: ["Table", "TableProps", "Column", "Sort"],
+    exports: ["Table", "TableProps", "Column", "Sort", "RowProps", "RowGroup", "OpenGroups", "GroupWords", "ALL_GROUPS_OPEN", "ALL_GROUPS_CLOSED", "isGroupOpen", "withGroupOpen", "allGroupsOpen"],
     summary:
-      "A data table from columns and rows: a caption, column headers and row headers, numbers set to the end in mono, a row for when there is nothing, rows of bars while loading, headers that ask for a sort, and actions at the end of each row. Wider than its frame, it scrolls sideways inside it and says so, never the page.",
+      "A data table from columns and rows: a caption, column headers and row headers, numbers set to the end in mono, a row for when there is nothing, rows of bars while loading, headers that ask for a sort, and actions at the end of each row. Rows can come in groups, each under a heading row across the table that a button opens and closes, with \"Expand all\" above. Wider than its frame, it scrolls sideways inside it and says so, never the page; with `fit` it is never wider than its frame.",
     example: "live",
     usage: `import { Table, type Column } from "@/components/s1lin/table";
 
@@ -694,31 +731,62 @@ const columns: Column<Key>[] = [
 <Table caption="API keys" hideCaption columns={columns} rows={keys} rowKey="id"
   sort={sort} onSortChange={setSort} loading={!keys}
   empty={<EmptyState size="sm" title="No keys yet" action={<Button variant="go">Create key</Button>} />}
-  actions={(k) => <Menu variant="icon" size="sm" align="end" label={\`Actions for \${k.name}\`} items={…} />} />`,
+  actions={(k) => <Menu variant="icon" size="sm" align="end" label={\`Actions for \${k.name}\`} items={…} />} />
+
+// Rows in groups that open and close, in a table that fits its frame:
+import { Table, isGroupOpen, withGroupOpen, type OpenGroups } from "@/components/s1lin/table";
+
+const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); // closed but the troubled ones
+<Table caption="Models by group" fit collapsible expandAll columns={columns} rowKey="id"
+  openGroups={open} onOpenGroupsChange={setOpen}
+  groups={groups.map((g) => ({
+    key: String(g.id), label: g.name, rows: g.models, empty: "No models",
+    heading: (open) => <GroupHeading group={g} summary={!open} />,
+    meta: (open) => (open ? \`\${g.models.length} models\` : priceRange(g)),
+  }))}
+  rowProps={(m) => ({ "data-status": m.status, onClick: openDetail })} />`,
     props: [
       { name: "caption", type: "ReactNode", required: true, desc: "What the table is: its `<caption>`, read first, and the name of its frame when the frame scrolls." },
       { name: "hideCaption", type: "boolean", default: "false", desc: "Keep the caption for screen readers only, where a heading above says it." },
-      { name: "columns", type: "Column<Row>[]", required: true, desc: "Each `{ key, header, cell?, numeric?, align?, sortable?, wrap?, width? }`. Without `cell` the row's field `key` is shown. `numeric` sets it to the end in mono; `wrap` lets long words wrap (cells keep to one line)." },
-      { name: "rows", type: "Row[]", required: true, desc: "The rows, in the order shown: the table does not sort or page them." },
+      {
+        name: "columns",
+        type: "Column<Row>[]",
+        required: true,
+        desc: "Each `{ key, header, cell?, numeric?, align?, sortable?, wrap?, width?, clamp?, title?, span?, className? }`. Without `cell` the row's field `key` is shown; `numeric` sets it to the end in mono; `clamp` keeps it to that many lines and `title(row)` gives the whole; `span(row)` takes the next columns too.",
+      },
+      { name: "rows", type: "Row[]", desc: "The rows, in the order shown: the table does not sort or page them. Give `rows` or `groups`." },
+      {
+        name: "groups",
+        type: "RowGroup<Row>[]",
+        desc: "Rows in groups instead: each `{ key, heading, meta?, label?, rows, empty?, className?, style? }` is a `<tbody>` under a heading row across the table. `heading` and `meta` may be functions, told whether the group is open.",
+      },
       { name: "rowKey", type: "keyof Row | (row, index) => Key", required: true, desc: "Each row's React key." },
       { name: "rowHeader", type: "string", default: "the first column", desc: "The column whose cells name their rows (`<th scope=\"row\">`)." },
-      { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "One row across the table when there are no rows: words, or an EmptyState." },
+      { name: "rowProps", type: "(row, index) => RowProps", desc: "Attributes for a row's `<tr>`: a class, `data-` attributes, a click that follows the row's own link." },
+      { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "One row across the table when there are no rows: words, or an EmptyState. By default the `empty` of the words in force (`S1Words`)." },
       { name: "loading", type: "boolean | number", default: "false", desc: "Rows of bars in place of the rows (5, or the number given), and `aria-busy` on the table." },
       { name: "sort", type: "{ key, dir: \"asc\" | \"desc\" } | null", desc: "The sort to show: that header marked, and `aria-sort` on it." },
       { name: "onSortChange", type: "(sort) => void", desc: "Called when a sortable header is pressed: ascending first, then the other way. Sort the rows yourself." },
       { name: "actions", type: "(row, index) => ReactNode", desc: "A last column of buttons: a Menu, a Button. Its header is named for screen readers only." },
-      { name: "actionsLabel", type: "string", default: "\"Actions\"", desc: "That header's name." },
+      { name: "actionsLabel", type: "string", default: "\"Actions\"", desc: "That header's name; by default the words' `actions`." },
       { name: "stickyHeader", type: "boolean", default: "false", desc: "The header row stays while the rows scroll inside the frame, `maxHeight` tall." },
       { name: "maxHeight", type: "CSS length", default: "\"28rem\"", desc: "The frame's height with a sticky header." },
       { name: "dense", type: "boolean", default: "false", desc: "Tighter rows in 13px type, for a log." },
-      { name: "scrollHint", type: "string", default: "\"Scroll sideways for more\"", desc: "The line under a table wider than its frame." },
-      { name: "sortWords", type: "{ asc, desc, none }", desc: "What a sortable header adds for screen readers: \"sorted ascending\"; translate here." },
+      { name: "fit", type: "boolean", default: "false", desc: "As wide as the frame and no wider: the columns share it out (by `width`, the rest evenly) and words wrap. For a dense table that must not scroll sideways." },
+      { name: "collapsible", type: "boolean", default: "false", desc: "Each group's heading row gets a button that opens and closes it; a click on the row's background does the same. A closed group keeps its heading row only." },
+      { name: "openGroups", type: "OpenGroups", desc: "The open groups, controlled: `{ all, except }`, every group but `except` when `all`, else only `except`; groups that come later follow `all`. `isGroupOpen`, `withGroupOpen`, `allGroupsOpen` read and change it." },
+      { name: "defaultOpenGroups", type: "OpenGroups", default: "ALL_GROUPS_OPEN", desc: "The open groups at first, uncontrolled." },
+      { name: "onOpenGroupsChange", type: "(open: OpenGroups) => void", desc: "Called after a toggle or Expand all, with the groups now open." },
+      { name: "expandAll", type: "boolean", default: "false", desc: "A button above the table that opens every group, and closes them all once all are open." },
+      { name: "groupWords", type: "{ expandAll, collapseAll }", default: "\"Expand all\", \"Collapse all\"", desc: "That button's words; translate them here." },
+      { name: "scrollHint", type: "string", default: "\"Scroll sideways for more\"", desc: "The line under a table wider than its frame; by default the words' `scrollHint`." },
+      { name: "sortWords", type: "{ asc, desc, none }", desc: "What a sortable header adds for screen readers: \"sorted ascending\"; by default the words' `sortAscending`, `sortDescending`, `sortNone`." },
       CLASS,
     ],
     notes: [
-      { label: "Accessibility", text: "A real `<table>`: the caption names it, headers have `scope`, the first column's cells are row headers, so a screen reader reads \"prod-key, Spend, $41.20\" moving across. A sortable header is a button inside the `<th>`, and the `<th>` carries `aria-sort`. Shapes in the arrows and the badges, not colour, carry state." },
-      { label: "Keyboard", text: "When the table is wider than its frame (or the header is sticky), the frame becomes a region named by the caption, with `tabIndex=0`, so the arrow keys scroll it; when it fits, it is no stop at all." },
-      { label: "Phone", text: "Cells keep to one line, so columns never squeeze to a word a line; the table scrolls sideways inside its frame, with a shade at the edge that has more and \"Scroll sideways for more\" under it." },
+      { label: "Accessibility", text: "A real `<table>`: the caption names it, headers have `scope`, the first column's cells are row headers, so a screen reader reads \"prod-key, Spend, $41.20\" moving across. A sortable header is a button inside the `<th>`, and the `<th>` carries `aria-sort`. Shapes in the arrows and the badges, not colour, carry state. Each group is a `<tbody>` named by its heading row (`<th scope=\"rowgroup\">` across the table). Its toggle is a button named by the group's `label` (or its heading) with `aria-expanded`, so a screen reader hears \"Claude, collapsed\"; the triangle points down at the rows when they show. A heading may hold its own links and buttons: a click on them does not toggle." },
+      { label: "Keyboard", text: "When the table is wider than its frame (or the header is sticky), the frame becomes a region named by the caption, with `tabIndex=0`, so the arrow keys scroll it; when it fits, it is no stop at all. Tab reaches each group's toggle, Enter or Space opens and closes it." },
+      { label: "Phone", text: "Cells keep to one line, so columns never squeeze to a word a line; the table scrolls sideways inside its frame, with a shade at the edge that has more and \"Scroll sideways for more\" under it. With `fit`, leave out what a phone cannot hold (mark the column with `className`, then give it no width and hide its words in a container query: not `display: none`, since a group's heading row spans every column), or fold it into the first cell." },
     ],
   },
   {

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "./cn";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./pagination.css";
 
@@ -18,14 +19,12 @@ type Props = {
   siblings?: number;
   /** At the start of the row: "21–40 of 213". */
   summary?: ReactNode;
-  /** The navigation's name, for screen readers. */
+  /** The navigation's name, for screen readers; "Pagination" from S1Words by default. */
   label?: string;
-  /** The words, translated: Previous, Next, and "Page {n}" and "Page {n} of {count}". */
+  /** The words, translated: Previous, Next, and "Page {n}" and "Page {n} of {count}"; from S1Words by default. */
   words?: { previous: string; next: string; page: (n: number) => string; of: (n: number, count: number) => string };
   className?: string;
 };
-
-const WORDS = { previous: "Previous", next: "Next", page: (n: number) => `Page ${n}`, of: (n: number, count: number) => `Page ${n} of ${count}` };
 
 /** The page numbers to show: the ends, this page and its siblings; a gap where pages are left out, a page where only one would be. */
 export function pageList(page: number, count: number, siblings = 1): (number | "gap")[] {
@@ -48,7 +47,9 @@ export function pageList(page: number, count: number, siblings = 1): (number | "
  * `aria-current="page"`; buttons, or links with `href`. In a narrow box the
  * numbers give way to "Page 3 of 12".
  */
-export function Pagination({ page, pageCount, onPageChange, href, siblings = 1, summary, label = "Pagination", words = WORDS, className }: Props) {
+export function Pagination({ page, pageCount, onPageChange, href, siblings = 1, summary, label, words: given, className }: Props) {
+  const w = useS1Words();
+  const words = given ?? { previous: w.previous, next: w.next, page: w.page, of: w.pageOf };
   const count = Math.max(1, pageCount);
   const at = Math.min(Math.max(1, page), count);
   const step = (to: number, body: ReactNode, opts: { cls: string; name?: string; current?: boolean; disabled?: boolean }) => {
@@ -74,7 +75,7 @@ export function Pagination({ page, pageCount, onPageChange, href, siblings = 1, 
     );
   };
   return (
-    <nav className={cn("s1-pages", className)} aria-label={label}>
+    <nav className={cn("s1-pages", className)} aria-label={label ?? w.pagination}>
       {summary && <p className="s1-pages__summary">{summary}</p>}
       <p className="s1-pages__status">{words.of(at, count)}</p>
       <ul className="s1-pages__list">

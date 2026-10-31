@@ -125,6 +125,8 @@ export function Demo({ id }: { id: string }) {
       return <Tokens />;
     case "dark":
       return <DarkDemo />;
+    case "words":
+      return <demos.WordsDemo />;
 
     case "button":
       return <Buttons />;

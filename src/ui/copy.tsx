@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "./button";
 import { cn } from "./cn";
 import { VisuallyHidden } from "./visually-hidden";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./copy.css";
 
@@ -47,7 +48,7 @@ type Props = {
   value: string | (() => string);
   /** The button's name for screen readers: "Copy API key". It should begin with the visible word. */
   label?: string;
-  /** The visible word. */
+  /** The visible word; "Copy" from S1Words by default, as are the next three. */
   children?: ReactNode;
   /** The word after a copy. */
   copiedText?: string;
@@ -71,15 +72,17 @@ type Props = {
 export function Copy({
   value,
   label,
-  children = "Copy",
-  copiedText = "Copied",
-  failedText = "Failed",
-  messages = { copied: "Copied to the clipboard", failed: "Could not copy: select the text and copy it" },
+  children,
+  copiedText,
+  failedText,
+  messages,
   variant = "plain",
   size = "sm",
   onCopy,
   className,
 }: Props) {
+  const w = useS1Words();
+  const said = messages ?? { copied: w.copiedMessage, failed: w.copyFailedMessage };
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const button = useRef<HTMLButtonElement>(null);
   const timer = useRef<number>(undefined);
@@ -97,9 +100,9 @@ export function Copy({
   return (
     <span className={cn("s1-copy", className)} data-state={state}>
       <Button ref={button} variant={variant} size={size} aria-label={state === "idle" ? label : undefined} onClick={() => void press()}>
-        {state === "copied" ? copiedText : state === "failed" ? failedText : children}
+        {state === "copied" ? (copiedText ?? w.copied) : state === "failed" ? (failedText ?? w.copyFailed) : (children ?? w.copy)}
       </Button>
-      <VisuallyHidden role="status">{state === "copied" ? messages.copied : state === "failed" ? messages.failed : ""}</VisuallyHidden>
+      <VisuallyHidden role="status">{state === "copied" ? said.copied : state === "failed" ? said.failed : ""}</VisuallyHidden>
     </span>
   );
 }
