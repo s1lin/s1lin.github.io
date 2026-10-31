@@ -4,6 +4,7 @@ import * as tokyoRain from "ascii.rest/pieces/tokyo-rain";
 import { AsciiArt } from "@/components/AsciiArt";
 import { GlitchTitle } from "@/components/effects";
 import { MarkSetOut } from "@/components/Mark";
+import { Comments } from "@/components/social/Comments";
 import { useMedia } from "@/hooks/useMedia";
 import { useNear } from "@/hooks/useNear";
 
@@ -158,7 +159,7 @@ export function Colophon() {
         </div>
 
         <div className="contact">
-          <div>
+          <div className="contact__find">
             <GlitchTitle>Find the editor.</GlitchTitle>
             <ul>
               <li>
@@ -167,6 +168,15 @@ export function Colophon() {
                 </a>
               </li>
             </ul>
+          </div>
+          {/* Letters to the editor: the same comments as under a blog post, kept for the front page. */}
+          <div className="letters" id="letters">
+            <Comments
+              target="site:s1lin:editor"
+              lang="en"
+              title="Letters to the editor"
+              placeholder="Write to the editor: a question, a correction, a hello."
+            />
           </div>
           <p className="motto">
             Stay hungry, stay foolish.<span lang="zh-Hans">求知若饥，虚心若愚</span>

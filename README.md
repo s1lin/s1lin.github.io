@@ -191,7 +191,8 @@ not prerendered. The ACM library itself is not used and not included.
 ## Comments and shapes
 
 Blog posts and the Life page take comments, likes and reposts, and Life takes shapes readers publish from the launch
-pad. None of it is stored here: the site is static, so it all goes to **Aha Social**, the API the TokensBeat BFF
+pad. The front page has them too: "Letters to the editor", under "Find the editor." in the colophon (target
+`site:s1lin:editor`, anchor `#letters`; `src/components/Colophon.tsx`). None of it is stored here: the site is static, so it all goes to **Aha Social**, the API the TokensBeat BFF
 serves (contract: `agent-ui/SOCIAL.md` in the sub2api repository).
 
 A repost is real: it lists the thing on the reposter's Aha page, and the thread shows "Reposted by …" (public names, a link when the member has a handle; `src/lib/social/client.ts` `repostedBy`, `reposts(handle)`).
