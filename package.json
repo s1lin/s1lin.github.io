@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "build": "node scripts/registry.mjs && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "registry": "node scripts/registry.mjs",
     "lint": "oxlint src scripts vite.config.ts",
     "preview": "vite preview",
     "serve": "python3 -I scripts/serve-local.py",

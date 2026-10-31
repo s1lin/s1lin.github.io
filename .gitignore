@@ -1,6 +1,8 @@
 node_modules
 dist
 dist-ssr
+# the registry, built from registry.json by scripts/registry.mjs
+public/r
 *.local
 .DS_Store
 .idea/

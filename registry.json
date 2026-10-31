@@ -1,0 +1,443 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "s1lin",
+  "homepage": "https://s1lin.tokensbeat.com/ui/",
+  "items": [
+    {
+      "name": "tokens",
+      "type": "registry:style",
+      "title": "Tokens",
+      "author": "s1lin",
+      "description": "The tokens every part is drawn in: paper, ink, two greys, two hairlines, one accent, five typefaces and the \"+\" registration marks, as --s1- CSS variables, light and dark.",
+      "files": [
+        {
+          "path": "src/ui/tokens.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/tokens.css"
+        }
+      ],
+      "categories": [
+        "foundations"
+      ]
+    },
+    {
+      "name": "cn",
+      "type": "registry:lib",
+      "title": "cn",
+      "author": "s1lin",
+      "description": "Class names joined, the falsy ones dropped: clsx, under the name shadcn's parts use.",
+      "dependencies": [
+        "clsx@^2.1.1"
+      ],
+      "files": [
+        {
+          "path": "src/ui/cn.ts",
+          "type": "registry:lib",
+          "target": "@components/s1lin/cn.ts"
+        }
+      ],
+      "categories": [
+        "utils"
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "The house buttons: a hairline box in mono type, the same in ink with an offset shadow for the one thing to do, a pill, and words underlined; a size down; a link that looks the part.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/button.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/button.tsx"
+        },
+        {
+          "path": "src/ui/button.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/button.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "section-label",
+      "type": "registry:ui",
+      "title": "SectionLabel",
+      "description": "A section's label: mono caps over a strong hairline, a word in Japanese first; it draws in from the left as it scrolls into view.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/section-label.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/section-label.tsx"
+        },
+        {
+          "path": "src/ui/section-label.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/section-label.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "kicker",
+      "type": "registry:ui",
+      "title": "Kicker",
+      "description": "The line over a heading: a Japanese label in mincho, then the rest in spaced mono caps.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/kicker.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/kicker.tsx"
+        },
+        {
+          "path": "src/ui/kicker.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/kicker.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "roundel",
+      "type": "registry:ui",
+      "title": "Roundel",
+      "description": "A metro-style station roundel: a line's letter in a ring, sized to the type around it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/roundel.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/roundel.tsx"
+        },
+        {
+          "path": "src/ui/roundel.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/roundel.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "folio",
+      "type": "registry:ui",
+      "title": "Folio",
+      "description": "A page number, \"— 04 —\", centred at the foot of its box, as on a printed page.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/folio.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/folio.tsx"
+        },
+        {
+          "path": "src/ui/folio.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/folio.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "barcode",
+      "type": "registry:ui",
+      "title": "Barcode",
+      "description": "An id as a barcode drawn from its hex digits, the id printed under it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/barcode.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/barcode.tsx"
+        },
+        {
+          "path": "src/ui/barcode.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/barcode.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "stack",
+      "type": "registry:ui",
+      "title": "Stack",
+      "description": "A line of small hairline tags in mono: what something is built with.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/stack.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/stack.tsx"
+        },
+        {
+          "path": "src/ui/stack.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/stack.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "screen",
+      "type": "registry:ui",
+      "title": "Screen",
+      "description": "A screenshot in a hairline browser frame: a bar with three dots and the address, an offset plate behind.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/screen.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/screen.tsx"
+        },
+        {
+          "path": "src/ui/screen.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/screen.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "plate",
+      "type": "registry:ui",
+      "title": "Plate",
+      "description": "A box in a strong hairline with a \"+\" registration mark at each corner, as on a drawing sheet.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/plate.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/plate.tsx"
+        },
+        {
+          "path": "src/ui/plate.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/plate.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "mark",
+      "type": "registry:ui",
+      "title": "Mark",
+      "description": "The mark, a cross on a block of ink, and the same set out with compass and square.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/mark.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/mark.tsx"
+        },
+        {
+          "path": "src/ui/mark.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/mark.css"
+        }
+      ],
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "ascii-art",
+      "type": "registry:ui",
+      "title": "AsciiArt",
+      "description": "An ascii.rest piece: a <pre> that holds a still frame until the piece starts, or a canvas for pieces in colour.",
+      "author": "s1lin",
+      "dependencies": [
+        "ascii.rest@^0.4.0"
+      ],
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/use-hydrated.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/ascii-art.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/ascii-art.tsx"
+        },
+        {
+          "path": "src/ui/ascii-art.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/ascii-art.css"
+        }
+      ],
+      "docs": "Pieces come from ascii.rest: import * as typewriter from \"ascii.rest/pieces/typewriter\". For box-drawing characters in JetBrains Mono, declare the \"ascii.rest mono\" font (see ascii-art.css).",
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "tex",
+      "type": "registry:ui",
+      "title": "Tex",
+      "description": "LaTeX set by KaTeX, inline or on a line of its own; finished HTML from a server, or set in the browser when the formula mounts.",
+      "author": "s1lin",
+      "dependencies": [
+        "katex@^0.19.0"
+      ],
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/tex.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/tex.tsx"
+        }
+      ],
+      "docs": "Import KaTeX's stylesheet on the pages that show maths: import \"katex/dist/katex.min.css\". To set maths on a server, call setKatex(katex) once before rendering.",
+      "categories": [
+        "parts"
+      ]
+    },
+    {
+      "name": "use-near",
+      "type": "registry:hook",
+      "title": "useNear",
+      "description": "True while an element is within a margin of the viewport; false on the server and the first render. Mount heavy things on it.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-near.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-near.ts"
+        }
+      ],
+      "categories": [
+        "hooks"
+      ]
+    },
+    {
+      "name": "use-media",
+      "type": "registry:hook",
+      "title": "useMedia",
+      "description": "A media query's answer, kept current; false on the server.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-media.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-media.ts"
+        }
+      ],
+      "categories": [
+        "hooks"
+      ]
+    },
+    {
+      "name": "use-dark",
+      "type": "registry:hook",
+      "title": "useDark",
+      "description": "True on night paper, read as the tokens read it: data-theme, a dark or light class, data-mode, else the system.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-dark.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-dark.ts"
+        }
+      ],
+      "categories": [
+        "hooks"
+      ]
+    },
+    {
+      "name": "use-hydrated",
+      "type": "registry:hook",
+      "title": "useHydrated",
+      "description": "False in server HTML and while hydrating, true after: for output only a browser should make.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-hydrated.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-hydrated.ts"
+        }
+      ],
+      "categories": [
+        "hooks"
+      ]
+    },
+    {
+      "name": "use-scale",
+      "type": "registry:hook",
+      "title": "useScale",
+      "description": "CSS pixels per unit of a drawing so many units wide, for words that must hold their size as an SVG scales.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-scale.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-scale.ts"
+        }
+      ],
+      "categories": [
+        "hooks"
+      ]
+    }
+  ]
+}
