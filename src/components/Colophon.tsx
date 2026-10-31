@@ -144,7 +144,7 @@ export function Colophon() {
             </dd>
             <dt>Built with</dt>
             <dd>
-              React, Vite and Tailwind CSS, prerendered at build time; its parts are set out at <a href="/ui/">/ui/</a>
+              React and Vite, prerendered at build time; its parts are set out at <a href="/ui/">/ui/</a>
             </dd>
             <dt>Photographs</dt>
             <dd>

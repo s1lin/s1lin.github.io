@@ -1,7 +1,7 @@
 # s1lin.github.io
 
 s1lin's personal site, set like a magazine issue: **S1LIN Vol. 30, "Architecture"**.
-React 19, TypeScript, Vite and Tailwind CSS, prerendered to static HTML and
+React 19, TypeScript and Vite, in plain CSS, prerendered to static HTML and
 served by GitHub Pages.
 
 ## Develop
@@ -38,7 +38,7 @@ without JavaScript and the client only hydrates them.
 | `src/content/github.json` | Its counts, from GitHub (`scripts/github-data.py`); see below |
 | `src/components/AsciiArt.tsx` | [ascii.rest](https://ascii.rest) pieces: banner, typewriter, skyline, the departures board (inked in airport colours in `Departures.tsx`), and the alpine dawn and Tokyo rain that take turns at the end (`Colophon.tsx`) |
 | `src/styles/site.css` | The design system: paper and ink tokens, the page frame, grid, type |
-| `src/index.css` | Tailwind theme and utilities over `site.css` (no preflight) |
+| `src/index.css` | The stylesheet every page starts from: the cascade layers, the fonts and `site.css` |
 | `src/styles/fonts.css`, `scripts/fonts.mjs` | The typefaces, served from this site; see Type below |
 | `public/assets/img/` | Photographs and screenshots, WebP |
 | `blog/`, `src/blog.tsx`, `src/components/Blog.tsx` | The blog at `/blog/`, outside the issue: its index, and a page per post |
@@ -104,9 +104,6 @@ prefer reduced motion get no sand:
 ```bash
 python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.tsx src/components/canvasui/ParticleScroll.tsx
 ```
-
-Tailwind utilities win over `site.css`. The issue's colours and fonts are available
-as `bg-paper`, `text-sumi`, `text-ink-2`, `font-mincho` and so on.
 
 ### UI docs
 

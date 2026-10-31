@@ -1,6 +1,5 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -13,7 +12,7 @@ const posts = readdirSync(here("blog"), { withFileTypes: true })
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   resolve: {
     alias: { "@": here("./src") },
   },
