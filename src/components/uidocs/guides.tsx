@@ -54,6 +54,10 @@ function InstallGuide() {
           <b>A part.</b> It comes with the tokens, <code>cn</code> and the npm packages it needs:
         </p>
         <Install item="button" />
+        <p className="ud-guide__p">
+          A part added later may bring newer copies of what it shares with the ones you have (the tokens, Button): shadcn asks
+          before it replaces a file, and <code>--overwrite</code> takes them all.
+        </p>
       </li>
       <li>
         <p>
