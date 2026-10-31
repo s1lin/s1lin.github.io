@@ -106,7 +106,7 @@ export const ENTRIES: Entry[] = [
     item: "tokens",
     exports: [],
     summary:
-      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, five typefaces and the \"+\" marks. They come in with any part; set them to restyle the lot.",
+      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, five typefaces, the \"+\" marks, and the scheme for native controls. They come in with any part; set them to restyle the lot.",
     example: "live",
     propsTitle: "Variables",
     props: [
@@ -118,6 +118,7 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-rule", type: "colour", default: "ink at 14%", desc: "Hairlines between things." },
       { name: "--s1-rule-strong", type: "colour", default: "ink at 80%", desc: "Hairlines under a label, round a box or a button." },
       { name: "--s1-accent", type: "colour", default: "#d62d20 · #f0574b", desc: "The one colour: the go button's offset shadow. Set it to the ink for a press in one ink." },
+      { name: "--s1-scheme", type: "light | dark", default: "light · dark", desc: "The colour scheme native controls are drawn in: a select's list, a number's arrows, a date's picker." },
       { name: "--s1-font-display", type: "font stack", default: "Instrument Serif…", desc: "Headlines." },
       { name: "--s1-font-sans", type: "font stack", default: "Inter Tight…", desc: "Text, and the roundel's letter." },
       { name: "--s1-font-mono", type: "font stack", default: "JetBrains Mono…", desc: "Labels, buttons, numbers." },
@@ -169,16 +170,17 @@ export const ENTRIES: Entry[] = [
     item: "button",
     exports: ["Button", "buttonClass", "ButtonProps", "ButtonVariant", "ButtonSize"],
     summary:
-      "The house buttons. `plain` is a hairline box in mono type; `go`, the same in ink with an offset shadow in the accent, is for the one thing to do; `chip` is a pill; `link` is words underlined. Pressed, a box sinks into its shadow.",
+      "The house buttons. `plain` is a hairline box in mono type; `go`, the same in ink with an offset shadow in the accent, is for the one thing to do; `chip` is a pill; `link` is words underlined; `icon` is the plain box made square, for a mark with an aria-label. Pressed, a box sinks into its shadow.",
     example: "live",
     usage: `import { Button } from "@/components/s1lin/button";
 
 <Button variant="go" onClick={post}>Post</Button>
 <Button size="sm" onClick={cancel}>Cancel</Button>
 <Button variant="link" onClick={signOut}>Sign out</Button>
-<Button variant="go" href="/signup">Create an account</Button>`,
+<Button variant="go" href="/signup">Create an account</Button>
+<Button variant="icon" aria-label="Close" onClick={close}><svg …/></Button>`,
     props: [
-      { name: "variant", type: "\"plain\" | \"go\" | \"chip\" | \"link\"", default: "\"plain\"", desc: "Which button." },
+      { name: "variant", type: "\"plain\" | \"go\" | \"chip\" | \"link\" | \"icon\"", default: "\"plain\"", desc: "Which button. `icon` is 40px square (30px at `sm`) for an svg or one character, and needs an `aria-label`." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm` is 30px tall in 11px type, for a row of small actions." },
       { name: "href", type: "string", desc: "Makes it a link, `<a>`, that looks the part; the other props go to the `<a>`." },
       { name: "type", type: "\"button\" | \"submit\" | \"reset\"", default: "\"button\"", desc: "As on `<button>`; it submits a form only when asked to." },
