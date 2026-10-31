@@ -319,21 +319,25 @@ const KINDS: { key: keyof Parts; label: string; cls: string }[] = [
 const FW = 300;
 const FH = 168;
 const NODE = 6;
+// The agents stand further apart than the kinds: their labels take two lines,
+// and the small agents' labels can then sit level with their own nodes.
+const GAP_FROM = 24;
 const GAP = 10;
-const PER = (FH - (KINDS.length - 1) * GAP) / T.total;
+// one scale for both sides, whichever needs more room for its gaps
+const PER = Math.min(FH - (T.apps.length - 1) * GAP_FROM, FH - (KINDS.length - 1) * GAP) / T.total;
 
 type Span = { y0: number; y1: number };
-/** Values stacked down one side, a gap between each, centred in the drawing. */
-function stack(values: number[]): Span[] {
-  let y = (FH - values.reduce((a, v) => a + v * PER, 0) - (values.length - 1) * GAP) / 2;
+/** Values stacked down one side, `gap` between each, centred in the drawing. */
+function stack(values: number[], gap: number): Span[] {
+  let y = (FH - values.reduce((a, v) => a + v * PER, 0) - (values.length - 1) * gap) / 2;
   return values.map((v) => {
     const span = { y0: y, y1: y + v * PER };
-    y = span.y1 + GAP;
+    y = span.y1 + gap;
     return span;
   });
 }
-const FROM = stack(T.apps.map((a) => T.byApp[a]));
-const TO = stack(KINDS.map((k) => T.parts[k.key]));
+const FROM = stack(T.apps.map((a) => T.byApp[a]), GAP_FROM);
+const TO = stack(KINDS.map((k) => T.parts[k.key]), GAP);
 
 /** Label centres beside a side's nodes, nudged down until no two are closer than `room` pixels. */
 function spread(spans: Span[], room: number) {
