@@ -3,10 +3,12 @@
 // Fontsource's npm packages: Google Fonts' own woff2 files, cut into Google's
 // unicode-range slices, so a page fetches only the slices holding characters it
 // shows. Vite copies each file it is pointed at into dist/assets/ with a hash.
-// Run it after changing a package's version or the weights below, and commit
-// what it writes:
+// The front page also gets a cut of its own Japanese and Chinese (see FRONT
+// below), read from the built page and fetched from Google Fonts. Run it after
+// changing a package's version, the weights below, or the front page's Japanese
+// or Chinese, and commit what it writes:
 //
-//   node scripts/fonts.mjs
+//   npm run build && node scripts/fonts.mjs && npm run build
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
 
 const root = new URL("../", import.meta.url);
@@ -32,15 +34,15 @@ const FAMILIES = [
     notice: "Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)",
   },
   {
-    family: "Shippori Mincho B1", pkg: "@fontsource/shippori-mincho-b1", css: ["700.css", "800.css"],
+    family: "Shippori Mincho B1", pkg: "@fontsource/shippori-mincho-b1", css: ["700.css", "800.css"], front: "ja",
     notice: "Copyright 2021 The Shippori Mincho Project Authors (https://github.com/fontdasu/ShipporiMincho)",
   },
   {
-    family: "Zen Kaku Gothic New", pkg: "@fontsource/zen-kaku-gothic-new", css: ["500.css", "700.css"],
+    family: "Zen Kaku Gothic New", pkg: "@fontsource/zen-kaku-gothic-new", css: ["500.css", "700.css"], front: "ja",
     notice: "Copyright 2022 The Zen Project Authors (https://github.com/googlefonts/zen-kakugothic)",
   },
   {
-    family: "Noto Serif SC", pkg: "@fontsource-variable/noto-serif-sc", css: ["wght.css"], weights: ["400 700"],
+    family: "Noto Serif SC", pkg: "@fontsource-variable/noto-serif-sc", css: ["wght.css"], weights: ["400 700"], front: "zh",
     notice: "(c) 2017-2024 Adobe (http://www.adobe.com/).",
   },
 ];
@@ -87,6 +89,62 @@ function merge(a, b) {
   return [...out, ...a.slice(i), ...b.slice(j)];
 }
 
+// The front page's cut. Its Japanese and Chinese, some 70 characters each, lie
+// in about 45 different slices (1.4 MB), so each of these faces also gets one
+// small file holding just the characters the built front page shows, cut by
+// Google Fonts (its text= subsets, as the issue used to load them). Written
+// after the slices, the cut is asked first for its characters; anything else
+// still comes from a slice, so a character the cut lacks costs bytes, not looks.
+// Text the page only sets once it runs is added by hand: the runhead's switch
+// reads 紙 in dark mode, which the built page never is.
+const FRONT_EXTRA = { ja: "紙", zh: "" };
+
+function frontText() {
+  if (!existsSync(new URL("dist/index.html", root))) throw new Error("dist/index.html is missing: run npm run build first");
+  const html = read("dist/index.html").replace(/<script[\s\S]*?<\/script>/g, "");
+  // Everything past ASCII, so the punctuation inside Japanese or Chinese comes along
+  const chars = (s) => s.replace(/<[^>]*>/g, "").replace(/[\x00-\x7f]/g, "");
+  const sets = { ja: new Set(FRONT_EXTRA.ja), zh: new Set(FRONT_EXTRA.zh) };
+  for (const [, , lang, inner] of html.matchAll(/<(\w+)\b[^>]*\blang="(ja|zh-Hans)"[^>]*>([\s\S]*?)<\/\1>/g))
+    for (const c of chars(inner)) sets[lang === "ja" ? "ja" : "zh"].add(c);
+  // The runhead names each section as it scrolls past, from its data-run label
+  for (const [, label] of html.matchAll(/data-run="([^"]*)"/g)) for (const c of chars(label)) sets.ja.add(c);
+  // Kana or Han outside any lang element might be set in either
+  for (const c of chars(html.slice(html.indexOf("<body"))))
+    if (/[\u3000-\u9fff\uff00-\uffef]/u.test(c) && !sets.ja.has(c) && !sets.zh.has(c)) sets.ja.add(c), sets.zh.add(c);
+  return { ja: [...sets.ja].sort().join(""), zh: [...sets.zh].sort().join("") };
+}
+
+// Google Fonts sends woff2 and a unicode-range only to a current browser.
+const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+async function get(url) {
+  const res = await fetch(url, { headers: { "user-agent": UA } });
+  if (!res.ok) throw new Error(`${url.slice(0, 120)}: HTTP ${res.status}`);
+  return res;
+}
+
+// One file per weight, with the same weight the slices declare, so the browser
+// takes the cut and the slices as one face.
+async function frontCut(f, slices, text) {
+  const weights = [...new Set(slices.flatMap((s) => s.faces.map((face) => face.weight)))];
+  const query = `${f.family.replaceAll(" ", "+")}:wght@${weights.map((w) => w.replace(" ", "..")).join(";")}`;
+  const sheet = await (await get(`https://fonts.googleapis.com/css2?family=${query}&text=${encodeURIComponent(text)}&display=swap`)).text();
+  let rules = "";
+  const got = [];
+  for (const [, block] of sheet.matchAll(/@font-face\s*\{([^}]*)\}/g)) {
+    const weight = field(block, "font-weight");
+    const range = field(block, "unicode-range");
+    const src = block.match(/url\(([^)]+)\)\s*format\('woff2'\)/)?.[1];
+    if (!weights.includes(weight) || !range || !src) throw new Error(`${f.family}: Google Fonts sent an unexpected face (${weight})`);
+    const name = `${f.pkg.split("/")[1]}-front-${weight.replace(" ", "-")}.woff2`;
+    writeFileSync(new URL(`src/styles/fonts/${name}`, root), Buffer.from(await (await get(src)).arrayBuffer()));
+    rules += `@font-face { font-family: "${f.family}"; font-weight: ${weight}; font-display: swap; src: url("./fonts/${name}?no-inline") format("woff2"); unicode-range: ${range}; }\n`;
+    got.push(weight);
+  }
+  if (got.length !== weights.length) throw new Error(`${f.family}: Google Fonts sent ${got.join(", ")}, not ${weights.join(", ")}`);
+  return rules;
+}
+
 const version = (pkg) => JSON.parse(read(`node_modules/${pkg}/package.json`)).version;
 let css = `/*
  * The issue's typefaces, served from this site. Generated by scripts/fonts.mjs
@@ -98,14 +156,18 @@ ${FAMILIES.map((f) => ` *   ${f.family}: ${f.pkg} ${version(f.pkg)}`).join("\n")
  * where every page would download them, wanted or not.
  */
 `;
+const sliced = FAMILIES.map(slicesOf);
 let faces = 0;
-for (const { range, faces: list } of FAMILIES.map(slicesOf).reduce(merge)) {
+for (const { range, faces: list } of sliced.reduce(merge)) {
   for (const { family, pkg, style, weight, file } of list) {
     const italic = style === "italic" ? " font-style: italic;" : "";
     css += `@font-face { font-family: "${family}";${italic} font-weight: ${weight}; font-display: swap; src: url("${pkg}/files/${file}?no-inline") format("woff2"); unicode-range: ${range}; }\n`;
     faces++;
   }
 }
+const front = frontText();
+css += `\n/* The front page's cut (src/styles/fonts/*-front-*.woff2), last so it is asked first:\n *   ja ${front.ja}\n *   zh ${front.zh}\n */\n`;
+for (const [i, f] of FAMILIES.entries()) if (f.front) css += await frontCut(f, sliced[i], front[f.front]);
 writeFileSync(new URL("src/styles/fonts.css", root), css);
 
 // One copy of the licence, after every family's notice. The packages carry the
@@ -118,7 +180,9 @@ writeFileSync(
   new URL("public/assets/OFL.txt", root),
   `The typefaces in this folder (*.woff2) are served by s1lin.tokensbeat.com
 under the SIL Open Font License, Version 1.1, given in full below. They are the
-files Google Fonts serves, unmodified, from the Fontsource packages.
+files Google Fonts serves, unmodified: its unicode-range slices, from the
+Fontsource packages, and (the *-front-* files) its cuts of the same fonts down
+to the characters on the front page.
 
 ${FAMILIES.map((f) => `${f.family} (${files(f)})\n${f.notice}`).join("\n\n")}
 
@@ -128,4 +192,4 @@ ${FAMILIES.find((f) => f.family === "JetBrains Mono").notice}
 
 ${ofl}`,
 );
-console.log(`src/styles/fonts.css: ${faces} faces of ${FAMILIES.length} families; public/assets/OFL.txt`);
+console.log(`src/styles/fonts.css: ${faces} sliced faces of ${FAMILIES.length} families and the front page's cut (${[...front.ja].length} ja, ${[...front.zh].length} zh characters); public/assets/OFL.txt`);

@@ -1,6 +1,8 @@
 The typefaces in this folder (*.woff2) are served by s1lin.tokensbeat.com
 under the SIL Open Font License, Version 1.1, given in full below. They are the
-files Google Fonts serves, unmodified, from the Fontsource packages.
+files Google Fonts serves, unmodified: its unicode-range slices, from the
+Fontsource packages, and (the *-front-* files) its cuts of the same fonts down
+to the characters on the front page.
 
 Instrument Serif (instrument-serif-*.woff2)
 Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)

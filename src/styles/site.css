@@ -267,7 +267,7 @@ pre, .ascii { font-family: var(--f-mono); font-variant-ligatures: none; }
    fetched from ascii.rest: Google's JetBrains Mono has no box-drawing characters. */
 @font-face {
   font-family: "ascii.rest mono";
-  src: url("./ascii-rest-mono.woff2?no-inline") format("woff2");
+  src: url("./fonts/ascii-rest-mono.woff2?no-inline") format("woff2");
   unicode-range: U+00B0, U+00B7, U+2022, U+2500-259F, U+25CF;
   font-display: swap;
 }

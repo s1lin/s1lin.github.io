@@ -121,11 +121,21 @@ Chinese in a new post needs no list of characters.
 the `@font-face` rules, written by `scripts/fonts.mjs` with the weights and
 styles the styles use. Vite copies the files into `dist/assets/` under hashed
 names (`?no-inline` stops it pasting the smallest into the stylesheet), and a
-browser fetches one only when a page shows a character in its range. After
-changing a package's version, or a weight in the list at the top of the script:
+browser fetches one only when a page shows a character in its range.
+
+The front page's Japanese and Chinese, some 70 characters each, would still
+touch about 45 slices (1.4 MB), so the script also takes a cut of each of those
+faces holding just the characters the built front page shows (Google Fonts'
+`text=` subsets, as the issue used to load them, saved in `src/styles/fonts/`
+as `*-front-*.woff2`). They come after the slices, so the browser asks them
+first for their characters and the slices for anything else: a character the
+cut lacks costs a slice, never the look. The front page loads about 220 KB of
+type. Re-run it after changing a package's version, a weight in the list at the
+top of the script, or the front page's Japanese or Chinese (it reads the built
+page, and needs Google Fonts reachable):
 
 ```bash
-node scripts/fonts.mjs   # rewrites src/styles/fonts.css and public/assets/OFL.txt
+npm run build && node scripts/fonts.mjs && npm run build
 ```
 
 The fonts are under the SIL Open Font License; the script writes each one's
@@ -134,7 +144,7 @@ beside the files and linked from the colophon. The HTML shells (`index.html`,
 `blog/`, `life/`) load no fonts of their own; a new page gets them by importing
 `src/index.css`. The ascii.rest pieces take their line and block characters
 from "ascii.rest mono", ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept in
-`src/styles/` since Google's JetBrains Mono leaves those characters out.
+`src/styles/fonts/` since Google's JetBrains Mono leaves those characters out.
 
 ## Blog
 
