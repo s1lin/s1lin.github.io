@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Avatar, Icon } from "@/components/social/common";
 import { Composer } from "@/components/social/Composer";
-import { errorText, when } from "@/components/social/helpers";
+import { errorText, signInText, when } from "@/components/social/helpers";
 import { Reactions, type ReactionState } from "@/components/social/Reactions";
 import { SOCIAL_COPY, type SocialCopy } from "@/components/social/copy";
 import type { Lang } from "@/components/life/copy";
 import { moreReposters, reposterUrl, type Reposter, type SocialComment, type Thread } from "@/lib/social/client.ts";
 import { social, useSession } from "@/lib/social/useSocial";
 
-function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: SocialComment; c: SocialCopy; lang: Lang; target: string; liked: boolean; onChanged: () => void; reply: boolean }) {
+function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: SocialComment; c: SocialCopy; lang: Lang; target: string; liked: Set<string>; onChanged: () => void; reply: boolean }) {
   const { session } = useSession();
-  const [st, setSt] = useState<ReactionState>({ likes: cm.likes, reposts: 0, liked, reposted: false });
+  const [st, setSt] = useState<ReactionState>({ likes: cm.likes, reposts: 0, liked: liked.has(cm.id), reposted: false });
   const [replying, setReplying] = useState(false);
   return (
     <li className={`soc__comment${cm.pending ? " is-pending" : ""}`} id={`c-${cm.id}`}>
@@ -48,7 +48,7 @@ function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: Soc
         {cm.replies && cm.replies.length > 0 && (
           <ul className="soc__list soc__list--replies">
             {cm.replies.map((r) => (
-              <CommentView key={`${r.id}:${r.likes}`} cm={r} c={c} lang={lang} target={target} liked={false} onChanged={onChanged} reply={false} />
+              <CommentView key={`${r.id}:${r.likes}:${liked.has(r.id)}`} cm={r} c={c} lang={lang} target={target} liked={liked} onChanged={onChanged} reply={false} />
             ))}
           </ul>
         )}
@@ -66,7 +66,7 @@ function CommentLike({ id, st, setSt, c }: { id: string; st: ReactionState; setS
       try {
         await signIn();
       } catch (e) {
-        setErr(errorText(e, c));
+        setErr(signInText(e, c));
       }
       return;
     }
@@ -183,7 +183,7 @@ export function Comments({ target, lang, title, placeholder }: { target: string;
       {thread && thread.comments.length > 0 && (
         <ul className="soc__list">
           {thread.comments.map((cm) => (
-            <CommentView key={`${cm.id}:${cm.likes}:${liked.has(cm.id)}`} cm={cm} c={c} lang={lang} target={target} liked={liked.has(cm.id)} onChanged={reload} reply />
+            <CommentView key={`${cm.id}:${cm.likes}:${liked.has(cm.id)}`} cm={cm} c={c} lang={lang} target={target} liked={liked} onChanged={reload} reply />
           ))}
         </ul>
       )}

@@ -150,7 +150,8 @@ export function ShapeGallery({ lang }: { lang: Lang }) {
       {shapes && shapes.length > 0 && (
         <ul className="soc__shapes">
           {shapes.map((s) => (
-            <Card key={s.id} shape={s} lang={lang} />
+            // Keyed by the counts and the reader's own marks too, so a sign-in shows what they already liked.
+            <Card key={`${s.id}:${s.likes}:${s.reposts}:${s.liked}:${s.reposted}`} shape={s} lang={lang} />
           ))}
         </ul>
       )}

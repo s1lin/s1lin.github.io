@@ -73,11 +73,11 @@ const LEDGER: [string, string, string][] = [
   ["2018–2019", "Pioneer Education", ", Chengdu. Project manager and engineer for its administration system; academic advisor."],
   ["2019–2022", "McGill University", ", Montreal. M.Sc. in computer science at the Scientific Computing Lab, on asynchronous parallel solvers for integer least squares. Third place at the Dobson Cup with AwakeAI."],
   ["2020–2025", "AwakeAI", ", Montreal. Co-founder; system architect from 2023; COO from January 2025 until I resigned in July."],
-  ["2023", "Echosonic", ". Embedded AI engineer, running models on STM32 microcontrollers."],
+  ["2022–2023", "EchoSonic", ". Embedded AI engineer, running models on STM32 microcontrollers."],
   ["2025 —", "WorkGo", ". The career OS, version 2.0 from August 2026."],
   ["2025 —", "InclusifAI", ". Founder app, Partner Hub and public site."],
   ["2026 —", "HiRain Technologies", ". Roadside perception, and research on recursive self-improvement."],
-  ["2026 —", "Tokensbeat", ". Architect and operator of the platform; opened in October, with WorkGo and InclusifAI as its first tenants."],
+  ["2026 —", "TokensBeat", ". Architect and operator of the platform; opened in October, with WorkGo and InclusifAI as its first tenants."],
 ];
 
 export function Departures() {
