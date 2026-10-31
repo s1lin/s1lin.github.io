@@ -31,7 +31,7 @@ export async function copyText(text: string, near?: Element | null): Promise<boo
   const back = document.activeElement as HTMLElement | null;
   host.append(box);
   box.select();
-  let ok = false;
+  let ok: boolean;
   try {
     ok = document.execCommand("copy");
   } catch {
