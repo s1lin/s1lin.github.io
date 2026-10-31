@@ -39,12 +39,17 @@
     border: 1px solid var(--s1-rule-strong); background: var(--s1-paper);
   }
   .s1-radios--segmented .s1-radio {
-    align-items: center; justify-content: center; min-height: 32px; padding: 0 12px; gap: 0;
+    align-items: center; justify-content: center; min-height: 32px; padding: 0 12px;
     font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2);
   }
   .s1-radios--segmented .s1-radio + .s1-radio { border-left: 1px solid var(--s1-rule); }
-  .s1-radios--segmented .s1-radio__control { position: static; width: 0; height: 0; margin: 0; }
-  .s1-radios--segmented .s1-radio__dot { display: none; }
+  /* Where :has() is known the chosen segment is in reverse and the dot goes; elsewhere the dot stays to show it. */
+  .s1-radios--segmented .s1-radio { gap: 6px; }
+  @supports selector(:has(*)) {
+    .s1-radios--segmented .s1-radio { gap: 0; }
+    .s1-radios--segmented .s1-radio__control { position: static; width: 0; height: 0; margin: 0; }
+    .s1-radios--segmented .s1-radio__dot { display: none; }
+  }
   .s1-radios--segmented .s1-radio:hover { color: var(--s1-ink); }
   .s1-radios--segmented .s1-radio:has(.s1-radio__input:checked) { background: var(--s1-ink); color: var(--s1-paper); }
   .s1-radios--segmented .s1-radio:has(.s1-radio__input:focus-visible) { outline: 2px solid var(--s1-ink); outline-offset: 2px; z-index: 1; }

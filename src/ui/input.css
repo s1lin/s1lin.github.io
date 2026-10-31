@@ -38,6 +38,6 @@
   /* In error: the line doubles, in the ink; the Field's message says what is wrong. */
   .s1-input[data-invalid] { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
   .s1-input[data-readonly] { background: var(--s1-paper-2); }
-  .s1-input[data-disabled] { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
-  .s1-input[data-disabled] .s1-input__control { cursor: not-allowed; }
+  .s1-input:is([data-disabled], :has(> .s1-input__control:disabled)) { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-input:is([data-disabled], :has(> .s1-input__control:disabled)) .s1-input__control { cursor: not-allowed; }
 }

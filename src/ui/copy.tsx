@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "./button";
 import { cn } from "./cn";
@@ -84,6 +86,7 @@ export function Copy({
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   async function press() {
+    setState("idle"); // a second copy changes the status's words again, so it is read again
     const ok = await copyText(typeof value === "function" ? value() : value, button.current);
     setState(ok ? "copied" : "failed");
     onCopy?.(ok);

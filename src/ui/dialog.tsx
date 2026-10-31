@@ -1,4 +1,6 @@
-import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
+"use client";
+
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { cn } from "./cn";
 import "./tokens.css";
 import "./dialog.css";
@@ -69,7 +71,8 @@ export function Dialog({ open, onClose, title, description, children, actions, s
       if (latest.current.dismissible) latest.current.onClose();
     };
     const close = () => {
-      if (latest.current.open) latest.current.onClose();
+      // a late event from an earlier close must not shut a dialog opened again since
+      if (!d.open && latest.current.open) latest.current.onClose();
       const to = back.current;
       back.current = null;
       if (to?.isConnected && (document.activeElement === document.body || document.activeElement === null)) to.focus();
@@ -81,6 +84,25 @@ export function Dialog({ open, onClose, title, description, children, actions, s
       d.removeEventListener("close", close);
     };
   }, []);
+
+  // Unmounted while open (a route change, `{open && <Dialog …/>}`): close it first, so the browser gives focus back.
+  useLayoutEffect(() => {
+    const d = ref.current;
+    return () => {
+      if (d?.open) d.close();
+    };
+  }, []);
+
+  // A body taller than the dialog scrolls; it then takes focus, as a region named by the heading, so a keyboard can scroll it.
+  const body = useRef<HTMLDivElement>(null);
+  const [tall, setTall] = useState(false);
+  useEffect(() => {
+    const el = body.current;
+    if (!open || !el || !("ResizeObserver" in window)) return;
+    const ro = new ResizeObserver(() => setTall(el.scrollHeight > el.clientHeight + 1));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
 
   return (
     <dialog
@@ -117,7 +139,17 @@ export function Dialog({ open, onClose, title, description, children, actions, s
               </button>
             )}
           </div>
-          {children && <div className="s1-dialog__body">{children}</div>}
+          {children && (
+            <div
+              ref={body}
+              className="s1-dialog__body"
+              role={tall ? "region" : undefined}
+              aria-labelledby={tall ? `${id}-title` : undefined}
+              tabIndex={tall ? 0 : undefined}
+            >
+              {children}
+            </div>
+          )}
           {actions && <div className="s1-dialog__foot">{actions}</div>}
         </div>
       )}

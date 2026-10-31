@@ -1,3 +1,5 @@
+"use client";
+
 import { useId, type InputHTMLAttributes, type ReactNode, type Ref } from "react";
 import { cn } from "./cn";
 import { useField } from "./field";
@@ -33,7 +35,7 @@ export function Input({ size = "md", prefix, suffix, invalid, className, id, req
   return (
     <span
       className={cn("s1-input", `s1-input--${size}`, className)}
-      data-invalid={field["aria-invalid"] ? "" : undefined}
+      data-invalid={field["aria-invalid"] !== undefined && field["aria-invalid"] !== false && field["aria-invalid"] !== "false" ? "" : undefined}
       data-disabled={field.disabled ? "" : undefined}
       data-readonly={rest.readOnly ? "" : undefined}
     >

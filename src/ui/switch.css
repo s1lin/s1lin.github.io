@@ -25,7 +25,7 @@
   .s1-switch--reverse .s1-switch__row { flex-direction: row-reverse; justify-content: space-between; width: 100%; }
   .s1-switch--reverse .s1-switch__hint { margin: 0 46px 0 0; }
 
-  .s1-switch--disabled .s1-switch__row { color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-switch--disabled .s1-switch__row, .s1-switch__row:has(.s1-switch__input:disabled) { color: var(--s1-ink-3); cursor: not-allowed; }
   .s1-switch__input:disabled + .s1-switch__track { border-style: dashed; border-color: var(--s1-ink-3); }
   .s1-switch__input:disabled:checked + .s1-switch__track { background: var(--s1-ink-3); border-style: solid; }
 

@@ -1,3 +1,5 @@
+"use client";
+
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "./cn";
 import { Glyph, type Status } from "./glyph";

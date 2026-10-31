@@ -1,3 +1,5 @@
+"use client";
+
 import type { Ref, TextareaHTMLAttributes } from "react";
 import { cn } from "./cn";
 import { useField } from "./field";

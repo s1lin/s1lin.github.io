@@ -1,3 +1,5 @@
+"use client";
+
 import { useSyncExternalStore } from "react";
 
 const DARK = "(prefers-color-scheme: dark)";

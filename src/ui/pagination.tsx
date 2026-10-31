@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { cn } from "./cn";
 import "./tokens.css";
@@ -51,9 +53,10 @@ export function Pagination({ page, pageCount, onPageChange, href, siblings = 1, 
   const at = Math.min(Math.max(1, page), count);
   const step = (to: number, body: ReactNode, opts: { cls: string; name?: string; current?: boolean; disabled?: boolean }) => {
     const props = { className: opts.cls, "aria-label": opts.name, "aria-current": opts.current ? ("page" as const) : undefined };
+    // Disabled with aria-disabled, not disabled: Next pressed onto the last page keeps its focus.
     if (!href)
       return (
-        <button type="button" {...props} disabled={opts.disabled} onClick={() => onPageChange?.(to)}>
+        <button type="button" {...props} aria-disabled={opts.disabled || undefined} onClick={() => !opts.disabled && onPageChange?.(to)}>
           {body}
         </button>
       );

@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useId, type FieldsetHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Glyph } from "./glyph";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useId, type FieldsetHTMLAttributes, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Fieldset } from "./field";

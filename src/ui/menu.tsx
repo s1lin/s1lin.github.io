@@ -1,3 +1,5 @@
+"use client";
+
 import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "./button";
 import { cn } from "./cn";
@@ -25,12 +27,13 @@ export type MenuItem =
 type Props = {
   /** The actions, in order; "separator" draws a line between groups. */
   items: MenuItem[];
-  /** What the button shows. Leave it out with variant "icon" for three dots. */
+  /** What the button shows; three dots in a square button when left out. */
   children?: ReactNode;
   /** The button's name, needed when it shows no words: "Actions for prod-key". */
   label?: string;
   /** Which edge of the button the menu lines up with. */
   align?: "start" | "end";
+  /** The button: "icon" (square) when it shows the three dots, else "plain". */
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
@@ -47,16 +50,18 @@ const canPop = (el: HTMLElement) => typeof el.showPopover === "function";
  * opens below the button, or above it when there is no room. All of it is
  * phrasing content, so it may stand in a paragraph or a table cell.
  */
-export function Menu({ items, children, label, align = "start", variant = "plain", size = "md", className }: Props) {
+export function Menu({ items, children, label, align = "start", variant = children === undefined ? "icon" : "plain", size = "md", className }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLSpanElement>(null);
   const start = useRef<"first" | "last">("first");
 
-  const enabled = () => [...(list.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])') ?? [])];
+  // Every item, disabled ones too: they are reached and heard, only not chosen (as the ARIA practices have it).
+  const entries = () => [...(list.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
 
   function show(where: "first" | "last") {
+    if (!items.some((i) => i !== "separator")) return;
     start.current = where;
     setOpen(true);
   }
@@ -89,7 +94,7 @@ export function Menu({ items, children, label, align = "start", variant = "plain
     };
     if (canPop(m) && !m.matches(":popover-open")) m.showPopover();
     place();
-    const all = [...m.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')];
+    const all = [...m.querySelectorAll<HTMLElement>('[role="menuitem"]')];
     (start.current === "last" ? all[all.length - 1] : all[0])?.focus();
     const outside = (e: PointerEvent) => {
       const t = e.target as Node;
@@ -109,7 +114,7 @@ export function Menu({ items, children, label, align = "start", variant = "plain
   const typed = useRef({ text: "", at: 0 });
 
   function onListKey(e: KeyboardEvent<HTMLSpanElement>) {
-    const all = enabled();
+    const all = entries();
     const i = all.indexOf(document.activeElement as HTMLElement);
     const go = (n: number) => all[(n + all.length) % all.length]?.focus();
     switch (e.key) {
@@ -177,6 +182,10 @@ export function Menu({ items, children, label, align = "start", variant = "plain
           if (e.key === "ArrowDown" || e.key === "ArrowUp") {
             e.preventDefault();
             show(e.key === "ArrowUp" ? "last" : "first");
+          } else if (e.key === "Escape" && open) {
+            e.preventDefault();
+            e.stopPropagation();
+            hide(true);
           }
         }}
       >
