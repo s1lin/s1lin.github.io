@@ -77,7 +77,7 @@ const LEDGER: [string, string, string][] = [
   ["2025 —", "WorkGo", ". The career OS, version 2.0 from August 2026."],
   ["2025 —", "InclusifAI", ". Founder app, Partner Hub and public site."],
   ["2026 —", "HiRain Technologies", ". Roadside perception, and research on recursive self-improvement."],
-  ["2026 —", "Tokensbeat", ". Architect and operator of the platform; opened in October, with WorkGo and InclusifAI as its first tenants."],
+  ["2026 —", "TokensBeat", ". Architect and operator of the platform; opened in October, with WorkGo and InclusifAI as its first tenants."],
 ];
 
 export function Departures() {

@@ -12,7 +12,7 @@ import type { Insets } from "@/lib/metro";
 const ARCH = banner("arch", { font: "block", shadow: "single", effect: "type" });
 
 const LINES: { href: string; letter: string; title: string; sub: string; page: string }[] = [
-  { href: "#tokensbeat", letter: "T", title: "One gateway, apps as tenants", sub: "Tokensbeat, the platform", page: "08" },
+  { href: "#tokensbeat", letter: "T", title: "One gateway, apps as tenants", sub: "TokensBeat, the platform", page: "08" },
   { href: "#workgo", letter: "W", title: "Putting careers on rails", sub: "WorkGo, the career OS", page: "12" },
   { href: "#inclusifai", letter: "I", title: "Funding rails for every founder", sub: "InclusifAI", page: "16" },
   { href: "#hirain", letter: "H", title: "Five points on the roadside", sub: "Perception at HiRain", page: "20" },
