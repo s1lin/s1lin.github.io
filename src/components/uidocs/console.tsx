@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
@@ -19,6 +19,7 @@ import { RadioGroup } from "@/ui/radio-group";
 import { Secret } from "@/ui/secret";
 import { Select } from "@/ui/select";
 import { Skeleton } from "@/ui/skeleton";
+import { Slider } from "@/ui/slider";
 import { Spinner } from "@/ui/spinner";
 import { Stat, StatGroup } from "@/ui/stat";
 import { Switch } from "@/ui/switch";
@@ -258,6 +259,42 @@ export function SwitchDemo() {
         Allow new keys
       </Switch>
       <Switch defaultChecked>Beside its label</Switch>
+    </div>
+  );
+}
+
+/** The setting a console has it for: how dark its hairlines are, drawn live in a ledger beside it. */
+export function SliderDemo() {
+  const [contrast, setContrast] = useState(14);
+  return (
+    <div className="ud-grid2">
+      <div className="ud-stack ud-stack--wide">
+        <Slider
+          label="Line contrast"
+          min={0}
+          max={60}
+          step={2}
+          value={contrast}
+          onValueChange={setContrast}
+          format={(v) => `${v}%`}
+          hint="How dark the hairlines between rows are drawn."
+          marks={[
+            { value: 0, label: "None" },
+            { value: 14, label: "Default" },
+            { value: 60, label: "Strong" },
+          ]}
+        />
+        <Slider label="Temperature" min={0} max={2} step={0.1} defaultValue={0.7} format={(v) => v.toFixed(1)} marks={[0, 1, 2]} />
+        <Slider label="Warn at" min={50} max={100} step={5} defaultValue={80} format={(v) => `${v}%`} disabled hint="Owners only." />
+      </div>
+      <ul className="ud-ledger" style={{ "--ud-line": `${contrast}%` } as CSSProperties} aria-label="Keys, ruled at that contrast">
+        {KEYS.slice(0, 4).map((k) => (
+          <li key={k.id}>
+            <span>{k.name}</span>
+            <span className="mono">{usd(k.spend)}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -179,7 +179,7 @@ export function Demo({ id }: { id: string }) {
       return <Stack items={["React 19", "TypeScript", "Vite 8", "plain CSS", "prerendered"]} />;
     case "screen":
       return (
-        <Screen bar="tokensbeat.com">
+        <Screen bar="tokensbeat.com" className="ud-screen">
           <img src="/assets/img/web-tokensbeat-home.webp" width={1600} height={1000} loading="lazy" alt="The TokensBeat home page: one gateway to many models." />
         </Screen>
       );
@@ -229,6 +229,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.RadioDemo />;
     case "switch":
       return <demos.SwitchDemo />;
+    case "slider":
+      return <demos.SliderDemo />;
 
     case "table":
       return <demos.TableDemo />;

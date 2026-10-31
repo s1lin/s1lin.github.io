@@ -10,11 +10,13 @@
  * src/components appears in the list of site parts.
  */
 
-export type GroupId = "start" | "parts" | "forms" | "data" | "overlays" | "feedback" | "text" | "hooks";
+export type GroupId = "start" | "foundations" | "parts" | "forms" | "data" | "overlays" | "feedback" | "text" | "hooks";
 
 export interface Group {
   id: GroupId;
   name: string;
+  /** The chapter of the index it stands in; the parts' families share one. */
+  chapter: string;
   blurb: string;
 }
 
@@ -22,41 +24,55 @@ export const GROUPS: Group[] = [
   {
     id: "start",
     name: "Getting started",
-    blurb: "From an empty app to the first part, then how the parts take your colours, your night and your stylesheet.",
+    chapter: "Getting started",
+    blurb: "From an empty app to the first part, and how the parts' stylesheets sit beside your own, with Tailwind or without.",
+  },
+  {
+    id: "foundations",
+    name: "Foundations",
+    chapter: "Foundations",
+    blurb: "What every part is drawn in and says: the tokens, the night, the status hues, the words. Set them once and the parts take your colours, your night and your language.",
   },
   {
     id: "parts",
-    name: "Parts",
+    name: "Editorial",
+    chapter: "Parts",
     blurb: "The parts the issue is set with, each a component and its own stylesheet, drawn in the tokens. Each brings the tokens and cn with it.",
   },
   {
     id: "forms",
+    chapter: "Parts",
     name: "Forms",
     blurb: "Native controls in the house's hairline, wired for screen readers: a Field gives its control a label, a hint and an error, and the control says it is invalid. Every one works with a keyboard, a phone's own pickers and a form's own submit.",
   },
   {
     id: "data",
+    chapter: "Parts",
     name: "Data",
     blurb: "Tables, figures and statuses for a console: keys, usage, orders, models. Statuses are told apart by line, fill and shape in one ink, never by hue alone, so they read in greyscale and to anyone who does not see colour.",
   },
   {
     id: "overlays",
+    chapter: "Parts",
     name: "Overlays",
     blurb: "What opens over the page or in place of part of it: a dialog, a menu of actions, tabs, toasts. Each follows the ARIA practices for its keys and its focus, on native elements where there is one (<dialog>, the Popover API).",
   },
   {
     id: "feedback",
+    chapter: "Parts",
     name: "Feedback",
     blurb: "What the page says while it works and after: a notice where it applies, a spinner for a moment, bars where something is still coming.",
   },
   {
     id: "text",
+    chapter: "Parts",
     name: "Text and keys",
     blurb: "Code, API keys and the clipboard: copy that falls back where the clipboard is unavailable, a key that is not in the page while it is hidden, words for screen readers only.",
   },
   {
     id: "hooks",
     name: "Hooks and cn",
+    chapter: "Hooks and cn",
     blurb: "Small helpers the parts share. Each hook answers false (or 1) on the server and on the first render in the browser, so server HTML and hydration agree; the real answer comes a moment later.",
   },
 ];
@@ -127,7 +143,7 @@ export const ENTRIES: Entry[] = [
   {
     id: "tokens",
     name: "Tokens",
-    group: "start",
+    group: "foundations",
     item: "tokens",
     exports: [],
     summary:
@@ -171,7 +187,7 @@ export const ENTRIES: Entry[] = [
   {
     id: "dark",
     name: "Dark mode",
-    group: "start",
+    group: "foundations",
     exports: [],
     summary:
       "The tokens turn to night with the system's dark scheme, unless the root says otherwise, and on any element that asks. Three ways of asking are understood, so the parts follow whatever your app already does.",
@@ -189,7 +205,7 @@ export const ENTRIES: Entry[] = [
   {
     id: "theming",
     name: "Theming",
-    group: "start",
+    group: "foundations",
     exports: [],
     summary:
       "The parts are drawn in one ink, and a status says itself by its line, its fill and its shape. An app that wants hues sets the status tokens, which are left unset: a badge, a notice, a meter, a stat's change and a switch that is on then take them, and the shapes stay, so nothing rests on colour alone. Until they are set every status falls back to the ink around it, so a page that sets none looks as it always has.",
@@ -227,7 +243,7 @@ export const ENTRIES: Entry[] = [
   {
     id: "words",
     name: "Words",
-    group: "start",
+    group: "foundations",
     item: "words",
     exports: ["S1Words", "useS1Words", "S1_WORDS", "S1WordMap"],
     summary:
@@ -707,6 +723,46 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     notes: [
       { label: "Accessibility", text: "A screen reader hears a switch, on or off (`role=\"switch\"` on a checkbox, so the state is the checkbox's own). Space toggles it. Off and on differ in fill and in the thumb's side, not only in colour." },
       { label: "Reduced motion", text: "The thumb jumps instead of sliding." },
+    ],
+  },
+
+  {
+    id: "slider",
+    name: "Slider",
+    group: "forms",
+    item: "slider",
+    exports: ["Slider", "SliderProps", "SliderMark"],
+    summary:
+      "A number in a range, dragged or set with the arrow keys: a native `<input type=\"range\">` drawn as the Meter's hairline track, filled in ink up to a thumb with a needle in it, its label and value above and marks under it if you want them. For a setting that takes effect as it moves: a line's contrast, a temperature, a warning share.",
+    example: "live",
+    usage: `import { Slider } from "@/components/s1lin/slider";
+
+<Slider label="Line contrast" min={0} max={60} step={2} value={contrast} onValueChange={setContrast}
+  format={(v) => \`\${v}%\`} hint="How dark the hairlines between rows are drawn."
+  marks={[{ value: 0, label: "None" }, { value: 14, label: "Default" }, { value: 60, label: "Strong" }]} />
+
+<Slider label="Temperature" name="temperature" min={0} max={2} step={0.1} defaultValue={0.7} marks={[0, 1, 2]} />`,
+    props: [
+      { name: "label", type: "ReactNode", desc: "What is set: a `<label>` for the range. Without one, give the slider an `aria-label`." },
+      { name: "value", type: "number", desc: "The value, when controlled; held between `min` and `max`." },
+      { name: "defaultValue", type: "number", default: "min", desc: "The value at first, when not." },
+      { name: "onValueChange", type: "(value: number) => void", desc: "Called with each new value as it moves. The native `onChange` is called too." },
+      { name: "min", type: "number", default: "0", desc: "The lowest value." },
+      { name: "max", type: "number", default: "100", desc: "The highest value." },
+      { name: "step", type: "number", default: "1", desc: "The smallest move, by an arrow key or the pointer." },
+      { name: "format", type: "(value: number) => string", desc: "The value in words: shown beside the label and read as its `aria-valuetext`, so a screen reader hears \"40%\" and not \"40\"." },
+      { name: "marks", type: "(number | SliderMark)[]", desc: "Ticks under the track: numbers, or `{ value, label? }` with words under the tick. The tick the value sits on is drawn in the ink, and its words are read with the value (\"14%, Default\")." },
+      { name: "hideValue", type: "boolean", default: "false", desc: "Keep the value out of sight, where what it changes shows it; it is still read." },
+      { name: "hint", type: "ReactNode", desc: "A line under the track, read as the slider's description." },
+      { name: "invalid", type: "boolean", default: "false", desc: "In error: the track's line doubles, and the range has `aria-invalid`." },
+      { name: "disabled", type: "boolean", default: "false", desc: "Dashed, in the third ink; the value still shows." },
+      { name: "className", type: "string", desc: "Added to the wrapper (`s1-slider`), as `style` is; every other prop (`name`, `form`, `ref`, `aria-*`) goes to the `<input>`." },
+    ],
+    notes: [
+      { label: "Keyboard", text: "A native range: ← and ↓ move a step down, → and ↑ a step up, Page Up and Page Down a larger step, Home and End go to the ends. Nothing is scripted." },
+      { label: "Accessibility", text: "A slider to screen readers, named by its label, with its min, max and value, and the words from `format` as its `aria-valuetext`. The value printed beside the label is hidden from them, so it is not read twice. Focus draws a 2px outline in the ink round the thumb. The whole track takes a press, 24px tall." },
+      { label: "Phone", text: "The track takes the width of its box, and a tap on it moves the thumb there. The words under the end marks keep inside the box." },
+      { label: "Styles", text: "In a high-contrast mode (forced colours) the track, the thumb and the fill are drawn in the system's colours, the fill in its highlight." },
     ],
   },
 
