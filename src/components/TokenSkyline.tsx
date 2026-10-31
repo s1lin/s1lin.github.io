@@ -93,12 +93,14 @@ const PEAK = SUM.indexOf(TALLEST);
 const weekStart = (w: number) => new Date(START + w * 7 * DAY);
 
 /*
- * The weeks as columns, one a week from the first there was any, all the same
- * width. Each is filled to full height with that week's mix of models (a
- * company to a hue and its models in shades of it, MODEL_FILL; Other in grey),
- * so a week of a few thousand tokens still shows what it was spent on. Over
- * it, a bar for how many tokens, on a square-root scale so the small weeks
- * can be seen beside the huge ones. Months are named under the columns.
+ * The weeks as columns, one for each week with tokens, all the same width; a
+ * week with none takes no room, and a wider seam with a break in the axis marks
+ * where weeks were skipped. Each column is filled to full height with that
+ * week's mix of models (a company to a hue and its models in shades of it,
+ * MODEL_FILL; Other in grey), so a week of a few thousand tokens still shows
+ * what it was spent on. Over it, a bar for how many tokens, on a square-root
+ * scale so the small weeks can be seen beside the huge ones. Months are named
+ * under the columns.
  */
 const W = 556;
 const VOL = 44; // the bar over the columns
@@ -106,26 +108,39 @@ const BAND = 6; // between the bars and the columns
 const MIX = 150; // the columns
 const NAMES_H = 16; // the months' names
 const H = VOL + BAND + MIX + NAMES_H;
-const COL = W / WEEKS;
+/** The weeks with tokens: the only ones that get a column. */
+const USED = SUM.flatMap((total, week) => (total > 0 ? [week] : []));
+/** Where weeks were skipped: before each column that does not follow the week before it. */
+const BREAKS = USED.filter((week, i) => i > 0 && week - USED[i - 1] > 1).length;
+const SKIP = 5; // the seam where weeks were skipped
+const COL = (W - BREAKS * SKIP) / USED.length;
 const SEAM = Math.min(1.5, COL / 5); // paper between columns
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
-type Column = { week: number; x: number; w: number };
+/** `skipped`: how many weeks with no tokens come just before this one. */
+type Column = { week: number; x: number; w: number; skipped: number };
 type Month = { month: number; total: number; x: number };
 
-const COLUMNS: Column[] = WEEK.map((_, week) => ({ week, x: week * COL, w: COL - SEAM }));
-/** The weeks with tokens, for the table and the picker. */
-const BLOCKS = COLUMNS.filter((c) => SUM[c.week] > 0);
-/** Each week goes to the month it starts in (the first week, to the first day's month); a month starts at its first week. */
+const COLUMNS: Column[] = (() => {
+  let x = 0;
+  return USED.map((week, i) => {
+    const skipped = i > 0 ? week - USED[i - 1] - 1 : 0;
+    if (skipped) x += SKIP;
+    const c = { week, x, w: COL - SEAM, skipped };
+    x += COL;
+    return c;
+  });
+})();
+const COLUMN_OF = new Map(COLUMNS.map((c) => [c.week, c]));
+/** Each week goes to the month it starts in (the first week, to the first day's month); a month starts at its first column. */
 const MONTHS_AT: Month[] = (() => {
   const months: Month[] = [];
-  SUM.forEach((total, week) => {
-    if (!total) return;
+  for (const { week, x } of COLUMNS) {
     const month = (week === 0 ? new Date(FIRST) : weekStart(week)).getUTCMonth();
     const last = months.at(-1);
-    if (last?.month === month) last.total += total;
-    else months.push({ month, total, x: week * COL });
-  });
+    if (last?.month === month) last.total += SUM[week];
+    else months.push({ month, total: SUM[week], x });
+  }
   return months;
 })();
 /** A company to a hue: the dataviz palette's first five slots, in their validated order (site.css). */
@@ -272,11 +287,15 @@ function Weeks({ scale }: { scale: number }) {
     <g>
       {COLUMNS.map((c) => {
         const total = SUM[c.week];
-        if (!total) return <rect key={c.week} className="tokens__empty" x={r2(c.x)} y={top} width={r2(c.w)} height={MIX} />;
         const bar = Math.max(1.5, VOL * Math.sqrt(total / TALLEST));
+        // the break in the axis, in the middle of the wider seam before a column that follows skipped weeks
+        const gap = c.x - (SKIP + SEAM) / 2;
         let y = top;
         return (
           <g key={c.week}>
+            {c.skipped > 0 && (
+              <path className="sky-break" d={`M${r2(gap - 1.5)} ${top + MIX + 4}L${r2(gap + 0.5)} ${top + MIX - 2}M${r2(gap - 0.5)} ${top + MIX + 4}L${r2(gap + 1.5)} ${top + MIX - 2}`} />
+            )}
             <rect className="tokens__vol" x={r2(c.x)} y={r2(base - bar)} width={r2(c.w)} height={r2(bar)} />
             {WEEK[c.week].models.map((n, k) => {
               if (!n) return null;
@@ -532,10 +551,10 @@ export function TokenSkyline() {
     const box = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - box.left) * W) / box.width;
     const y = ((e.clientY - box.top) * H) / box.height;
-    const week = Math.floor(x / COL);
-    setAt(y <= VOL + BAND + MIX && SUM[week] > 0 ? week : null);
+    const c = COLUMNS.findLast((c) => c.x - SEAM <= x);
+    setAt(y <= VOL + BAND + MIX && c && x < c.x + COL ? c.week : null);
   }
-  const column = at === null ? undefined : COLUMNS[at];
+  const column = at === null ? undefined : COLUMN_OF.get(at);
 
   const since = T.since ? long(new Date(T.since)) : "the start";
   return (
@@ -590,7 +609,7 @@ export function TokenSkyline() {
           if (e.pointerType === "mouse") setAt(null);
         }}
       >
-        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as one column a week, each filled with that week's mix of models, and a bar over it for how many tokens: ${MONTHS_AT.map((m) => `${MONTHS[m.month]} ${compact(m.total)}`).join(", ")}. By model: ${T.models.map((m) => `${m} ${compact(T.byModel[m] ?? 0)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
+        <title id="sky-t">{`${thousands(T.total)} tokens with coding agents since ${since}, as one column for each week with any (weeks with none left out), each filled with that week's mix of models, and a bar over it for how many tokens: ${MONTHS_AT.map((m) => `${MONTHS[m.month]} ${compact(m.total)}`).join(", ")}. By model: ${T.models.map((m) => `${m} ${compact(T.byModel[m] ?? 0)}`).join(", ")}. The busiest week, from ${long(weekStart(PEAK))}, used ${compact(TALLEST)}.`}</title>
         <Weeks scale={scale} />
         {column && (
           <rect className="tokens__at" x={r2(column.x - 1)} y={0.75} width={r2(column.w + 2)} height={VOL + BAND + MIX - 1.5} />
@@ -623,7 +642,7 @@ export function TokenSkyline() {
             </tr>
           </thead>
           <tbody>
-            {BLOCKS.map(({ week }) => (
+            {COLUMNS.map(({ week }) => (
               <tr key={week}>
                 <th scope="row">{short(weekStart(week))}</th>
                 {WEEK[week].models.map((n, k) => (
@@ -640,8 +659,9 @@ export function TokenSkyline() {
       <Flow />
 
       <figcaption>
-        <span lang="ja">週</span>, weeks: one column for each week since the first there were any, every column filled to full
-        height with that week's mix of models, so a week of a few thousand tokens still shows what it was spent on.
+        <span lang="ja">週</span>, weeks: one column for each week with tokens, every column filled to full height with that
+        week's mix of models, so a week of a few thousand tokens still shows what it was spent on. Weeks with none are left
+        out; a break in the axis marks where.
         The bar above a column is how many tokens the week used, on a square-root scale so the small weeks show beside the huge ones.
         Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
         cache, or written back as output. Counted by cc-switch on {MACHINES}, and from Cursor's own usage exports, cache reads included, to {long(new Date(T.fetched))}. The money is what the
