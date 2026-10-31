@@ -3,7 +3,7 @@ import { cn } from "./cn";
 import "./tokens.css";
 import "./button.css";
 
-export type ButtonVariant = "plain" | "go" | "chip" | "link";
+export type ButtonVariant = "plain" | "go" | "chip" | "link" | "icon";
 export type ButtonSize = "md" | "sm";
 
 /** The classes of a button, for an element that cannot be a Button (a <span> chip, a <label>). */
@@ -21,9 +21,10 @@ export type ButtonProps = Own &
 /**
  * The house buttons: "plain", a hairline box in mono type; "go", the same in
  * ink with an offset shadow in the accent, for the one thing to do; "chip", a
- * pill; "link", words underlined. "sm" is a size down. Pressed, a box sinks
- * into its shadow. With `href` it is a link that looks the part; without, a
- * <button type="button">.
+ * pill; "link", words underlined; "icon", the plain box made square, for a
+ * mark that needs an aria-label (close, more actions). "sm" is a size down.
+ * Pressed, a box sinks into its shadow. With `href` it is a link that looks
+ * the part; without, a <button type="button">.
  */
 export function Button({ variant, size, className, ...rest }: ButtonProps) {
   const cls = buttonClass({ variant, size }, className);
