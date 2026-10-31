@@ -17,7 +17,8 @@ export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
  * A status in a word, in mono caps in a small box. Each status differs in its
  * line, its fill and its shape, never in hue alone, so it reads in one ink, in
  * greyscale and to anyone who does not see colour; the words say it to a
- * screen reader. Set `color` on `.s1-badge--bad` if your app wants a hue.
+ * screen reader. An app that wants hues sets `--s1-ok`, `--s1-warn`, `--s1-bad`
+ * and `--s1-info` (and their `-tint`s); unset, every status is drawn in ink.
  */
 export function Badge({ status = "neutral", plain = false, className, children, ...rest }: BadgeProps) {
   return (

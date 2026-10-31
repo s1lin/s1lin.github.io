@@ -1,4 +1,5 @@
-/* Badge (badge.tsx): five statuses in one ink, told apart by line, fill and shape. */
+/* Badge (badge.tsx): five statuses in one ink, told apart by line, fill and shape. A theme that sets the status
+   hues (tokens.css) puts each status's hue on its line, its shape and its ground; the words stay in the ink. */
 @layer components {
   .s1-badge {
     display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; max-width: 100%; min-height: 21px; padding: 0 7px;
@@ -7,8 +8,12 @@
   }
   .s1-badge .s1-glyph { width: 0.86em; height: 0.86em; }
   .s1-badge--neutral { border-color: var(--s1-rule-strong); color: var(--s1-ink-2); }
-  .s1-badge--info { border-style: dotted; }
-  .s1-badge--warn { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--s1-ink) 16%, transparent) 0 1.5px, transparent 1.5px 5px), var(--s1-paper); }
-  .s1-badge--bad { background: var(--s1-ink); color: var(--s1-paper); }
+  .s1-badge--ok { border-color: var(--s1-ok, var(--s1-ink)); background: var(--s1-ok-tint, var(--s1-paper)); }
+  .s1-badge--info { border-style: dotted; border-color: var(--s1-info, var(--s1-ink)); background: var(--s1-info-tint, var(--s1-paper)); }
+  .s1-badge--warn {
+    border-color: var(--s1-warn, var(--s1-ink));
+    background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--s1-warn, var(--s1-ink)) 16%, transparent) 0 1.5px, transparent 1.5px 5px), var(--s1-warn-tint, var(--s1-paper));
+  }
+  .s1-badge--bad { border-color: var(--s1-bad, var(--s1-ink)); background: var(--s1-bad, var(--s1-ink)); color: var(--s1-on-status, var(--s1-paper)); }
   @media (forced-colors: active) { .s1-badge--bad { border-width: 2px; } }
 }

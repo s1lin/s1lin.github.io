@@ -5,6 +5,9 @@
  * the scheme native controls are drawn in (a select's list, a number's arrows).
  * Set any of them on :root, or on an element for its part of the page.
  *
+ * Status hues are left unset: an app's theme may set them (see the end of the
+ * :root block), and until it does every status is drawn in the ink.
+ *
  * Night: the system's dark scheme, unless the root says light (data-theme,
  * class or Kumo's data-mode); or data-theme="dark", class="dark" or
  * data-mode="dark" on any element, and "light" to come back inside one.
@@ -38,6 +41,18 @@
       linear-gradient(currentColor 0 0) left 0 bottom 5px / 11px 1px no-repeat,
       linear-gradient(currentColor 0 0) right 5px bottom 0 / 1px 11px no-repeat,
       linear-gradient(currentColor 0 0) right 0 bottom 5px / 11px 1px no-repeat;
+
+    /* Status hues, unset on purpose. A part that shows a status reads each one
+       with a fallback, var(--s1-ok, var(--s1-ink)), so it stays in the ink
+       around it, whatever that ink is set to on the element, until an app's
+       theme sets them on :root or on an element (and for night, as above):
+         --s1-ok:   unset, the ink    --s1-ok-tint:   unset, the paper
+         --s1-warn: unset, the ink    --s1-warn-tint: unset, the paper
+         --s1-bad:  unset, the ink    --s1-bad-tint:  unset, the paper
+         --s1-info: unset, the ink    --s1-info-tint: unset, the paper
+         --s1-on-status: unset, the paper (the words on a solid status fill)
+       The hue is the line, the shape and a meter's fill; the tint is a badge's
+       ground; the shapes stay, so a status never rests on colour alone. */
   }
 
   @media (prefers-color-scheme: dark) {

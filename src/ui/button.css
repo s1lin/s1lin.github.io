@@ -8,6 +8,8 @@
   }
   .s1-btn--go { background: var(--s1-ink); color: var(--s1-paper); box-shadow: 3px 3px 0 var(--s1-accent); }
   .s1-btn--plain:disabled, .s1-btn--go:disabled, .s1-btn--icon:disabled { opacity: 0.5; cursor: default; }
+  /* A go button that cannot go loses its shadow and its ink: half an ink block on a shadow read as broken. */
+  .s1-btn--go:disabled { opacity: 1; background: var(--s1-paper-2); color: var(--s1-ink-3); border-color: var(--s1-rule); box-shadow: none; }
   .s1-btn--plain:active:not(:disabled), .s1-btn--go:active:not(:disabled), .s1-btn--icon:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--s1-accent); }
   .s1-btn--sm { min-height: 30px; padding: 0 10px; font-size: 11px; }
   /* Square: the mark inside (an svg at 16px, or one character) is the label's picture; the label is aria-label. */

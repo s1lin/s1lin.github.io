@@ -16,7 +16,8 @@
     background: var(--s1-ink-2); transition: transform 140ms ease;
   }
   .s1-switch__row:hover .s1-switch__track { border-color: var(--s1-ink); }
-  .s1-switch__input:checked + .s1-switch__track { background: var(--s1-ink); border-color: var(--s1-ink); }
+  /* On: the track filled in the ink, or in the ok hue once a theme sets one (tokens.css). */
+  .s1-switch__input:checked + .s1-switch__track { background: var(--s1-ok, var(--s1-ink)); border-color: var(--s1-ok, var(--s1-ink)); }
   .s1-switch__input:checked + .s1-switch__track::after { background: var(--s1-paper); transform: translateX(16px); }
   .s1-switch__input:focus-visible + .s1-switch__track { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
   .s1-switch__label { min-width: 0; overflow-wrap: anywhere; }
