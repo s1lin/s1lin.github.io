@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 
 const here = (p: string) => path.resolve(import.meta.dirname, p);
 
-// The pages: the issue, the blog's index, and a shell for each post at blog/<slug>/index.html.
+// The pages: the issue, the blog's index, a shell for each post at blog/<slug>/index.html, Life, and the UI docs.
 const posts = readdirSync(here("blog"), { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => here(`blog/${d.name}/index.html`));
@@ -18,6 +18,6 @@ export default defineConfig({
     alias: { "@": here("./src") },
   },
   build: {
-    rolldownOptions: { input: [here("index.html"), here("blog/index.html"), here("life/index.html"), ...posts] },
+    rolldownOptions: { input: [here("index.html"), here("blog/index.html"), here("life/index.html"), here("ui/index.html"), ...posts] },
   },
 });

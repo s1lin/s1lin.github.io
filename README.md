@@ -44,6 +44,7 @@ without JavaScript and the client only hydrates them.
 | `src/content/posts/` | The posts, newest first in `index.ts`, one file each |
 | `life/`, `src/life.tsx`, `src/components/Life.tsx`, `src/components/life/` | Life at `/life/`, outside the issue: the four rules, ARC-style puzzles, a playground, a study of the game |
 | `src/lib/life/` | Its engine, levels and creatures, with no dependencies (`life.ts`, `levels.ts`, `patterns.ts`), and the two 160×135 glider-gun seeds from the Java original (`seeds/`) |
+| `ui/`, `src/ui.tsx`, `src/components/uidocs/`, `src/styles/uidocs.css` | The UI docs at `/ui/`: every part of the site, documented for reuse (see below) |
 
 ## UI components
 
@@ -105,6 +106,20 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 
 Tailwind utilities win over `site.css`. The issue's colours and fonts are available
 as `bg-paper`, `text-sumi`, `text-ink-2`, `font-mincho` and so on.
+
+### UI docs
+
+`/ui/` documents the parts the site is built from, in the manner of a component
+library's docs: the foundations (tokens, type, grid, hairlines and marks,
+buttons, theme and motion), then each component with a live example, its props,
+its import and notes on accessibility, reduced motion, phones, dark mode and
+cost, and the site's own sections listed at the end. The inventory is data, in
+`src/components/uidocs/registry.ts`; `npm test` checks it against the source
+(every named export and prop exists, and every exported component in
+`src/components` is in it), so a new component needs an entry there. The social
+parts are shown as specimens with mock data (`specimens.tsx`): the docs page
+never signs in, posts or calls Aha. WebGL effects start only near the screen or
+when asked. The page is prerendered like the issue.
 
 ## Blog
 
