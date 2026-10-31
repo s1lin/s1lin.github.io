@@ -5,12 +5,12 @@ import { cn } from "./cn";
 /*
  * Maths in LaTeX, set by KaTeX. Where the page is rendered on a server, hand
  * Tex the KaTeX module first (setKatex) and readers get finished HTML, with
- * MathML beside it for screen readers, and no KaTeX script: on the client Tex
- * reads back the HTML already in the page, so hydration matches. Anywhere
- * else (a page rendered in the browser, a dev server) it loads KaTeX when the
- * first formula mounts and sets it then. KaTeX's stylesheet is not imported
- * here, so pages without maths never load it: import
- * "katex/dist/katex.min.css" on the pages that have some.
+ * MathML beside it for screen readers, and no KaTeX script: in the browser Tex
+ * reads back the HTML already in the page, so hydration matches. Anywhere else
+ * (a page rendered in the browser, a dev server) it loads KaTeX when the first
+ * formula mounts and sets it then. KaTeX's stylesheet (tex.css) comes along
+ * the first time a page that has none shows maths; a server-rendered page
+ * should import tex.css itself, so its maths is styled before any script runs.
  */
 type Katex = { renderToString(tex: string, options?: KatexOptions): string };
 let katex: Katex | undefined;
@@ -19,6 +19,20 @@ let katex: Katex | undefined;
 export function setKatex(k: Katex) {
   katex = k;
 }
+
+/** Whether KaTeX's rules are on the page: they take its MathML copy out of the flow. */
+function styled() {
+  const probe = document.createElement("span");
+  probe.className = "katex";
+  probe.hidden = true;
+  probe.innerHTML = '<span class="katex-mathml"></span>';
+  document.body.append(probe);
+  const yes = getComputedStyle(probe.firstElementChild!).position === "absolute";
+  probe.remove();
+  return yes;
+}
+let stylesheet: Promise<unknown> | undefined;
+const loadStylesheet = () => (stylesheet ??= styled() ? Promise.resolve() : import("./tex.css"));
 
 const options = (block: boolean): KatexOptions => ({ displayMode: block, throwOnError: false, output: "htmlAndMathml" });
 
@@ -40,9 +54,12 @@ export function Tex({ children, block = false, className }: { children: string; 
   }));
   const html = set.key === key ? set.html : "";
   useEffect(() => {
-    if (html) return;
+    if (html) {
+      void loadStylesheet();
+      return;
+    }
     let live = true;
-    void import("katex").then(({ default: k }) => {
+    void Promise.all([import("katex"), loadStylesheet()]).then(([{ default: k }]) => {
       if (live) setSet({ key, html: k.renderToString(children, options(block)) });
     });
     return () => {

@@ -1,6 +1,7 @@
 /*
- * /ui/: the parts of the site, documented (components/uidocs). Loaded by that
- * page only. The issue's own tokens, grid and hairlines; no colours of its own.
+ * /ui/: the library the site is built from, documented (components/uidocs).
+ * Loaded by that page only. The issue's own tokens, grid and hairlines; no
+ * colours of its own.
  */
 
 /* Anchors clear the running head, and on a phone the strip of groups under it too. */
@@ -74,7 +75,7 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
 
 /* Code: on the second paper, scrolling sideways inside itself. */
 .ud-code { margin: 20px 0 0; }
-.ud-code .ud-code__label { margin: 0 0 6px; font: 500 10px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.ud-code .ud-code__label, .ud-install .ud-code__label { margin: 0 0 6px; font: 500 10px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .ud-code pre {
   margin: 0; padding: 12px 14px; overflow-x: auto; scrollbar-width: thin;
   background: var(--paper-2); border: 0.5px solid var(--rule);
@@ -82,11 +83,9 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
 }
 .ud-code pre code { font: inherit; }
 
-/* The plate an example stands on: a hairline box with registration marks, its kind in a bar on top. */
-.ud-plate { position: relative; margin: 24px 0 0; border: 0.5px solid var(--rule-strong); background: var(--paper); }
-.ud-plate::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+/* The plate an example stands on: the library's Plate, its kind in a bar on top. */
+.ud-plate { margin: 24px 0 0; background: var(--paper); }
 .ud-plate__kind { margin: 0; padding: 7px 12px; border-bottom: 0.5px solid var(--rule); color: var(--ink-3); font-size: 10px; }
-.ud-plate[data-kind="specimen"] .ud-plate__kind { border-bottom-style: dashed; }
 .ud-plate__body { padding: clamp(18px, 3vw, 36px) clamp(14px, 2.6vw, 32px); }
 .ud-plate__body > :first-child { margin-top: 0; }
 .ud-plate__body > :last-child { margin-bottom: 0; }
@@ -137,16 +136,46 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
   .ud-notes dd { border-top: 0; padding-top: 0; }
 }
 
-/* A button of this page's own, in the house manner (as .m2l-bar button). */
-.ud-btn {
-  font: 500 11px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sumi);
-  background: transparent; border: 0.5px solid var(--rule-strong); padding: 9px 12px; cursor: pointer;
+/* Install: the package managers as a choice in the house manner (pressed in reverse), Copy, then the command. */
+.ud-install { margin: 24px 0 0; }
+.ud-install__box { border: 0.5px solid var(--rule-strong); background: var(--paper-2); }
+.ud-install__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 8px; border-bottom: 0.5px solid var(--rule); }
+.ud-install__pm { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; }
+.ud-install__pm button {
+  font: 500 11px/1 var(--f-mono); letter-spacing: 0.04em; color: var(--ink-2);
+  background: transparent; border: 0.5px solid transparent; padding: 7px 9px; cursor: pointer;
 }
-.ud-btn:hover { background: var(--paper-2); }
-.ud-btn[aria-pressed="true"] { background: var(--sumi); border-color: var(--sumi); color: var(--paper); }
-.ud-onclick__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0; }
-.ud-onclick__bar + * { margin-top: 18px; }
-.ud-onclick__cost { font: 400 11px/1.5 var(--f-mono); color: var(--ink-3); }
+.ud-install__pm button:hover { color: var(--sumi); border-color: var(--rule-strong); }
+.ud-install__pm button[aria-pressed="true"] { background: var(--sumi); border-color: var(--sumi); color: var(--paper); }
+.ud-install__copy { min-width: 74px; }
+.ud-install pre { margin: 0; padding: 12px 14px; overflow-x: auto; scrollbar-width: thin; font: 400 13px/1.6 var(--f-mono); color: var(--sumi); }
+.ud-install pre code { font: inherit; }
+.ud-install__said { min-height: 0; margin: 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+.ud-install__said:empty { display: none; }
+.ud-install__said:not(:empty) { margin-top: 6px; }
+.ud-install__url { margin: 8px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-3); overflow-wrap: anywhere; }
+.uidocs .ud-install__url code { white-space: normal; overflow-wrap: anywhere; }
+
+/* What an install puts in the app. */
+.ud-files { margin: 28px 0 0; }
+.ud-files ul { list-style: none; margin: 0; padding: 0; border-top: 0.5px solid var(--rule-strong); }
+.ud-files li { padding: 6px 0; border-bottom: 0.5px solid var(--rule); font-size: 0.9rem; overflow-wrap: anywhere; }
+.uidocs .ud-files li code { background: none; padding: 0; white-space: normal; }
+.ud-files__dep code { color: var(--ink-2); }
+.ud-files__dep span { margin-left: 8px; font: 400 11px/1 var(--f-mono); color: var(--ink-3); }
+.ud-files p { margin: 10px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+
+/* Getting started: numbered steps, each with its code. */
+.ud-steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; }
+.ud-steps > li { counter-increment: step; position: relative; padding: 18px 0 22px 44px; border-top: 0.5px solid var(--rule); }
+.ud-steps > li::before {
+  content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 20px;
+  font: 500 11px/1 var(--f-mono); letter-spacing: 0.1em; color: var(--ink-3);
+}
+.ud-steps p { margin: 0; max-width: 42em; }
+.ud-steps .ud-code, .ud-steps .ud-install { margin-top: 14px; }
+.ud-guide__p { margin: 18px 0 0; max-width: 42em; }
+@container (max-width: 600px) { .ud-steps > li { padding-left: 0; } .ud-steps > li::before { position: static; display: block; margin-bottom: 8px; } }
 
 /* ------------------------------------------------------------------ the examples */
 
@@ -155,50 +184,26 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
 
 .ud-swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 20px var(--gap); }
 .ud-swatch { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: start; }
-.ud-swatch i { grid-row: 1 / span 4; width: 44px; height: 44px; border: 0.5px solid var(--rule-strong); }
+.ud-swatch i { grid-row: 1 / span 2; width: 44px; height: 44px; border: 0.5px solid var(--rule-strong); }
 .ud-swatch b { font: 500 12px/1.4 var(--f-mono); }
 .ud-swatch span { font: 400 11px/1.45 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
-.ud-swatch small { margin-top: 2px; font-size: 0.82rem; line-height: 1.4; color: var(--ink-2); }
 
-.ud-type { list-style: none; margin: 0; padding: 0; }
-.ud-type + .ud-type { margin-top: 28px; padding-top: 22px; border-top: 0.5px solid var(--rule-strong); }
+.ud-type { list-style: none; margin: 28px 0 0; padding: 22px 0 0; border-top: 0.5px solid var(--rule-strong); }
 .ud-type li { display: grid; grid-template-columns: minmax(0, 13em) minmax(0, 1fr); gap: 4px var(--gap); align-items: baseline; padding: 14px 0; border-top: 0.5px solid var(--rule); }
 .ud-type li:first-child { border-top: 0; padding-top: 0; }
 .ud-type__spec { margin: 0; font: 400 11px/1.55 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
 .ud-type__spec b { display: block; font-weight: 500; color: var(--sumi); }
 .ud-type__sample { margin: 0; min-width: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
-.ud-type__sample.display { font-size: clamp(3rem, 8.4vw, 8.5rem); }
-.ud-type__sample.dek, .ud-type__sample.cap, .ud-type__sample .kicker { margin: 0; }
-.ud-type__sample.mono { font-size: 0.72rem; }
-.ud-type__sample.cap { font-size: 11px; }
 @container (max-width: 600px) { .ud-type li { grid-template-columns: minmax(0, 1fr); } }
 
-.ud-cols span {
-  display: grid; place-items: end center; height: 72px; padding-bottom: 6px;
-  background: color-mix(in srgb, var(--sumi) 5%, transparent); border-inline: 0.5px solid var(--rule);
-  font: 400 10px/1 var(--f-mono); color: var(--ink-3);
-}
-.ud-spans { margin-top: 8px; }
-.ud-spans span {
-  padding: 8px 10px; border: 0.5px solid var(--rule-strong); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-  font: 400 10px/1.2 var(--f-mono); color: var(--ink-2);
-}
-.ud-griddemo .cap { margin-top: 14px; }
-
-.ud-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-.ud-rules li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 16px; align-items: center; font-size: 0.88rem; color: var(--ink-2); }
-.ud-rules i { display: block; height: 0; }
-@container (max-width: 600px) { .ud-rules li { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
-.ud-corner-box { position: relative; margin: 32px 6px 6px; padding: 18px 20px; border: 0.5px solid var(--rule-strong); }
-.ud-corner-box::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+.ud-corner-box { margin: 32px 6px 6px; padding: 18px 20px; }
 .ud-corner-box p { margin: 0; }
 .ud-corner-box .mono { margin-bottom: 8px; color: var(--ink-3); text-transform: none; }
 
-.ud-buttons { display: grid; gap: 22px; }
-.ud-buttons__row { display: grid; gap: 8px; }
-.ud-buttons__row .cap, .ud-buttons .m2l-bar { margin: 0; padding: 0; }
-.ud-buttons .bl-nav { max-width: 360px; }
-.ud-buttons .closing__pick { margin: 0; }
+.ud-buttons { display: grid; gap: 18px; }
+.ud-buttons .ud-row { gap: 12px 14px; }
+.ud-buttons .cap { margin: 0; }
+.ud-quiet { color: var(--ink-3); border-style: dashed; cursor: default; }
 
 .ud-readout { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: 0 18px; margin: 0; font: 400 12px/1.5 var(--f-mono); }
 .ud-readout dt, .ud-readout dd { margin: 0; padding: 6px 0; border-top: 0.5px solid var(--rule); overflow-wrap: anywhere; }
@@ -208,74 +213,34 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
   .ud-readout { grid-template-columns: minmax(0, 1fr); }
   .ud-readout dd { border-top: 0; padding-top: 0; }
 }
-.ud-drawn { margin: 28px 0 10px; }
 .ud-scalebar { width: 100%; height: 8px; margin-top: 16px; }
 .ud-scalebar rect { fill: var(--sumi); }
+
+.ud-labels .s1-section-label:last-child { margin-bottom: 0; }
 
 .ud-mark { flex: none; }
 .ud-mark--64 { width: 64px; height: 64px; }
 .ud-mark--32 { width: 32px; height: 32px; }
 .ud-mark--18 { width: 18px; height: 18px; }
-.ud-brand { align-items: center; }
-.ud-roundel-title { margin: 22px 0 0; }
-.ud-row .roundel { font-size: 1.1rem; }
+.ud-roundels { font-size: 1.1rem; }
+.ud-roundel-title { display: flex; align-items: center; gap: 10px; margin: 22px 0 0; font: 400 clamp(1.8rem, 2.6vw, 2.5rem)/1.05 var(--f-display); }
+.ud-roundel-title .s1-roundel { font-size: 1.05rem; }
 
-.uidocs .kicker + .kicker { margin-top: 10px; }
+.uidocs .s1-kicker + .s1-kicker { margin-top: 10px; }
 .ud-folio { position: relative; height: 96px; border-bottom: 0.5px solid var(--rule); }
 .ud-folio .cap { margin: 0; }
-.ud-folio .folio { bottom: 14px; }
+.ud-folio .s1-folio { bottom: 14px; }
+.ud-bars svg { width: 96px; min-width: 0; height: 9px; }
 
-.ud-refs p { margin: 0; }
-.ud-refs .post__refs { margin-top: 18px; }
+.ud-plate-demo { margin: 6px; padding: 18px 20px; }
+.ud-plate-demo p:not(.s1-kicker) { margin: 0; }
 
-.ud-elsewhere figure { margin: 0 !important; }
 .ud-tex p { margin: 0; }
-.ud-tex .tex--block { display: block; }
+.ud-tex .s1-tex--block { display: block; }
 .ud-tex .katex-display { margin: 18px 0 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
 
-.ud-blocks > * + * { margin-top: 28px; }
-.ud-blocks .sect-label { margin-bottom: 0; }
-.ud-blocks .spec, .ud-blocks .built, .ud-blocks .pull { margin-top: 28px; }
-.ud-blocks .lemma { margin-bottom: 0; }
-.ud-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
-.ud-figbox { aspect-ratio: 3 / 2; background: var(--paper-2); border: 0.5px solid var(--rule); }
-.ud-blocks .endmark { margin-top: 32px; }
-@container (max-width: 600px) {
-  .ud-figs { grid-template-columns: minmax(0, 1fr); }
-  .ud-blocks .endmark { flex-wrap: wrap; row-gap: 8px; }
-}
-
-.ud-glitch { margin: 0; font: 400 clamp(2.4rem, 6vw, 4.8rem)/1 var(--f-display); letter-spacing: -0.01em; }
-.ud-photo img { width: 100%; }
-
-.ud-typer { margin: 0; }
-.ud-heatmap { max-width: 40rem; }
-
-.ud-metro { margin: 0; }
-.ud-metro .m2l-map { position: relative; overflow: hidden; aspect-ratio: 16 / 10; min-height: 260px; }
-.ud-metro .m2l-map__title { left: 20px; top: 16px; }
-.ud-metro .m2l-map__note { right: 14px; bottom: 14px; }
-.ud-metro figcaption { margin-top: 12px; }
-
-.ud-icons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 12px; }
-.ud-icons li { display: flex; align-items: center; gap: 10px; color: var(--sumi); }
-.ud-icons code { background: none !important; padding: 0 !important; font-size: 11px; color: var(--ink-2); }
-
-/* The social specimens: the thread's own classes, without the rule and room it takes under a post. */
-.soc.ud-soc { margin: 0; padding: 0; border: 0; }
-.ud-soc__title { margin: 0; font: 400 clamp(26px, 3.4vw, 38px)/1.1 var(--f-display); }
-.ud-soc__h3 { margin: 10px 0 4px; font: 800 15px/1.2 var(--f-sans); }
-.ud-soc .soc__shape-open { cursor: default; }
-.ud-soc .soc__shapes { margin: 0; max-width: 260px; }
-.ud-soc .soc__list:last-child { margin-bottom: 0; }
-
-.uidocs .life__board { display: block; max-width: 100%; height: auto; background: #000; image-rendering: pixelated; }
-.ud-boards { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
-.ud-boards figure { margin: 0; }
-.ud-arrow { font: 400 2rem/1 var(--f-display); color: var(--ink-2); }
-.ud-thumbs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 18px 22px; }
-.ud-thumbs li { display: grid; gap: 6px; justify-items: start; }
-.ud-thumbs .cap { margin: 0; }
+.ud-typer { margin: 0; padding: 16px 18px; border: 0.5px solid var(--rule-strong); background: var(--paper-2); overflow: hidden; }
+.ud-typer .s1-ascii { font-size: clamp(13px, 1.4vw, 17px); line-height: 1.25; }
 
 /* ------------------------------------------------------------------ phone */
 

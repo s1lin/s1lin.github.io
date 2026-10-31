@@ -334,7 +334,7 @@
       "name": "tex",
       "type": "registry:ui",
       "title": "Tex",
-      "description": "LaTeX set by KaTeX, inline or on a line of its own; finished HTML from a server, or set in the browser when the formula mounts.",
+      "description": "LaTeX set by KaTeX, inline or on a line of its own, with KaTeX's stylesheet; finished HTML from a server, or set in the browser when the formula mounts.",
       "author": "s1lin",
       "dependencies": [
         "katex@^0.19.0"
@@ -347,9 +347,14 @@
           "path": "src/ui/tex.tsx",
           "type": "registry:ui",
           "target": "@components/s1lin/tex.tsx"
+        },
+        {
+          "path": "src/ui/tex.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/tex.css"
         }
       ],
-      "docs": "Import KaTeX's stylesheet on the pages that show maths: import \"katex/dist/katex.min.css\". To set maths on a server, call setKatex(katex) once before rendering.",
+      "docs": "Tex loads KaTeX and its stylesheet (tex.css) the first time it sets maths. Rendering on a server? Call setKatex(katex) there, and import tex.css on the page so maths is styled before any script runs.",
       "categories": [
         "parts"
       ]

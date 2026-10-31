@@ -1,0 +1,7 @@
+/*
+ * Tex (tex.tsx): KaTeX's stylesheet, in a cascade layer of its own, so a
+ * page's own rules for maths can sit above it. Tex fetches this itself the
+ * first time it sets maths in a page that lacks it; a page rendered on a
+ * server imports it, so its maths is styled before any script runs.
+ */
+@import "katex/dist/katex.min.css" layer(katex);
