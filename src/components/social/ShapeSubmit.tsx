@@ -9,6 +9,7 @@ import { ARC } from "@/lib/life/palette";
 import { MAX_SHAPE } from "@/lib/social/client.ts";
 import { cropShape } from "@/lib/social/shape.ts";
 import { social, useSession } from "@/lib/social/useSocial";
+import { Button } from "@/ui/button";
 
 type Outcome = { tone: "ok" | "wait" | "bad"; text: string } | null;
 
@@ -79,19 +80,19 @@ export function ShapeSubmit({ grid, lang }: { grid: Grid; lang: Lang }) {
             <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={3} placeholder={c.notePlaceholder} />
           </label>
           <div className="soc__row">
-            <button type="submit" className="soc__btn soc__btn--go" disabled={busy || !crop?.ok || !title.trim() || !note.trim()}>
+            <Button variant="go" type="submit" disabled={busy || !crop?.ok || !title.trim() || !note.trim()}>
               {busy ? c.sending : c.submitShape}
-            </button>
-            <button type="button" className="soc__btn" onClick={() => setOpen(false)}>
+            </Button>
+            <Button onClick={() => setOpen(false)}>
               {c.close}
-            </button>
+            </Button>
           </div>
         </>
       )}
       {!session && (
-        <button type="button" className="soc__btn" onClick={() => setOpen(false)}>
+        <Button onClick={() => setOpen(false)}>
           {c.close}
-        </button>
+        </Button>
       )}
       {out && (
         <p className={`soc__note soc__note--${out.tone}`} role="status">

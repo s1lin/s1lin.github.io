@@ -1,0 +1,17 @@
+/* SectionLabel (section-label.tsx). */
+@layer components {
+  .s1-section-label {
+    margin: 0 0 28px; padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--s1-rule-strong);
+    font: 500 11px/1.2 var(--s1-font-mono); letter-spacing: 0.14em; text-transform: uppercase;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .s1-section-label [lang="ja"] { font: 700 20px/1 var(--s1-font-mincho); letter-spacing: 0.24em; text-transform: none; }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .s1-section-label { animation: s1-draw linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; transform-origin: left; }
+    }
+  }
+  @keyframes s1-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}

@@ -6,6 +6,7 @@ import type { Lang } from "@/components/life/copy";
 import { CONSOLE_KEYS_URL, MAX_COMMENT, MAX_INSTRUCTION, TONES, loadRevisePrefs, pickModel, saveRevisePrefs, type ModelCatalog } from "@/lib/social/client.ts";
 import { SHOWN_TURNS, baseFor, countLabel, initialRevision, revisionReducer, turnError, waitingTurn, type Ask, type RevAction, type Turn } from "@/lib/social/revision.ts";
 import { forgetSession, social, useModels, useSession, useSocialConfig, type ModelsState } from "@/lib/social/useSocial";
+import { Button, buttonClass } from "@/ui/button";
 
 type Choice = { keyId: number | string; model: string };
 type Outcome = { tone: "ok" | "wait" | "bad"; text: string } | null;
@@ -47,7 +48,7 @@ function ModelChip({ c, models, choice, onPick, reload }: { c: SocialCopy; model
 
   if (models.state === "loading") {
     return (
-      <span className="soc__chip soc__chip--model is-quiet">
+      <span className={buttonClass({ variant: "chip" }, "soc__chip soc__chip--model is-quiet")}>
         <Icon name="half" size={14} />
         {c.modelsLoading}
       </span>
@@ -55,19 +56,19 @@ function ModelChip({ c, models, choice, onPick, reload }: { c: SocialCopy; model
   }
   if (models.state === "error") {
     return (
-      <button type="button" className="soc__chip soc__chip--model" onClick={reload}>
+      <Button variant="chip" className="soc__chip soc__chip--model" onClick={reload}>
         <Icon name="half" size={14} />
         {c.modelsError}
-      </button>
+      </Button>
     );
   }
   const cat = models.cat;
   if (!choice || cat.keys.length === 0) {
     return (
-      <a className="soc__chip soc__chip--model soc__chip--add" href={CONSOLE_KEYS_URL} target="_blank" rel="noopener">
+      <Button variant="chip" className="soc__chip soc__chip--model soc__chip--add" href={CONSOLE_KEYS_URL} target="_blank" rel="noopener">
         <Icon name="half" size={14} />
         {c.addModel} ↗
-      </a>
+      </Button>
     );
   }
 
@@ -101,9 +102,9 @@ function ModelChip({ c, models, choice, onPick, reload }: { c: SocialCopy; model
 
   return (
     <span className="soc__chipwrap">
-      <button
+      <Button
         ref={chip}
-        type="button"
+        variant="chip"
         className="soc__chip soc__chip--model"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -120,7 +121,7 @@ function ModelChip({ c, models, choice, onPick, reload }: { c: SocialCopy; model
         <Icon name="half" size={14} />
         <span className="soc__chip-label">{choice.model}</span>
         <Icon name="caret" size={14} />
-      </button>
+      </Button>
       {open && (
         <div className={`soc__pop${down ? " soc__pop--down" : ""}`} id={id} ref={pop} role="dialog" aria-label={c.modelsTitle} onKeyDown={keys}>
           <p className="soc__pop-title">{c.modelsTitle}</p>
@@ -199,9 +200,9 @@ function TurnView({ t, c, last, model, inBox, waiting, onUse, onAgain, onStop }:
               <i />
             </span>
             <span className="soc__wait-text">{c.thinking}</span>
-            <button type="button" className="soc__link" onClick={onStop}>
+            <Button variant="link" onClick={onStop}>
               {c.stop}
-            </button>
+            </Button>
           </div>
         )}
         {t.state === "done" && (
@@ -212,14 +213,14 @@ function TurnView({ t, c, last, model, inBox, waiting, onUse, onAgain, onStop }:
               {inBox ? (
                 <span className="soc__inbox">✓ {c.inBox}</span>
               ) : (
-                <button type="button" className="soc__btn soc__btn--sm soc__btn--go" onClick={onUse}>
+                <Button variant="go" size="sm" onClick={onUse}>
                   {c.use}
-                </button>
+                </Button>
               )}
               {last && (
-                <button type="button" className="soc__btn soc__btn--sm" onClick={onAgain} disabled={waiting}>
+                <Button size="sm" onClick={onAgain} disabled={waiting}>
                   {c.again}
-                </button>
+                </Button>
               )}
             </div>
           </>
@@ -228,14 +229,14 @@ function TurnView({ t, c, last, model, inBox, waiting, onUse, onAgain, onStop }:
           <div className="soc__bubble soc__bubble--err" role="alert">
             <span>{fix.text}</span>
             {fix.link && (
-              <a className="soc__link" href={CONSOLE_KEYS_URL} target="_blank" rel="noopener">
+              <Button variant="link" href={CONSOLE_KEYS_URL} target="_blank" rel="noopener">
                 {fix.link} ↗
-              </a>
+              </Button>
             )}
             {fix.retry && last && (
-              <button type="button" className="soc__link" onClick={onAgain} disabled={waiting}>
+              <Button variant="link" onClick={onAgain} disabled={waiting}>
                 {c.again}
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -495,29 +496,29 @@ export function Composer({ target, parentId, c, lang, placeholder, onDone, onCan
               </span>
               <span className="soc__bar-end">
                 {rev.undo && (
-                  <button type="button" className="soc__link" onClick={undo} title={c.undoTitle}>
+                  <Button variant="link" onClick={undo} title={c.undoTitle}>
                     {c.undo}
-                  </button>
+                  </Button>
                 )}
                 <span className={`soc__len${over ? " is-over" : ""}`}>{countLabel(body.length, MAX_COMMENT, lang)}</span>
                 {onCancel && (
-                  <button type="button" className="soc__btn soc__btn--sm" onClick={onCancel}>
+                  <Button size="sm" onClick={onCancel}>
                     {c.cancel}
-                  </button>
+                  </Button>
                 )}
-                <button type="button" className="soc__btn soc__btn--go" onClick={() => void post()} disabled={busy || !body.trim() || over}>
+                <Button variant="go" onClick={() => void post()} disabled={busy || !body.trim() || over}>
                   {busy ? c.sending : c.send}
-                </button>
+                </Button>
               </span>
             </>
           ) : (
             <span className="soc__bar-out">
-              <a className="soc__btn soc__btn--go" href={cfg?.signInUrl ?? "https://tokensbeat.com/?aff=EL8RSC36GVWT"} target="_blank" rel="noopener">
+              <Button variant="go" href={cfg?.signInUrl ?? "https://tokensbeat.com/?aff=EL8RSC36GVWT"} target="_blank" rel="noopener">
                 {c.createAccount}
-              </a>
-              <button type="button" className="soc__btn soc__btn--go" onClick={enter} disabled={signing}>
+              </Button>
+              <Button variant="go" onClick={enter} disabled={signing}>
                 {signing ? c.waitingPopup : c.signIn}
-              </button>
+              </Button>
             </span>
           )}
         </div>
@@ -528,9 +529,9 @@ export function Composer({ target, parentId, c, lang, placeholder, onDone, onCan
           <span>
             {c.signedInAs(session.user.name)}
             {" · "}
-            <button type="button" className="soc__link" onClick={signOut}>
+            <Button variant="link" onClick={signOut}>
               {c.signOut}
-            </button>
+            </Button>
           </span>
           <span className="soc__hint">{c.postHint}</span>
         </p>

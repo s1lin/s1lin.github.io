@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { signInText } from "@/components/social/helpers";
 import { useSession, useSocialConfig } from "@/lib/social/useSocial";
 import type { SocialCopy } from "@/components/social/copy";
+import { Button } from "@/ui/button";
 
 const PATHS = {
   heart: "M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.4-7 10-7 10z",
@@ -47,9 +48,9 @@ export function SignInBar({ c, note }: { c: SocialCopy; note?: ReactNode }) {
     return (
       <p className="soc__who">
         <span>{c.signedInAs(session.user.name)}</span>
-        <button type="button" className="soc__link" onClick={signOut}>
+        <Button variant="link" onClick={signOut}>
           {c.signOut}
-        </button>
+        </Button>
       </p>
     );
   }
@@ -68,12 +69,12 @@ export function SignInBar({ c, note }: { c: SocialCopy; note?: ReactNode }) {
     <div className="soc__signin">
       <p>{note ?? c.signInPrompt}</p>
       <div className="soc__row">
-        <a className="soc__btn soc__btn--go" href={cfg?.signInUrl ?? "https://tokensbeat.com/?aff=EL8RSC36GVWT"} target="_blank" rel="noopener">
+        <Button variant="go" href={cfg?.signInUrl ?? "https://tokensbeat.com/?aff=EL8RSC36GVWT"} target="_blank" rel="noopener">
           {c.createAccount}
-        </a>
-        <button type="button" className="soc__btn soc__btn--go" onClick={go} disabled={busy}>
+        </Button>
+        <Button variant="go" onClick={go} disabled={busy}>
           {busy ? c.waitingPopup : c.signIn}
-        </button>
+        </Button>
       </div>
       {err && (
         <p className="soc__note soc__note--bad" role="alert">

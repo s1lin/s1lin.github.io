@@ -1,0 +1,14 @@
+/*
+ * AsciiArt (ascii-art.tsx). ascii.rest's own <ascii-art> element ships these
+ * rules; its React pieces do not: a bare <pre>, and a font stack that reaches
+ * "ascii.rest mono" for the line and block characters JetBrains Mono lacks.
+ * That font is ascii.rest's 3 KB cut of JetBrains Mono (OFL). Declare it once
+ * where you serve it, or system monospace faces stand in:
+ *   @font-face { font-family: "ascii.rest mono"; src: url(…/ascii-rest-mono.woff2) format("woff2");
+ *     unicode-range: U+00B0, U+00B7, U+2022, U+2500-259F, U+25CF; font-display: swap; }
+ */
+@layer components {
+  .s1-ascii { font-variant-ligatures: none; }
+  :where(pre.s1-ascii) { margin: 0; line-height: 1.2; letter-spacing: 0; white-space: pre; font-variant-ligatures: none; }
+  pre.s1-ascii, canvas.s1-ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+}

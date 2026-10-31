@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Mark } from "@/components/Mark";
-import { useDark } from "@/hooks/useDark";
+import { Mark } from "@/ui/mark";
+import { useDark } from "@/ui/use-dark";
 
 const CJK = /[぀-ヿ㐀-鿿]/;
 

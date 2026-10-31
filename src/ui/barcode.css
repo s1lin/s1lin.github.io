@@ -1,0 +1,7 @@
+/* Barcode (barcode.tsx): the bars as wide as the id printed under them. */
+@layer components {
+  .s1-barcode { display: inline-grid; gap: 5px; width: max-content; vertical-align: middle; }
+  /* width 0 and min-width 100%: the stretched drawing fills the id's width and never sets it */
+  .s1-barcode svg { display: block; width: 0; min-width: 100%; height: 26px; fill: var(--s1-ink); }
+  .s1-barcode__id { font: 400 9.5px/1 var(--s1-font-mono); letter-spacing: 0.06em; text-transform: none; color: var(--s1-ink-2); white-space: nowrap; }
+}

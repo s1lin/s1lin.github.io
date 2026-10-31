@@ -1,0 +1,76 @@
+/*
+ * The tokens every part of the library is drawn in: one ink on plain stock, a
+ * second paper for plates and wells, two greys, two hairline strengths, one
+ * accent (the go button's offset shadow), five typefaces, and the "+" marks.
+ * Set any of them on :root, or on an element for its part of the page.
+ *
+ * Night: the system's dark scheme, unless the root says light (data-theme,
+ * class or Kumo's data-mode); or data-theme="dark", class="dark" or
+ * data-mode="dark" on any element, and "light" to come back inside one.
+ */
+@layer base {
+  :root {
+    --s1-paper: #f6f6f4;
+    --s1-paper-2: #ececea;
+    --s1-ink: #111;
+    --s1-ink-2: #4d4d4d;
+    --s1-ink-3: #8a8a8a;
+    --s1-rule: rgb(17 17 17 / 0.14);
+    --s1-rule-strong: rgb(17 17 17 / 0.8);
+    --s1-accent: #d62d20;
+
+    --s1-font-display: "Instrument Serif", "Shippori Mincho B1", "Times New Roman", serif;
+    --s1-font-sans: "Inter Tight", "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --s1-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --s1-font-mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --s1-font-gothic: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+
+    /* A "+" registration mark at each corner of a box, in its text colour. The
+       box should be 11px larger than the one it marks, 5.5px on every side. */
+    --s1-corners:
+      linear-gradient(currentColor 0 0) left 5px top 0 / 1px 11px no-repeat,
+      linear-gradient(currentColor 0 0) left 0 top 5px / 11px 1px no-repeat,
+      linear-gradient(currentColor 0 0) right 5px top 0 / 1px 11px no-repeat,
+      linear-gradient(currentColor 0 0) right 0 top 5px / 11px 1px no-repeat,
+      linear-gradient(currentColor 0 0) left 5px bottom 0 / 1px 11px no-repeat,
+      linear-gradient(currentColor 0 0) left 0 bottom 5px / 11px 1px no-repeat,
+      linear-gradient(currentColor 0 0) right 5px bottom 0 / 1px 11px no-repeat,
+      linear-gradient(currentColor 0 0) right 0 bottom 5px / 11px 1px no-repeat;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"], .light, [data-mode="light"]) {
+      --s1-paper: #0f0f0f;
+      --s1-paper-2: #191919;
+      --s1-ink: #ededed;
+      --s1-ink-2: #b3b3b3;
+      --s1-ink-3: #7a7a7a;
+      --s1-rule: rgb(237 237 237 / 0.14);
+      --s1-rule-strong: rgb(237 237 237 / 0.8);
+      --s1-accent: #f0574b;
+    }
+  }
+
+  [data-theme="dark"], .dark, [data-mode="dark"] {
+    --s1-paper: #0f0f0f;
+    --s1-paper-2: #191919;
+    --s1-ink: #ededed;
+    --s1-ink-2: #b3b3b3;
+    --s1-ink-3: #7a7a7a;
+    --s1-rule: rgb(237 237 237 / 0.14);
+    --s1-rule-strong: rgb(237 237 237 / 0.8);
+    --s1-accent: #f0574b;
+  }
+
+  /* back to paper inside a dark page */
+  :root [data-theme="light"], :root .light, :root [data-mode="light"] {
+    --s1-paper: #f6f6f4;
+    --s1-paper-2: #ececea;
+    --s1-ink: #111;
+    --s1-ink-2: #4d4d4d;
+    --s1-ink-3: #8a8a8a;
+    --s1-rule: rgb(17 17 17 / 0.14);
+    --s1-rule-strong: rgb(17 17 17 / 0.8);
+    --s1-accent: #d62d20;
+  }
+}

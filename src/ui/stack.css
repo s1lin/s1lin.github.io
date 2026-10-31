@@ -1,0 +1,5 @@
+/* Stack (stack.tsx). */
+@layer components {
+  .s1-stack { margin: 18px 0 0; font: 400 11px/1.8 var(--s1-font-mono); color: var(--s1-ink-2); letter-spacing: 0.02em; }
+  .s1-stack span { display: inline-block; padding: 0 7px; margin: 0 4px 4px 0; border: 0.5px solid var(--s1-rule-strong); border-radius: 2px; }
+}

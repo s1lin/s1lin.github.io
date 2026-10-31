@@ -1,8 +1,10 @@
 import type { Piece } from "ascii.rest";
 import * as splitFlap from "ascii.rest/pieces/split-flap";
-import { AsciiArt } from "@/components/AsciiArt";
-import { Folio, Kicker } from "@/components/bits";
 import { GlitchTitle } from "@/components/effects";
+import { AsciiArt } from "@/ui/ascii-art";
+import { Folio } from "@/ui/folio";
+import { Kicker } from "@/ui/kicker";
+import { SectionLabel } from "@/ui/section-label";
 
 /*
  * The split-flap board shows years as clock times (20:14 is 2014). Its drum
@@ -100,9 +102,9 @@ export function Departures() {
         </div>
 
         <div className="ledger">
-          <h3 className="sect-label">
-            <span lang="ja">記録</span> The long version
-          </h3>
+          <SectionLabel as="h3" ja="記録">
+            The long version
+          </SectionLabel>
           <ol>
             {LEDGER.map(([when, who, rest]) => (
               <li key={who}>

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { LOGOS } from "@/content/logos";
 import tokens from "@/content/tokens.json";
-import { useMedia } from "@/hooks/useMedia";
-import { useScale } from "@/hooks/useScale";
-import { useNear } from "@/hooks/useNear";
 import { DAY, MONTHS, long, short, thousands } from "@/lib/calendar";
+import { Plate } from "@/ui/plate";
+import { SectionLabel } from "@/ui/section-label";
+import { useMedia } from "@/ui/use-media";
+import { useNear } from "@/ui/use-near";
+import { useScale } from "@/ui/use-scale";
 
 /*
  * The editor's tokens with coding agents, under the GitHub heatmap: the total
@@ -212,7 +214,7 @@ function ByModel() {
   return (
     <div className="models">
       <p className="flows__title mono">By model</p>
-      <div className="champion">
+      <Plate className="champion">
         <p className="champion__label mono">
           <span lang="ja">王者</span> Champion
         </p>
@@ -227,7 +229,7 @@ function ByModel() {
         <span className="champion__bar" aria-hidden="true">
           <i style={{ width: `${(100 * n) / T.total}%`, background: MODEL_FILL[CHAMPION] }} />
         </span>
-      </div>
+      </Plate>
       <p className="models__scale mono">The rest, on a scale of their own</p>
       <div className="models__makers">
         {BY_MAKER.map(({ maker, models, n }) => (
@@ -559,9 +561,9 @@ export function TokenSkyline() {
   const since = T.since ? long(new Date(T.since)) : "the start";
   return (
     <figure className="tokens">
-      <h3 className="sect-label">
-        <span lang="ja">街</span> With agents
-      </h3>
+      <SectionLabel as="h3" ja="街">
+        With agents
+      </SectionLabel>
       <p className="tokens__total">
         <Odometer value={T.total} />
         <span className="tokens__unit mono">tokens</span>

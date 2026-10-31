@@ -1,20 +1,27 @@
 /* S1LIN — Vol. 30 "Architecture". A magazine issue, set in one ink on plain stock. */
 
+:root, .night {
+  /* The library's tokens (src/ui/tokens.css) under the issue's own names. */
+  --paper: var(--s1-paper);
+  --paper-2: var(--s1-paper-2);
+  --sumi: var(--s1-ink);
+  --ink-2: var(--s1-ink-2);
+  --ink-3: var(--s1-ink-3);
+  --rule: var(--s1-rule);
+  --rule-strong: var(--s1-rule-strong);
+
+  --f-display: var(--s1-font-display);
+  --f-sans: var(--s1-font-sans);
+  --f-mono: var(--s1-font-mono);
+  --f-mincho: var(--s1-font-mincho);
+  --f-gothic: var(--s1-font-gothic);
+
+  /* A "+" registration mark at each corner of a box, in its text colour. The
+     box should be 11px larger than the one it marks, 5.5px on every side. */
+  --corners: var(--s1-corners);
+}
+
 :root {
-  --paper: #f6f6f4;
-  --paper-2: #ececea;
-  --sumi: #111;
-  --ink-2: #4d4d4d;
-  --ink-3: #8a8a8a;
-  --rule: rgb(17 17 17 / 0.14);
-  --rule-strong: rgb(17 17 17 / 0.8);
-
-  --f-display: "Instrument Serif", "Shippori Mincho B1", "Times New Roman", serif;
-  --f-sans: "Inter Tight", "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --f-mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --f-gothic: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
-
   --gutter: clamp(16px, 4vw, 56px);
   --gap: clamp(14px, 2vw, 28px);
   --max: 1440px;
@@ -22,58 +29,27 @@
 
   /* The page frame: a hairline either side of the text column, halfway into the gutter. */
   --frame: calc(max(0px, (100% - var(--max)) / 2) + var(--gutter) / 2);
-  /* A "+" registration mark at each corner of a box, in its text colour. The
-     box should be 11px larger than the one it marks, 5.5px on every side. */
-  --corners:
-    linear-gradient(currentColor 0 0) left 5px top 0 / 1px 11px no-repeat,
-    linear-gradient(currentColor 0 0) left 0 top 5px / 11px 1px no-repeat,
-    linear-gradient(currentColor 0 0) right 5px top 0 / 1px 11px no-repeat,
-    linear-gradient(currentColor 0 0) right 0 top 5px / 11px 1px no-repeat,
-    linear-gradient(currentColor 0 0) left 5px bottom 0 / 1px 11px no-repeat,
-    linear-gradient(currentColor 0 0) left 0 bottom 5px / 11px 1px no-repeat,
-    linear-gradient(currentColor 0 0) right 5px bottom 0 / 1px 11px no-repeat,
-    linear-gradient(currentColor 0 0) right 0 bottom 5px / 11px 1px no-repeat;
 
   color-scheme: light;
 }
 
+/* Night paper: the tokens turn by themselves; the browser's own parts follow. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0f0f0f;
-    --paper-2: #191919;
-    --sumi: #ededed;
-    --ink-2: #b3b3b3;
-    --ink-3: #7a7a7a;
-    --rule: rgb(237 237 237 / 0.14);
-    --rule-strong: rgb(237 237 237 / 0.8);
-    color-scheme: dark;
-  }
+  :root:not([data-theme="light"]) { color-scheme: dark; }
 }
-
-:root[data-theme="dark"] {
-  --paper: #0f0f0f;
-  --paper-2: #191919;
-  --sumi: #ededed;
-  --ink-2: #b3b3b3;
-  --ink-3: #7a7a7a;
-  --rule: rgb(237 237 237 / 0.14);
-  --rule-strong: rgb(237 237 237 / 0.8);
-  color-scheme: dark;
-}
+:root[data-theme="dark"] { color-scheme: dark; }
 
 /* The photo essay is always printed on black stock. */
 .night {
-  --paper: #0b0b0b;
-  --paper-2: #161616;
-  --sumi: #ededed;
-  --ink-2: #b0b0b0;
-  --ink-3: #7a7a7a;
-  --rule: rgb(237 237 237 / 0.16);
-  --rule-strong: rgb(237 237 237 / 0.8);
+  --s1-paper: #0b0b0b;
+  --s1-paper-2: #161616;
+  --s1-ink: #ededed;
+  --s1-ink-2: #b0b0b0;
+  --s1-ink-3: #7a7a7a;
+  --s1-rule: rgb(237 237 237 / 0.16);
+  --s1-rule-strong: rgb(237 237 237 / 0.8);
   color-scheme: dark;
 }
-
-*, *::before, *::after { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -96,15 +72,8 @@ body {
   overflow-x: hidden;
 }
 
-img, svg, canvas { display: block; max-width: 100%; }
-img { height: auto; }
-
-a { color: inherit; text-decoration-thickness: 0.06em; text-underline-offset: 0.18em; }
-a:hover { color: var(--ink-3); }
-:focus-visible { outline: 2px solid var(--sumi); outline-offset: 3px; }
-
-[lang="ja"] { font-family: var(--f-gothic); line-break: strict; word-break: auto-phrase; }
-[lang="zh-Hans"] { font-family: "Noto Serif SC", var(--f-mincho); }
+/* Links grey under the pointer; the library's buttons keep their ink. */
+a:where(:not(.s1-btn)):hover { color: var(--ink-3); }
 
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden;
@@ -144,9 +113,6 @@ a:hover { color: var(--ink-3); }
 .runhead__brand span { font-family: var(--f-mincho); font-size: 13px; letter-spacing: 0.2em; }
 .runhead__mark { width: 18px; height: 18px; flex: none; align-self: center; }
 
-/* The mark, a cross on a block of ink: the favicon, the runhead and the colophon. */
-.brand-mark rect { fill: var(--sumi); }
-.brand-mark path { fill: none; stroke: var(--paper); stroke-width: 5; }
 .runhead__now {
   flex: 1; text-align: center; color: var(--ink-2);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -186,21 +152,8 @@ a:hover { color: var(--ink-3); }
 .runhead::after { top: auto; bottom: -6px; }
 
 /* ------------------------------------------------------------------ shared editorial parts */
-
-.kicker {
-  margin: 0 0 18px;
-  font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
-  display: flex; align-items: center; gap: 10px;
-}
-.kicker [lang="ja"] { font: 700 13px/1 var(--f-mincho); letter-spacing: 0.2em; color: var(--sumi); }
-
-.sect-label {
-  margin: 0 0 28px; padding-bottom: 10px;
-  border-bottom: 0.5px solid var(--rule-strong);
-  font: 500 11px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase;
-  display: flex; align-items: baseline; gap: 12px;
-}
-.sect-label [lang="ja"] { font: 700 20px/1 var(--f-mincho); letter-spacing: 0.24em; text-transform: none; }
+/* The library's parts (Kicker, SectionLabel, Roundel, Folio, Screen, Stack,
+   Barcode, Mark, Plate, AsciiArt) bring their own styles from src/ui/. */
 
 .display {
   margin: 0;
@@ -216,21 +169,9 @@ a:hover { color: var(--ink-3); }
   color: var(--ink-2);
 }
 
-.folio {
-  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
-  font: 500 10px/1 var(--f-mono); letter-spacing: 0.2em; color: var(--ink-3);
-}
-
 .tate { writing-mode: vertical-rl; text-orientation: mixed; font-family: var(--f-mincho); letter-spacing: 0.3em; }
 
 .bouten { text-emphasis: filled sesame var(--sumi); -webkit-text-emphasis: filled sesame var(--sumi); text-emphasis-position: over right; }
-
-.roundel {
-  display: inline-grid; place-items: center; flex: none;
-  width: 1.9em; height: 1.9em; border-radius: 50%;
-  border: 1px solid var(--sumi); background: var(--paper); color: var(--sumi);
-  font: 600 0.8em/1 var(--f-sans);
-}
 
 figure { margin: 0; }
 figcaption, .cap {
@@ -247,32 +188,15 @@ figcaption, .cap {
 .plate { position: relative; background: var(--paper-2); }
 .plate img { width: 100%; }
 
-/* screenshot in a hairline browser frame */
-.screen { border: 0.5px solid var(--rule-strong); background: var(--paper); box-shadow: 0 1px 0 var(--rule), 14px 14px 0 -1px var(--paper-2); }
-.screen__bar {
-  display: flex; align-items: center; gap: 8px; height: 26px; padding-inline: 10px;
-  border-bottom: 0.5px solid var(--rule-strong);
-  font: 400 10.5px/1 var(--f-mono); color: var(--ink-2); letter-spacing: 0.04em;
-}
-.screen__bar::before {
-  content: ""; width: 26px; height: 6px; flex: none;
-  background: radial-gradient(circle 3px at 3px 3px, var(--ink-3) 98%, transparent) 0 0 / 10px 6px repeat-x;
-}
-.screen img { width: 100%; }
-
-pre, .ascii { font-family: var(--f-mono); font-variant-ligatures: none; }
-/* ascii.rest pieces. Its <ascii-art> element ships these two rules; the React pieces do not,
-   so they live here: a font for the line and block characters only, and a bare <pre>.
-   The font is ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept here rather than
-   fetched from ascii.rest: Google's JetBrains Mono has no box-drawing characters. */
+/* ascii.rest pieces (AsciiArt, src/ui/ascii-art.css) reach for this font for the line and
+   block characters only. It is ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept here
+   rather than fetched from ascii.rest: Google's JetBrains Mono has no box-drawing characters. */
 @font-face {
   font-family: "ascii.rest mono";
   src: url("./fonts/ascii-rest-mono.woff2?no-inline") format("woff2");
   unicode-range: U+00B0, U+00B7, U+2022, U+2500-259F, U+25CF;
   font-display: swap;
 }
-:where(pre.ascii) { margin: 0; line-height: 1.2; letter-spacing: 0; white-space: pre; font-variant-ligatures: none; }
-pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .divider {
   margin: 0; overflow: hidden; color: var(--ink-3); text-align: center;
@@ -323,11 +247,11 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 }
 .cover__play-label [lang="ja"] { font: 700 20px/1 var(--f-mincho); letter-spacing: 0.2em; text-transform: none; color: var(--sumi); }
 
+/* each on a Plate (src/ui/plate.tsx): a hairline box with "+" marks at its corners */
 .machine {
-  position: relative; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;
-  padding: clamp(14px, 1.6vw, 22px); border: 0.5px solid var(--rule-strong);
+  min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;
+  padding: clamp(14px, 1.6vw, 22px);
 }
-.machine::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
 .machine--metro { grid-column: 1 / span 7; }
 .machine--brick { grid-column: 8 / span 5; }
 .machine__head { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 6px 14px; }
@@ -380,8 +304,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* The special feature and its coverlines, set flat under the machines. */
 .cover__band { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gap); align-items: start; margin-top: clamp(32px, 4vw, 52px); }
 .cover__feature { grid-column: 1 / span 5; }
-.cover__feature .ascii { display: block; width: 100%; max-width: 520px; height: auto; margin: 4px 0 6px; color: var(--sumi); }
-.cover__feature pre.ascii { font-size: clamp(5px, 1.05vw, 9.5px); line-height: 1.1; overflow: hidden; }
+.cover__feature .s1-ascii { display: block; width: 100%; max-width: 520px; height: auto; margin: 4px 0 6px; color: var(--sumi); }
+.cover__feature pre.s1-ascii { font-size: clamp(5px, 1.05vw, 9.5px); line-height: 1.1; overflow: hidden; }
 .cover__feature .barcode { align-items: flex-start; margin-top: 22px; }
 .cover__ruby { margin: 2px 0 0; font: 400 14px/1.3 var(--f-display); color: var(--ink-2); }
 .cover__ruby [lang="ja"] { font-family: var(--f-mincho); font-weight: 700; color: var(--sumi); letter-spacing: 0.2em; }
@@ -431,7 +355,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .toc__p { order: 3; font: 500 12px/1 var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
 .toc__sub { padding-left: 18px; border-left: 0.5px solid var(--rule); margin-left: 6px !important; }
 .toc__sub a { font: 500 0.95rem/1.2 var(--f-sans); padding: 6px 0; align-items: center; }
-.toc__sub .roundel { font-size: 0.72rem; }
+.toc__sub .s1-roundel { font-size: 0.72rem; }
 /* The blog's posts under its line, numbered as on the blog. */
 .toc__no { display: inline-block; flex: none; width: 2.2em; font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
 
@@ -446,7 +370,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .qed { font-family: var(--f-mono); margin-left: 0.2em; }
 
 .typer { margin: 34px 0 0; padding: 16px 18px; border: 0.5px solid var(--rule-strong); background: var(--paper-2); overflow: hidden; }
-.typer .ascii { font-size: clamp(13px, 1.4vw, 17px); line-height: 1.25; }
+.typer .s1-ascii { font-size: clamp(13px, 1.4vw, 17px); line-height: 1.25; }
 .typer pre { margin: 0; }
 
 .namenote { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; margin-top: 40px; padding-top: 22px; border-top: 0.5px solid var(--rule); }
@@ -476,7 +400,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   :root:not([data-theme="light"]) .heatmap { --l0: #161b22; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353; }
 }
 :root[data-theme="dark"] .heatmap { --l0: #161b22; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353; }
-.heatmap .sect-label { margin-bottom: 18px; }
+.heatmap .s1-section-label { margin-bottom: 18px; }
 /* Narrower than its least width, the year scrolls in its own box and opens on
    the latest weeks; the earlier ones fade out at the edge rather than stop short. */
 .heatmap__plot { display: flex; flex-direction: row-reverse; overflow-x: auto; scrollbar-width: thin; }
@@ -514,7 +438,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   :root:not([data-theme="light"]) .tokens { --agent-claude: #d95926; --agent-codex: #3987e5; --agent-pi: #199e70; --kind-cache: #9085e9; --ink-4: #4a4a4a; }
 }
 :root[data-theme="dark"] .tokens { --agent-claude: #d95926; --agent-codex: #3987e5; --agent-pi: #199e70; --kind-cache: #9085e9; --ink-4: #4a4a4a; }
-.tokens .sect-label { margin-bottom: 16px; }
+.tokens .s1-section-label { margin-bottom: 16px; }
 .tokens__total, .tokens__usd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; }
 .tokens__n { font: 400 clamp(2.2rem, 8.6cqi, 3.5rem)/1 var(--f-display); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; white-space: nowrap; }
 .tokens__lead { color: var(--ink-3); opacity: 0.4; }
@@ -554,9 +478,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 
 /* By model, under the town: the companies in two columns, each under its mark, every model a bar on one scale. */
 .models { margin: 18px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
-/* The champion, a row of its own over the rest; its bar is of all the tokens. */
-.champion { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 4px 14px; margin: 0 0 18px; padding: 12px 14px 14px; border: 0.5px solid var(--rule-strong); position: relative; }
-.champion::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+/* The champion, a row of its own over the rest, on a Plate; its bar is of all the tokens. */
+.champion { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 4px 14px; margin: 0 0 18px; padding: 12px 14px 14px; }
 .champion p { margin: 0; }
 .champion__label { font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); }
 .champion__label [lang="ja"] { font: 700 12px/1 var(--f-mincho); letter-spacing: 0.2em; color: var(--sumi); margin-right: 4px; }
@@ -777,7 +700,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 }
 .feature__line { display: block; height: 2px; background: var(--sumi); margin: 6px 0 22px; width: 100%; }
 .feature__title { display: flex; align-items: center; gap: 14px; margin: 0; font: 800 clamp(2rem, 3.6vw, 3.3rem)/1 var(--f-sans); letter-spacing: -0.03em; }
-.feature__title .roundel { font-size: 1.05rem; }
+.feature__title .s1-roundel { font-size: 1.05rem; }
 .feature__kanji { display: flex; align-items: baseline; gap: 12px; margin: 18px 0 0; }
 .feature__kanji b { font: 800 clamp(3.4rem, 6vw, 5.4rem)/1 var(--f-mincho); }
 .feature__kanji span { font: 400 11px/1.4 var(--f-mono); letter-spacing: 0.08em; color: var(--ink-2); }
@@ -800,8 +723,6 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .built li::before { content: counter(b, decimal-leading-zero); font: 500 11px/1.9 var(--f-mono); color: var(--ink-3); }
 .built b { font-weight: 600; }
 
-.stack { margin: 18px 0 0; font: 400 11px/1.8 var(--f-mono); color: var(--ink-2); letter-spacing: 0.02em; }
-.stack span { display: inline-block; padding: 0 7px; margin: 0 4px 4px 0; border: 0.5px solid var(--rule-strong); border-radius: 2px; }
 
 .feature__figs { margin-top: 40px; display: grid; gap: 36px; }
 .feature__figs .pair { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; align-items: start; }
@@ -978,7 +899,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .board { grid-column: 1 / span 7; }
 /* The board is in colour, on its own black housing in either theme, like the real thing. */
 .board__frame { width: min(100%, 640px); padding: clamp(10px, 1.6vw, 20px); background: #0d0d0d; color: #f2efe6; overflow-x: auto; }
-.board__frame .ascii { font-size: clamp(8.5px, 1.15vw, 15px); line-height: 1.2; }
+.board__frame .s1-ascii { font-size: clamp(8.5px, 1.15vw, 15px); line-height: 1.2; }
 .board__frame .board__static { margin: 0; font: 400 clamp(8.5px, 1.15vw, 15px)/1.2 var(--f-mono); }
 .ledger { grid-column: 9 / span 4; }
 .ledger ol { list-style: none; margin: 0; padding: 0; }
@@ -995,15 +916,15 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* ------------------------------------------------------------------ colophon */
 
 .colophon { padding-bottom: 64px; }
-.okuzuke { grid-column: 1 / span 6; position: relative; border: 0.5px solid var(--rule-strong); padding: clamp(18px, 2.4vw, 32px); }
-.okuzuke::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+/* The colophon's box, on a Plate (src/ui/plate.tsx). */
+.okuzuke { grid-column: 1 / span 6; padding: clamp(18px, 2.4vw, 32px); }
 /* The closing plates take turns, each on its own sky, so the box is held at their 2:1 before a canvas starts. */
 .closing { grid-column: 1 / -1; margin: clamp(48px, 6vw, 88px) 0 0; }
 .closing__plate { position: relative; aspect-ratio: 2 / 1; background: #090c18; transition: background-color 0.45s ease; }
 .closing__plate::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
 .closing__piece { height: 100%; transition: opacity 0.45s ease; }
 .closing__piece.is-fading { opacity: 0; }
-.closing__piece .ascii { display: block; width: 100%; height: 100%; }
+.closing__piece .s1-ascii { display: block; width: 100%; height: 100%; }
 .closing__cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 18px; }
 .closing__pick { display: flex; gap: 16px; }
 .closing__pick button { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; color: var(--ink-2); cursor: pointer; }
@@ -1014,11 +935,6 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .okuzuke dt, .okuzuke dd { margin: 0; padding: 7px 0; border-top: 0.5px solid var(--rule); font-size: 0.9rem; }
 .okuzuke dt { font: 500 10.5px/1.9 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
 .okuzuke__mark { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: start; }
-.mark-set-out { width: 96px; height: 96px; }
-.mark-set-out__block { fill: var(--sumi); }
-.mark-set-out__guide { fill: none; stroke: var(--ink-3); stroke-width: 0.8; }
-.mark-set-out__cross { fill: none; stroke: var(--paper); stroke-width: 3.75; }
-.mark-set-out__pin { fill: var(--sumi); }
 /* Find the editor: the links, then the letters (social.css), then the motto at the foot. */
 .contact { grid-column: 8 / span 5; display: flex; flex-direction: column; gap: 40px; }
 .contact__find h2 { margin: 0; font: 400 clamp(2.6rem, 4.6vw, 4.6rem)/0.95 var(--f-display); }
@@ -1058,7 +974,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .post__main { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
 .post__main > * { min-width: 0; }
 .post__head { grid-column: 1 / span 4; align-self: start; position: sticky; top: calc(var(--head-h) + 28px); }
-.post__head .kicker a { text-decoration: none; }
+.post__head .s1-kicker a { text-decoration: none; }
 .post__title { margin: 0; font: 400 clamp(2.4rem, 4vw, 4.2rem)/1.15 var(--f-display); text-wrap: balance; }
 .posts__title[lang="zh-Hans"], .post__title[lang="zh-Hans"] { font-family: "Noto Serif SC", var(--f-mincho); letter-spacing: 0.02em; }
 /* a title of a whole sentence is set a size down, so it does not stand five lines tall */
@@ -1068,13 +984,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .post__head .spec dd { font-size: 0.88rem; }
 .post__code { margin: 22px 0 0; }
 
-/* A post's id as a barcode (Barcode in bits.tsx), in place of a date: the bars
-   as wide as the id printed under them; in the contents, the bars alone. */
-.code { display: inline-grid; gap: 5px; width: max-content; vertical-align: middle; }
-/* width 0 and min-width 100%: the stretched drawing fills the id's width and never sets it */
-.code svg { display: block; width: 0; min-width: 100%; height: 26px; fill: var(--sumi); }
-.code__id { font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: none; color: var(--ink-2); white-space: nowrap; }
-.toc .code svg { width: 96px; min-width: 0; height: 9px; }
+/* A post's id as a barcode (Barcode, src/ui/barcode.tsx), in place of a date; in the contents, the bars alone. */
+.toc .s1-barcode svg { width: 96px; min-width: 0; height: 9px; }
 .toc a.toc__post { align-items: start; }
 .toc a.toc__post::after { content: none; }
 .toc__post .toc__no { padding-top: 0.25em; }
@@ -1094,7 +1005,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
    and the frames for pictures shown elsewhere stay across the column. */
 .post__text figure:not(.elsewhere, .post__epigraph) { float: left; width: 46%; margin: 0.45em 1.6em 1em 0; }
 .post__text figure img { width: auto; max-width: 100%; background: var(--paper-2); }
-.post__text h2, .post__text h3, .post__text .tex--block, .post__text .elsewhere,
+.post__text h2, .post__text h3, .post__text .s1-tex--block, .post__text .elsewhere,
 .post__signed, .post__refs, .post__note { clear: both; }
 /* a quotation beside a picture narrows to the room left, so its rule is never under it */
 .post__text > blockquote { display: flow-root; font-style: italic; }
@@ -1212,7 +1123,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .feature__line, .sect-label { animation: draw linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; transform-origin: left; }
+    .feature__line { animation: draw linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; transform-origin: left; }
     @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     /* the heatmap's year fills in from the left, just behind its label's rule */
     .heatmap__plot { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; }

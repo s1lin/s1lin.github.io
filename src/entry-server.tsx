@@ -1,9 +1,14 @@
+import katex from "katex";
 import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import App from "./App.tsx";
 import { BlogPage } from "@/components/Blog";
 import { UiPage } from "@/components/uidocs/UiDocs";
 import { POSTS } from "@/content/posts";
+import { setKatex } from "@/ui/tex";
+
+// Maths is set here, as the pages are prerendered: readers get finished HTML and no KaTeX script.
+setKatex(katex);
 
 /** The issue as HTML. */
 export function render() {

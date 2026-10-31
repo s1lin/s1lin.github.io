@@ -1,0 +1,9 @@
+/* Kicker (kicker.tsx). */
+@layer components {
+  .s1-kicker {
+    margin: 0 0 18px;
+    font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--s1-ink-2);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .s1-kicker [lang="ja"] { font: 700 13px/1 var(--s1-font-mincho); letter-spacing: 0.2em; color: var(--s1-ink); }
+}

@@ -17,6 +17,7 @@ import {
   thousands,
   weekOf,
 } from "@/lib/calendar";
+import { SectionLabel } from "@/ui/section-label";
 
 /*
  * The editor's last year on GitHub, a square a day, shaded as the profile page
@@ -109,9 +110,9 @@ export function GitHubHeatmap() {
 
   return (
     <figure className="heatmap">
-      <h3 className="sect-label">
-        <span lang="ja">草</span> On GitHub
-      </h3>
+      <SectionLabel as="h3" ja="草">
+        On GitHub
+      </SectionLabel>
       <div className="heatmap__plot">
         <svg
           viewBox={`0 0 ${W} ${H}`}

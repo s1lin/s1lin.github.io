@@ -1,0 +1,9 @@
+/* Roundel (roundel.tsx). */
+@layer components {
+  .s1-roundel {
+    display: inline-grid; place-items: center; flex: none;
+    width: 1.9em; height: 1.9em; border-radius: 50%;
+    border: 1px solid var(--s1-ink); background: var(--s1-paper); color: var(--s1-ink);
+    font: 600 0.8em/1 var(--s1-font-sans);
+  }
+}

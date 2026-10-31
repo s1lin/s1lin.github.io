@@ -1,8 +1,9 @@
 import * as skyline from "ascii.rest/pieces/skyline";
-import { AsciiArt } from "@/components/AsciiArt";
-import { Folio, Kicker } from "@/components/bits";
 import { ErasePhoto, GlitchTitle } from "@/components/effects";
 import { SKYLINE } from "@/content/ascii-stills";
+import { AsciiArt } from "@/ui/ascii-art";
+import { Folio } from "@/ui/folio";
+import { Kicker } from "@/ui/kicker";
 
 type Photo = {
   cls: string;

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type RefObject } from "react";
 import { METRO_CITIES } from "@/content/metro-cities";
-import { useDark } from "@/hooks/useDark";
-import { useNear } from "@/hooks/useNear";
 import { createPlayer, lineColour, stats, type Insets, type Look, type MetroCity, type Player } from "@/lib/metro";
+import { useDark } from "@/ui/use-dark";
+import { useNear } from "@/ui/use-near";
 
 const cache = new Map<string, Promise<MetroCity>>();
 

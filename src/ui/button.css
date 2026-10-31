@@ -1,0 +1,24 @@
+/* Button (button.tsx). The press is a translate, so it holds still for readers who prefer reduced motion. */
+@layer components {
+  .s1-btn { font: 500 12px/1 var(--s1-font-mono); cursor: pointer; }
+  .s1-btn--plain, .s1-btn--go {
+    display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    min-height: 40px; padding: 0 16px; line-height: 1;
+    background: var(--s1-paper); color: var(--s1-ink); border: 1px solid var(--s1-rule-strong); text-decoration: none;
+  }
+  .s1-btn--go { background: var(--s1-ink); color: var(--s1-paper); box-shadow: 3px 3px 0 var(--s1-accent); }
+  .s1-btn--plain:disabled, .s1-btn--go:disabled { opacity: 0.5; cursor: default; }
+  .s1-btn--plain:active:not(:disabled), .s1-btn--go:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--s1-accent); }
+  .s1-btn--sm { min-height: 30px; padding: 0 10px; font-size: 11px; }
+
+  .s1-btn--chip {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 32px; max-width: 100%; padding: 0 10px 0 8px;
+    color: var(--s1-ink); background: var(--s1-paper); border: 1px solid var(--s1-rule-strong); border-radius: 999px; text-decoration: none;
+  }
+  .s1-btn--chip:hover, .s1-btn--chip[aria-expanded="true"] { background: var(--s1-paper-2); }
+
+  .s1-btn--link { background: none; border: 0; padding: 0; color: var(--s1-ink-2); text-decoration: underline; text-underline-offset: 3px; }
+
+  .s1-btn:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .s1-btn:active:not(:disabled) { transform: none; } }
+}

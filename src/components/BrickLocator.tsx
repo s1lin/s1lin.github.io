@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useNear } from "@/hooks/useNear";
 import { BRICK, loadBook, samplePage, samplePicture, type Book, type Box } from "@/lib/brick";
+import { Plate } from "@/ui/plate";
+import { useNear } from "@/ui/use-near";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -43,7 +44,7 @@ export function BrickMachine() {
   const steps = part ? new Set(part.uses.map((u) => u.step)).size : 0;
 
   return (
-    <section className="machine machine--brick" ref={root} aria-labelledby="bl-name">
+    <Plate as="section" className="machine machine--brick" ref={root} aria-labelledby="bl-name">
       <header className="machine__head">
         <p className="machine__no">
           <span lang="ja">部品</span> No. 02
@@ -109,6 +110,6 @@ export function BrickMachine() {
           </p>
         </>
       )}
-    </section>
+    </Plate>
   );
 }

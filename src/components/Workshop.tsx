@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { Folio, Kicker } from "@/components/bits";
 import { GlitchTitle } from "@/components/effects";
 import { WorkshopSlider } from "@/components/WorkshopSlider";
+import { Folio } from "@/ui/folio";
+import { Kicker } from "@/ui/kicker";
 
 type Item = {
   id?: string;

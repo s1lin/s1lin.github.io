@@ -1,7 +1,8 @@
+// First, so the cascade layers are declared before any part brings its own styles.
+import "./index.css";
 import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { UiPage } from "@/components/uidocs/UiDocs";
-import "./index.css";
 import "./fonts";
 import "./styles/tex.css";
 import "./styles/social.css";

@@ -1,0 +1,17 @@
+/*
+ * The element defaults, in the layer under the library's parts (src/ui/), so a
+ * part's own rules win over them: a Button that is a link keeps its colours,
+ * a Kicker's Japanese keeps its mincho. Everything else is in site.css.
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+img, svg, canvas { display: block; max-width: 100%; }
+img { height: auto; }
+
+a { color: inherit; text-decoration-thickness: 0.06em; text-underline-offset: 0.18em; }
+:focus-visible { outline: 2px solid var(--sumi); outline-offset: 3px; }
+
+[lang="ja"] { font-family: var(--f-gothic); line-break: strict; word-break: auto-phrase; }
+[lang="zh-Hans"] { font-family: "Noto Serif SC", var(--f-mincho); }
+
+pre { font-family: var(--f-mono); font-variant-ligatures: none; }

@@ -1,8 +1,9 @@
 import { Fragment } from "react";
-import { Barcode, Kicker } from "@/components/bits";
 import { Runhead } from "@/components/Runhead";
 import { Comments } from "@/components/social/Comments";
 import { POSTS, type Post } from "@/content/posts";
+import { Barcode } from "@/ui/barcode";
+import { Kicker } from "@/ui/kicker";
 
 const RUN = "随筆 · Blog";
 

@@ -1,0 +1,7 @@
+/* Folio (folio.tsx). Its box needs position: relative. */
+@layer components {
+  .s1-folio {
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    font: 500 10px/1 var(--s1-font-mono); letter-spacing: 0.2em; color: var(--s1-ink-3);
+  }
+}

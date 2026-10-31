@@ -1,5 +1,5 @@
 /*
- * KaTeX's stylesheet, for maths in the blog (components/Tex.tsx), loaded by the
+ * KaTeX's stylesheet, for maths in the blog (Tex, src/ui/tex.tsx), loaded by the
  * blog's pages only. It sits in a layer of its own, and the issue's adjustments
  * follow in that layer, so they win on specificity. Its fonts load only when a
  * page uses them.
@@ -12,7 +12,7 @@
   .post__text .katex .cjk_fallback { font-family: "Noto Serif SC", var(--f-mincho); }
   /* On its own line: centred, clear of the paragraph's indent, and scrolling
      sideways inside itself when it is wider than a phone. */
-  .post__text .tex--block { display: block; }
-  .post__text .tex--block .katex-display { margin: 1.1em 0; padding: 2px 0; overflow-x: auto; overflow-y: hidden; text-indent: 0; }
-  .post__text .tex--block .katex-display > .katex { text-align: center; }
+  .post__text .s1-tex--block { display: block; }
+  .post__text .s1-tex--block .katex-display { margin: 1.1em 0; padding: 2px 0; overflow-x: auto; overflow-y: hidden; text-indent: 0; }
+  .post__text .s1-tex--block .katex-display > .katex { text-align: center; }
 }

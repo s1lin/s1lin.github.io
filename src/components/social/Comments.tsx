@@ -7,6 +7,7 @@ import { SOCIAL_COPY, type SocialCopy } from "@/components/social/copy";
 import type { Lang } from "@/components/life/copy";
 import { moreReposters, reposterUrl, type Reposter, type SocialComment, type Thread } from "@/lib/social/client.ts";
 import { social, useSession } from "@/lib/social/useSocial";
+import { Button } from "@/ui/button";
 
 function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: SocialComment; c: SocialCopy; lang: Lang; target: string; liked: Set<string>; onChanged: () => void; reply: boolean }) {
   const { session } = useSession();
@@ -26,9 +27,9 @@ function CommentView({ cm, c, lang, target, liked, onChanged, reply }: { cm: Soc
         <div className="soc__actions">
           <CommentLike id={cm.id} st={st} setSt={setSt} c={c} />
           {reply && session && (
-            <button type="button" className="soc__link" onClick={() => setReplying((r) => !r)}>
+            <Button variant="link" onClick={() => setReplying((r) => !r)}>
               {c.reply}
-            </button>
+            </Button>
           )}
         </div>
         {replying && (
@@ -174,9 +175,9 @@ export function Comments({ target, lang, title, placeholder }: { target: string;
       {state === "error" && (
         <p className="soc__note soc__note--bad" role="alert">
           {c.loadError}{" "}
-          <button type="button" className="soc__link" onClick={() => { setState("loading"); reload(); }}>
+          <Button variant="link" onClick={() => { setState("loading"); reload(); }}>
             {c.retry}
-          </button>
+          </Button>
         </p>
       )}
       {state === "ready" && thread && thread.comments.length === 0 && <p className="soc__empty">{c.empty}</p>}
@@ -188,9 +189,9 @@ export function Comments({ target, lang, title, placeholder }: { target: string;
         </ul>
       )}
       {thread?.next && (
-        <button type="button" className="soc__btn" onClick={more} disabled={moreBusy}>
+        <Button onClick={more} disabled={moreBusy}>
           {moreBusy ? c.loading : c.more}
-        </button>
+        </Button>
       )}
     </section>
   );

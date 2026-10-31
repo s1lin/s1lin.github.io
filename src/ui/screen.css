@@ -1,0 +1,14 @@
+/* Screen (screen.tsx). */
+@layer components {
+  .s1-screen { border: 0.5px solid var(--s1-rule-strong); background: var(--s1-paper); box-shadow: 0 1px 0 var(--s1-rule), 14px 14px 0 -1px var(--s1-paper-2); }
+  .s1-screen__bar {
+    display: flex; align-items: center; gap: 8px; height: 26px; padding-inline: 10px;
+    border-bottom: 0.5px solid var(--s1-rule-strong);
+    font: 400 10.5px/1 var(--s1-font-mono); color: var(--s1-ink-2); letter-spacing: 0.04em;
+  }
+  .s1-screen__bar::before {
+    content: ""; width: 26px; height: 6px; flex: none;
+    background: radial-gradient(circle 3px at 3px 3px, var(--s1-ink-3) 98%, transparent) 0 0 / 10px 6px repeat-x;
+  }
+  .s1-screen img { display: block; width: 100%; height: auto; }
+}
