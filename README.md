@@ -226,6 +226,10 @@ Never deploy a build made with `S1LIN_REGISTRY` set. There is no npm package yet
 `src/ui/` has no imports from outside itself but `react`, `clsx`, `ascii.rest` and
 `katex`, so one could be cut from it as it is.
 
+An app that has parts from before may get newer copies of what a new part
+shares with them (the tokens, Button): shadcn asks before replacing a file, and
+`--overwrite` takes them all; an app using the earlier parts still builds.
+
 A part for an app's console goes in the `console` category (`"categories":
 ["console", "<its group>"]`), so it loads with `/ui/` and not with the issue, and
 is documented in one of the console's groups.
