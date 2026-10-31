@@ -1,0 +1,300 @@
+/*
+ * /ui/: the parts of the site, documented (components/uidocs). Loaded by that
+ * page only. The issue's own tokens, grid and hairlines; no colours of its own.
+ */
+
+/* Anchors clear the running head, and on a phone the strip of groups under it too. */
+html { scroll-padding-top: calc(var(--head-h) + 20px); }
+@media (max-width: 900px) { html { scroll-padding-top: calc(var(--head-h) + 60px); } }
+
+.uidocs { padding-top: clamp(40px, 6vw, 96px); }
+.uidocs code { font: 400 0.86em/1.45 var(--f-mono); letter-spacing: 0; text-transform: none; }
+.uidocs :not(pre) > code { padding: 0.05em 0.3em; background: var(--paper-2); border-radius: 2px; white-space: nowrap; }
+/* In a table a type may be long: there it wraps anywhere. */
+.uidocs .ud-props code { white-space: normal; overflow-wrap: anywhere; }
+
+.ud-intro { grid-column: 1 / span 8; }
+.ud-intro .display { font-size: clamp(3rem, 7.4vw, 7.4rem); }
+.ud-aside { grid-column: 9 / span 4; align-self: end; color: var(--ink-2); font-size: 0.95rem; }
+.ud-aside p { margin: 0 0 12px; }
+.ud-aside b { color: var(--sumi); font-weight: 600; }
+
+/* ------------------------------------------------------------------ the index of parts */
+
+.ud-nav {
+  grid-column: 1 / span 3; align-self: start; position: sticky; top: calc(var(--head-h) + 28px);
+  max-height: calc(100vh - var(--head-h) - 56px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  margin-top: clamp(56px, 7vw, 104px); padding-right: 10px;
+}
+.ud-nav__title { margin: 0; padding-bottom: 10px; border-bottom: 0.5px solid var(--rule-strong); color: var(--ink-2); }
+.ud-nav ol, .ud-nav ul { list-style: none; margin: 0; padding: 0; }
+.ud-nav__groups > li { padding: 10px 0 12px; border-bottom: 0.5px solid var(--rule); }
+.ud-nav__group {
+  display: block; text-decoration: none; color: var(--sumi);
+  font: 500 11px/1.4 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.ud-nav__items { margin-top: 6px !important; }
+.ud-nav__items a {
+  display: block; padding: 2px 0 2px 10px; border-left: 0.5px solid var(--rule);
+  font: 400 0.86rem/1.4 var(--f-sans); color: var(--ink-2); text-decoration: none;
+}
+.ud-nav__items a:hover { color: var(--sumi); }
+.ud-nav__items a[aria-current] { color: var(--sumi); font-weight: 500; border-left: 2px solid var(--sumi); padding-left: 8.5px; }
+
+.ud-body { grid-column: 4 / span 9; margin-top: clamp(56px, 7vw, 104px); }
+
+/* ------------------------------------------------------------------ a group, a part */
+
+.ud-group + .ud-group { margin-top: clamp(64px, 8vw, 120px); }
+.ud-group__h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 0; padding-bottom: 12px; border-bottom: 0.5px solid var(--rule-strong);
+  font: 400 clamp(2.2rem, 3.6vw, 3.4rem)/1 var(--f-display); letter-spacing: -0.01em;
+}
+.ud-group__h .mono { color: var(--ink-3); }
+.ud-group__blurb { margin: 14px 0 0; max-width: 40em; color: var(--ink-2); }
+
+.ud-item { padding: 40px 0 44px; border-bottom: 0.5px solid var(--rule); container-type: inline-size; }
+.ud-item:last-child { border-bottom: 0; }
+.ud-item__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; }
+.ud-item__name { margin: 0; font: 400 clamp(1.8rem, 2.6vw, 2.5rem)/1.05 var(--f-display); overflow-wrap: anywhere; }
+.ud-item__file { margin: 0; font: 400 11px/1.5 var(--f-mono); color: var(--ink-3); overflow-wrap: anywhere; }
+.ud-item__sum { margin: 14px 0 0; max-width: 42em; }
+
+.ud-h4 { margin: 0 0 8px; color: var(--ink-2); }
+.ud-see { margin: 18px 0 0; font: 500 11px/1.6 var(--f-mono); letter-spacing: 0.06em; }
+.ud-see a { text-decoration: none; border-bottom: 0.5px solid currentColor; }
+.ud-where { margin: 16px 0 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+.ud-where b { margin-right: 8px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sumi); }
+
+/* Code: on the second paper, scrolling sideways inside itself. */
+.ud-code { margin: 20px 0 0; }
+.ud-code .ud-code__label { margin: 0 0 6px; font: 500 10px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.ud-code pre {
+  margin: 0; padding: 12px 14px; overflow-x: auto; scrollbar-width: thin;
+  background: var(--paper-2); border: 0.5px solid var(--rule);
+  font: 400 12.5px/1.6 var(--f-mono); color: var(--sumi); tab-size: 2;
+}
+.ud-code pre code { font: inherit; }
+
+/* The plate an example stands on: a hairline box with registration marks, its kind in a bar on top. */
+.ud-plate { position: relative; margin: 24px 0 0; border: 0.5px solid var(--rule-strong); background: var(--paper); }
+.ud-plate::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+.ud-plate__kind { margin: 0; padding: 7px 12px; border-bottom: 0.5px solid var(--rule); color: var(--ink-3); font-size: 10px; }
+.ud-plate[data-kind="specimen"] .ud-plate__kind { border-bottom-style: dashed; }
+.ud-plate__body { padding: clamp(18px, 3vw, 36px) clamp(14px, 2.6vw, 32px); }
+.ud-plate__body > :first-child { margin-top: 0; }
+.ud-plate__body > :last-child { margin-bottom: 0; }
+
+/* Props and the site parts: a table on a desktop, a block for each row on a phone. */
+.ud-props { margin: 28px 0 0; }
+.ud-props table { width: 100%; border-collapse: collapse; font-size: 0.9rem; line-height: 1.5; }
+.ud-props th, .ud-props td { padding: 9px 14px 9px 0; text-align: left; vertical-align: top; border-top: 0.5px solid var(--rule); }
+.ud-props th:last-child, .ud-props td:last-child { padding-right: 0; }
+.ud-props thead th { padding-block: 0 8px; border-top: 0; border-bottom: 0.5px solid var(--rule-strong); font: 500 10px/1.4 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.ud-props tbody tr:first-child > * { border-top: 0; }
+.ud-props tbody th { font-weight: 500; white-space: nowrap; }
+.ud-props tbody th code { background: none; padding: 0; font-size: 0.92em; }
+.ud-props__type code, .ud-props__def code { background: none !important; padding: 0 !important; color: var(--ink-2); }
+.ud-props__def { min-width: 5.5em; }
+.ud-props__def em { font: italic 400 0.95em var(--f-display); color: var(--ink-3); }
+.ud-listed .ud-props__def { white-space: normal; font: 400 11px/1.6 var(--f-mono); }
+@container (max-width: 600px) {
+  .ud-props thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .ud-props table, .ud-props tbody, .ud-props tr, .ud-props th, .ud-props td { display: block; }
+  .ud-props tbody tr { padding: 10px 0; border-top: 0.5px solid var(--rule); }
+  .ud-props tbody tr:first-child { border-top: 0.5px solid var(--rule-strong); }
+  .ud-props th, .ud-props td { padding: 0; border: 0; }
+  .ud-props tbody th { display: inline; white-space: normal; }
+  .ud-props td.ud-props__type, .ud-props td.ud-props__def { display: inline; margin-left: 10px; }
+  .ud-props td:last-child { margin-top: 4px; }
+}
+/* The site parts' table needs the page's width before it can stand as a table. */
+@media (max-width: 1100px) {
+  .ud-listed thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .ud-listed table, .ud-listed tbody, .ud-listed tr, .ud-listed th, .ud-listed td { display: block; }
+  .ud-listed tbody tr { padding: 10px 0; border-top: 0.5px solid var(--rule); }
+  .ud-listed tbody tr:first-child { border-top: 0.5px solid var(--rule-strong); }
+  .ud-listed th, .ud-listed td { padding: 0; border: 0; }
+  .ud-listed tbody th { display: inline; }
+  .ud-listed td.ud-props__type { display: inline; margin-left: 10px; }
+  .ud-listed td.ud-props__def { margin-top: 2px; }
+  .ud-listed td:last-child { margin-top: 2px; }
+}
+.ud-listed { container-type: inline-size; }
+
+/* What to know: labels in mono caps on the left, as in the colophon. */
+.ud-notes { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); margin: 26px 0 0; }
+.ud-notes dt, .ud-notes dd { margin: 0; padding: 8px 0; border-top: 0.5px solid var(--rule); font-size: 0.92rem; }
+.ud-notes dt { padding-right: 14px; font: 500 10.5px/1.9 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+@container (max-width: 600px) {
+  .ud-notes { grid-template-columns: minmax(0, 1fr); }
+  .ud-notes dd { border-top: 0; padding-top: 0; }
+}
+
+/* A button of this page's own, in the house manner (as .m2l-bar button). */
+.ud-btn {
+  font: 500 11px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sumi);
+  background: transparent; border: 0.5px solid var(--rule-strong); padding: 9px 12px; cursor: pointer;
+}
+.ud-btn:hover { background: var(--paper-2); }
+.ud-btn[aria-pressed="true"] { background: var(--sumi); border-color: var(--sumi); color: var(--paper); }
+.ud-onclick__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0; }
+.ud-onclick__bar + * { margin-top: 18px; }
+.ud-onclick__cost { font: 400 11px/1.5 var(--f-mono); color: var(--ink-3); }
+
+/* ------------------------------------------------------------------ the examples */
+
+.ud-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin: 0; }
+.ud-row--top { align-items: flex-start; }
+
+.ud-swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 20px var(--gap); }
+.ud-swatch { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: start; }
+.ud-swatch i { grid-row: 1 / span 4; width: 44px; height: 44px; border: 0.5px solid var(--rule-strong); }
+.ud-swatch b { font: 500 12px/1.4 var(--f-mono); }
+.ud-swatch span { font: 400 11px/1.45 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
+.ud-swatch small { margin-top: 2px; font-size: 0.82rem; line-height: 1.4; color: var(--ink-2); }
+
+.ud-type { list-style: none; margin: 0; padding: 0; }
+.ud-type + .ud-type { margin-top: 28px; padding-top: 22px; border-top: 0.5px solid var(--rule-strong); }
+.ud-type li { display: grid; grid-template-columns: minmax(0, 13em) minmax(0, 1fr); gap: 4px var(--gap); align-items: baseline; padding: 14px 0; border-top: 0.5px solid var(--rule); }
+.ud-type li:first-child { border-top: 0; padding-top: 0; }
+.ud-type__spec { margin: 0; font: 400 11px/1.55 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
+.ud-type__spec b { display: block; font-weight: 500; color: var(--sumi); }
+.ud-type__sample { margin: 0; min-width: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+.ud-type__sample.display { font-size: clamp(3rem, 8.4vw, 8.5rem); }
+.ud-type__sample.dek, .ud-type__sample.cap, .ud-type__sample .kicker { margin: 0; }
+.ud-type__sample.mono { font-size: 0.72rem; }
+.ud-type__sample.cap { font-size: 11px; }
+@container (max-width: 600px) { .ud-type li { grid-template-columns: minmax(0, 1fr); } }
+
+.ud-cols span {
+  display: grid; place-items: end center; height: 72px; padding-bottom: 6px;
+  background: color-mix(in srgb, var(--sumi) 5%, transparent); border-inline: 0.5px solid var(--rule);
+  font: 400 10px/1 var(--f-mono); color: var(--ink-3);
+}
+.ud-spans { margin-top: 8px; }
+.ud-spans span {
+  padding: 8px 10px; border: 0.5px solid var(--rule-strong); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font: 400 10px/1.2 var(--f-mono); color: var(--ink-2);
+}
+.ud-griddemo .cap { margin-top: 14px; }
+
+.ud-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.ud-rules li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 16px; align-items: center; font-size: 0.88rem; color: var(--ink-2); }
+.ud-rules i { display: block; height: 0; }
+@container (max-width: 600px) { .ud-rules li { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
+.ud-corner-box { position: relative; margin: 32px 6px 6px; padding: 18px 20px; border: 0.5px solid var(--rule-strong); }
+.ud-corner-box::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
+.ud-corner-box p { margin: 0; }
+.ud-corner-box .mono { margin-bottom: 8px; color: var(--ink-3); text-transform: none; }
+
+.ud-buttons { display: grid; gap: 22px; }
+.ud-buttons__row { display: grid; gap: 8px; }
+.ud-buttons__row .cap, .ud-buttons .m2l-bar { margin: 0; padding: 0; }
+.ud-buttons .bl-nav { max-width: 360px; }
+.ud-buttons .closing__pick { margin: 0; }
+
+.ud-readout { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: 0 18px; margin: 0; font: 400 12px/1.5 var(--f-mono); }
+.ud-readout dt, .ud-readout dd { margin: 0; padding: 6px 0; border-top: 0.5px solid var(--rule); overflow-wrap: anywhere; }
+.ud-readout dt { color: var(--ink-2); }
+.ud-readout dd { color: var(--sumi); font-weight: 500; }
+@container (max-width: 600px) {
+  .ud-readout { grid-template-columns: minmax(0, 1fr); }
+  .ud-readout dd { border-top: 0; padding-top: 0; }
+}
+.ud-drawn { margin: 28px 0 10px; }
+.ud-scalebar { width: 100%; height: 8px; margin-top: 16px; }
+.ud-scalebar rect { fill: var(--sumi); }
+
+.ud-mark { flex: none; }
+.ud-mark--64 { width: 64px; height: 64px; }
+.ud-mark--32 { width: 32px; height: 32px; }
+.ud-mark--18 { width: 18px; height: 18px; }
+.ud-brand { align-items: center; }
+.ud-roundel-title { margin: 22px 0 0; }
+.ud-row .roundel { font-size: 1.1rem; }
+
+.uidocs .kicker + .kicker { margin-top: 10px; }
+.ud-folio { position: relative; height: 96px; border-bottom: 0.5px solid var(--rule); }
+.ud-folio .cap { margin: 0; }
+.ud-folio .folio { bottom: 14px; }
+
+.ud-refs p { margin: 0; }
+.ud-refs .post__refs { margin-top: 18px; }
+
+.ud-elsewhere figure { margin: 0 !important; }
+.ud-tex p { margin: 0; }
+.ud-tex .tex--block { display: block; }
+.ud-tex .katex-display { margin: 18px 0 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+
+.ud-blocks > * + * { margin-top: 28px; }
+.ud-blocks .sect-label { margin-bottom: 0; }
+.ud-blocks .spec, .ud-blocks .built, .ud-blocks .pull { margin-top: 28px; }
+.ud-blocks .lemma { margin-bottom: 0; }
+.ud-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
+.ud-figbox { aspect-ratio: 3 / 2; background: var(--paper-2); border: 0.5px solid var(--rule); }
+.ud-blocks .endmark { margin-top: 32px; }
+@container (max-width: 600px) {
+  .ud-figs { grid-template-columns: minmax(0, 1fr); }
+  .ud-blocks .endmark { flex-wrap: wrap; row-gap: 8px; }
+}
+
+.ud-glitch { margin: 0; font: 400 clamp(2.4rem, 6vw, 4.8rem)/1 var(--f-display); letter-spacing: -0.01em; }
+.ud-photo img { width: 100%; }
+
+.ud-typer { margin: 0; }
+.ud-heatmap { max-width: 40rem; }
+
+.ud-metro { margin: 0; }
+.ud-metro .m2l-map { position: relative; overflow: hidden; aspect-ratio: 16 / 10; min-height: 260px; }
+.ud-metro .m2l-map__title { left: 20px; top: 16px; }
+.ud-metro .m2l-map__note { right: 14px; bottom: 14px; }
+.ud-metro figcaption { margin-top: 12px; }
+
+.ud-icons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 12px; }
+.ud-icons li { display: flex; align-items: center; gap: 10px; color: var(--sumi); }
+.ud-icons code { background: none !important; padding: 0 !important; font-size: 11px; color: var(--ink-2); }
+
+/* The social specimens: the thread's own classes, without the rule and room it takes under a post. */
+.soc.ud-soc { margin: 0; padding: 0; border: 0; }
+.ud-soc__title { margin: 0; font: 400 clamp(26px, 3.4vw, 38px)/1.1 var(--f-display); }
+.ud-soc__h3 { margin: 10px 0 4px; font: 800 15px/1.2 var(--f-sans); }
+.ud-soc .soc__shape-open { cursor: default; }
+.ud-soc .soc__shapes { margin: 0; max-width: 260px; }
+.ud-soc .soc__list:last-child { margin-bottom: 0; }
+
+.uidocs .life__board { display: block; max-width: 100%; height: auto; background: #000; image-rendering: pixelated; }
+.ud-boards { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.ud-boards figure { margin: 0; }
+.ud-arrow { font: 400 2rem/1 var(--f-display); color: var(--ink-2); }
+.ud-thumbs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 18px 22px; }
+.ud-thumbs li { display: grid; gap: 6px; justify-items: start; }
+.ud-thumbs .cap { margin: 0; }
+
+/* ------------------------------------------------------------------ phone */
+
+@media (max-width: 900px) {
+  .ud-intro, .ud-aside, .ud-nav, .ud-body { grid-column: 1 / -1; }
+  .ud-aside { margin-top: 24px; }
+  /* The index becomes a strip of the groups, held under the running head; it scrolls sideways by itself. */
+  .ud-nav {
+    position: sticky; top: var(--head-h); z-index: 40; max-height: none; overflow: visible;
+    margin: 36px 0 0; padding: 0;
+    background: var(--paper);
+    border-bottom: 0.5px solid var(--rule-strong);
+  }
+  .ud-nav__title, .ud-nav__items { display: none; }
+  .ud-nav .ud-nav__groups { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 12px 0 11px; white-space: nowrap; mask-image: linear-gradient(to right, #000 88%, transparent); }
+  .ud-nav__groups::-webkit-scrollbar { display: none; }
+  .ud-nav__groups > li { padding: 0; border: 0; }
+  .ud-nav__group { color: var(--ink-2); }
+  .ud-nav__group[aria-current] { color: var(--sumi); text-decoration: underline; text-underline-offset: 4px; }
+  .ud-body { margin-top: 28px; }
+  .ud-item { padding: 32px 0 36px; }
+}
+
+@media print {
+  .ud-nav { display: none; }
+  .ud-body { grid-column: 1 / -1; }
+}

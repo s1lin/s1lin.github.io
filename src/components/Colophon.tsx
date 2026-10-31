@@ -143,7 +143,9 @@ export function Colophon() {
               tokens are from <a href="https://lobehub.com/icons">LobeHub Icons</a> (MIT) and belong to their companies
             </dd>
             <dt>Built with</dt>
-            <dd>React, Vite and Tailwind CSS, prerendered at build time</dd>
+            <dd>
+              React, Vite and Tailwind CSS, prerendered at build time; its parts are set out at <a href="/ui/">/ui/</a>
+            </dd>
             <dt>Photographs</dt>
             <dd>
               Cities: Skylines screenshots by the author; under three of them, the same frames re-rendered as

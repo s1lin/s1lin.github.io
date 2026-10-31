@@ -1,5 +1,5 @@
 // Renders each page to HTML at build time and writes it into its file under
-// dist/ (the issue, the blog and its posts), so the pages read without
+// dist/ (the issue, the blog and its posts, the UI docs), so the pages read without
 // JavaScript and the client only hydrates.
 import { readFile, rm, writeFile } from "node:fs/promises";
 

@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import App from "./App.tsx";
 import { BlogPage } from "@/components/Blog";
+import { UiPage } from "@/components/uidocs/UiDocs";
 import { POSTS } from "@/content/posts";
 
 /** The issue as HTML. */
@@ -22,11 +23,21 @@ function renderBlog(slug?: string) {
   );
 }
 
+/** The UI docs at /ui/. */
+function renderUi() {
+  return renderToString(
+    <StrictMode>
+      <UiPage />
+    </StrictMode>,
+  );
+}
+
 /** Every page, by its file under dist/, for scripts/prerender.mjs. */
 export function pages(): Record<string, () => string> {
   return {
     "index.html": render,
     "blog/index.html": () => renderBlog(),
+    "ui/index.html": renderUi,
     ...Object.fromEntries(POSTS.map((p) => [`blog/${p.slug}/index.html`, () => renderBlog(p.slug)])),
   };
 }
