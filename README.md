@@ -2,8 +2,9 @@
 
 s1lin's personal site, set like a magazine issue: **S1LIN Vol. 30, "Architecture"**.
 React 19, TypeScript and Vite, in plain CSS, prerendered to static HTML and
-served by GitHub Pages. Its shared parts are a UI library of their own, served
-from the site as a shadcn registry (see Publishing the UI).
+served by GitHub Pages. Its shared parts are a UI library of their own, with the
+form and data parts a web console needs, served from the site as a shadcn
+registry (see Publishing the UI).
 
 ## Develop
 
@@ -31,7 +32,7 @@ page's first stylesheet declares the cascade layers in order (see Styles).
 | Path | What |
 | --- | --- |
 | `src/App.tsx` | The issue, section by section |
-| `src/ui/` | The UI library: Button, SectionLabel, Kicker, Roundel, Folio, Barcode, Stack, Screen, Plate, Mark, AsciiArt, Tex, five hooks and `cn`, each part with its own stylesheet, and `tokens.css`. Published as the registry; the site imports the same files (`@/ui/…`) |
+| `src/ui/` | The UI library: the issue's parts (Button, SectionLabel, Kicker, Roundel, Folio, Barcode, Stack, Screen, Plate, Mark, AsciiArt, Tex), the console's (see below), six hooks and `cn`, each part with its own stylesheet, and `tokens.css`. Published as the registry; the site imports the same files (`@/ui/…`) |
 | `registry.json`, `scripts/registry.mjs` | The registry's items, and the script that builds them into `public/r/` |
 | `src/components/` | The site's own parts: cover, contents, features, cities, workshop, departures, colophon, the social parts, Life |
 | `src/components/TokensbeatFigures.tsx` | The plan in the Tokensbeat feature, drawn as a building section: apps moving in on the foundation, the models under it |
@@ -120,14 +121,45 @@ with Tailwind or without), then each part and hook with a live example, its
 install command (npm, pnpm, yarn or bun, with Copy; the choice is kept in
 `localStorage`), its usage, props, notes and the files it puts in an app. The
 site's own parts follow in a short list, marked not published. The examples are
-the published files themselves, from `src/ui/`. The inventory is data, in
+the published files themselves, from `src/ui/` (the console's, in
+`src/components/uidocs/console.tsx`, with made-up keys and figures; one
+`<Toaster />` sits at the foot of the page). The inventory is data, in
 `src/components/uidocs/registry.ts`; what each item installs is read from
 `registry.json`. `npm test` checks the two against each other and the source:
 every item is documented, every export of `src/ui/` is named, every prop and token
 exists, every item brings what its files import, the built registry passes
 shadcn's schema, and every exported component in `src/components` is in the list
-of site parts. The docs page never mounts the social parts, so it never signs
-in, posts or calls Aha. The page is prerendered like the issue.
+of site parts. `test/ui-parts.test.ts` holds the parts to the house rules (each
+stylesheet one `@layer components` block, `s1-` classes, `--s1-` tokens, no colour
+of its own, `tokens.css` imported first) and renders each console part on a
+server, as an app would, to check its roles, names and wiring. The docs page
+never mounts the social parts, so it never signs in, posts or calls Aha. The page
+is prerendered like the issue.
+
+### The console's parts
+
+The parts a web console needs (keys, usage, top-ups and orders, a model plaza, an
+account), in the registry's `console` category and in five groups on `/ui/`:
+
+- **Forms**: Field and Fieldset (label, hint and error wired to the control by
+  `useField`), Input, Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
+  segmented row), Switch. Native elements throughout.
+- **Data**: Table (caption, row headers, sort, empty and loading rows, row
+  actions, a sticky header; scrolls inside its frame), Pagination, Badge, Glyph,
+  Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
+  EmptyState.
+- **Overlays**: Dialog (the native `<dialog>`), Menu (the ARIA menu button, in the
+  top layer), Tabs, Toast (`toast()` and one `<Toaster />`).
+- **Feedback**: Notice, Spinner, Skeleton.
+- **Text and keys**: Code, Copy (with a fallback where the Clipboard API is not
+  there), Secret (an API key that is not in the page while hidden),
+  VisuallyHidden; and the hook useOverflow.
+
+They keep to one ink: statuses differ in line, fill and shape (a tick, a
+triangle, a cross, hatching, reverse), never in hue alone. They add no npm
+package beyond `clsx`. The issue's pages never load them: `vite.config.ts` puts
+only the items outside the `console` category in the stylesheet every page
+starts with, and a test fails if a page other than `/ui/` imports one.
 
 ## Styles
 
@@ -193,6 +225,10 @@ S1LIN_REGISTRY=http://127.0.0.1:4192 npm run build && npm run serve -- 4192
 Never deploy a build made with `S1LIN_REGISTRY` set. There is no npm package yet;
 `src/ui/` has no imports from outside itself but `react`, `clsx`, `ascii.rest` and
 `katex`, so one could be cut from it as it is.
+
+A part for an app's console goes in the `console` category (`"categories":
+["console", "<its group>"]`), so it loads with `/ui/` and not with the issue, and
+is documented in one of the console's groups.
 
 
 ## Type
