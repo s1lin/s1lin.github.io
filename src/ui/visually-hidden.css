@@ -1,0 +1,8 @@
+/* VisuallyHidden (visually-hidden.tsx): one pixel, clipped, out of the flow; still in the accessibility tree. */
+@layer components {
+  .s1-visually-hidden {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    margin: -1px; padding: 0; border: 0; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+}

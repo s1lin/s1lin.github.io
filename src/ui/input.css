@@ -1,0 +1,43 @@
+/* Input (input.tsx): the box is the <span>; the <input> inside it has no box of its own. */
+@layer components {
+  .s1-input {
+    display: flex; align-items: stretch; box-sizing: border-box; width: 100%; min-width: 0; min-height: 40px;
+    background: var(--s1-paper); color: var(--s1-ink); border: 1px solid var(--s1-rule-strong);
+    font: 400 16px/1.25 var(--s1-font-sans); cursor: text;
+  }
+  .s1-input:hover { border-color: var(--s1-ink); }
+  .s1-input:focus-within { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-input__control {
+    flex: 1 1 auto; box-sizing: border-box; width: 100%; min-width: 0; margin: 0; padding: 0 12px;
+    border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit;
+    outline: none; appearance: none; color-scheme: var(--s1-scheme);
+  }
+  .s1-input__control::placeholder { color: var(--s1-ink-3); opacity: 1; }
+  .s1-input__control[type="number"], .s1-input__control[inputmode="numeric"], .s1-input__control[inputmode="decimal"] {
+    font-family: var(--s1-font-mono); font-size: 0.94em; font-variant-numeric: tabular-nums;
+  }
+  .s1-input__affix {
+    display: flex; align-items: center; flex: none; padding: 0 0 0 12px;
+    font: 400 12px/1 var(--s1-font-mono); letter-spacing: 0.04em; color: var(--s1-ink-2); white-space: nowrap; cursor: default;
+  }
+  .s1-input__affix + .s1-input__control { padding-left: 8px; }
+  .s1-input__affix--end { padding: 0 12px 0 0; }
+  .s1-input__control:has(+ .s1-input__affix--end) { padding-right: 8px; }
+  /* A button inside the box sits in from its edges. */
+  .s1-input__affix:has(> .s1-btn) { padding: 3px; }
+  .s1-input__affix > .s1-btn { min-height: 100%; }
+
+  .s1-input--sm { min-height: 30px; font-size: 14px; }
+  .s1-input--sm .s1-input__control { padding-inline: 8px; }
+  .s1-input--sm .s1-input__affix { padding-left: 8px; }
+  .s1-input--sm .s1-input__affix--end { padding: 0 8px 0 0; }
+  .s1-input--sm .s1-input__affix:has(> .s1-btn) { padding: 2px; }
+  /* Phones zoom into type under 16px: the small box keeps its height, the type goes to 16px. */
+  @media (pointer: coarse) { .s1-input--sm { font-size: 16px; } }
+
+  /* In error: the line doubles, in the ink; the Field's message says what is wrong. */
+  .s1-input[data-invalid] { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
+  .s1-input[data-readonly] { background: var(--s1-paper-2); }
+  .s1-input[data-disabled] { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-input[data-disabled] .s1-input__control { cursor: not-allowed; }
+}

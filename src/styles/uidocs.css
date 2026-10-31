@@ -9,8 +9,9 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
 @media (max-width: 900px) { html { scroll-padding-top: calc(var(--head-h) + 60px); } }
 
 .uidocs { padding-top: clamp(40px, 6vw, 96px); }
-.uidocs code { font: 400 0.86em/1.45 var(--f-mono); letter-spacing: 0; text-transform: none; }
-.uidocs :not(pre) > code { padding: 0.05em 0.3em; background: var(--paper-2); border-radius: 2px; white-space: nowrap; }
+/* The page's own code, not the parts' in the live examples, which bring their own (no specificity added). */
+.uidocs code:where(:not(.ud-plate__body *)) { font: 400 0.86em/1.45 var(--f-mono); letter-spacing: 0; text-transform: none; }
+.uidocs :not(pre) > code:where(:not(.ud-plate__body *)) { padding: 0.05em 0.3em; background: var(--paper-2); border-radius: 2px; white-space: nowrap; }
 /* In a table a type may be long: there it wraps anywhere. */
 .uidocs .ud-props code { white-space: normal; overflow-wrap: anywhere; }
 
@@ -268,3 +269,32 @@ html { scroll-padding-top: calc(var(--head-h) + 20px); }
   .ud-nav { display: none; }
   .ud-body { grid-column: 1 / -1; }
 }
+
+/* ------------------------------------------------------------------ the console's examples */
+
+.ud-said { margin: 0; }
+.ud-p { margin: 0; max-width: 40em; }
+.ud-stack { display: grid; gap: 14px; justify-items: start; }
+.ud-stack--wide { justify-items: stretch; gap: 22px; }
+.ud-indent { padding-left: 28px; }
+.ud-form { display: grid; gap: 20px; max-width: 34rem; }
+.ud-form .ud-row { gap: 10px; }
+.ud-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 20px 24px; align-items: start; }
+.ud-grid2--top { align-items: stretch; }
+.ud-grid2 > .s1-empty { border: 0.5px dashed var(--rule-strong); }
+.ud-span2 { grid-column: 1 / -1; }
+.ud-narrow { width: auto; max-width: 12rem; }
+.ud-settings { display: grid; max-width: 30rem; }
+.ud-settings > .s1-switch { padding: 12px 0; border-bottom: 0.5px solid var(--rule); }
+.ud-settings > .s1-switch:first-child { border-top: 0.5px solid var(--rule-strong); }
+.ud-settings > .s1-switch:last-child { border-bottom: 0; }
+.ud-narrowbox { max-width: 22rem; padding: 12px; border: 0.5px dashed var(--rule-strong); }
+.ud-badge-line { margin: 0; font-size: 1rem; }
+.ud-glyphs { display: flex; flex-wrap: wrap; gap: 14px 26px; margin: 0; padding: 0; list-style: none; font-size: 1.4rem; }
+.ud-glyphs li { display: flex; align-items: center; gap: 10px; }
+.ud-glyphs .mono { font-size: 11px; color: var(--ink-2); }
+.ud-icon { fill: none; stroke: currentColor; stroke-width: 1.5; }
+.ud-skel { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: 14px; align-items: start; }
+.ud-skel__dot { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--sumi); color: var(--paper); font: 500 14px/1 var(--f-mono); }
+.ud-overflow { max-width: 100%; overflow-x: auto; padding: 10px 12px; border: 0.5px solid var(--rule-strong); background: var(--paper-2); font: 400 13px/1.5 var(--f-mono); white-space: nowrap; }
+.ud-overflow:focus-visible { outline: 2px solid var(--sumi); outline-offset: 2px; }

@@ -1,0 +1,45 @@
+/* Dialog (dialog.tsx): a sheet on a veil of paper, "+" marks at its corners; the body scrolls, the head and foot hold. */
+@layer components {
+  .s1-dialog {
+    box-sizing: border-box; width: min(560px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px);
+    margin: auto; padding: 0; overflow: visible;
+    border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); color: var(--s1-ink);
+    box-shadow: 12px 12px 0 -1px var(--s1-paper-2), 12px 12px 0 0 var(--s1-rule);
+    font: 400 15px/1.5 var(--s1-font-sans);
+  }
+  .s1-dialog--sm { width: min(420px, calc(100vw - 32px)); }
+  .s1-dialog--lg { width: min(760px, calc(100vw - 32px)); }
+  .s1-dialog::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--s1-corners); color: var(--s1-ink); }
+  .s1-dialog::backdrop { background: color-mix(in srgb, var(--s1-paper) 78%, transparent); backdrop-filter: blur(2px); }
+  :root:has(.s1-dialog:modal) { overflow: hidden; }
+
+  .s1-dialog__box { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; max-height: calc(100dvh - 34px); }
+  .s1-dialog__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 14px 14px 20px; border-bottom: 1px solid var(--s1-rule); }
+  .s1-dialog__titles { min-width: 0; }
+  .s1-dialog__title { margin: 0; font: 400 clamp(1.5rem, 1.3rem + 0.8vw, 1.9rem)/1.1 var(--s1-font-display); overflow-wrap: anywhere; }
+  .s1-dialog__desc { margin: 6px 0 0; font: 400 14px/1.5 var(--s1-font-sans); color: var(--s1-ink-2); }
+  .s1-dialog__close {
+    display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; margin: -4px 0 0; padding: 0;
+    border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); color: var(--s1-ink); cursor: pointer;
+  }
+  .s1-dialog__close:hover { border-color: var(--s1-ink); }
+  .s1-dialog__close:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-dialog__close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+  .s1-dialog__body { min-height: 0; padding: 18px 20px; overflow-y: auto; overscroll-behavior: contain; }
+  .s1-dialog__body > :first-child { margin-top: 0; }
+  .s1-dialog__body > :last-child { margin-bottom: 0; }
+  .s1-dialog__foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 12px; padding: 14px 20px 18px; border-top: 1px solid var(--s1-rule); }
+  /* On a phone the buttons share the row, the main one last. */
+  @media (max-width: 480px) {
+    .s1-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); box-shadow: 4px 4px 0 -1px var(--s1-paper-2), 4px 4px 0 0 var(--s1-rule); }
+    .s1-dialog__box { max-height: calc(100dvh - 18px); }
+    .s1-dialog__head { padding: 14px 10px 12px 14px; }
+    .s1-dialog__body { padding: 14px; }
+    .s1-dialog__foot { padding: 12px 14px 14px; }
+    .s1-dialog__foot > * { flex: 1 1 auto; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-dialog[open] { animation: s1-dialog-in 160ms ease-out; }
+  }
+  @keyframes s1-dialog-in { from { opacity: 0; transform: translateY(8px); } }
+}

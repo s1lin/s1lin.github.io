@@ -6,10 +6,12 @@ import { Guide } from "@/components/uidocs/guides";
 import { Code, Example, Files, Inline, Install, Notes, PropsTable } from "@/components/uidocs/parts";
 import { ENTRIES, GROUPS, LISTED, REGISTRY, type Entry } from "@/components/uidocs/registry";
 import { Kicker } from "@/ui/kicker";
+import { Toaster } from "@/ui/toast";
 
 const RUN = "部品 · UI library";
 const BY_GROUP = GROUPS.map((g) => ({ ...g, entries: ENTRIES.filter((e) => e.group === g.id) }));
 const PARTS = manifest.items.filter((i) => i.type === "registry:ui").length;
+const CONSOLE = manifest.items.filter((i) => i.type === "registry:ui" && i.categories?.includes("console")).length;
 const HOOKS = manifest.items.filter((i) => i.type === "registry:hook").length;
 
 /** One item: what it is, a live example, the command that adds it, how to use it, its props, what to know, its files. */
@@ -183,15 +185,15 @@ export function UiPage() {
                 The parts, <em>to take with you.</em>
               </h1>
               <p className="dek">
-                The parts this site is set with, published as a component registry: one command adds a part to your app,
-                its source and its own stylesheet, and the copy is yours. Plain CSS in tokens you can restyle; no Tailwind
-                needed, and none in the way if you have it.
+                The parts this site is set with, and the parts a console needs (forms, tables, dialogs, keys), published as
+                a component registry: one command adds a part to your app, its source and its own stylesheet, and the copy
+                is yours. Plain CSS in tokens you can restyle; no Tailwind needed, and none in the way if you have it.
               </p>
             </header>
             <div className="ud-aside">
               <p>
-                <b>{manifest.items.length} items</b>: {PARTS} parts, {HOOKS} hooks, <code>cn</code> and the tokens, each with a
-                live example on this page.
+                <b>{manifest.items.length} items</b>: {PARTS} parts ({CONSOLE} of them for a console), {HOOKS} hooks,{" "}
+                <code>cn</code> and the tokens, each with a live example on this page.
               </p>
               <p>
                 <code>npx shadcn@latest add @s1lin/button</code>, once <code>@s1lin</code> is in your components.json; the
@@ -232,6 +234,7 @@ export function UiPage() {
           </div>
         </section>
       </main>
+      <Toaster />
     </>
   );
 }

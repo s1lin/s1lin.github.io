@@ -1,0 +1,24 @@
+/* Stat and StatGroup (stat.tsx). The group draws its hairlines as each stat's left and top edge, clipped at the group's own. */
+@layer components {
+  .s1-stat { display: grid; align-content: start; gap: 6px; min-width: 0; margin: 0; }
+  .s1-stat__label { margin: 0; font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); }
+  .s1-stat__value {
+    margin: 0; font: 400 clamp(2rem, 1.7rem + 1.2vw, 2.75rem)/1.05 var(--s1-font-display); color: var(--s1-ink);
+    font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.01em; overflow-wrap: anywhere;
+  }
+  .s1-stat__value .s1-skeleton { margin: 0.12em 0; }
+  .s1-stat__unit { margin-left: 0.4em; font: 400 12px/1 var(--s1-font-mono); letter-spacing: 0.06em; color: var(--s1-ink-2); }
+  .s1-stat__delta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; margin: 0; font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink); font-variant-numeric: tabular-nums; }
+  .s1-stat__note { color: var(--s1-ink-2); }
+  .s1-stat__trend { display: inline-block; flex: none; width: 0.66em; height: 0.58em; background: currentColor; }
+  .s1-stat__trend--up { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .s1-stat__trend--down { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .s1-stat__trend--flat { clip-path: inset(38% 0); }
+
+  .s1-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); overflow: clip;
+    border-top: 1px solid var(--s1-rule-strong); border-bottom: 1px solid var(--s1-rule);
+  }
+  .s1-stats > .s1-stat { padding: 16px 18px 18px; box-shadow: -1px 0 0 var(--s1-rule), 0 -1px 0 var(--s1-rule); }
+  @media (forced-colors: active) { .s1-stat__trend { background: CanvasText; forced-color-adjust: none; } }
+}

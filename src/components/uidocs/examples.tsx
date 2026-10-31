@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import * as typewriter from "ascii.rest/pieces/typewriter";
+import * as demos from "@/components/uidocs/console";
 import { DarkDemo, Tokens } from "@/components/uidocs/foundations";
 import { AsciiArt } from "@/ui/ascii-art";
 import { Barcode } from "@/ui/barcode";
@@ -212,6 +213,65 @@ export function Demo({ id }: { id: string }) {
         </div>
       );
 
+    case "field":
+      return <demos.FieldDemo />;
+    case "input":
+      return <demos.InputDemo />;
+    case "textarea":
+      return <demos.TextareaDemo />;
+    case "select":
+      return <demos.SelectDemo />;
+    case "checkbox":
+      return <demos.CheckboxDemo />;
+    case "radio-group":
+      return <demos.RadioDemo />;
+    case "switch":
+      return <demos.SwitchDemo />;
+
+    case "table":
+      return <demos.TableDemo />;
+    case "pagination":
+      return <demos.PaginationDemo />;
+    case "badge":
+      return <demos.BadgeDemo />;
+    case "glyph":
+      return <demos.GlyphDemo />;
+    case "stat":
+      return <demos.StatDemo />;
+    case "meter":
+      return <demos.MeterDemo />;
+    case "description-list":
+      return <demos.DescriptionDemo />;
+    case "panel":
+      return <demos.PanelDemo />;
+    case "empty-state":
+      return <demos.EmptyDemo />;
+
+    case "dialog":
+      return <demos.DialogDemo />;
+    case "menu":
+      return <demos.MenuDemo />;
+    case "tabs":
+      return <demos.TabsDemo />;
+    case "toast":
+      return <demos.ToastDemo />;
+
+    case "notice":
+      return <demos.NoticeDemo />;
+    case "spinner":
+      return <demos.SpinnerDemo />;
+    case "skeleton":
+      return <demos.SkeletonDemo />;
+
+    case "code":
+      return <demos.CodeDemo />;
+    case "copy":
+      return <demos.CopyDemo />;
+    case "secret":
+      return <demos.SecretDemo />;
+    case "visually-hidden":
+      return <demos.HiddenDemo />;
+
     case "use-near":
       return <NearDemo />;
     case "use-media":
@@ -222,6 +282,8 @@ export function Demo({ id }: { id: string }) {
       return <HydratedDemo />;
     case "use-scale":
       return <ScaleDemo />;
+    case "use-overflow":
+      return <demos.OverflowDemo />;
     case "cn":
       return <Readout label={'cn("s1-btn", false && "is-on", ["s1-btn--go"], { "s1-btn--sm": true })'} value={`"${cn("s1-btn", false, ["s1-btn--go"], { "s1-btn--sm": true })}"`} />;
     default:

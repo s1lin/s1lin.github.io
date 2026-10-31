@@ -1,0 +1,16 @@
+/* Panel (panel.tsx): a hairline frame; with marks, the Plate's "+" at each corner. */
+@layer components {
+  .s1-panel { position: relative; box-sizing: border-box; min-width: 0; margin: 0; border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); color: var(--s1-ink); }
+  .s1-panel--marks::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--s1-corners); }
+  .s1-panel__head {
+    display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 20px;
+    padding: 16px clamp(14px, 2.4vw, 22px) 14px; border-bottom: 1px solid var(--s1-rule);
+  }
+  .s1-panel__titles { min-width: 0; flex: 1 1 14em; }
+  .s1-panel__title { margin: 0; font: 400 clamp(1.45rem, 1.25rem + 0.8vw, 1.85rem)/1.1 var(--s1-font-display); letter-spacing: -0.005em; overflow-wrap: anywhere; }
+  .s1-panel__desc { margin: 4px 0 0; font: 400 14px/1.5 var(--s1-font-sans); color: var(--s1-ink-2); }
+  .s1-panel__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .s1-panel__body { padding: clamp(14px, 2.4vw, 22px); min-width: 0; }
+  .s1-panel--flush .s1-panel__body { padding: 0; }
+  .s1-panel__foot { padding: 12px clamp(14px, 2.4vw, 22px); border-top: 1px solid var(--s1-rule); font: 400 13px/1.5 var(--s1-font-sans); color: var(--s1-ink-2); }
+}

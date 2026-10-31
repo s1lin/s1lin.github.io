@@ -1,0 +1,6 @@
+/* Copy (copy.tsx): the Button, wide enough for "Copied" so it does not jump. */
+@layer components {
+  .s1-copy { display: inline-flex; flex: none; }
+  .s1-copy > .s1-btn--plain, .s1-copy > .s1-btn--go { min-width: 9ch; }
+  .s1-copy[data-state="copied"] > .s1-btn--plain { background: var(--s1-ink); border-color: var(--s1-ink); color: var(--s1-paper); }
+}

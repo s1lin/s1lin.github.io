@@ -1,0 +1,37 @@
+/* Switch (switch.tsx): the <input role="switch"> lies over the drawn track, invisible, and takes the clicks. */
+@layer components {
+  .s1-switch { display: grid; gap: 2px; min-width: 0; }
+  .s1-switch__row {
+    display: inline-flex; align-items: flex-start; gap: 10px; width: fit-content; max-width: 100%; min-height: 24px;
+    font: 400 15px/1.45 var(--s1-font-sans); color: var(--s1-ink); cursor: pointer;
+  }
+  .s1-switch__control { position: relative; flex: none; width: 36px; height: 20px; margin-top: 1px; }
+  .s1-switch__input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+  .s1-switch__track {
+    position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; border-radius: 999px;
+    background: var(--s1-paper); border: 1px solid var(--s1-rule-strong);
+  }
+  .s1-switch__track::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--s1-ink-2); transition: transform 140ms ease;
+  }
+  .s1-switch__row:hover .s1-switch__track { border-color: var(--s1-ink); }
+  .s1-switch__input:checked + .s1-switch__track { background: var(--s1-ink); border-color: var(--s1-ink); }
+  .s1-switch__input:checked + .s1-switch__track::after { background: var(--s1-paper); transform: translateX(16px); }
+  .s1-switch__input:focus-visible + .s1-switch__track { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-switch__label { min-width: 0; overflow-wrap: anywhere; }
+  .s1-switch__hint { display: block; margin: 0 0 0 46px; font: 400 13px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); }
+
+  .s1-switch--reverse .s1-switch__row { flex-direction: row-reverse; justify-content: space-between; width: 100%; }
+  .s1-switch--reverse .s1-switch__hint { margin: 0 46px 0 0; }
+
+  .s1-switch--disabled .s1-switch__row { color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-switch__input:disabled + .s1-switch__track { border-style: dashed; border-color: var(--s1-ink-3); }
+  .s1-switch__input:disabled:checked + .s1-switch__track { background: var(--s1-ink-3); border-style: solid; }
+
+  @media (prefers-reduced-motion: reduce) { .s1-switch__track::after { transition: none; } }
+  @media (forced-colors: active) {
+    .s1-switch__input { opacity: 1; }
+    .s1-switch__track { display: none; }
+  }
+}

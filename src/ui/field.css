@@ -1,0 +1,24 @@
+/* Field and Fieldset (field.tsx): a mono label over the control, the error and the hint under it. */
+@layer components {
+  .s1-field { display: grid; gap: 6px; min-width: 0; margin: 0; }
+  .s1-field__top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+  .s1-field__label {
+    padding: 0; font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--s1-ink-2); overflow-wrap: anywhere;
+  }
+  .s1-field__req { margin-left: 0.3em; color: var(--s1-ink); }
+  .s1-field__aside { font: 400 11px/1.4 var(--s1-font-mono); letter-spacing: 0.02em; color: var(--s1-ink-2); font-variant-numeric: tabular-nums; }
+  .s1-field__hint, .s1-field__error { margin: 0; font: 400 13px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); overflow-wrap: anywhere; }
+  .s1-field__error { display: flex; align-items: baseline; gap: 7px; font-weight: 500; color: var(--s1-ink); }
+  .s1-field__error .s1-glyph { width: 0.72em; height: 0.72em; }
+  .s1-field--disabled .s1-field__label { color: var(--s1-ink-3); }
+
+  .s1-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+  /* A floated legend sits in the flow like any block, so the gaps below hold in every browser. */
+  .s1-fieldset > legend { float: left; width: 100%; margin: 0 0 8px; }
+  .s1-fieldset > legend + * { clear: both; }
+  .s1-fieldset > .s1-field__hint { margin-bottom: 10px; }
+  .s1-fieldset > .s1-field__error { margin-top: 10px; }
+  .s1-fieldset__body { display: grid; gap: 10px; min-width: 0; }
+  .s1-fieldset:disabled > legend { color: var(--s1-ink-3); }
+}

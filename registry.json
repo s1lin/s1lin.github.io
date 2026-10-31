@@ -360,6 +360,762 @@
       ]
     },
     {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "A label, one control, a hint and an error, wired: the label's for, aria-describedby and aria-invalid; and Fieldset, the same for a group of checkboxes or radios.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/field.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/field.tsx"
+        },
+        {
+          "path": "src/ui/field.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/field.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "A native text box of any text type (text, number, search, password) in a hairline box, two sizes, words or a button inside it before or after; wired to the Field around it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/field.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/input.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/input.tsx"
+        },
+        {
+          "path": "src/ui/input.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/input.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "description": "Lines of text in the Input's box, dragged taller or growing as it fills; wired to the Field around it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/field.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/textarea.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/textarea.tsx"
+        },
+        {
+          "path": "src/ui/textarea.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/textarea.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "The native <select> in the Input's box with a drawn chevron, a placeholder, two sizes; wired to the Field around it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/field.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/select.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/select.tsx"
+        },
+        {
+          "path": "src/ui/select.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/select.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "A native checkbox in a drawn box, a tick when on and a bar when some are, with a label and a hint.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/checkbox.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/checkbox.tsx"
+        },
+        {
+          "path": "src/ui/checkbox.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/checkbox.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "RadioGroup",
+      "description": "One choice of a few: native radios in a fieldset that is the radiogroup, as a list, as cards (an amount, a plan) or as a segmented row (24h · 7d · 30d).",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/field.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/radio-group.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/radio-group.tsx"
+        },
+        {
+          "path": "src/ui/radio-group.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/radio-group.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "On or off at once: a native checkbox with role=\"switch\", drawn as a track and a thumb, with a label and a hint.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/switch.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/switch.tsx"
+        },
+        {
+          "path": "src/ui/switch.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/switch.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "A data table: caption, column and row headers, numbers in mono at the end, an empty row, rows of bars while loading, sortable headers, row actions, a sticky header; scrolls sideways inside its frame.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/skeleton.json",
+        "https://s1lin.tokensbeat.com/r/use-overflow.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/table.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/table.tsx"
+        },
+        {
+          "path": "src/ui/table.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/table.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "Pages of a long list: Previous, Next, the ends, this page and its neighbours, as buttons or links; \"Page 3 of 12\" in a narrow box.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/pagination.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/pagination.tsx"
+        },
+        {
+          "path": "src/ui/pagination.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/pagination.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "A status in a word: neutral, info, ok, warn, bad, told apart by line, fill and shape in one ink, never by hue alone.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/badge.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/badge.tsx"
+        },
+        {
+          "path": "src/ui/badge.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/badge.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "glyph",
+      "type": "registry:ui",
+      "title": "Glyph",
+      "description": "A status as a shape drawn in CSS (a dash, a ring, a tick, a triangle, a cross), in the ink around it, for the words beside it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/glyph.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/glyph.tsx"
+        },
+        {
+          "path": "src/ui/glyph.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/glyph.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "stat",
+      "type": "registry:ui",
+      "title": "Stat",
+      "description": "A figure that matters: a label, the number large in the display face, its change with a triangle; and StatGroup, a row of them with hairlines between.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/skeleton.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/stat.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/stat.tsx"
+        },
+        {
+          "path": "src/ui/stat.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/stat.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "meter",
+      "type": "registry:ui",
+      "title": "Meter",
+      "description": "How much of a limit is used (a quota, a budget): a bar in ink, hatched past a warning share, doubled once over; role=\"meter\".",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/meter.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/meter.tsx"
+        },
+        {
+          "path": "src/ui/meter.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/meter.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "description-list",
+      "type": "registry:ui",
+      "title": "DescriptionList",
+      "description": "Facts as names and values in a <dl>: names in mono caps beside their values, name over value in a narrow box.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/description-list.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/description-list.tsx"
+        },
+        {
+          "path": "src/ui/description-list.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/description-list.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "panel",
+      "type": "registry:ui",
+      "title": "Panel",
+      "description": "A block of a console page in a hairline frame: a heading with its actions, the body, a footer; a named region.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/panel.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/panel.tsx"
+        },
+        {
+          "path": "src/ui/panel.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/panel.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "empty-state",
+      "type": "registry:ui",
+      "title": "EmptyState",
+      "description": "Nothing here yet: an empty frame marked at its corners, a line in the display face, what to do next.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/empty-state.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/empty-state.tsx"
+        },
+        {
+          "path": "src/ui/empty-state.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/empty-state.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A modal dialog on the native <dialog>: the page behind inert, Esc and the veil to close, focus in and back, a heading, a body, actions.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/dialog.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/dialog.tsx"
+        },
+        {
+          "path": "src/ui/dialog.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/dialog.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
+      "name": "menu",
+      "type": "registry:ui",
+      "title": "Menu",
+      "description": "A button that opens a list of actions, the ARIA menu button: arrows, Home, End, letters, Esc; in the top layer, so no frame clips it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/menu.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/menu.tsx"
+        },
+        {
+          "path": "src/ui/menu.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/menu.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Panels behind a row of tabs: one tab stop, the arrow keys between tabs, automatic or manual activation; the row scrolls on a phone.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/tabs.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/tabs.tsx"
+        },
+        {
+          "path": "src/ui/tabs.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/tabs.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "toast(\"Saved\") from anywhere, shown by one <Toaster />: a polite live region, five seconds unless the pointer or focus is on it, an action that waits.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/toast.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/toast.tsx"
+        },
+        {
+          "path": "src/ui/toast.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/toast.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ],
+      "docs": "Put <Toaster /> on the page once, at the root of your app; then call toast() from anywhere."
+    },
+    {
+      "name": "notice",
+      "type": "registry:ui",
+      "title": "Notice",
+      "description": "A message in the page where it applies: info, ok, warn or bad, a heavy edge in ink, a title, words, an action, a close button.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/notice.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/notice.tsx"
+        },
+        {
+          "path": "src/ui/notice.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/notice.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "feedback"
+      ]
+    },
+    {
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "description": "Waiting, for a moment: a hairline ring with a quarter in ink, turning; a status a screen reader reads.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/spinner.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/spinner.tsx"
+        },
+        {
+          "path": "src/ui/spinner.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/spinner.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "feedback"
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "Where something is still coming: bars in the shape of the text or box it will be, a band passing over them.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/skeleton.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/skeleton.tsx"
+        },
+        {
+          "path": "src/ui/skeleton.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/skeleton.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "feedback"
+      ]
+    },
+    {
+      "name": "code",
+      "type": "registry:ui",
+      "title": "Code",
+      "description": "Code in mono, inline or a block with a bar for its name and Copy; a long line scrolls inside the block.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/copy.json",
+        "https://s1lin.tokensbeat.com/r/use-overflow.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/code.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/code.tsx"
+        },
+        {
+          "path": "src/ui/code.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/code.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "text"
+      ]
+    },
+    {
+      "name": "copy",
+      "type": "registry:ui",
+      "title": "Copy",
+      "description": "A button that copies a value and says so, to the eye and to a screen reader; falls back to the copy command where the clipboard is unavailable.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/copy.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/copy.tsx"
+        },
+        {
+          "path": "src/ui/copy.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/copy.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "text"
+      ]
+    },
+    {
+      "name": "secret",
+      "type": "registry:ui",
+      "title": "Secret",
+      "description": "An API key as dots with its ends showing, Show and Copy; the value is not in the page while hidden.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json",
+        "https://s1lin.tokensbeat.com/r/copy.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/secret.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/secret.tsx"
+        },
+        {
+          "path": "src/ui/secret.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/secret.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "text"
+      ]
+    },
+    {
+      "name": "visually-hidden",
+      "type": "registry:ui",
+      "title": "VisuallyHidden",
+      "description": "Words for screen readers only: off the screen, still read.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/visually-hidden.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/visually-hidden.tsx"
+        },
+        {
+          "path": "src/ui/visually-hidden.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/visually-hidden.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "text"
+      ]
+    },
+    {
       "name": "use-near",
       "type": "registry:hook",
       "title": "useNear",
@@ -442,6 +1198,24 @@
       ],
       "categories": [
         "hooks"
+      ]
+    },
+    {
+      "name": "use-overflow",
+      "type": "registry:hook",
+      "title": "useOverflow",
+      "description": "True while an element is wider than its box, so its content scrolls sideways; false on the server. Make the box focusable only then.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/use-overflow.ts",
+          "type": "registry:hook",
+          "target": "@components/s1lin/use-overflow.ts"
+        }
+      ],
+      "categories": [
+        "hooks",
+        "console"
       ]
     }
   ]
