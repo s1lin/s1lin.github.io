@@ -298,6 +298,10 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
   padding-top: clamp(10px, 1.6vw, 22px);
   margin-left: -0.04em;
   white-space: nowrap;
+  /* Set in a fallback face before Inter Tight arrives (or where it never does), the
+     one unbreakable line runs wider than the screen: cut it at the frame instead of
+     widening the page. Inter Tight itself stops short of the edge. */
+  overflow-x: clip;
 }
 /* the one, cut out of the masthead */
 .masthead__one { color: transparent; -webkit-text-stroke: max(1px, 0.004em) var(--sumi); }
