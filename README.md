@@ -39,6 +39,7 @@ without JavaScript and the client only hydrates them.
 | `src/components/AsciiArt.tsx` | [ascii.rest](https://ascii.rest) pieces: banner, typewriter, skyline, the departures board (inked in airport colours in `Departures.tsx`), and the alpine dawn and Tokyo rain that take turns at the end (`Colophon.tsx`) |
 | `src/styles/site.css` | The design system: paper and ink tokens, the page frame, grid, type |
 | `src/index.css` | Tailwind theme and utilities over `site.css` (no preflight) |
+| `src/styles/fonts.css`, `scripts/fonts.mjs` | The typefaces, served from this site; see Type below |
 | `public/assets/img/` | Photographs and screenshots, WebP |
 | `blog/`, `src/blog.tsx`, `src/components/Blog.tsx` | The blog at `/blog/`, outside the issue: its index, and a page per post |
 | `src/content/posts/` | The posts, newest first in `index.ts`, one file each |
@@ -106,6 +107,35 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 Tailwind utilities win over `site.css`. The issue's colours and fonts are available
 as `bg-paper`, `text-sumi`, `text-ink-2`, `font-mincho` and so on.
 
+## Type
+
+The typefaces are served from this site, not from Google Fonts: Instrument
+Serif, Inter Tight, JetBrains Mono, Shippori Mincho B1, Zen Kaku Gothic New and
+Noto Serif SC. They come from [Fontsource](https://fontsource.org)'s npm packages
+(pinned in `package.json`), which carry Google Fonts' own woff2 files cut into
+Google's unicode-range slices: about 120 per Japanese face and 100 for Noto
+Serif SC, so a page fetches only the slices that hold characters it shows, and
+Chinese in a new post needs no list of characters.
+
+`src/styles/fonts.css`, imported by `src/index.css` and so by every page, holds
+the `@font-face` rules, written by `scripts/fonts.mjs` with the weights and
+styles the styles use. Vite copies the files into `dist/assets/` under hashed
+names (`?no-inline` stops it pasting the smallest into the stylesheet), and a
+browser fetches one only when a page shows a character in its range. After
+changing a package's version, or a weight in the list at the top of the script:
+
+```bash
+node scripts/fonts.mjs   # rewrites src/styles/fonts.css and public/assets/OFL.txt
+```
+
+The fonts are under the SIL Open Font License; the script writes each one's
+copyright notice and the licence into `public/assets/OFL.txt`, which is served
+beside the files and linked from the colophon. The HTML shells (`index.html`,
+`blog/`, `life/`) load no fonts of their own; a new page gets them by importing
+`src/index.css`. The ascii.rest pieces take their line and block characters
+from "ascii.rest mono", ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept in
+`src/styles/` since Google's JetBrains Mono leaves those characters out.
+
 ## Blog
 
 `/blog/` holds longer pieces, outside the issue, each in the language it was
@@ -135,10 +165,6 @@ desktop, break it into steps with `aligned` so it fits the column.
 Pictures that belong to someone else are not rehosted: `<Elsewhere>` (in
 `src/components/bits.tsx`) names each and links to where it can be seen, with
 the figure's caption.
-
-The issue loads Noto Serif SC only for the characters it shows. When a post's
-title is Chinese, add its characters to the `text=` list of that font in the
-root `index.html`, or the title falls back to a system font in the contents.
 
 ## Metro data
 
@@ -271,5 +297,6 @@ settings, set **Pages → Build and deployment → Source** to **GitHub Actions*
 
 Canvas UI by David Haz (MIT + Commons Clause); its Frost is adapted from
 [frozen](https://github.com/takuma-hmng8/frozen) by takuma-hmng8. ascii.rest by
-@bas3line (MIT).
+@bas3line (MIT). The typefaces are under the SIL Open Font License 1.1, with
+their copyright notices in `public/assets/OFL.txt`.
 Cities: Skylines is a trademark of Paradox Interactive.

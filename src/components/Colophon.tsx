@@ -113,7 +113,10 @@ export function Colophon() {
               </span>
             </dd>
             <dt>Type</dt>
-            <dd>Instrument Serif, Inter Tight, JetBrains Mono, Shippori Mincho B1 and Zen Kaku Gothic New, from Google Fonts</dd>
+            <dd>
+              Instrument Serif, Inter Tight, JetBrains Mono, Shippori Mincho B1, Zen Kaku Gothic New and, for Chinese,
+              Noto Serif SC, served from this site under the <a href="/assets/OFL.txt">SIL Open Font License</a>
+            </dd>
             <dt>ASCII</dt>
             <dd>
               <a href="https://ascii.rest">ascii.rest</a> by @bas3line (MIT): the cover banner, the typewriter, the
