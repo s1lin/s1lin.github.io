@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { cn } from "./cn";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./dialog.css";
 
@@ -27,7 +28,7 @@ type Props = {
   dismissible?: boolean;
   /** The element to focus on opening. By default the first with `data-autofocus`, else the browser's choice: the first that takes focus. */
   initialFocus?: RefObject<HTMLElement | null>;
-  /** The close button's name. */
+  /** The close button's name; "Close" from S1Words by default. */
   closeLabel?: string;
   className?: string;
 };
@@ -39,7 +40,8 @@ type Props = {
  * that takes focus) and back to where it was on closing. A heading names it
  * and the description describes it; the page behind stops scrolling.
  */
-export function Dialog({ open, onClose, title, description, children, actions, size = "md", dismissible = true, initialFocus, closeLabel = "Close", className }: Props) {
+export function Dialog({ open, onClose, title, description, children, actions, size = "md", dismissible = true, initialFocus, closeLabel, className }: Props) {
+  const w = useS1Words();
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
   const back = useRef<HTMLElement | null>(null);
@@ -132,7 +134,7 @@ export function Dialog({ open, onClose, title, description, children, actions, s
               )}
             </div>
             {dismissible && (
-              <button type="button" className="s1-dialog__close" aria-label={closeLabel} onClick={onClose}>
+              <button type="button" className="s1-dialog__close" aria-label={closeLabel ?? w.close} onClick={onClose}>
                 <svg viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" />
                 </svg>

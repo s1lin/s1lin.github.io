@@ -4,6 +4,7 @@ import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type Reac
 import { Button, type ButtonSize, type ButtonVariant } from "./button";
 import { cn } from "./cn";
 import { Glyph } from "./glyph";
+import { useS1Words } from "./words";
 import "./tokens.css";
 import "./menu.css";
 
@@ -29,7 +30,7 @@ type Props = {
   items: MenuItem[];
   /** What the button shows; three dots in a square button when left out. */
   children?: ReactNode;
-  /** The button's name, needed when it shows no words: "Actions for prod-key". */
+  /** The button's name: "Actions for prod-key". Without words or a name the three dots are named "More actions" from S1Words. */
   label?: string;
   /** Which edge of the button the menu lines up with. */
   align?: "start" | "end";
@@ -52,6 +53,7 @@ const canPop = (el: HTMLElement) => typeof el.showPopover === "function";
  */
 export function Menu({ items, children, label, align = "start", variant = children === undefined ? "icon" : "plain", size = "md", className }: Props) {
   const id = useId();
+  const w = useS1Words();
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLSpanElement>(null);
@@ -173,7 +175,7 @@ export function Menu({ items, children, label, align = "start", variant = childr
         id={`${id}-button`}
         variant={variant}
         size={size}
-        aria-label={label}
+        aria-label={label ?? (children === undefined ? w.moreActions : undefined)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={`${id}-menu`}

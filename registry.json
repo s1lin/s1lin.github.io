@@ -557,14 +557,15 @@
       "name": "table",
       "type": "registry:ui",
       "title": "Table",
-      "description": "A data table: caption, column and row headers, numbers in mono at the end, an empty row, rows of bars while loading, sortable headers, row actions, a sticky header; scrolls sideways inside its frame.",
+      "description": "A data table: caption, column and row headers, numbers in mono at the end, an empty row, rows of bars while loading, sortable headers, row actions, a sticky header, rows in groups that open and close (Expand all), a fit mode that never outgrows its frame; otherwise scrolls sideways inside its frame.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/skeleton.json",
         "https://s1lin.tokensbeat.com/r/use-overflow.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -591,7 +592,8 @@
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
-        "https://s1lin.tokensbeat.com/r/cn.json"
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -675,7 +677,8 @@
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/skeleton.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -810,7 +813,8 @@
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
-        "https://s1lin.tokensbeat.com/r/cn.json"
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -839,7 +843,8 @@
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/button.json",
-        "https://s1lin.tokensbeat.com/r/glyph.json"
+        "https://s1lin.tokensbeat.com/r/glyph.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -896,7 +901,8 @@
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/button.json",
         "https://s1lin.tokensbeat.com/r/glyph.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -926,7 +932,8 @@
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/glyph.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -954,7 +961,8 @@
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -1010,7 +1018,8 @@
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/copy.json",
-        "https://s1lin.tokensbeat.com/r/use-overflow.json"
+        "https://s1lin.tokensbeat.com/r/use-overflow.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -1039,7 +1048,8 @@
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/button.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -1069,7 +1079,8 @@
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/button.json",
         "https://s1lin.tokensbeat.com/r/copy.json",
-        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -1108,6 +1119,24 @@
           "path": "src/ui/visually-hidden.css",
           "type": "registry:file",
           "target": "@components/s1lin/visually-hidden.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "text"
+      ]
+    },
+    {
+      "name": "words",
+      "type": "registry:ui",
+      "title": "S1Words",
+      "description": "The words the parts say for themselves, in English, and a provider that gives them in your language: Copy, Close, Previous and Next, Show and Hide, Loading, and what a screen reader hears; a part's own prop still wins.",
+      "author": "s1lin",
+      "files": [
+        {
+          "path": "src/ui/words.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/words.tsx"
         }
       ],
       "categories": [
