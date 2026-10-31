@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 /**
  * True while an element is wider than its box: its content scrolls sideways.
@@ -11,8 +11,14 @@ import { useEffect, useState, type RefObject } from "react";
  */
 export function useOverflow(ref: RefObject<HTMLElement | null>) {
   const [over, setOver] = useState(false);
+  // The box being watched. The ref can point at a box only after a later render, or at a new one (a Code
+  // turned into a block), so look again after every render and move the observers when it changed.
+  const watched = useRef<{ el: HTMLElement; stop: () => void } | null>(null);
   useEffect(() => {
     const el = ref.current;
+    if (watched.current?.el === el) return;
+    watched.current?.stop();
+    watched.current = null;
     if (!el || !("ResizeObserver" in window)) return;
     const check = () => setOver(el.scrollWidth > el.clientWidth + 1);
     const ro = new ResizeObserver(check);
@@ -21,10 +27,14 @@ export function useOverflow(ref: RefObject<HTMLElement | null>) {
     // new text in the same box resizes nothing: watch the content too
     const mo = new MutationObserver(check);
     mo.observe(el, { childList: true, subtree: true, characterData: true });
-    return () => {
-      ro.disconnect();
-      mo.disconnect();
+    watched.current = {
+      el,
+      stop: () => {
+        ro.disconnect();
+        mo.disconnect();
+      },
     };
-  }, [ref]);
+  });
+  useEffect(() => () => watched.current?.stop(), []);
   return over;
 }
