@@ -2,14 +2,16 @@
 
 s1lin's personal site, set like a magazine issue: **S1LIN Vol. 30, "Architecture"**.
 React 19, TypeScript and Vite, in plain CSS, prerendered to static HTML and
-served by GitHub Pages.
+served by GitHub Pages. Its shared parts are a UI library of their own, served
+from the site as a shadcn registry (see Publishing the UI).
 
 ## Develop
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm run build    # type-check, build, prerender into dist/
+npm run build    # build the registry, type-check, build, prerender into dist/
+npm run registry # build the registry alone, into public/r/
 npm run preview  # serve dist/
 npm run serve    # serve dist/ with Brick Locator at /brick-locator/, as Pages does
 npm run lint
@@ -21,14 +23,17 @@ npm run lint
 
 `npm run build` renders every page to HTML (`src/entry-server.tsx`,
 `scripts/prerender.mjs`): the issue, the blog and each post, so they read
-without JavaScript and the client only hydrates them.
+without JavaScript and the client only hydrates them. It also checks that each
+page's first stylesheet declares the cascade layers in order (see Styles).
 
 ## Layout
 
 | Path | What |
 | --- | --- |
 | `src/App.tsx` | The issue, section by section |
-| `src/components/` | Cover, contents, features, cities, workshop, departures, colophon |
+| `src/ui/` | The UI library: Button, SectionLabel, Kicker, Roundel, Folio, Barcode, Stack, Screen, Plate, Mark, AsciiArt, Tex, five hooks and `cn`, each part with its own stylesheet, and `tokens.css`. Published as the registry; the site imports the same files (`@/ui/…`) |
+| `registry.json`, `scripts/registry.mjs` | The registry's items, and the script that builds them into `public/r/` |
+| `src/components/` | The site's own parts: cover, contents, features, cities, workshop, departures, colophon, the social parts, Life |
 | `src/components/TokensbeatFigures.tsx` | The plan in the Tokensbeat feature, drawn as a building section: apps moving in on the foundation, the models under it |
 | `src/components/canvasui/` | Canvas UI effects (Ripple, Magnify, Frost, Glitch, ParticleScroll), patched; see below |
 | `src/components/effects.tsx` | Where those effects meet the photographs and section titles, and the frost over the page |
@@ -36,16 +41,17 @@ without JavaScript and the client only hydrates them.
 | `public/data/metro/` | Those networks, from OpenStreetMap (`scripts/metro-data.py`) |
 | `src/components/GitHubHeatmap.tsx` | The GitHub heatmap under the contents list: a year of contributions, a square a day |
 | `src/content/github.json` | Its counts, from GitHub (`scripts/github-data.py`); see below |
-| `src/components/AsciiArt.tsx` | [ascii.rest](https://ascii.rest) pieces: banner, typewriter, skyline, the departures board (inked in airport colours in `Departures.tsx`), and the alpine dawn and Tokyo rain that take turns at the end (`Colophon.tsx`) |
-| `src/styles/site.css` | The design system: paper and ink tokens, the page frame, grid, type |
-| `src/index.css` | The stylesheet every page starts from: the cascade layers, the fonts and `site.css` |
+| `src/ui/ascii-art.tsx` | [ascii.rest](https://ascii.rest) pieces: banner, typewriter, skyline, the departures board (inked in airport colours in `Departures.tsx`), and the alpine dawn and Tokyo rain that take turns at the end (`Colophon.tsx`) |
+| `src/styles/site.css` | The issue's design: its names for the library's tokens, the page frame, grid, type, every section |
+| `src/styles/base.css` | The element defaults (links, images, focus, Japanese and Chinese runs), under the library's parts |
+| `src/index.css` | The stylesheet every page starts from: the cascade layers, the fonts, `base.css` and `site.css` |
 | `src/styles/fonts.css`, `scripts/fonts.mjs` | The typefaces, served from this site; see Type below |
 | `public/assets/img/` | Photographs and screenshots, WebP |
 | `blog/`, `src/blog.tsx`, `src/components/Blog.tsx` | The blog at `/blog/`, outside the issue: its index, and a page per post |
 | `src/content/posts/` | The posts, newest first in `index.ts`, one file each |
 | `life/`, `src/life.tsx`, `src/components/Life.tsx`, `src/components/life/` | Life at `/life/`, outside the issue: the four rules, ARC-style puzzles, a playground, a study of the game |
 | `src/lib/life/` | Its engine, levels and creatures, with no dependencies (`life.ts`, `levels.ts`, `patterns.ts`), and the two 160×135 glider-gun seeds from the Java original (`seeds/`) |
-| `ui/`, `src/ui.tsx`, `src/components/uidocs/`, `src/styles/uidocs.css` | The UI docs at `/ui/`: every part of the site, documented for reuse (see below) |
+| `ui/`, `src/ui.tsx`, `src/components/uidocs/`, `src/styles/uidocs.css` | The UI docs at `/ui/`: the library, documented for installing (see below) |
 
 ## UI components
 
@@ -107,17 +113,86 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 
 ### UI docs
 
-`/ui/` (listed under the workshop in the contents, as U) documents the parts the site is built from, in the manner of a component
-library's docs: the foundations (tokens, type, grid, hairlines and marks,
-buttons, theme and motion), then each component with a live example, its props,
-its import and notes on accessibility, reduced motion, phones, dark mode and
-cost, and the site's own sections listed at the end. The inventory is data, in
-`src/components/uidocs/registry.ts`; `npm test` checks it against the source
-(every named export and prop exists, and every exported component in
-`src/components` is in it), so a new component needs an entry there. The social
-parts are shown as specimens with mock data (`specimens.tsx`): the docs page
-never signs in, posts or calls Aha. WebGL effects start only near the screen or
-when asked. The page is prerendered like the issue.
+`/ui/` (listed under the workshop in the contents, as U) is the library's docs, in
+the manner of shadcn's: Getting started (the registry in `components.json`, the
+first part, the tokens, dark mode, how the stylesheets sit beside an app's own,
+with Tailwind or without), then each part and hook with a live example, its
+install command (npm, pnpm, yarn or bun, with Copy; the choice is kept in
+`localStorage`), its usage, props, notes and the files it puts in an app. The
+site's own parts follow in a short list, marked not published. The examples are
+the published files themselves, from `src/ui/`. The inventory is data, in
+`src/components/uidocs/registry.ts`; what each item installs is read from
+`registry.json`. `npm test` checks the two against each other and the source:
+every item is documented, every export of `src/ui/` is named, every prop and token
+exists, every item brings what its files import, the built registry passes
+shadcn's schema, and every exported component in `src/components` is in the list
+of site parts. The docs page never mounts the social parts, so it never signs
+in, posts or calls Aha. The page is prerendered like the issue.
+
+## Styles
+
+Plain CSS, in cascade layers, lowest first: `compat` (borders are solid and none
+unless a rule says otherwise), `base` (the element defaults in `base.css`, and the
+library's tokens), `components` (the library's parts, each part's stylesheet
+imported by the part) and `site` (`site.css`, which can adjust any part from the
+outside: `.toc .s1-barcode svg`). The pages' own stylesheets (`social.css`,
+`life.css`, `uidocs.css`) are in no layer, so they win over all of it, and KaTeX's
+sits in a `katex` layer above `site`. `src/index.css` declares the order, and every
+page's entry imports it first so the order is declared before any part's
+stylesheet arrives; the build checks it. `site.css` names the library's tokens in
+its own words (`--paper` is `var(--s1-paper)`, `--sumi` is `var(--s1-ink)`); the
+photo essay's black stock sets the `--s1-` values for its section.
+
+## Publishing the UI
+
+The library in `src/ui/` is published the way [Canvas UI](https://canvasui.dev)
+publishes, as a [shadcn registry](https://ui.shadcn.com/docs/registry) served by
+the site itself:
+
+- the index: `https://s1lin.tokensbeat.com/r/registry.json`
+- each item: `https://s1lin.tokensbeat.com/r/{name}.json`, its files' source inside
+
+An app adds `"@s1lin": "https://s1lin.tokensbeat.com/r/{name}.json"` under
+`registries` in its `components.json`, then:
+
+```bash
+npx shadcn@latest add @s1lin/button
+npx shadcn@latest add https://s1lin.tokensbeat.com/r/button.json   # the same, with no registry set up
+```
+
+Every file of an item lands in the app's components folder under `s1lin/`
+(`components/s1lin/button.tsx`, `button.css`), beside `tokens.css` and `cn.ts`,
+which every part brings; the parts import one another by `./`, so they hold
+wherever that folder is. Items name the items they need by full URL, so the
+second form works too. Class names begin `s1-` and variables `--s1-`.
+
+`registry.json` lists the items; `scripts/registry.mjs` (`npm run registry`, and
+the first step of `npm run build`) runs `shadcn build` (pinned in `package.json`)
+into `public/r/`, which Vite copies into `dist/r/`; `public/r/` is not committed.
+To add an item:
+
+1. Write it in `src/ui/`: a kebab-case `.tsx`, its stylesheet beside it in
+   `@layer components` with `s1-` classes in `--s1-` tokens, both imported by the
+   part (`import "./tokens.css"; import "./part.css";`), and any other part or
+   hook imported by `./`.
+2. Add it to `registry.json`: each file with `"target": "@components/s1lin/<file>"`
+   (`registry:ui` for `.tsx`, `registry:file` for `.css`), its npm packages in
+   `dependencies`, and the items it imports in `registryDependencies` as
+   `https://s1lin.tokensbeat.com/r/<name>.json`.
+3. Document it in `src/components/uidocs/registry.ts` with a live example in
+   `examples.tsx`, and use it on the site from `@/ui/<file>`.
+4. `npm test` says what is missing.
+
+To try the registry before it is published, build it for a local host and serve
+the build there; the items' dependencies then point at it:
+
+```bash
+S1LIN_REGISTRY=http://127.0.0.1:4192 npm run build && npm run serve -- 4192
+```
+
+Never deploy a build made with `S1LIN_REGISTRY` set. There is no npm package yet;
+`src/ui/` has no imports from outside itself but `react`, `clsx`, `ascii.rest` and
+`katex`, so one could be cut from it as it is.
 
 
 ## Type
@@ -175,10 +250,11 @@ and meta tags and `data-post="<slug>"` on the root. Vite builds every shell
 under `blog/`, and the build fails if a listed post has no shell. Images go in
 `public/assets/img/blog-*.webp`.
 
-Maths is LaTeX, set by KaTeX when the pages are prerendered, so readers get
-finished HTML (with MathML for screen readers) and no KaTeX script; only the
-blog's pages load KaTeX's stylesheet, and its fonts load only where they are
-used (`src/components/Tex.tsx`, `src/styles/tex.css`). Write the source with
+Maths is LaTeX, set by KaTeX when the pages are prerendered (the server entry
+hands Tex the KaTeX module with `setKatex`), so readers get finished HTML (with
+MathML for screen readers) and no KaTeX script; only the blog's pages load
+KaTeX's stylesheet, the part's own `tex.css`, and its fonts load only where they
+are used (`src/ui/tex.tsx`, `src/styles/tex.css`). Write the source with
 `String.raw` so its backslashes stay, inline or on its own line:
 
 ```tsx

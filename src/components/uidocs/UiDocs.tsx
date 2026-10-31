@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import manifest from "../../../registry.json";
 import { Runhead } from "@/components/Runhead";
 import { Demo } from "@/components/uidocs/examples";
-import { Code, Inline, Notes, Plate, PropsTable } from "@/components/uidocs/parts";
-import { ENTRIES, GROUPS, LISTED, type Entry } from "@/components/uidocs/registry";
+import { Guide } from "@/components/uidocs/guides";
+import { Code, Example, Files, Inline, Install, Notes, PropsTable } from "@/components/uidocs/parts";
+import { ENTRIES, GROUPS, LISTED, REGISTRY, type Entry } from "@/components/uidocs/registry";
 import { Kicker } from "@/ui/kicker";
 
-const RUN = "部品 · UI components";
+const RUN = "部品 · UI library";
 const BY_GROUP = GROUPS.map((g) => ({ ...g, entries: ENTRIES.filter((e) => e.group === g.id) }));
-const LIVE = ENTRIES.filter((e) => e.example !== "none").length;
+const PARTS = manifest.items.filter((i) => i.type === "registry:ui").length;
+const HOOKS = manifest.items.filter((i) => i.type === "registry:hook").length;
 
-/** One part: what it is, a live example, how to bring it in and use it, its props, and what to know. */
+/** One item: what it is, a live example, the command that adds it, how to use it, its props, what to know, its files. */
 function Item({ e }: { e: Entry }) {
   return (
     <article className="ud-item" id={e.id} aria-labelledby={`${e.id}-name`}>
@@ -17,25 +20,22 @@ function Item({ e }: { e: Entry }) {
         <h3 className="ud-item__name" id={`${e.id}-name`}>
           {e.name}
         </h3>
-        <p className="ud-item__file">{e.sources.join(" · ")}</p>
+        {e.item && <p className="ud-item__file">@s1lin/{e.item}</p>}
       </header>
       <p className="ud-item__sum">
         <Inline text={e.summary} />
       </p>
-      {e.import && <Code label="Import">{e.import}</Code>}
-      {e.example !== "none" && (
-        <Plate kind={e.example}>
+      {e.example === "guide" && <Guide id={e.id} />}
+      {e.example === "live" && (
+        <Example>
           <Demo id={e.id} />
-        </Plate>
+        </Example>
       )}
-      {e.see && (
-        <p className="ud-see">
-          <a href={e.see.href}>{e.see.label} →</a>
-        </p>
-      )}
-      {e.usage && <Code label="Use">{e.usage}</Code>}
+      {e.item && <Install item={e.item} />}
+      {e.usage && <Code label="Usage">{e.usage}</Code>}
       {e.props && <PropsTable title={e.propsTitle ?? "Props"} props={e.props} />}
       {e.notes && <Notes notes={e.notes} />}
+      {e.item && <Files item={e.item} />}
       {e.where && (
         <p className="ud-where">
           <b>On the site</b> {e.where}
@@ -94,7 +94,7 @@ function Nav() {
 
   return (
     <nav className="ud-nav" aria-label="Parts" ref={nav}>
-      <p className="ud-nav__title mono">Parts</p>
+      <p className="ud-nav__title mono">Library</p>
       <ol className="ud-nav__groups">
         {BY_GROUP.map((g) => (
           <li key={g.id}>
@@ -122,16 +122,17 @@ function Nav() {
   );
 }
 
-/** The site's own sections, for completeness. */
+/** The site's own parts, not in the registry: a short list, so the inventory is whole. */
 function SiteParts() {
   return (
     <section className="ud-group" id="site" data-run="部品 · Site parts" aria-labelledby="site-h">
       <h2 className="ud-group__h" id="site-h">
-        Site parts <span className="mono">{LISTED.length}</span>
+        Site parts <span className="mono">not published</span>
       </h2>
       <p className="ud-group__blurb">
-        Sections and pages written for one place in the site, from the parts above. They are listed so the inventory is
-        whole; they are not meant to be lifted out as they are.
+        Sections and pieces written for one place in the site, from the parts above. They are listed so the inventory is
+        whole; they are not in the registry. The WebGL effects are Canvas UI&rsquo;s: take them from{" "}
+        <a href="https://canvasui.dev">canvasui.dev</a>, under its own licence.
       </p>
       <div className="ud-props ud-listed">
         <table>
@@ -153,7 +154,7 @@ function SiteParts() {
                   <code>{l.sources.join(", ")}</code>
                 </td>
                 <td className="ud-props__def">
-                  <a href={l.where}>{l.where}</a>
+                  <a href={l.where}>{l.where.replace(/^https:\/\//, "")}</a>
                 </td>
                 <td>{l.why}</td>
               </tr>
@@ -165,7 +166,7 @@ function SiteParts() {
   );
 }
 
-/** /ui/: every part this site is built from, documented for reuse. */
+/** /ui/: the library the site is built from, documented for installing elsewhere. */
 export function UiPage() {
   return (
     <>
@@ -177,48 +178,46 @@ export function UiPage() {
         <section className="spread uidocs" data-run={RUN}>
           <div className="wrap grid">
             <header className="ud-intro">
-              <Kicker ja="部品">UI · the parts of the issue</Kicker>
+              <Kicker ja="部品">UI · a library from the issue</Kicker>
               <h1 className="display">
-                The parts <em>of the issue.</em>
+                The parts, <em>to take with you.</em>
               </h1>
               <p className="dek">
-                Every component and shared part this site is built from, in one place: what each is for, an example that
-                runs, its props, how to import it, and what to know before using it.
+                The parts this site is set with, published as a component registry: one command adds a part to your app,
+                its source and its own stylesheet, and the copy is yours. Plain CSS in tokens you can restyle; no Tailwind
+                needed, and none in the way if you have it.
               </p>
             </header>
             <div className="ud-aside">
               <p>
-                <b>{ENTRIES.length} parts</b> in {GROUPS.length} groups, {LIVE} with an example on the page; {LISTED.length}{" "}
-                site parts listed at the end.
+                <b>{manifest.items.length} items</b>: {PARTS} parts, {HOOKS} hooks, <code>cn</code> and the tokens, each with a
+                live example on this page.
               </p>
               <p>
-                Import from <code>@/</code>, the alias for <code>src/</code>. Styles are global: <code>site.css</code> for
-                everything, <code>social.css</code> and <code>life.css</code> for those pages&rsquo; parts.
+                <code>npx shadcn@latest add @s1lin/button</code>, once <code>@s1lin</code> is in your components.json; the
+                index is <a href={`${REGISTRY}/registry.json`}>/r/registry.json</a>.
               </p>
-              <p>
-                Specimens are the real markup with mock data: nothing on this page signs in, posts or calls Aha. Heavy
-                effects start only near the screen, or when you ask.
-              </p>
+              <p>The examples are the published code: the site imports the same files it serves.</p>
             </div>
 
             {/* the index and the parts in a box of their own, so the held index lets go where the parts end */}
             <div className="ud-main">
-            <Nav />
+              <Nav />
 
-            <div className="ud-body" id="parts">
-              {BY_GROUP.map((g) => (
-                <section key={g.id} className="ud-group" id={g.id} data-run={`部品 · ${g.name}`} aria-labelledby={`${g.id}-h`}>
-                  <h2 className="ud-group__h" id={`${g.id}-h`}>
-                    {g.name} <span className="mono">{g.entries.length}</span>
-                  </h2>
-                  <p className="ud-group__blurb">{g.blurb}</p>
-                  {g.entries.map((e) => (
-                    <Item key={e.id} e={e} />
-                  ))}
-                </section>
-              ))}
-              <SiteParts />
-            </div>
+              <div className="ud-body" id="parts">
+                {BY_GROUP.map((g) => (
+                  <section key={g.id} className="ud-group" id={g.id} data-run={`部品 · ${g.name}`} aria-labelledby={`${g.id}-h`}>
+                    <h2 className="ud-group__h" id={`${g.id}-h`}>
+                      {g.name} <span className="mono">{g.entries.length}</span>
+                    </h2>
+                    <p className="ud-group__blurb">{g.blurb}</p>
+                    {g.entries.map((e) => (
+                      <Item key={e.id} e={e} />
+                    ))}
+                  </section>
+                ))}
+                <SiteParts />
+              </div>
             </div>
 
             <div className="endmark mono">

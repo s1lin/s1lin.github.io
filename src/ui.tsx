@@ -5,7 +5,6 @@ import { createRoot, hydrateRoot } from "react-dom/client";
 import { UiPage } from "@/components/uidocs/UiDocs";
 import "./fonts";
 import "./styles/tex.css";
-import "./styles/social.css";
 import "./styles/uidocs.css";
 
 const root = document.getElementById("root")!;

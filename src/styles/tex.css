@@ -1,10 +1,11 @@
 /*
  * KaTeX's stylesheet, for maths in the blog (Tex, src/ui/tex.tsx), loaded by the
- * blog's pages only. It sits in a layer of its own, and the issue's adjustments
+ * blog's pages only, from the part's own tex.css: in the prerendered HTML, before
+ * any script runs. It sits in a layer of its own, and the issue's adjustments
  * follow in that layer, so they win on specificity. Its fonts load only when a
  * page uses them.
  */
-@import "katex/dist/katex.min.css" layer(katex);
+@import "../ui/tex.css";
 
 @layer katex {
   .post__text .katex { font-size: 0.96em; text-indent: 0; }
