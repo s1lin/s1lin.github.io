@@ -11,8 +11,13 @@ npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check, build, prerender into dist/
 npm run preview  # serve dist/
+npm run serve    # serve dist/ with Brick Locator at /brick-locator/, as Pages does
 npm run lint
 ```
+
+`npm run serve` (`scripts/serve-local.py`) takes Brick Locator from a checkout of
+[s1lin/brick-locator](https://github.com/s1lin/brick-locator) next to this one
+(`../brick-locator`); Pages publishes that repository under this site's domain.
 
 `npm run build` renders every page to HTML (`src/entry-server.tsx`,
 `scripts/prerender.mjs`): the issue, the blog and each post, so they read
