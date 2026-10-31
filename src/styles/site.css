@@ -433,7 +433,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .toc__sub a { font: 500 0.95rem/1.2 var(--f-sans); padding: 6px 0; align-items: center; }
 .toc__sub .roundel { font-size: 0.72rem; }
 /* The blog's posts under its line, numbered as on the blog. */
-.toc__no { display: inline-block; width: 2.2em; font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
+.toc__no { display: inline-block; flex: none; width: 2.2em; font: 500 11px/1 var(--f-mono); color: var(--ink-3); }
 
 .foreword { grid-column: 7 / span 6; }
 .theorem {

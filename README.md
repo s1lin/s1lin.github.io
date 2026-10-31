@@ -110,7 +110,7 @@ as `bg-paper`, `text-sumi`, `text-ink-2`, `font-mincho` and so on.
 
 ### UI docs
 
-`/ui/` documents the parts the site is built from, in the manner of a component
+`/ui/` (listed under the workshop in the contents, as U) documents the parts the site is built from, in the manner of a component
 library's docs: the foundations (tokens, type, grid, hairlines and marks,
 buttons, theme and motion), then each component with a live example, its props,
 its import and notes on accessibility, reduced motion, phones, dark mode and

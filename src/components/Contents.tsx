@@ -44,6 +44,7 @@ const WORKSHOP = [
   { href: "#brick-locator", letter: "B", name: "Brick Locator", page: "36" },
   { href: "#metro2line", letter: "M", name: "Metro2Line", page: "37" },
   { href: "/life/", letter: "L", name: "Life, a grid puzzle", page: "→" },
+  { href: "/ui/", letter: "U", name: "UI, the parts of the issue", page: "→" },
 ];
 
 export function Contents() {
