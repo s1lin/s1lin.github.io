@@ -201,6 +201,8 @@ export function UiPage() {
               </p>
             </div>
 
+            {/* the index and the parts in a box of their own, so the held index lets go where the parts end */}
+            <div className="ud-main">
             <Nav />
 
             <div className="ud-body" id="parts">
@@ -216,6 +218,7 @@ export function UiPage() {
                 </section>
               ))}
               <SiteParts />
+            </div>
             </div>
 
             <div className="endmark mono">
