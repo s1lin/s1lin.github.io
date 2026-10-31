@@ -143,6 +143,15 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-rule", type: "colour", default: "ink at 14%", desc: "Hairlines between things." },
       { name: "--s1-rule-strong", type: "colour", default: "ink at 80%", desc: "Hairlines under a label, round a box or a button." },
       { name: "--s1-accent", type: "colour", default: "#d62d20 · #f0574b", desc: "The one colour: the go button's offset shadow. Set it to the ink for a press in one ink." },
+      { name: "--s1-ok", type: "colour", default: "unset: the ink", desc: "A good status: an ok badge's line and tick, a notice's edge, a meter's fill, a stat that rises, a switch that is on. See Theming." },
+      { name: "--s1-ok-tint", type: "colour", default: "unset: the paper", desc: "The ground of an ok badge." },
+      { name: "--s1-warn", type: "colour", default: "unset: the ink", desc: "A warning: a warn badge's line, hatch and triangle, a notice's hatched edge, a meter past its warning share." },
+      { name: "--s1-warn-tint", type: "colour", default: "unset: the paper", desc: "The ground under a warn badge's hatch." },
+      { name: "--s1-bad", type: "colour", default: "unset: the ink", desc: "An error: a bad badge's fill, a notice's double line and cross, a meter over its limit, a stat that falls." },
+      { name: "--s1-bad-tint", type: "colour", default: "unset: the paper", desc: "A ground for your own bad rows and pills; no part draws it (the bad badge is solid)." },
+      { name: "--s1-info", type: "colour", default: "unset: the ink", desc: "A note: an info badge's dotted line and ring, a notice's edge." },
+      { name: "--s1-info-tint", type: "colour", default: "unset: the paper", desc: "The ground of an info badge." },
+      { name: "--s1-on-status", type: "colour", default: "unset: the paper", desc: "The words on a solid status fill: the bad badge's." },
       { name: "--s1-scheme", type: "light | dark", default: "light · dark", desc: "The colour scheme native controls are drawn in: a select's list, a number's arrows, a date's picker." },
       { name: "--s1-font-display", type: "font stack", default: "Instrument Serif…", desc: "Headlines." },
       { name: "--s1-font-sans", type: "font stack", default: "Inter Tight…", desc: "Text, and the roundel's letter." },
@@ -175,6 +184,35 @@ export const ENTRIES: Entry[] = [
 <section class="light">…</section>`,
     notes: [
       { label: "Dark mode", text: "Light on the root (`class=\"light\"`, `data-theme=\"light\"` or `data-mode=\"light\"`) holds the paper when the system is dark. An app that marks only dark (`.dark`, nothing for light) should mark light too, or a dark system turns the parts. `useDark()` reads the same rules." },
+    ],
+  },
+  {
+    id: "theming",
+    name: "Theming",
+    group: "start",
+    exports: [],
+    summary:
+      "The parts are drawn in one ink, and a status says itself by its line, its fill and its shape. An app that wants hues sets the status tokens, which are left unset: a badge, a notice, a meter, a stat's change and a switch that is on then take them, and the shapes stay, so nothing rests on colour alone. Until they are set every status falls back to the ink around it, so a page that sets none looks as it always has.",
+    example: "none",
+    usage: `/* your theme, after the parts: the status hues, and the go button's shadow in your brand */
+:root {
+  --s1-ok: #1d733b;   --s1-ok-tint: #dce7de;
+  --s1-warn: #925600; --s1-warn-tint: #ebe3d7;
+  --s1-bad: #c0261b;  --s1-bad-tint: #f0ddda;
+  --s1-info: #1f5fb8; --s1-info-tint: #dce4ed;
+  --s1-on-status: #f6f6f4;   /* the words on the solid bad badge */
+  --s1-accent: #0f7a6c;
+}
+/* night: the same names, on the selectors Dark mode lists */
+.dark { --s1-ok: #5cc281; --s1-ok-tint: #1a281f; --s1-bad: #ff6b5e; --s1-on-status: #111; }
+
+// a stat whose fall is good, and one with no good way
+<Stat label="p50 latency" value="820 ms" delta="-12%" trend="down" data-good="down" />
+<Stat label="Requests" value="2,619" delta="+4%" trend="up" data-good="none" />`,
+    notes: [
+      { label: "Styles", text: "Set them outside a cascade layer, or in one after `base`: the parts' tokens sit in `@layer base`, so an unlayered rule wins. A hue set on an element holds for its part of the page, as every token does." },
+      { label: "Accessibility", text: "Check each hue at 4.5:1 against both papers and its own tint; the words on a tint stay in the ink. In forced colours every hue gives way to the system's, and the shapes carry the status." },
+      { label: "Dark mode", text: "Give each a night value on the same selectors the tokens use (see Dark mode), or the day's hues stay on the night paper." },
     ],
   },
   {
@@ -738,7 +776,7 @@ const columns: Column<Key>[] = [
     ],
     notes: [
       { label: "Accessibility", text: "The words are the status; the shape is hidden from screen readers. No status is told by hue: the five read apart in greyscale and to anyone who does not see colour." },
-      { label: "Styles", text: "One ink by design. An app that wants a hue for one status can set it: `.s1-badge--bad { color: … }` colours the line and the shape (and the fill, for bad)." },
+      { label: "Styles", text: "One ink by design. An app that wants hues sets the status tokens (see Theming): each status then takes its hue on its line, its shape and its ground, and the words stay in the ink." },
     ],
   },
   {
@@ -792,6 +830,7 @@ const columns: Column<Key>[] = [
     notes: [
       { label: "Accessibility", text: "Each stat is a group named by its label; a screen reader reads \"Spend this month, $41.20, Up +12.5%, vs September\". The triangle is hidden; the word says the direction." },
       { label: "Phone", text: "The group puts as many stats a row as fit at 11.5rem each, down to one a row at 320px." },
+      { label: "Styles", text: "With the status hues set (see Theming) a rise is drawn in ok and a fall in bad; `data-good=\"down\"` on the stat turns that round (latency, errors) and `data-good=\"none\"` keeps the change in the ink." },
     ],
   },
   {

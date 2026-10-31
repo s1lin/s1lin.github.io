@@ -8,7 +8,7 @@
       "type": "registry:style",
       "title": "Tokens",
       "author": "s1lin",
-      "description": "The tokens every part is drawn in: paper, ink, two greys, two hairlines, one accent, five typefaces and the \"+\" registration marks, as --s1- CSS variables, light and dark.",
+      "description": "The tokens every part is drawn in: paper, ink, two greys, two hairlines, one accent, five typefaces and the \"+\" registration marks, as --s1- CSS variables, light and dark; and the status hues an app may set, unset so every status stays in the ink.",
       "files": [
         {
           "path": "src/ui/tokens.css",

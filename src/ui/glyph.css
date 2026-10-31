@@ -10,6 +10,12 @@
   .s1-glyph--ok { clip-path: polygon(0 56%, 15% 41%, 38% 63%, 85% 14%, 100% 29%, 38% 93%); }
   .s1-glyph--warn { clip-path: polygon(50% 2%, 100% 96%, 0 96%); }
   .s1-glyph--bad { clip-path: polygon(18% 4%, 50% 36%, 82% 4%, 96% 18%, 64% 50%, 96% 82%, 82% 96%, 50% 64%, 18% 96%, 4% 82%, 36% 50%, 4% 18%); }
+  /* In a badge or a notice the shape takes its status's hue once a theme sets one (tokens.css); the reversed bad
+     badge keeps its cross in the colour of its words. Anywhere else a glyph is the colour around it. */
+  :is(.s1-badge, .s1-notice) > .s1-glyph--ok { color: var(--s1-ok, currentColor); }
+  :is(.s1-badge, .s1-notice) > .s1-glyph--warn { color: var(--s1-warn, currentColor); }
+  :is(.s1-badge, .s1-notice) > .s1-glyph--info { color: var(--s1-info, currentColor); }
+  .s1-notice > .s1-glyph--bad { color: var(--s1-bad, currentColor); }
   /* High-contrast modes paint backgrounds away: draw the shapes as their outline's colour instead. */
   @media (forced-colors: active) {
     .s1-glyph:not(.s1-glyph--info) { background: CanvasText; forced-color-adjust: none; }

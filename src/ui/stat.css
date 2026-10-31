@@ -14,6 +14,13 @@
   .s1-stat__trend--up { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
   .s1-stat__trend--down { clip-path: polygon(0 0, 100% 0, 50% 100%); }
   .s1-stat__trend--flat { clip-path: inset(38% 0); }
+  /* A theme that sets the status hues (tokens.css) colours the change and its triangle: up in ok, down in bad; the
+     other way round on a stat marked data-good="down" (latency, errors), and in the ink on data-good="none". */
+  .s1-stat__delta:has(> .s1-stat__trend--up) { color: var(--s1-ok, var(--s1-ink)); }
+  .s1-stat__delta:has(> .s1-stat__trend--down) { color: var(--s1-bad, var(--s1-ink)); }
+  .s1-stat[data-good="down"] .s1-stat__delta:has(> .s1-stat__trend--up) { color: var(--s1-bad, var(--s1-ink)); }
+  .s1-stat[data-good="down"] .s1-stat__delta:has(> .s1-stat__trend--down) { color: var(--s1-ok, var(--s1-ink)); }
+  .s1-stat[data-good="none"] .s1-stat__delta { color: var(--s1-ink); }
 
   .s1-stats {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); overflow: clip;
