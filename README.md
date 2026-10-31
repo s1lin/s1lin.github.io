@@ -233,8 +233,9 @@ A repost is real: it lists the thing on the reposter's Aha page, and the thread 
 ## Token skyline
 
 Under the GitHub heatmap, the editor's tokens with coding agents: a total and
-its value at API list prices, the weeks from the first week there
-was any (one equal-width column a week, each filled to full height with that
+its value at API list prices, the weeks with tokens (one equal-width column
+for each such week; weeks with none are left out, and a break in the axis marks
+where; each column filled to full height with that
 week's mix of models, a company to a hue and its models in shades of it, so a
 quiet week still shows what it was spent on; a bar above each column, on a
 square-root scale, is how many tokens it used), a "by model" chart under it that doubles as the key, each company under
