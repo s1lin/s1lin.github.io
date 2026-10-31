@@ -1246,6 +1246,33 @@
         "hooks",
         "console"
       ]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "A number in a range, dragged or set with the arrow keys: a native input type=\"range\" drawn as a hairline track filled in ink to its thumb, its label and value above, optional marks under it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/slider.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/slider.tsx"
+        },
+        {
+          "path": "src/ui/slider.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/slider.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
     }
   ]
 }

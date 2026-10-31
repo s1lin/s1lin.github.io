@@ -168,6 +168,16 @@ test("ids are unique and every group has entries", () => {
   for (const g of GROUPS) assert.ok(ENTRIES.some((e) => e.group === g.id), `${g.id} has no entries`);
 });
 
+test("the groups keep the anchors links point at, each in a chapter of the index", () => {
+  const ids = GROUPS.map((g) => g.id);
+  for (const id of ["start", "parts", "forms", "data", "overlays", "feedback", "text", "hooks"]) assert.ok(ids.includes(id), `#${id} is linked to: keep the group`);
+  for (const g of GROUPS) assert.ok(g.chapter, `${g.id} is in no chapter`);
+  // a chapter's groups stand together, so the index reads in the page's order
+  const chapters = GROUPS.map((g) => g.chapter).filter((c, i, all) => c !== all[i - 1]);
+  assert.equal(new Set(chapters).size, chapters.length, "a chapter's groups are split apart");
+  assert.ok(!ENTRIES.some((e) => e.id === "library" || e.id === "site"), "#library and #site are the page's own");
+});
+
 test("every entry with an example or a guide has its case", () => {
   const examples = read("src/components/uidocs/examples.tsx");
   const guides = read("src/components/uidocs/guides.tsx");

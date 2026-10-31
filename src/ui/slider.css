@@ -1,0 +1,94 @@
+/* Slider (slider.tsx): a native <input type="range"> drawn as the Meter's hairline track, filled in ink up to a thumb
+   with a needle in it; marks under the track. The thumb travels inside the track's border, so the fill, the marks and
+   the thumb all meet at --s1-slider-inset from either end. */
+@layer components {
+  .s1-slider { --s1-slider-thumb: 14px; --s1-slider-inset: calc(var(--s1-slider-thumb) / 2 + 1px); display: grid; gap: 6px; min-width: 0; }
+  .s1-slider__top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+  .s1-slider__label { font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); overflow-wrap: anywhere; }
+  .s1-slider__value { font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .s1-slider__rail { position: relative; min-width: 0; }
+  .s1-slider__input {
+    position: relative; z-index: 1; display: block; box-sizing: border-box; width: 100%; height: 24px; margin: 0; padding: 0;
+    background: transparent; cursor: pointer; color-scheme: var(--s1-scheme);
+    appearance: none; -webkit-appearance: none;
+  }
+  .s1-slider__input:focus { outline: none; }
+
+  /* The track: a hairline box on the paper, in ink from the start to the thumb's centre. */
+  .s1-slider__input::-webkit-slider-runnable-track {
+    box-sizing: border-box; height: 8px; border: 1px solid var(--s1-rule-strong);
+    background: linear-gradient(to right, var(--s1-ink) 0 calc(var(--s1-slider-thumb) / 2 + (100% - var(--s1-slider-thumb)) * var(--s1-slider-fill, 0)), var(--s1-paper) 0);
+  }
+  .s1-slider__input::-moz-range-track { box-sizing: border-box; height: 8px; border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); }
+  .s1-slider__input::-moz-range-progress { box-sizing: border-box; height: 8px; border: 1px solid var(--s1-ink); background: var(--s1-ink); }
+
+  /* The thumb: a tall hairline box on the paper with a needle down its middle, the needle on the value. */
+  .s1-slider__input::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; box-sizing: border-box; width: var(--s1-slider-thumb); height: 22px; margin-top: -8px;
+    border: 1px solid var(--s1-ink); border-radius: 0;
+    background: linear-gradient(var(--s1-ink) 0 0) center / 1px 10px no-repeat, var(--s1-paper);
+  }
+  .s1-slider__input::-moz-range-thumb {
+    box-sizing: border-box; width: var(--s1-slider-thumb); height: 22px;
+    border: 1px solid var(--s1-ink); border-radius: 0;
+    background: linear-gradient(var(--s1-ink) 0 0) center / 1px 10px no-repeat, var(--s1-paper);
+  }
+  .s1-slider__input:hover:not(:disabled)::-webkit-slider-thumb { background-color: var(--s1-paper-2); }
+  .s1-slider__input:hover:not(:disabled)::-moz-range-thumb { background-color: var(--s1-paper-2); }
+  .s1-slider__input:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-slider__input:focus-visible::-moz-range-thumb { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+
+  /* Marks: a tick under the track at each, words under the tick; the one the value sits on in the ink. */
+  .s1-slider__marks { position: relative; height: 6px; margin-top: -5px; }
+  .s1-slider__marks--labelled { height: 26px; }
+  .s1-slider__mark { position: absolute; top: 0; width: 0; left: calc(var(--s1-slider-inset) + (100% - 2 * var(--s1-slider-inset)) * var(--s1-slider-at, 0)); }
+  .s1-slider__mark::before { content: ""; position: absolute; top: 0; left: -0.5px; width: 1px; height: 6px; background: var(--s1-ink-3); }
+  .s1-slider__tick-label {
+    position: absolute; top: 10px; left: 0; transform: translateX(-50%);
+    font: 400 11px/1.3 var(--s1-font-mono); letter-spacing: 0.02em; color: var(--s1-ink-2); white-space: nowrap;
+  }
+  .s1-slider__mark[data-edge="start"] .s1-slider__tick-label { left: calc(-1 * var(--s1-slider-inset)); transform: none; }
+  .s1-slider__mark[data-edge="end"] .s1-slider__tick-label { left: auto; right: calc(-1 * var(--s1-slider-inset)); transform: none; }
+  .s1-slider__mark[data-on]::before { background: var(--s1-ink); }
+  .s1-slider__mark[data-on] .s1-slider__tick-label { color: var(--s1-ink); }
+
+  .s1-slider__hint { margin: 0; font: 400 13px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); overflow-wrap: anywhere; }
+
+  /* In error the track's line doubles, as an Input's does. */
+  .s1-slider[data-invalid] .s1-slider__input::-webkit-slider-runnable-track { border-color: var(--s1-ink); box-shadow: 0 0 0 1px var(--s1-ink); }
+  .s1-slider[data-invalid] .s1-slider__input::-moz-range-track { border-color: var(--s1-ink); box-shadow: 0 0 0 1px var(--s1-ink); }
+
+  /* Disabled: dashed, in the third ink. */
+  .s1-slider--disabled .s1-slider__label, .s1-slider--disabled .s1-slider__value { color: var(--s1-ink-3); }
+  .s1-slider__input:disabled { cursor: not-allowed; }
+  .s1-slider__input:disabled::-webkit-slider-runnable-track {
+    border-style: dashed; border-color: var(--s1-ink-3);
+    background: linear-gradient(to right, var(--s1-ink-3) 0 calc(var(--s1-slider-thumb) / 2 + (100% - var(--s1-slider-thumb)) * var(--s1-slider-fill, 0)), transparent 0);
+  }
+  .s1-slider__input:disabled::-moz-range-track { border-style: dashed; border-color: var(--s1-ink-3); background: transparent; }
+  .s1-slider__input:disabled::-moz-range-progress { border-color: var(--s1-ink-3); background: var(--s1-ink-3); }
+  .s1-slider__input:disabled::-webkit-slider-thumb { border-color: var(--s1-ink-3); background: linear-gradient(var(--s1-ink-3) 0 0) center / 1px 10px no-repeat, var(--s1-paper); }
+  .s1-slider__input:disabled::-moz-range-thumb { border-color: var(--s1-ink-3); background: linear-gradient(var(--s1-ink-3) 0 0) center / 1px 10px no-repeat, var(--s1-paper); }
+  .s1-slider--disabled .s1-slider__mark::before { background: var(--s1-ink-3); }
+  .s1-slider--disabled .s1-slider__tick-label { color: var(--s1-ink-3); }
+
+  /* High-contrast modes: the same drawing in the system's colours, the fill in its highlight. */
+  @media (forced-colors: active) {
+    .s1-slider__input, .s1-slider__mark::before { forced-color-adjust: none; }
+    .s1-slider__input::-webkit-slider-runnable-track {
+      border-color: CanvasText;
+      background: linear-gradient(to right, Highlight 0 calc(var(--s1-slider-thumb) / 2 + (100% - var(--s1-slider-thumb)) * var(--s1-slider-fill, 0)), Canvas 0);
+    }
+    .s1-slider__input::-moz-range-track { border-color: CanvasText; background: Canvas; }
+    .s1-slider__input::-moz-range-progress { border-color: Highlight; background: Highlight; }
+    .s1-slider__input::-webkit-slider-thumb { border-color: CanvasText; background: linear-gradient(CanvasText 0 0) center / 1px 10px no-repeat, Canvas; }
+    .s1-slider__input::-moz-range-thumb { border-color: CanvasText; background: linear-gradient(CanvasText 0 0) center / 1px 10px no-repeat, Canvas; }
+    .s1-slider__input:focus-visible::-webkit-slider-thumb { outline-color: Highlight; }
+    .s1-slider__input:focus-visible::-moz-range-thumb { outline-color: Highlight; }
+    .s1-slider__input:disabled::-webkit-slider-runnable-track { border-color: GrayText; background: linear-gradient(to right, GrayText 0 calc(var(--s1-slider-thumb) / 2 + (100% - var(--s1-slider-thumb)) * var(--s1-slider-fill, 0)), Canvas 0); }
+    .s1-slider__input:disabled::-webkit-slider-thumb { border-color: GrayText; }
+    .s1-slider__input:disabled::-moz-range-thumb { border-color: GrayText; }
+    .s1-slider__mark::before { background: CanvasText; }
+  }
+}

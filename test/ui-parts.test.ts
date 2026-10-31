@@ -273,6 +273,47 @@ test("Meter: a meter named by its label, the value held inside the range, the wo
   assert.match(m, new RegExp(`id="${attr(m, meter, "aria-labelledby")}">Video seconds<`));
 });
 
+test("Slider: a native range named by its label, its value in words, the printed value and the marks hidden from screen readers", async () => {
+  const { Slider } = await part("slider");
+  const marks = [{ value: 0, label: "None" }, { value: 14, label: "Default" }, { value: 60, label: "Strong" }, 30, 99];
+  const m = html(h(Slider, { label: "Line contrast", id: "contrast", min: 0, max: 60, step: 2, defaultValue: 14, format: (v: number) => `${v}%`, hint: "How dark the lines are.", marks }));
+  const input = /<input[^>]*>/;
+  assert.equal(attr(m, input, "type"), "range");
+  assert.equal(attr(m, input, "id"), "contrast");
+  assert.equal(attr(m, /<label[^>]*>/, "for"), "contrast");
+  assert.deepEqual(["min", "max", "step", "value"].map((a) => attr(m, input, a)), ["0", "60", "2", "14"]);
+  // the words from format, and a mark's words when the value sits on it
+  assert.equal(attr(m, input, "aria-valuetext"), "14%, Default");
+  assert.match(m, new RegExp(`<p class="s1-slider__hint" id="${attr(m, input, "aria-describedby")}">How dark the lines are\\.</p>`));
+  // the value is printed for the eye only: the range itself says it
+  assert.match(m, /<output class="s1-slider__value" for="contrast" aria-hidden="true">14%<\/output>/);
+  // marks: hidden, outside the range dropped, the ends held inside the box, the one under the value marked
+  const ticks = m.match(/<div class="s1-slider__marks s1-slider__marks--labelled" aria-hidden="true">.*?<\/div>/)![0];
+  assert.equal([...ticks.matchAll(/class="s1-slider__mark"/g)].length, 4);
+  assert.match(ticks, /--s1-slider-at:0"[^>]*data-edge="start"/);
+  assert.match(ticks, /--s1-slider-at:1"[^>]*data-edge="end"/);
+  assert.match(ticks, /--s1-slider-at:0\.5"><\/span>/, "a mark with no words is a tick alone");
+  assert.equal([...ticks.matchAll(/data-on=""/g)].length, 1);
+  assert.match(ticks, /data-on=""><span class="s1-slider__tick-label">Default<\/span>/);
+  assert.match(m, /class="s1-slider" style="--s1-slider-fill:0\.233/);
+
+  // held inside its range; with no format and no named mark the number is its own words
+  const plain = html(h(Slider, { "aria-label": "Temperature", value: 120, max: 100 }));
+  assert.equal(attr(plain, input, "value"), "100");
+  assert.equal(attr(plain, input, "aria-label"), "Temperature");
+  assert.equal(attr(plain, input, "aria-valuetext"), undefined);
+  assert.doesNotMatch(plain, /<label/);
+  // a mark's words that say what the value already says are not read twice
+  const word = html(h(Slider, { label: "Level", min: 1, max: 3, defaultValue: 2, format: (v: number) => ["Faint", "Default", "Strong"][v - 1], marks: [{ value: 2, label: "Default" }] }));
+  assert.equal(attr(word, input, "aria-valuetext"), "Default");
+  // in error and disabled
+  const off = html(h(Slider, { label: "Warn at", invalid: true, disabled: true, hideValue: true }));
+  assert.equal(attr(off, input, "aria-invalid"), "true");
+  assert.match(off.match(input)![0], /\sdisabled=""/);
+  assert.match(off, /class="s1-slider s1-slider--disabled"[^>]*data-invalid=""/);
+  assert.doesNotMatch(off, /<output/);
+});
+
 test("Dialog, Menu, Tabs, Toaster: closed overlays are in the server HTML, wired and hidden", async () => {
   const { Dialog } = await part("dialog");
   const { Menu } = await part("menu");

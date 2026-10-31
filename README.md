@@ -115,12 +115,17 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 ### UI docs
 
 `/ui/` (listed under the workshop in the contents, as U) is the library's docs, in
-the manner of shadcn's: Getting started (the registry in `components.json`, the
-first part, the tokens, dark mode, how the stylesheets sit beside an app's own,
-with Tailwind or without), then each part and hook with a live example, its
-install command (npm, pnpm, yarn or bun, with Copy; the choice is kept in
-`localStorage`), its usage, props, notes and the files it puts in an app. The
-site's own parts follow in a short list, marked not published. The examples are
+the manner of shadcn's, in five chapters: 01 Getting started (the registry in
+`components.json`, the first part, how the stylesheets sit beside an app's own,
+with Tailwind or without), 02 Foundations (tokens, dark mode, theming, words), 03
+Parts by family (Editorial, Forms, Data, Overlays, Feedback, Text and keys), 04
+Hooks and `cn`, 05 Site parts (marked not published). Every item has the same
+anatomy: its name and one line, a live example on a quiet stage, one install line
+(npm, pnpm, yarn or bun, with Copy; the choice is shared by the page and kept in
+`localStorage`), then its reference in tabs: Usage, Props, Notes, Files (all in the
+prerendered HTML; printed or without JavaScript they show one after another). The
+index beside it is the whole tree and marks the item being read; on a phone it is
+a bar saying where you are that opens the same tree. The examples are
 the published files themselves, from `src/ui/` (the console's, in
 `src/components/uidocs/console.tsx`, with made-up keys and figures; one
 `<Toaster />` sits at the foot of the page). The inventory is data, in
@@ -143,9 +148,11 @@ account), in the registry's `console` category and in five groups on `/ui/`:
 
 - **Forms**: Field and Fieldset (label, hint and error wired to the control by
   `useField`), Input, Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
-  segmented row), Switch. Native elements throughout.
+  segmented row), Switch, Slider (a native range input on the Meter's hairline track,
+  with marks and a value). Native elements throughout.
 - **Data**: Table (caption, row headers, sort, empty and loading rows, row
-  actions, a sticky header; scrolls inside its frame), Pagination, Badge, Glyph,
+  actions, a sticky header, row groups that open and close with "Expand all", a
+  `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
   Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
   EmptyState.
 - **Overlays**: Dialog (the native `<dialog>`), Menu (the ARIA menu button, in the

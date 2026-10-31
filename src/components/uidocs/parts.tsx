@@ -1,8 +1,10 @@
-import { Fragment, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import manifest from "../../../registry.json";
-import { REGISTRY, type Note, type PropDoc } from "@/components/uidocs/registry";
+import { REGISTRY, type Entry, type Note, type PropDoc } from "@/components/uidocs/registry";
 import { Button } from "@/ui/button";
 import { Plate } from "@/ui/plate";
+import { Select } from "@/ui/select";
+import { Tabs, type Tab } from "@/ui/tabs";
 
 /** Words from the inventory: `code` in backticks, nothing else read as markup. */
 export function Inline({ text }: { text: string }) {
@@ -27,13 +29,30 @@ export function Code({ children, label }: { children: string; label?: string }) 
   );
 }
 
-/** The plate a live example stands on: the library's Plate, labelled. */
+/** The stage a live example stands on: the library's Plate, in the light hairline, the same size for every part. */
 export function Example({ children }: { children: ReactNode }) {
   return (
     <Plate className="ud-plate">
-      <p className="ud-plate__kind mono">Live</p>
       <div className="ud-plate__body">{children}</div>
     </Plate>
+  );
+}
+
+/** A path with a place to break after each "/", so a long one wraps at its folders and never mid-name. */
+export function Path({ children }: { children: string }) {
+  return (
+    <code>
+      {children.split("/").map((seg, i, all) => (
+        <Fragment key={i}>
+          {seg}
+          {i < all.length - 1 && (
+            <>
+              /<wbr />
+            </>
+          )}
+        </Fragment>
+      ))}
+    </code>
   );
 }
 
@@ -99,15 +118,15 @@ function useRunner() {
 }
 
 /**
- * The command that adds an item, for the reader's package manager, with Copy.
- * Under it, the same by its address, for an app without the registry set up.
+ * The command that adds an item, for the reader's package manager, with Copy:
+ * one line. The package manager is one choice for the whole page, kept for the
+ * next visit; changing it here changes every command.
  */
 export function Install({ item }: { item: string }) {
   const runner = useRunner();
   const [said, setSaid] = useState("");
   const pre = useRef<HTMLPreElement>(null);
   const timer = useRef<number>(undefined);
-  const id = useId();
   const command = `${RUNNERS.find(([r]) => r === runner)![1]} @s1lin/${item}`;
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -128,45 +147,41 @@ export function Install({ item }: { item: string }) {
   }
 
   return (
-    <figure className="ud-install" aria-labelledby={`${id}-cap`}>
-      <figcaption className="ud-code__label" id={`${id}-cap`}>
-        Install
-      </figcaption>
-      <div className="ud-install__box">
-        <div className="ud-install__bar">
-          <p className="ud-install__pm" role="group" aria-label="Package manager">
-            {RUNNERS.map(([r]) => (
-              <button key={r} type="button" aria-pressed={r === runner} onClick={() => pickRunner(r)}>
-                {r}
-              </button>
-            ))}
-          </p>
-          <Button size="sm" className="ud-install__copy" onClick={() => void copy()} aria-label={`Copy: ${command}`}>
-            {said === "Copied" ? "Copied" : "Copy"}
-          </Button>
-        </div>
+    <div className="ud-install" role="group" aria-label={`Install @s1lin/${item}`}>
+      <div className="ud-install__row">
         <pre ref={pre} tabIndex={0}>
           <code>{command}</code>
         </pre>
+        <Select size="sm" className="ud-install__pm" aria-label="Package manager" value={runner} onChange={(e) => pickRunner(e.target.value as Runner)}>
+          {RUNNERS.map(([r]) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </Select>
+        <Button size="sm" className="ud-install__copy" onClick={() => void copy()} aria-label={`Copy: ${command}`}>
+          {said === "Copied" ? "Copied" : "Copy"}
+        </Button>
       </div>
       <p className="ud-install__said" aria-live="polite">
         {said}
       </p>
-      <p className="ud-install__url">
-        No registry set up: <code>npx shadcn@latest add {`${REGISTRY}/${item}.json`}</code>
-      </p>
-    </figure>
+    </div>
   );
 }
 
-/** What an item puts in the app: its files, the items it brings and theirs, and npm packages. */
+/** The files an item puts in the app, with the items it brings. */
+function fileCount(item: string) {
+  return withDependencies(item).reduce((n, i) => n + i.files.length, 0);
+}
+
+/** What an item puts in the app: its files, the items it brings and theirs, npm packages, and the command by address. */
 export function Files({ item }: { item: string }) {
   const [own, ...brought] = withDependencies(item);
   if (!own) return null;
   const packages = [...new Set([own, ...brought].flatMap((i) => ("dependencies" in i ? i.dependencies : []) ?? []))];
   return (
     <div className="ud-files">
-      <h4 className="ud-h4 mono">Files</h4>
       <ul>
         {own.files.map((f) => (
           <li key={f.path}>
@@ -191,17 +206,24 @@ export function Files({ item }: { item: string }) {
           ))}
         </p>
       )}
+      <p className="ud-files__url">
+        No registry set up: <code>npx shadcn@latest add {`${REGISTRY}/${item}.json`}</code>
+      </p>
     </div>
   );
 }
 
-/** Props as a table on a desktop; on a phone each prop stacks into a small block. */
+/**
+ * Props as a table on a desktop: names never wrap, types wrap at their spaces,
+ * the words take what is left. In a narrow box each prop is a block, its type
+ * and default labelled.
+ */
 export function PropsTable({ title, props }: { title: string; props: PropDoc[] }) {
   const defaults = props.some((p) => p.default !== undefined || p.required);
   return (
     <div className="ud-props">
-      <h4 className="ud-h4 mono">{title}</h4>
       <table>
+        <caption className="visually-hidden">{title}</caption>
         <thead>
           <tr>
             <th scope="col">Name</th>
@@ -213,14 +235,18 @@ export function PropsTable({ title, props }: { title: string; props: PropDoc[] }
         <tbody>
           {props.map((p) => (
             <tr key={p.name}>
-              <th scope="row">
+              <th scope="row" className="ud-props__name">
                 <code>{p.name}</code>
               </th>
-              <td className="ud-props__type">
+              <td className="ud-props__type" data-label="Type">
                 <code>{p.type}</code>
               </td>
-              {defaults && <td className="ud-props__def">{p.required ? <em>required</em> : p.default ? <code>{p.default}</code> : "—"}</td>}
-              <td>
+              {defaults && (
+                <td className="ud-props__def" data-label="Default" data-none={!p.required && !p.default ? "" : undefined}>
+                  {p.required ? <em>required</em> : p.default ? <code>{p.default}</code> : "—"}
+                </td>
+              )}
+              <td className="ud-props__desc">
                 <Inline text={p.desc} />
               </td>
             </tr>
@@ -231,8 +257,8 @@ export function PropsTable({ title, props }: { title: string; props: PropDoc[] }
   );
 }
 
-/** Accessibility, motion, phone, dark mode, cost: what to know before using it. */
-export function Notes({ notes }: { notes: Note[] }) {
+/** Accessibility, motion, phone, dark mode, cost: what to know before using it; then where the site uses it. */
+export function Notes({ notes, where }: { notes: Note[]; where?: string }) {
   return (
     <dl className="ud-notes">
       {notes.map((n, i) => (
@@ -243,6 +269,37 @@ export function Notes({ notes }: { notes: Note[] }) {
           </dd>
         </Fragment>
       ))}
+      {where && (
+        <>
+          <dt>On the site</dt>
+          <dd>{where}</dd>
+        </>
+      )}
     </dl>
   );
+}
+
+/** A tab's name with its count beside it, in the third ink. */
+function Counted({ name, n }: { name: string; n: number }) {
+  return (
+    <>
+      {name} <span className="ud-ref__n">{n}</span>
+    </>
+  );
+}
+
+/**
+ * The reference under an item, one tab each: its usage (open), its props, what
+ * to know, the files it adds. Every panel is in the page's HTML; only the open
+ * one shows.
+ */
+export function Reference({ e }: { e: Entry }) {
+  const notes = (e.notes?.length ?? 0) + (e.where ? 1 : 0);
+  const tabs: Tab[] = [];
+  if (e.usage) tabs.push({ id: "usage", label: "Usage", content: <Code>{e.usage}</Code> });
+  if (e.props) tabs.push({ id: "props", label: <Counted name={e.propsTitle ?? "Props"} n={e.props.length} />, content: <PropsTable title={`${e.name}: ${e.propsTitle ?? "Props"}`} props={e.props} /> });
+  if (notes) tabs.push({ id: "notes", label: <Counted name="Notes" n={notes} />, content: <Notes notes={e.notes ?? []} where={e.where} /> });
+  if (e.item) tabs.push({ id: "files", label: <Counted name="Files" n={fileCount(e.item)} />, content: <Files item={e.item} /> });
+  if (tabs.length === 0) return null;
+  return <Tabs className="ud-ref" label={`${e.name}: reference`} tabs={tabs} keepMounted />;
 }
