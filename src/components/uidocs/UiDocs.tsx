@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Kicker } from "@/components/bits";
 import { Runhead } from "@/components/Runhead";
 import { Demo } from "@/components/uidocs/examples";
 import { Code, Inline, Notes, Plate, PropsTable } from "@/components/uidocs/parts";
 import { ENTRIES, GROUPS, LISTED, type Entry } from "@/components/uidocs/registry";
+import { Kicker } from "@/ui/kicker";
 
 const RUN = "部品 · UI components";
 const BY_GROUP = GROUPS.map((g) => ({ ...g, entries: ENTRIES.filter((e) => e.group === g.id) }));

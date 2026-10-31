@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import * as alpineDawn from "ascii.rest/pieces/alpine-dawn";
 import * as tokyoRain from "ascii.rest/pieces/tokyo-rain";
-import { AsciiArt } from "@/components/AsciiArt";
 import { GlitchTitle } from "@/components/effects";
-import { MarkSetOut } from "@/components/Mark";
 import { Comments } from "@/components/social/Comments";
-import { useMedia } from "@/hooks/useMedia";
-import { useNear } from "@/hooks/useNear";
+import { AsciiArt } from "@/ui/ascii-art";
+import { MarkSetOut } from "@/ui/mark";
+import { Plate } from "@/ui/plate";
+import { useMedia } from "@/ui/use-media";
+import { useNear } from "@/ui/use-near";
 
 /** The closing plates take turns. Each keeps its own colours on its own sky, like a photograph. */
 const PLATES = [
@@ -91,7 +92,7 @@ export function Colophon() {
   return (
     <section className="spread colophon" id="colophon" data-run="奥付 · Colophon">
       <div className="wrap grid">
-        <div className="okuzuke">
+        <Plate className="okuzuke">
           <h2>
             <span lang="ja">奥付</span> Colophon
           </h2>
@@ -161,7 +162,7 @@ export function Colophon() {
               companies; the opinions here are mine.
             </dd>
           </dl>
-        </div>
+        </Plate>
 
         <div className="contact">
           <div className="contact__find">

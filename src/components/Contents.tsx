@@ -1,9 +1,12 @@
 import * as typewriter from "ascii.rest/pieces/typewriter";
-import { AsciiArt } from "@/components/AsciiArt";
-import { Barcode, Folio, Roundel } from "@/components/bits";
 import { GitHubHeatmap } from "@/components/GitHubHeatmap";
 import { TokenSkyline } from "@/components/TokenSkyline";
 import { POSTS } from "@/content/posts";
+import { AsciiArt } from "@/ui/ascii-art";
+import { Barcode } from "@/ui/barcode";
+import { Folio } from "@/ui/folio";
+import { Roundel } from "@/ui/roundel";
+import { SectionLabel } from "@/ui/section-label";
 
 const FEATURES: { href: string; letter: string; name: string; page: string }[] = [
   { href: "#tokensbeat", letter: "T", name: "TokensBeat", page: "08" },
@@ -52,9 +55,9 @@ export function Contents() {
     <section className="spread" id="contents" data-run="目次 · Contents">
       <div className="wrap grid frontmatter">
         <nav className="toc" aria-labelledby="toc-h">
-          <h2 id="toc-h" className="sect-label">
-            <span lang="ja">目次</span> Contents
-          </h2>
+          <SectionLabel id="toc-h" ja="目次">
+            Contents
+          </SectionLabel>
           <ol>
             <Entry href="#foreword" title="Foreword" ja="巻頭言" page="04" />
             <Entry href="#feature" title="Nine lines, one proof" ja="特集" page="06" />
@@ -115,9 +118,7 @@ export function Contents() {
         </nav>
 
         <article className="foreword" id="foreword">
-          <h2 className="sect-label">
-            <span lang="ja">巻頭言</span> Foreword
-          </h2>
+          <SectionLabel ja="巻頭言">Foreword</SectionLabel>
           <p className="theorem">
             <b>Theorem.</b>I am an architect.
           </p>

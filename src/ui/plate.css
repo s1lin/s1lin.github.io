@@ -1,0 +1,5 @@
+/* Plate (plate.tsx): a hairline box, and "+" marks drawn 5.5px outside each corner. */
+@layer components {
+  .s1-plate { position: relative; border: 0.5px solid var(--s1-rule-strong); }
+  .s1-plate::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--s1-corners); }
+}

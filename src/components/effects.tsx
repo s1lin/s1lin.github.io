@@ -5,12 +5,12 @@ import { createGlitch, type GlitchInstance, type GlitchOptions } from "@/compone
 import { Magnify } from "@/components/canvasui/Magnify";
 import { createParticleScroll } from "@/components/canvasui/ParticleScroll";
 import { Ripple } from "@/components/canvasui/Ripple";
-import { useDark } from "@/hooks/useDark";
-import { useHydrated } from "@/hooks/useHydrated";
-import { useMedia } from "@/hooks/useMedia";
-import { useNear } from "@/hooks/useNear";
 import { paintPage, planPage, type PagePlan } from "@/lib/page-paint";
-import { cn } from "@/lib/utils";
+import { cn } from "@/ui/cn";
+import { useDark } from "@/ui/use-dark";
+import { useHydrated } from "@/ui/use-hydrated";
+import { useMedia } from "@/ui/use-media";
+import { useNear } from "@/ui/use-near";
 
 /*
  * Canvas UI effects over photographs. The components in components/canvasui

@@ -9,6 +9,7 @@ import { make, step, type Grid } from "@/lib/life/life";
 import type { Shape } from "@/lib/social/client.ts";
 import { requestShape } from "@/lib/social/shape.ts";
 import { social, useSession } from "@/lib/social/useSocial";
+import { Button } from "@/ui/button";
 
 const MARGIN = 8;
 const RESTART = 160;
@@ -140,9 +141,9 @@ export function ShapeGallery({ lang }: { lang: Lang }) {
       {failed && (
         <p className="soc__note soc__note--bad" role="alert">
           {c.loadError}{" "}
-          <button type="button" className="soc__link" onClick={() => setTick((t) => t + 1)}>
+          <Button variant="link" onClick={() => setTick((t) => t + 1)}>
             {c.retry}
-          </button>
+          </Button>
         </p>
       )}
       {!failed && shapes === null && <p className="soc__small">{c.loading}</p>}
@@ -156,9 +157,9 @@ export function ShapeGallery({ lang }: { lang: Lang }) {
         </ul>
       )}
       {next && (
-        <button type="button" className="soc__btn" onClick={more} disabled={busy}>
+        <Button onClick={more} disabled={busy}>
           {busy ? c.loading : c.more}
-        </button>
+        </Button>
       )}
     </section>
   );

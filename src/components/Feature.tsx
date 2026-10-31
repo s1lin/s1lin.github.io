@@ -1,5 +1,7 @@
 import { Fragment, type ReactNode } from "react";
-import { Folio, Roundel, Stack } from "@/components/bits";
+import { Folio } from "@/ui/folio";
+import { Roundel } from "@/ui/roundel";
+import { Stack } from "@/ui/stack";
 
 export type FeatureProps = {
   id: string;

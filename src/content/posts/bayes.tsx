@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Ref, SourceLink } from "@/components/bits";
-import { Tex } from "@/components/Tex";
 import type { Post } from "@/content/posts";
+import { Tex } from "@/ui/tex";
 
 const ORIGINAL = "https://mp.weixin.qq.com/s/13WAnogvuttjdl5ipvq3jA";
 

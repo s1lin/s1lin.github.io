@@ -1,7 +1,8 @@
 import { useState, useSyncExternalStore } from "react";
-import { Kicker } from "@/components/bits";
-import { useDark } from "@/hooks/useDark";
-import { useMedia } from "@/hooks/useMedia";
+import { Kicker } from "@/ui/kicker";
+import { useDark } from "@/ui/use-dark";
+import { useMedia } from "@/ui/use-media";
+import { buttonClass } from "@/ui/button";
 
 /*
  * The live examples of the foundations: the tokens, type, grid, rules and
@@ -218,10 +219,10 @@ export function ButtonsDemo() {
       <div className="ud-buttons__row">
         <div className="soc ud-soc">
           <div className="soc__row">
-            <button type="button" className="soc__btn" onClick={() => setLast("Load more")}>
+            <button type="button" className={buttonClass()} onClick={() => setLast("Load more")}>
               Load more
             </button>
-            <button type="button" className="soc__btn soc__btn--go" onClick={() => setLast("Post")}>
+            <button type="button" className={buttonClass({ variant: "go" })} onClick={() => setLast("Post")}>
               Post
             </button>
           </div>

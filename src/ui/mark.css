@@ -1,0 +1,11 @@
+/* Mark and MarkSetOut (mark.tsx). */
+@layer components {
+  .s1-mark rect { fill: var(--s1-ink); }
+  .s1-mark path { fill: none; stroke: var(--s1-paper); stroke-width: 5; }
+
+  .s1-mark-set-out { width: 96px; height: 96px; }
+  .s1-mark-set-out__block { fill: var(--s1-ink); }
+  .s1-mark-set-out__guide { fill: none; stroke: var(--s1-ink-3); stroke-width: 0.8; }
+  .s1-mark-set-out__cross { fill: none; stroke: var(--s1-paper); stroke-width: 3.75; }
+  .s1-mark-set-out__pin { fill: var(--s1-ink); }
+}

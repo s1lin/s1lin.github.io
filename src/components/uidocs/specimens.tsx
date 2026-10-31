@@ -4,6 +4,7 @@ import { Avatar, Icon } from "@/components/social/common";
 import { SOCIAL_COPY } from "@/components/social/copy";
 import { stamp } from "@/lib/life/life";
 import { ARC } from "@/lib/life/palette";
+import { buttonClass } from "@/ui/button";
 
 /*
  * The social parts as specimens: the markup and classes of Comments, Composer,
@@ -115,10 +116,10 @@ function SignedOutBox() {
         <textarea rows={3} disabled placeholder={c.signedOutPlaceholder} aria-label={c.signedOutPlaceholder} />
         <div className="soc__bar">
           <span className="soc__bar-out">
-            <button type="button" className="soc__btn soc__btn--go" onClick={() => setNote(true)}>
+            <button type="button" className={buttonClass({ variant: "go" })} onClick={() => setNote(true)}>
               {c.createAccount}
             </button>
-            <button type="button" className="soc__btn soc__btn--go" onClick={() => setNote(true)}>
+            <button type="button" className={buttonClass({ variant: "go" })} onClick={() => setNote(true)}>
               {c.signIn}
             </button>
           </span>
@@ -180,7 +181,7 @@ export function ComposerSpecimen() {
                       {used ? (
                         <span className="soc__inbox">{c.inBox}</span>
                       ) : (
-                        <button type="button" className="soc__btn soc__btn--sm" onClick={() => setBody(POLISHED)}>
+                        <button type="button" className={buttonClass({ size: "sm" })} onClick={() => setBody(POLISHED)}>
                           {c.use}
                         </button>
                       )}
@@ -205,7 +206,7 @@ export function ComposerSpecimen() {
           <textarea rows={3} value={body} onChange={(e) => setBody(e.target.value)} placeholder={c.placeholder} aria-label={c.placeholder} />
           <div className="soc__bar">
             <span className="soc__bar-start">
-              <span className="soc__chip soc__chip--model">
+              <span className={buttonClass({ variant: "chip" }, "soc__chip soc__chip--model")}>
                 <Icon name="half" size={14} />
                 <span className="soc__chip-label">qwen-3.8</span>
               </span>
@@ -216,7 +217,7 @@ export function ComposerSpecimen() {
             </span>
             <span className="soc__bar-end">
               <span className="soc__len">{body.length} / 2,000</span>
-              <button type="button" className="soc__btn soc__btn--go" disabled={!body.trim()} onClick={() => setNote("A specimen: nothing was posted.")}>
+              <button type="button" className={buttonClass({ variant: "go" })} disabled={!body.trim()} onClick={() => setNote("A specimen: nothing was posted.")}>
                 {c.send}
               </button>
             </span>
@@ -243,17 +244,17 @@ export function SignInSpecimen() {
       <div className="soc__signin">
         <p>{c.signInPrompt}</p>
         <div className="soc__row">
-          <button type="button" className="soc__btn soc__btn--go" onClick={() => setNote(true)}>
+          <button type="button" className={buttonClass({ variant: "go" })} onClick={() => setNote(true)}>
             {c.createAccount}
           </button>
-          <button type="button" className="soc__btn soc__btn--go" onClick={() => setNote(true)}>
+          <button type="button" className={buttonClass({ variant: "go" })} onClick={() => setNote(true)}>
             {c.signIn}
           </button>
         </div>
       </div>
       <p className="soc__who">
         <span>{c.signedInAs("Mina")}</span>
-        <button type="button" className="soc__link" onClick={() => setNote(true)}>
+        <button type="button" className={buttonClass({ variant: "link" })} onClick={() => setNote(true)}>
           {c.signOut}
         </button>
       </p>

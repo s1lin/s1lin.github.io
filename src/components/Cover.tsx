@@ -1,12 +1,14 @@
 import { useCallback, useRef } from "react";
 import { banner } from "ascii.rest/banner";
-import { AsciiArt } from "@/components/AsciiArt";
-import { Roundel } from "@/components/bits";
 import { BrickMachine } from "@/components/BrickLocator";
 import { MetroBar, MetroCaption, MetroMap } from "@/components/Metro2Line";
 import { ARCH_BANNER } from "@/content/ascii-stills";
 import { useMetro2Line } from "@/hooks/useMetro2Line";
 import type { Insets } from "@/lib/metro";
+import { AsciiArt } from "@/ui/ascii-art";
+import { Kicker } from "@/ui/kicker";
+import { Plate } from "@/ui/plate";
+import { Roundel } from "@/ui/roundel";
 
 // No colour: it types in the page's ink.
 const ARCH = banner("arch", { font: "block", shadow: "single", effect: "type" });
@@ -56,7 +58,7 @@ export function Cover() {
         <p className="cover__play-label">
           <span lang="ja">遊</span> Two working models, not renderings. Try them.
         </p>
-        <figure className="machine machine--metro" ref={plate}>
+        <Plate as="figure" className="machine machine--metro" ref={plate}>
           <header className="machine__head">
             <p className="machine__no">
               <span lang="ja">路線</span> No. 01
@@ -71,15 +73,13 @@ export function Cover() {
             </p>
           </MetroMap>
           <MetroCaption m={m} lead="Plate —" />
-        </figure>
+        </Plate>
         <BrickMachine />
       </div>
 
       <div className="wrap cover__band">
         <div className="cover__feature">
-          <p className="kicker">
-            <span lang="ja">特集</span> Special feature
-          </p>
+          <Kicker ja="特集">Special feature</Kicker>
           <AsciiArt piece={ARCH} label="ARCH, in ASCII" still={ARCH_BANNER} />
           <p className="cover__ruby">
             <span lang="ja">建築</span> &nbsp;/&nbsp; deciding where the weight goes, before anything stands

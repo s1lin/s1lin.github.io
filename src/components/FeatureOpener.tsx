@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Folio, Kicker } from "@/components/bits";
 import { GlitchTitle } from "@/components/effects";
+import { Folio } from "@/ui/folio";
+import { Kicker } from "@/ui/kicker";
 
 /*
  * Route map of my work, drawn as a network map along time: left to right runs

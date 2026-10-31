@@ -1,7 +1,7 @@
 import type { ReactNode, RefObject } from "react";
 import { METRO_CITIES } from "@/content/metro-cities";
 import { nameOf, type Metro2Line } from "@/hooks/useMetro2Line";
-import { cn } from "@/lib/utils";
+import { cn } from "@/ui/cn";
 
 /** Where anyone can draw, explore and adjust a network of their own: the Metro2Line toolbox. */
 export const MAKE_YOUR_OWN = "https://aha.tokensbeat.com/#/metro";

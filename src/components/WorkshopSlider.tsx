@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
-import { Roundel } from "@/components/bits";
 import { MAKE_YOUR_OWN } from "@/components/Metro2Line";
 import { METRO_CITIES } from "@/content/metro-cities";
-import { useDark } from "@/hooks/useDark";
 import { clone, parse, step, type Grid } from "@/lib/life/life";
 import { ARC, byAge } from "@/lib/life/palette";
 import gliderGun from "@/lib/life/seeds/glider-gun.txt?raw";
 import { lineColour, type MetroCity } from "@/lib/metro";
+import { Roundel } from "@/ui/roundel";
+import { useDark } from "@/ui/use-dark";
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 

@@ -1,5 +1,5 @@
 /* Comments, reactions and shapes (components/social). On the blog's paper and ink; on the Life page the primaries of .life. */
-.soc { --soc-red: var(--red, #d62d20); --soc-blue: var(--blue, #1d56b8); --soc-yellow: var(--yellow, #f2b705); margin: 56px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule-strong); text-align: left; font-family: var(--f-sans); color: var(--sumi); }
+.soc { --soc-red: var(--red, #d62d20); --soc-blue: var(--blue, #1d56b8); --soc-yellow: var(--yellow, #f2b705); --s1-accent: var(--soc-red); margin: 56px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule-strong); text-align: left; font-family: var(--f-sans); color: var(--sumi); }
 .soc * { text-indent: 0; text-align: left; letter-spacing: normal; }
 .soc h2 { font: 400 clamp(26px, 3.4vw, 38px)/1.1 var(--f-display); margin: 0; }
 .soc h3 { font: 800 15px/1.2 var(--f-sans); margin: 10px 0 4px; }
@@ -8,19 +8,14 @@
 .soc__small { font: 400 12px/1.5 var(--f-mono); color: var(--ink-3); margin: 10px 0; max-width: 62ch; }
 .soc__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .soc__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.soc__btn, .soc__link { font: 500 12px/1 var(--f-mono); cursor: pointer; }
-.soc__btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 40px; padding: 0 16px; line-height: 1; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); text-decoration: none; }
-.soc .soc__btn { text-align: center; }
-.soc__btn--go { background: var(--sumi); color: var(--paper); box-shadow: 3px 3px 0 var(--soc-red); }
-.soc__btn:disabled { opacity: 0.5; cursor: default; }
-.soc__btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--soc-red); }
-.soc__link { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+/* The buttons are the library's Button (src/ui/button.tsx): plain, go (its offset shadow in the red above), chip and link. */
+.soc .s1-btn--plain, .soc .s1-btn--go { text-align: center; }
 .soc__signin { margin: 12px 0; padding: 14px 16px; border: 1px solid var(--rule-strong); background: var(--paper-2); }
 .soc__signin p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
 .soc__who { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 10px 0; font: 500 12px/1.4 var(--f-mono); color: var(--ink-2); }
 .soc textarea, .soc input { width: 100%; box-sizing: border-box; font: 400 15px/1.5 var(--f-sans); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); padding: 10px 12px; border-radius: 0; resize: vertical; }
 .soc textarea { font-size: 16px; line-height: 1.55; padding: 14px 16px; }
-.soc textarea:focus-visible, .soc input:focus-visible, .soc__btn:focus-visible, .soc__react:focus-visible, .soc__link:focus-visible, .soc__shape-open:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
+.soc textarea:focus-visible, .soc input:focus-visible, .soc .s1-btn:focus-visible, .soc__react:focus-visible, .soc__shape-open:focus-visible { outline: 2px solid var(--soc-blue); outline-offset: 2px; }
 .soc__len { margin-left: auto; font: 400 11px/1 var(--f-mono); color: var(--ink-3); }
 .soc__note { font: 500 12px/1.5 var(--f-mono); margin: 4px 0; }
 .soc__note--ok { color: #1f8f33; }
@@ -75,7 +70,6 @@
 @media (max-width: 900px) { .post__social { grid-column: 1 / -1; } }
 /* On the front page the letters to the editor sit under "Find the editor.", above the motto. */
 .letters .soc { margin-top: 0; }
-@media (prefers-reduced-motion: reduce) { .soc__btn:active:not(:disabled) { transform: none; } }
 
 /* Who reposted this target: one quiet line under the heading, wrapping on a phone. */
 .soc__by { margin: 6px 0 0; font: 500 12px/1.5 var(--f-mono); color: var(--ink-2); overflow-wrap: anywhere; }
@@ -98,16 +92,12 @@
 .soc__bar-start, .soc__bar-end, .soc__bar-out { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .soc__bar-end { margin-left: auto; gap: 12px; }
 .soc__bar-out { margin-left: auto; }
-.soc__bar .soc__btn { min-height: 36px; padding: 0 14px; }
-.soc__btn--sm { min-height: 30px !important; padding: 0 10px !important; font-size: 11px; }
+.soc__bar :is(.s1-btn--plain, .s1-btn--go):not(.s1-btn--sm) { min-height: 36px; padding: 0 14px; }
 .soc__len { margin-left: 0; font: 400 11px/1 var(--f-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .soc__len.is-over { color: var(--soc-red); font-weight: 600; }
 
-/* The model chip and the Revise button: pills, quieter than Post. */
+/* The model chip (Button's "chip") and the Revise button: pills, quieter than Post. */
 .soc__chipwrap { position: relative; display: inline-flex; }
-.soc__chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px 0 8px; font: 500 12px/1 var(--f-mono); color: var(--sumi); background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 999px; cursor: pointer; text-decoration: none; max-width: 100%; }
-.soc__chip:hover { background: var(--paper-2); }
-.soc__chip[aria-expanded="true"] { background: var(--paper-2); }
 .soc__chip.is-quiet { color: var(--ink-3); border-style: dashed; cursor: default; }
 .soc__chip--add { border-style: dashed; }
 .soc__chip .soc__icon--half { color: var(--soc-blue); }
@@ -186,7 +176,7 @@
   .soc__bar-start { flex: 1 1 100%; }
   .soc__bar-end { flex: 1 1 100%; justify-content: flex-end; }
   .soc__bar-out { flex: 1 1 100%; }
-  .soc__bar-out .soc__btn { flex: 1 1 0; }
+  .soc__bar-out .s1-btn { flex: 1 1 0; }
   .soc__chips { flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; mask-image: linear-gradient(to right, #000 85%, transparent); }
   .soc__chips::-webkit-scrollbar { display: none; }
   .soc__ask { max-width: 92%; }

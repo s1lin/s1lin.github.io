@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { Screen } from "@/components/bits";
 import { LoupeShot } from "@/components/effects";
 import { Feature } from "@/components/Feature";
 import { HiRainFigures } from "@/components/HiRainFigures";
 import { TokensbeatSection } from "@/components/TokensbeatFigures";
+import { Screen } from "@/ui/screen";
 
 /** A screenshot figure: browser frame, loupe, caption. Images are 1600 × 1000. */
 function Shot({ bar, src, alt, children }: { bar: string; src: string; alt: string; children: ReactNode }) {

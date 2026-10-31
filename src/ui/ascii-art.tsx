@@ -1,7 +1,8 @@
 import { useEffect, useRef, type Ref } from "react";
 import { mount, type MountOptions, type Piece } from "ascii.rest";
-import { useHydrated } from "@/hooks/useHydrated";
-import { cn } from "@/lib/utils";
+import { cn } from "./cn";
+import { useHydrated } from "./use-hydrated";
+import "./ascii-art.css";
 
 type Props = {
   piece: Piece;
@@ -31,7 +32,7 @@ export function AsciiArt({ piece, options, label, still = "", className }: Props
     return mount(el, piece, JSON.parse(key) as MountOptions);
   }, [piece, key, live]);
 
-  const cls = cn("ascii", className);
+  const cls = cn("s1-ascii", className);
   if (onCanvas && live) {
     return <canvas ref={ref as Ref<HTMLCanvasElement>} className={cls} role="img" aria-label={label} />;
   }
