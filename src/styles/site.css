@@ -262,10 +262,12 @@ figcaption, .cap {
 
 pre, .ascii { font-family: var(--f-mono); font-variant-ligatures: none; }
 /* ascii.rest pieces. Its <ascii-art> element ships these two rules; the React pieces do not,
-   so they live here: a font for the line and block characters only, and a bare <pre>. */
+   so they live here: a font for the line and block characters only, and a bare <pre>.
+   The font is ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept here rather than
+   fetched from ascii.rest: Google's JetBrains Mono has no box-drawing characters. */
 @font-face {
   font-family: "ascii.rest mono";
-  src: url(https://ascii.rest/fonts/ascii-rest-mono.woff2) format("woff2");
+  src: url("./ascii-rest-mono.woff2?no-inline") format("woff2");
   unicode-range: U+00B0, U+00B7, U+2022, U+2500-259F, U+25CF;
   font-display: swap;
 }
