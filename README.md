@@ -117,20 +117,25 @@ Google's unicode-range slices: about 120 per Japanese face and 100 for Noto
 Serif SC, so a page fetches only the slices that hold characters it shows, and
 Chinese in a new post needs no list of characters.
 
-`src/styles/fonts.css`, imported by `src/index.css` and so by every page, holds
-the `@font-face` rules, written by `scripts/fonts.mjs` with the weights and
-styles the styles use. Vite copies the files into `dist/assets/` under hashed
-names (`?no-inline` stops it pasting the smallest into the stylesheet), and a
-browser fetches one only when a page shows a character in its range.
+`scripts/fonts.mjs` writes the `@font-face` rules, with the weights and styles
+the styles use, in two stylesheets. `src/styles/fonts.css`, imported by
+`src/index.css`, holds the Latin faces and the front page's cut (below), about
+2 KB gzipped, in the stylesheet that holds up the first paint.
+`src/styles/fonts-cjk.css`, the Japanese and Chinese slices (several hundred
+rules, about 70 KB gzipped), is attached by `src/fonts.ts` once the page runs,
+so it never delays it; until it arrives, other Japanese and Chinese wait in a
+system face (`font-display: swap`). Vite copies the font files into
+`dist/assets/` under hashed names (`?no-inline` stops it pasting the smallest
+into a stylesheet), and a browser fetches one only when a page shows a
+character in its range.
 
 The front page's Japanese and Chinese, some 70 characters each, would still
 touch about 45 slices (1.4 MB), so the script also takes a cut of each of those
 faces holding just the characters the built front page shows (Google Fonts'
 `text=` subsets, as the issue used to load them, saved in `src/styles/fonts/`
-as `*-front-*.woff2`). They come after the slices, so the browser asks them
-first for their characters and the slices for anything else: a character the
-cut lacks costs a slice, never the look. The front page loads about 220 KB of
-type. Re-run it after changing a package's version, a weight in the list at the
+as `*-front-*.woff2`). The slices leave those characters out, so the cut alone
+answers for them and the slices for anything else: a character the cut lacks
+costs a slice, never the look. The front page loads about 220 KB of type. Re-run it after changing a package's version, a weight in the list at the
 top of the script, or the front page's Japanese or Chinese (it reads the built
 page, and needs Google Fonts reachable):
 
@@ -141,8 +146,8 @@ npm run build && node scripts/fonts.mjs && npm run build
 The fonts are under the SIL Open Font License; the script writes each one's
 copyright notice and the licence into `public/assets/OFL.txt`, which is served
 beside the files and linked from the colophon. The HTML shells (`index.html`,
-`blog/`, `life/`) load no fonts of their own; a new page gets them by importing
-`src/index.css`. The ascii.rest pieces take their line and block characters
+`blog/`, `life/`) load no fonts of their own: a new page's entry imports
+`./index.css` and `./fonts`, as `src/main.tsx` does. The ascii.rest pieces take their line and block characters
 from "ascii.rest mono", ascii.rest's 3 KB cut of JetBrains Mono (OFL), kept in
 `src/styles/fonts/` since Google's JetBrains Mono leaves those characters out.
 

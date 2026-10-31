@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { BlogPage } from "@/components/Blog";
 import "./index.css";
+import "./fonts";
 import "./styles/tex.css";
 import "./styles/social.css";
 

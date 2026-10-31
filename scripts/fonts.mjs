@@ -1,10 +1,17 @@
-// Writes the issue's @font-face rules (src/styles/fonts.css) and the licence
-// that ships beside the font files (public/assets/OFL.txt). The faces come from
-// Fontsource's npm packages: Google Fonts' own woff2 files, cut into Google's
-// unicode-range slices, so a page fetches only the slices holding characters it
-// shows. Vite copies each file it is pointed at into dist/assets/ with a hash.
-// The front page also gets a cut of its own Japanese and Chinese (see FRONT
-// below), read from the built page and fetched from Google Fonts. Run it after
+// Writes the issue's @font-face rules and the licence that ships beside the font
+// files (public/assets/OFL.txt). The faces come from Fontsource's npm packages:
+// Google Fonts' own woff2 files, cut into Google's unicode-range slices, so a
+// page fetches only the slices holding characters it shows. Vite copies each
+// file it is pointed at into dist/assets/ with a hash.
+//
+//   src/styles/fonts.css      the Latin faces and the front page's cut of its
+//                             Japanese and Chinese (see FRONT below); imported by
+//                             src/index.css, so it holds up the first paint
+//   src/styles/fonts-cjk.css  the Japanese and Chinese slices, several hundred
+//                             rules; src/fonts.ts attaches it once the page is up
+//
+// The front page's cut is read from the built page and fetched from Google
+// Fonts. Run it after
 // changing a package's version, the weights below, or the front page's Japanese
 // or Chinese, and commit what it writes:
 //
@@ -92,11 +99,12 @@ function merge(a, b) {
 // The front page's cut. Its Japanese and Chinese, some 70 characters each, lie
 // in about 45 different slices (1.4 MB), so each of these faces also gets one
 // small file holding just the characters the built front page shows, cut by
-// Google Fonts (its text= subsets, as the issue used to load them). Written
-// after the slices, the cut is asked first for its characters; anything else
-// still comes from a slice, so a character the cut lacks costs bytes, not looks.
-// Text the page only sets once it runs is added by hand: the runhead's switch
-// reads 紙 in dark mode, which the built page never is.
+// Google Fonts (its text= subsets, as the issue used to load them). The slices
+// leave those characters out, so the cut alone answers for them, whichever
+// stylesheet comes first; anything else still comes from a slice, so a
+// character the cut lacks costs bytes, not looks. Text the page only sets once
+// it runs is added by hand: the runhead's switch reads 紙 in dark mode, which
+// the built page never is.
 const FRONT_EXTRA = { ja: "紙", zh: "" };
 
 function frontText() {
@@ -123,14 +131,41 @@ async function get(url) {
   return res;
 }
 
+// A unicode-range as [first, last] code points, and back.
+const parseRange = (range) =>
+  range.split(",").map((part) => {
+    const [a, b = a] = part.trim().replace(/^U\+/i, "").split("-").map((hex) => parseInt(hex, 16));
+    return [a, b];
+  });
+const formatRange = (spans) => spans.map(([a, b]) => `U+${a.toString(16)}${a === b ? "" : `-${b.toString(16)}`}`).join(",");
+
+// A slice's range without the cut's characters (unchanged when it held none of
+// them, so equal ranges stay equal and still sit side by side).
+function without(range, held) {
+  const spans = parseRange(range);
+  if (!spans.some(([a, b]) => held.some((c) => c >= a && c <= b))) return range;
+  const out = [];
+  for (let [a, b] of spans) {
+    for (const c of held) {
+      if (c < a || c > b) continue;
+      if (c > a) out.push([a, c - 1]);
+      a = c + 1;
+    }
+    if (a <= b) out.push([a, b]);
+  }
+  return out.length ? formatRange(out) : "";
+}
+
 // One file per weight, with the same weight the slices declare, so the browser
-// takes the cut and the slices as one face.
+// takes the cut and the slices as one face. Returns its rules and the code
+// points every weight of it holds, sorted.
 async function frontCut(f, slices, text) {
   const weights = [...new Set(slices.flatMap((s) => s.faces.map((face) => face.weight)))];
   const query = `${f.family.replaceAll(" ", "+")}:wght@${weights.map((w) => w.replace(" ", "..")).join(";")}`;
   const sheet = await (await get(`https://fonts.googleapis.com/css2?family=${query}&text=${encodeURIComponent(text)}&display=swap`)).text();
   let rules = "";
   const got = [];
+  let held = null;
   for (const [, block] of sheet.matchAll(/@font-face\s*\{([^}]*)\}/g)) {
     const weight = field(block, "font-weight");
     const range = field(block, "unicode-range");
@@ -140,35 +175,66 @@ async function frontCut(f, slices, text) {
     writeFileSync(new URL(`src/styles/fonts/${name}`, root), Buffer.from(await (await get(src)).arrayBuffer()));
     rules += `@font-face { font-family: "${f.family}"; font-weight: ${weight}; font-display: swap; src: url("./fonts/${name}?no-inline") format("woff2"); unicode-range: ${range}; }\n`;
     got.push(weight);
+    const points = new Set(parseRange(range).flatMap(([a, b]) => Array.from({ length: b - a + 1 }, (_, k) => a + k)));
+    held = held ? new Set([...held].filter((c) => points.has(c))) : points;
   }
   if (got.length !== weights.length) throw new Error(`${f.family}: Google Fonts sent ${got.join(", ")}, not ${weights.join(", ")}`);
-  return rules;
+  return { rules, held: [...held].sort((a, b) => a - b) };
 }
 
 const version = (pkg) => JSON.parse(read(`node_modules/${pkg}/package.json`)).version;
-let css = `/*
- * The issue's typefaces, served from this site. Generated by scripts/fonts.mjs
- * from these packages; do not edit by hand. Licences (SIL Open Font License 1.1)
- * in public/assets/OFL.txt, served beside the files.
-${FAMILIES.map((f) => ` *   ${f.family}: ${f.pkg} ${version(f.pkg)}`).join("\n")}
+const header = (what, families) => `/*
+ * ${what}
+ * Generated by scripts/fonts.mjs from these packages; do not edit by hand.
+ * Licences (SIL Open Font License 1.1) in public/assets/OFL.txt, served beside the files.
+${families.map((f) => ` *   ${f.family}: ${f.pkg} ${version(f.pkg)}`).join("\n")}
  * Faces that share a unicode-range are written together, whatever their family.
  * "?no-inline" keeps Vite from pasting slices under 4 KB into the stylesheet,
  * where every page would download them, wanted or not.
  */
 `;
-const sliced = FAMILIES.map(slicesOf);
 let faces = 0;
-for (const { range, faces: list } of sliced.reduce(merge)) {
-  for (const { family, pkg, style, weight, file } of list) {
-    const italic = style === "italic" ? " font-style: italic;" : "";
-    css += `@font-face { font-family: "${family}";${italic} font-weight: ${weight}; font-display: swap; src: url("${pkg}/files/${file}?no-inline") format("woff2"); unicode-range: ${range}; }\n`;
-    faces++;
-  }
-}
+const rules = (slices) =>
+  slices
+    .flatMap(({ range, faces: list }) =>
+      list.map(({ family, pkg, style, weight, file }) => {
+        faces++;
+        const italic = style === "italic" ? " font-style: italic;" : "";
+        return `@font-face { font-family: "${family}";${italic} font-weight: ${weight}; font-display: swap; src: url("${pkg}/files/${file}?no-inline") format("woff2"); unicode-range: ${range}; }\n`;
+      }),
+    )
+    .join("");
+
+const sliced = FAMILIES.map(slicesOf);
+const latin = FAMILIES.filter((f) => !f.front);
+const cjk = FAMILIES.filter((f) => f.front);
 const front = frontText();
-css += `\n/* The front page's cut (src/styles/fonts/*-front-*.woff2), last so it is asked first:\n *   ja ${front.ja}\n *   zh ${front.zh}\n */\n`;
-for (const [i, f] of FAMILIES.entries()) if (f.front) css += await frontCut(f, sliced[i], front[f.front]);
-writeFileSync(new URL("src/styles/fonts.css", root), css);
+const cuts = new Map();
+for (const [i, f] of FAMILIES.entries()) if (f.front) cuts.set(f, await frontCut(f, sliced[i], front[f.front]));
+
+writeFileSync(
+  new URL("src/styles/fonts.css", root),
+  header("The issue's typefaces, served from this site: the Latin faces and the front page's cut.", FAMILIES) +
+    rules(sliced.filter((_, i) => !FAMILIES[i].front).reduce(merge)) +
+    `\n/* The front page's cut (src/styles/fonts/*-front-*.woff2). The rest of these faces,\n   a slice at a time, is in fonts-cjk.css.\n *   ja ${front.ja}\n *   zh ${front.zh}\n */\n` +
+    [...cuts.values()].map((cut) => cut.rules).join(""),
+);
+writeFileSync(
+  new URL("src/styles/fonts-cjk.css", root),
+  header(
+    "The Japanese and Chinese faces' slices, attached by src/fonts.ts once the page is up. They leave out the front page's cut, which is in fonts.css.",
+    cjk,
+  ) +
+    rules(
+      sliced
+        .map((slices, i) => {
+          const cut = cuts.get(FAMILIES[i]);
+          return cut && slices.map(({ range, faces: list }) => ({ range: without(range, cut.held), faces: list })).filter((s) => s.range);
+        })
+        .filter(Boolean)
+        .reduce(merge),
+    ),
+);
 
 // One copy of the licence, after every family's notice. The packages carry the
 // same OFL 1.1 text under their own copyright lines; check that they still do.
@@ -192,4 +258,6 @@ ${FAMILIES.find((f) => f.family === "JetBrains Mono").notice}
 
 ${ofl}`,
 );
-console.log(`src/styles/fonts.css: ${faces} sliced faces of ${FAMILIES.length} families and the front page's cut (${[...front.ja].length} ja, ${[...front.zh].length} zh characters); public/assets/OFL.txt`);
+console.log(
+  `src/styles/fonts.css (${latin.map((f) => f.family).join(", ")}; the front page's cut: ${[...front.ja].length} ja, ${[...front.zh].length} zh characters), src/styles/fonts-cjk.css (${cjk.map((f) => f.family).join(", ")}): ${faces} sliced faces; public/assets/OFL.txt`,
+);

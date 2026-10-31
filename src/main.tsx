@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./fonts";
 import "./styles/social.css";
 
 const root = document.getElementById("root")!;
