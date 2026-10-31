@@ -1,4 +1,4 @@
-/** Tokensbeat figure: the plan, drawn as a building section. Apps upstairs, the foundation, the models beneath. */
+/** TokensBeat figure: the plan, drawn as a building section. Apps upstairs, the foundation, the models beneath. */
 
 const BAYS = [76, 232, 388, 544];
 const BAY_W = 144;
@@ -62,9 +62,9 @@ function Section() {
   const pileStep = (RIGHT - people) / MODELS.length;
   return (
     <svg viewBox="0 0 700 462" role="img" aria-labelledby="tb-t tb-d">
-      <title id="tb-t">The plan for Tokensbeat, as a building section</title>
+      <title id="tb-t">The plan for TokensBeat, as a building section</title>
       <desc id="tb-d">
-        What I want Tokensbeat to be. The foundation is one gateway to every model, with one wallet and one ledger; under
+        What I want TokensBeat to be. The foundation is one gateway to every model, with one wallet and one ledger; under
         it, piles reach down to Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM, Qwen and GPUs I run myself. On it
         stand bays: Aha, an agent app for people; WorkGo and InclusifAI, each with its own agent (Obi, Aria), a backend
         looked after for it and its own gateway; and room for the next app.
@@ -148,7 +148,7 @@ export function TokensbeatSection() {
         Drag the plan sideways for the rest of it →
       </p>
       <figcaption>
-        What I want Tokensbeat to be: one foundation that every model plugs into, and apps that move in on top of it, each
+        What I want TokensBeat to be: one foundation that every model plugs into, and apps that move in on top of it, each
         with its own agent, backend and gateway. People use the same building through Aha.
       </figcaption>
     </figure>

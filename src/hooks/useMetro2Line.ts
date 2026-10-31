@@ -70,7 +70,8 @@ export function useMetro2Line({
   const [city, setCity] = useState<MetroCity | null>(null);
   const [only, setOnly] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
-  const [failed, setFailed] = useState(false);
+  // The city whose network failed to load: its note must not follow the reader to the next city.
+  const [failed, setFailed] = useState<string | null>(null);
 
   const shown = quiz ? quiz.answer : slug;
   const riddle = quiz !== null && quiz.picked === null;
@@ -91,7 +92,7 @@ export function useMetro2Line({
     let live = true;
     load(shown).then(
       (c) => live && setCity(c),
-      () => live && setFailed(true),
+      () => live && setFailed(shown),
     );
     return () => {
       live = false;
@@ -138,7 +139,7 @@ export function useMetro2Line({
     shown,
     riddle,
     ready,
-    failed,
+    failed: failed === shown,
     numbers,
     hovered,
     hoverColour: (hovered && lineColour(hovered, hover!, dark)) ?? undefined,

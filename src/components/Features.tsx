@@ -32,8 +32,8 @@ export function Features() {
         id="tokensbeat"
         num="01"
         letter="T"
-        title="Tokensbeat"
-        run="特集 T · Tokensbeat"
+        title="TokensBeat"
+        run="特集 T · TokensBeat"
         lemma="An architect draws the foundation, and other people build on it."
         kanji={["基", "基盤", "foundation"]}
         spec={[
@@ -46,10 +46,10 @@ export function Features() {
           ],
         ]}
         lede="“Support while you build. Serve when you ship.” says the front page, and draws it as two rings. Serve, the inner ring, is what your app runs on in production; Support, the outer orbit, is what helps you while you build. Underneath is the drawing I keep coming back to: one gateway to many models, and a backend built from open-source parts. People get Aha, an agent app. App builders get the platform itself, and move in as tenants."
-        body="Today the models are live, with one key, one wallet and billing; Postgres and auth, storage and realtime, and the agent runtime are in early access, and a guide for moving over from Supabase is coming. A tenant takes any of three pieces, never a bundle: a private gateway with its own console, users and prices, where Tokensbeat sees exactly one key; an agent instance on Pi, the runtime behind Aha, running the tenant's own agent; and, if it wants one, a managed backend. The first two tenants are the next two lines in this issue: WorkGo, whose agent is Obi, and InclusifAI, whose agent is Aria."
+        body="Today the models are live, with one key, one wallet and billing; Postgres and auth, storage and realtime, and the agent runtime are in early access, and a guide for moving over from Supabase is coming. A tenant takes any of three pieces, never a bundle: a private gateway with its own console, users and prices, where TokensBeat sees exactly one key; an agent instance on Pi, the runtime behind Aha, running the tenant's own agent; and, if it wants one, a managed backend. The first two tenants are the next two lines in this issue: WorkGo, whose agent is Obi, and InclusifAI, whose agent is Aria."
         built={[
           b("The foundation.", "A gateway in Go in front of Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM and Qwen, and models on GPUs I run myself. One wallet, one console, and a public plaza of live health probes and prices."),
-          b("Tenant instances.", "The same binary again, with its own database, white-label site, sign-in and staff gate, and exactly one key upstream. A tenant's users never appear in Tokensbeat's ledger, and a daily job reconciles the two."),
+          b("Tenant instances.", "The same binary again, with its own database, white-label site, sign-in and staff gate, and exactly one key upstream. A tenant's users never appear in TokensBeat's ledger, and a daily job reconciles the two."),
           b("Agents on Pi.", "Events, durable state, tools, skills and hosted apps. To the public it is Aha; for a tenant it runs that tenant's agent behind a flag, so going back is one setting."),
           b("A backend to move into.", "Postgres, a REST API and sign-in for each project, with files and realtime beside the data, built from the same open-source parts as Supabase, and trusting the tenant's own sign-in. In early access."),
           b("Support while you build.", "Docs and guides, people reached by ticket, a status page, and a cloud dev box for your agents, in beta. The front page counts what is live, in beta, in early access and still to come, and says which is which."),
@@ -64,7 +64,7 @@ export function Features() {
             <Shot
               bar="tokensbeat.com"
               src="/assets/img/web-tokensbeat-home.webp"
-              alt="Tokensbeat front page: 'Support while you build. Serve when you ship.' above a dark orbit diagram with an inner ring for Serve and an outer orbit for Support."
+              alt="TokensBeat front page: 'Support while you build. Serve when you ship.' above a dark orbit diagram with an inner ring for Serve and an outer orbit for Support."
             >
               tokensbeat.com, 30 October 2026. The front page now splits the platform into Serve and Support; the plan above is what apps move into.
             </Shot>
@@ -87,7 +87,7 @@ export function Features() {
           ["What", "A career operating system: résumés, matching, and agents that do the legwork"],
         ]}
         lede="WorkGo started life as AI for remote jobs, and we have rebuilt it more than once since. The current version treats a career like a rail line: you choose the destination, agents lay the track, and you make the final call."
-        body="I work across the whole stack. In August 2026 I started WorkGo 2.0 again from an empty repository and laid out how it stands, and most of what a user touches today came out of that branch. Before that I wrote much of the matching service and the Go backend it now runs on. WorkGo is also one of the first two tenants on Tokensbeat: Obi already works as an agent with tools and durable runs, so moving him onto Pi is a translation, not a redesign."
+        body="I work across the whole stack. In August 2026 I started WorkGo 2.0 again from an empty repository and laid out how it stands, and most of what a user touches today came out of that branch. Before that I wrote much of the matching service and the Go backend it now runs on. WorkGo is also one of the first two tenants on TokensBeat: Obi already works as an agent with tools and durable runs, so moving him onto Pi is a translation, not a redesign."
         built={[
           b("WorkGo 2.0 web app.", "Résumés with Obi, the in-app coach; a six-step career identity wizard; Smart Match and an application tracker."),
           b("WorkGo Connector.", "OAuth plus MCP, so ChatGPT or Claude can read your own résumés when you ask them to."),
@@ -148,7 +148,7 @@ export function Features() {
           ],
         ]}
         lede="Applying for a grant usually means typing the same company story into forty different forms. InclusifAI gives a founder one Funding Passport and lets it do the typing, while the funders on the other side get a cleaner way to review."
-        body="I have been the main engineer on the founder app since October 2025, and I also build the Partner Hub for funding organizations and the new public site. Founders and the organizations that fund them come in through separate doors, and the AI that scores applications never sees demographic fields. InclusifAI is the other first tenant on Tokensbeat, and Aria the first tenant agent drawn for Pi."
+        body="I have been the main engineer on the founder app since October 2025, and I also build the Partner Hub for funding organizations and the new public site. Founders and the organizations that fund them come in through separate doors, and the AI that scores applications never sees demographic fields. InclusifAI is the other first tenant on TokensBeat, and Aria the first tenant agent drawn for Pi."
         built={[
           b("Funding Passport.", "One founder profile that fills many applications, with Smart Match for grants and investors."),
           b("Aria.", "An AI funding coach that sharpens long answers. Every edit is shown before the founder accepts it."),
