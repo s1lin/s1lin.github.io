@@ -33,11 +33,25 @@ let made = 0;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+/** A toast that stays until dismissed: one with an action, or one given Infinity. */
+const stays = (t: ToastOptions) => !Number.isFinite(t.duration ?? (t.action ? Infinity : 5000));
+
+/** At most five: past that the oldest toast that would leave by itself goes; one waiting on its action stays. */
+function trim(list: Item[]): Item[] {
+  const out = [...list];
+  while (out.length > 5) {
+    const i = out.findIndex((t) => !stays(t));
+    if (i < 0) break;
+    out.splice(i, 1);
+  }
+  return out;
+}
+
 function show(input: string | ToastOptions): string {
   const options = typeof input === "string" ? { title: input } : input;
   const id = options.id ?? `s1-toast-${++made}`;
   const item = { ...options, id };
-  items = items.some((t) => t.id === id) ? items.map((t) => (t.id === id ? item : t)) : [...items, item].slice(-5);
+  items = items.some((t) => t.id === id) ? items.map((t) => (t.id === id ? item : t)) : trim([...items, item]);
   emit();
   return id;
 }
@@ -68,7 +82,10 @@ function One({ item, paused, dismissLabel, words }: { item: Item; paused: boolea
   useEffect(() => {
     if (paused || !Number.isFinite(left.current)) return;
     since.current = Date.now();
-    const t = window.setTimeout(() => toast.dismiss(item.id), left.current);
+    // only this toast: a replacement under the same id (shown a frame later) keeps its own time
+    const t = window.setTimeout(() => {
+      if (items.includes(item)) toast.dismiss(item.id);
+    }, left.current);
     return () => {
       window.clearTimeout(t);
       left.current -= Date.now() - since.current;
