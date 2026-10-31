@@ -14,7 +14,7 @@ import { GlitchTitle } from "@/components/effects";
  * junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught.
  * YoueData runs on past McGill into AwakeAI at a Java interchange, Java being
  * what the two built on. Around it all runs the City builder loop, since the
- * first road in 2003. Dashes are unfinished: Tokensbeat before it
+ * first road in 2003. Dashes are unfinished: TokensBeat before it
  * opened, and everything past NOW.
  *
  * Everything is drawn 90 units in from the left, leaving room for the loop.
@@ -121,7 +121,7 @@ const HIGH_SCHOOL = { kanji: "高校", name: "Pioneer High School", y: 160, left
 /** The kanji's baseline, centred between the loop's rail and the first line across the terminal. */
 const kanjiY = (i: number, n: number) => 101 + (i - (n - 1) / 2) * 18;
 
-// Drawn in this order, so WorkGo crosses over Tokensbeat where it leaves the corridor.
+// Drawn in this order, so WorkGo crosses over TokensBeat where it leaves the corridor.
 const LINES: Line[] = [
   { key: "p", code: "P", name: "Pioneer", since: "2015–2019", live: `M${HIGH_SCHOOL.right} 160 H470` },
   // on past its close, through McGill, into AwakeAI at the Java interchange
@@ -139,7 +139,7 @@ const LINES: Line[] = [
     live: `M870 172 V240 Q870 260 890 260 H${NOW}`, planned: `M${NOW} 260 H${EDGE}`,
   },
   {
-    key: "t", code: "T", name: "Tokensbeat", since: "2026–, opened Oct",
+    key: "t", code: "T", name: "TokensBeat", since: "2026–, opened Oct",
     // under construction from 2026 until it opened, then in service until NOW
     planned: `M1000 76 H1021 L1087 142 H1320 M${NOW} 142 H${EDGE}`, live: `M1320 142 H${NOW}`,
   },
@@ -346,9 +346,9 @@ function RouteMap({ on }: { on: LineKey | null }) {
         care-work recorders) and COO. AwakeAI closes in July 2025 into a junction of architecture,
         cloud ops, React, TypeScript and Python, out of which WorkGo and InclusifAI open in October 2025, and HiRain,
         carrying edge vision, in 2026. EchoSonic, 2022 to 2023, sets out from McGill beside AwakeAI, sound recognition
-        on STM32, and closes into HiRain on its way down, carrying embedded work. WorkGo and InclusifAI share Supabase and Clerk. Tokensbeat, under construction
+        on STM32, and closes into HiRain on its way down, carrying embedded work. WorkGo and InclusifAI share Supabase and Clerk. TokensBeat, under construction
         from 2026, joins them: Go and Gin with WorkGo, PostgreSQL and Stripe with both, then Azure with InclusifAI after
-        WorkGo leaves for its 2.0 stop in August 2026. Tokensbeat opened in October 2026. Past now, all of it is
+        WorkGo leaves for its 2.0 stop in August 2026. TokensBeat opened in October 2026. Past now, all of it is
         planned: Obi and Aria move onto Pi, the managed backend opens, and HiRain's ARC-AGI-3 harness, at 8.8 points,
         aims for 10. Each line's timetable is in the key below the map.
       </desc>
@@ -607,7 +607,7 @@ export function FeatureOpener() {
         </GlitchTitle>
         <p className="dek">
           I work on several lines at once, the way a city runs several metro lines, and each line is one lemma of the
-          theorem on page 04. The newest, Tokensbeat, is the foundation: WorkGo and InclusifAI are moving onto it as
+          theorem on page 04. The newest, TokensBeat, is the foundation: WorkGo and InclusifAI are moving onto it as
           tenants, each keeping its own gateway, its own agent and its own users. Here is the network as of October
           2026.
         </p>
@@ -656,7 +656,7 @@ export function FeatureOpener() {
             out from McGill in 2022, sound recognition on STM32, and closes into HiRain, whose 2.5D detection runs on edge
             chips. Around it all
             runs the loop: city builder, since my first road in SimCity 4 in 2003. YoueData runs on into AwakeAI at a Java
-            interchange, Java being what both were built on. Dashes are unfinished: Tokensbeat before it opened, and everything past now. AwakeAI closed in July 2025,
+            interchange, Java being what both were built on. Dashes are unfinished: TokensBeat before it opened, and everything past now. AwakeAI closed in July 2025,
             when I resigned from the company where I first held the title of architect.
           </figcaption>
         </figure>

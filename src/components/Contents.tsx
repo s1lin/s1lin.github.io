@@ -6,7 +6,7 @@ import { TokenSkyline } from "@/components/TokenSkyline";
 import { POSTS } from "@/content/posts";
 
 const FEATURES: { href: string; letter: string; name: string; page: string }[] = [
-  { href: "#tokensbeat", letter: "T", name: "Tokensbeat", page: "08" },
+  { href: "#tokensbeat", letter: "T", name: "TokensBeat", page: "08" },
   { href: "#workgo", letter: "W", name: "WorkGo", page: "12" },
   { href: "#inclusifai", letter: "I", name: "InclusifAI", page: "16" },
   { href: "#hirain", letter: "H", name: "HiRain", page: "20" },
