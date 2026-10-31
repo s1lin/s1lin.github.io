@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "lint": "oxlint src scripts vite.config.ts",
     "preview": "vite preview",
+    "serve": "python3 -I scripts/serve-local.py",
     "test": "node --test test/*.test.ts"
   },
   "dependencies": {
