@@ -444,7 +444,8 @@ function RouteMap({ on }: { on: LineKey | null }) {
               <title>{s.label}</title>
             </circle>
             {s.href ? (
-              <a href={s.href}>
+              // the timetable carries the same link for the keyboard and screen readers; this one is for the pointer
+              <a href={s.href} tabIndex={-1}>
                 <text className="rm-lbl rm-link" x={sq(s.at.x)} y={s.at.y} textAnchor={s.at.anchor ?? "middle"}>
                   {s.label}
                 </text>
