@@ -1,6 +1,7 @@
 /* Pagination (pagination.tsx): square mono steps, the page shown in reverse. Its own container: narrow, the numbers go. */
 @layer components {
-  .s1-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; container-type: inline-size; min-width: 0; }
+  /* A size container takes no width from its content: it is given the row's, so it never collapses in a flex row. */
+  .s1-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; container-type: inline-size; box-sizing: border-box; width: 100%; flex: 1 1 auto; min-width: 0; }
   .s1-pages__summary, .s1-pages__status { margin: 0; font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink-2); font-variant-numeric: tabular-nums; }
   /* "Page 3 of 12" is read always, and seen only when the numbers are not. */
   .s1-pages__status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

@@ -24,7 +24,7 @@
   .s1-check__label { min-width: 0; overflow-wrap: anywhere; }
   .s1-check__hint { display: block; margin: 0 0 0 28px; font: 400 13px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); }
 
-  .s1-check--disabled .s1-check__row { color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-check--disabled .s1-check__row, .s1-check__row:has(.s1-check__input:disabled) { color: var(--s1-ink-3); cursor: not-allowed; }
   .s1-check__input:disabled + .s1-check__box { border-style: dashed; border-color: var(--s1-ink-3); }
   .s1-check__input:disabled:checked + .s1-check__box { background: var(--s1-ink-3); border-style: solid; }
 

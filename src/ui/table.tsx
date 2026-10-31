@@ -1,3 +1,5 @@
+"use client";
+
 import { useId, useRef, type CSSProperties, type Key, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Skeleton } from "./skeleton";

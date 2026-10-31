@@ -5,7 +5,7 @@
 @layer components {
   .s1-table { min-width: 0; max-width: 100%; }
   .s1-table__frame {
-    position: relative; box-sizing: border-box; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin;
+    position: relative; box-sizing: border-box; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; color-scheme: var(--s1-scheme);
     /* the shades: paper covers that scroll with the content, over shadows that stay at the frame's edges */
     background:
       linear-gradient(to right, var(--s1-paper) 40%, transparent) left / 32px 100% no-repeat local,

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useId, useState } from "react";
 import type { KatexOptions } from "katex";
 import { cn } from "./cn";

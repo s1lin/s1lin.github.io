@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, type Ref } from "react";
 import { mount, type MountOptions, type Piece } from "ascii.rest";
 import { cn } from "./cn";

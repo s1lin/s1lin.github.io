@@ -1,3 +1,5 @@
+"use client";
+
 import type { Ref, SelectHTMLAttributes } from "react";
 import { cn } from "./cn";
 import { useField } from "./field";
@@ -28,7 +30,7 @@ export function Select({ size = "md", placeholder, invalid, className, id, requi
   return (
     <span
       className={cn("s1-select", `s1-select--${size}`, rest.multiple && "s1-select--multiple", className)}
-      data-invalid={field["aria-invalid"] ? "" : undefined}
+      data-invalid={field["aria-invalid"] !== undefined && field["aria-invalid"] !== false && field["aria-invalid"] !== "false" ? "" : undefined}
       data-disabled={field.disabled ? "" : undefined}
     >
       <select ref={ref} className="s1-select__control" {...rest} defaultValue={defaultValue} {...field}>

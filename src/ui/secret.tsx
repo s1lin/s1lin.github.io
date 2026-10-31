@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { Button } from "./button";
 import { cn } from "./cn";
@@ -16,7 +18,7 @@ type Props = {
   /** Shown at first, when it is not. */
   defaultRevealed?: boolean;
   onRevealedChange?: (revealed: boolean) => void;
-  /** How many characters to leave showing at the start and the end while it is hidden: [3, 4] shows "sk-••••…a1b2". */
+  /** Characters left showing at the start and the end while it is hidden: [3, 4] shows "sk-••••…a1b2". None when they would show more than half of it. */
   keep?: [number, number];
   /** Leave out the Copy button. */
   noCopy?: boolean;
@@ -52,7 +54,8 @@ export function Secret({
     if (revealed === undefined) setOwn(next);
     onRevealedChange?.(next);
   };
-  const [start, end] = keep;
+  // The ends show only while they leave at least half the value hidden, so a short secret is never shown whole.
+  const [start, end] = keep[0] + keep[1] <= value.length / 2 ? keep : [0, 0];
   const head = value.slice(0, Math.max(0, start));
   const tail = end > 0 ? value.slice(-end) : "";
 

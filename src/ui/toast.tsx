@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+"use client";
+
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "./button";
 import { cn } from "./cn";
 import { Glyph, type Status } from "./glyph";
@@ -122,10 +124,10 @@ type Props = {
  * something just done, in a polite live region that is in the page from the
  * start, so each new toast is read out without moving focus; a toast called
  * as a dialog closes is shown a frame later, once the page behind it is
- * live again. A toast leaves
- * after five seconds, but not while the pointer is over the toasts or focus is
- * in them; one with an action stays until it is dismissed, so there is time to
- * reach its button.
+ * live again. A toast leaves after five seconds, but not while the pointer is
+ * over the toasts or focus is in them; one with an action stays until it is
+ * dismissed, so there is time to reach its button. Dismissing the toast that
+ * has focus moves focus to the next one, or back to where it came from.
  */
 export function Toaster({ position = "bottom-end", label = "Notifications", dismissLabel = "Dismiss", statusLabels = SAID, className }: Props) {
   // A frame late: a toast called as a modal dialog closes ("close(); toast(…)") then lands after the page
@@ -146,15 +148,40 @@ export function Toaster({ position = "bottom-end", label = "Notifications", dism
   }, []);
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
+  const ol = useRef<HTMLOListElement>(null);
+  // Where focus came from, to give it back when the toast that held it is gone.
+  const back = useRef<HTMLElement | null>(null);
+  const held = useRef(false);
+  // After toasts come and go: a toast removed under the pointer or with focus fires no leave or blur, so
+  // read both again; and if focus was in the toast that went, move it to the next toast, or back.
+  useLayoutEffect(() => {
+    const el = ol.current;
+    if (!el) return;
+    if (held.current && !el.contains(document.activeElement)) {
+      const next = el.querySelector<HTMLElement>(".s1-toast__close");
+      if (next) next.focus();
+      else if (back.current?.isConnected) back.current.focus({ preventScroll: true });
+    }
+    held.current = el.contains(document.activeElement);
+    setFocus(held.current);
+    setHover(el.matches(":hover"));
+  }, [list]);
   return (
     <section className={cn("s1-toaster", `s1-toaster--${position}`, className)} aria-label={label}>
       <ol
+        ref={ol}
         aria-live="polite"
         onPointerEnter={() => setHover(true)}
         onPointerLeave={() => setHover(false)}
-        onFocus={() => setFocus(true)}
+        onFocus={(e) => {
+          if (!held.current && !e.currentTarget.contains(e.relatedTarget as Node | null)) back.current = e.relatedTarget as HTMLElement | null;
+          held.current = true;
+          setFocus(true);
+        }}
         onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false);
+          if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+          held.current = false;
+          setFocus(false);
         }}
       >
         {list.map((t) => (

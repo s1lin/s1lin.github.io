@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Copy } from "./copy";
@@ -36,7 +38,14 @@ export function Code({ children, block = false, copy = false, label, className }
           {copy && <Copy value={children} label={`Copy ${name}`} />}
         </div>
       )}
-      <pre className="s1-code-block__pre" ref={pre} tabIndex={over ? 0 : undefined} data-overflow={over ? "" : undefined}>
+      <pre
+        className="s1-code-block__pre"
+        ref={pre}
+        tabIndex={over ? 0 : undefined}
+        role={over ? "region" : undefined}
+        aria-label={over ? (typeof label === "string" ? label : "Code") : undefined}
+        data-overflow={over ? "" : undefined}
+      >
         <code>{children}</code>
       </pre>
     </div>

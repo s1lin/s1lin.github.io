@@ -73,6 +73,14 @@ test("a part that draws in the tokens imports tokens.css before its own styleshe
   }
 });
 
+test("a part or hook that uses React's hooks or handlers is marked \"use client\", for apps with server components", () => {
+  for (const f of readdirSync(UI).filter((x) => /\.tsx?$/.test(x))) {
+    const text = readFileSync(path.join(UI, f), "utf8");
+    const client = /\buse[A-Z]\w*\(/.test(text) || /\son[A-Z]\w*=\{/.test(text) || /\bcreateContext\(/.test(text);
+    if (client) assert.ok(text.startsWith('"use client";\n'), `${f}: begin with "use client";`);
+  }
+});
+
 test("the console's parts are in the console category, and no page but /ui/ imports one", () => {
   const consoleGroups = new Set(["forms", "data", "overlays", "feedback", "text"]);
   const isConsole = new Map(MANIFEST.items.map((i) => [i.name, Boolean(i.categories?.includes("console"))]));
@@ -231,7 +239,8 @@ test("Pagination: the pages shown, the current one marked, Previous disabled on 
   const m = html(h(Pagination, { page: 1, pageCount: 12 }));
   assert.match(m, /<nav class="s1-pages" aria-label="Pagination">/);
   assert.match(m, /aria-label="Page 1" aria-current="page"/);
-  assert.match(m, /<button type="button" class="s1-pages__step" aria-label="Previous" disabled=""/);
+  // aria-disabled, not disabled: a step pressed onto the end keeps its focus
+  assert.match(m, /<button type="button" class="s1-pages__step" aria-label="Previous" aria-disabled="true">/);
   assert.match(m, /Page 1 of 12/);
   const links = html(h(Pagination, { page: 12, pageCount: 12, href: (p: number) => `?page=${p}` }));
   assert.match(links, /<a class="s1-pages__step" aria-label="Next" role="link" aria-disabled="true">/);

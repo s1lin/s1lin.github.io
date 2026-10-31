@@ -1,8 +1,8 @@
 /* Tabs (tabs.tsx): mono caps on a strong hairline; the open tab's bar drawn inside it, so nothing shifts. */
 @layer components {
   .s1-tabs { min-width: 0; }
-  .s1-tabs__list { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--s1-rule-strong); }
-  .s1-tabs__list::-webkit-scrollbar { display: none; }
+  /* A row wider than its box scrolls, with a thin bar to show there is more. */
+  .s1-tabs__list { display: flex; overflow-x: auto; scrollbar-width: thin; color-scheme: var(--s1-scheme); border-bottom: 1px solid var(--s1-rule-strong); }
   .s1-tabs__tab {
     flex: none; margin: 0; padding: 13px 14px 12px; border: 0; border-radius: 0; background: none; color: var(--s1-ink-2);
     font: 500 11px/1.2 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; cursor: pointer;

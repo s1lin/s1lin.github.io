@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useId, useRef, type InputHTMLAttributes, type ReactNode, type Ref } from "react";
 import { cn } from "./cn";
 import "./tokens.css";
@@ -21,14 +23,15 @@ export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" |
 export function Checkbox({ children, hint, indeterminate = false, className, ref, "aria-describedby": described, ...rest }: CheckboxProps) {
   const hintId = useId();
   const own = useRef<HTMLInputElement | null>(null);
+  // Every render: a click clears it in the DOM, and the prop may still say it is.
   useEffect(() => {
     if (own.current) own.current.indeterminate = indeterminate;
-  }, [indeterminate]);
+  });
   const setRef = useCallback(
     (el: HTMLInputElement | null) => {
       own.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
+      if (typeof ref === "function") return ref(el);
+      if (ref) ref.current = el;
     },
     [ref],
   );
