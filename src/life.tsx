@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { LifePage } from "@/components/Life";
 import "./index.css";
+import "./fonts";
 import "./styles/life.css";
 import "./styles/social.css";
 
