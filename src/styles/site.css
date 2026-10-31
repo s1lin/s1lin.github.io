@@ -689,6 +689,8 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .rm-keybtn span:last-child { margin-left: auto; font: 400 10.5px/1.2 var(--f-mono); color: var(--ink-2); white-space: nowrap; }
 .rm-keybtn:hover { background: var(--paper-2); }
 .rm-keybtn[aria-pressed="true"] { background: var(--paper-2); outline: 2px solid var(--c); outline-offset: -2px; }
+/* Under 360px the longest one-word names (TokensBeat, EchoSonic) are wider than a third of the key. */
+@media (max-width: 359px) { .rm-keybtn b { font-size: 0.84rem; } }
 @media (max-width: 760px) {
   /* still three by three: the roundel, the name and the dates stack in each button, so none is cut */
   .rm-keybtn { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 3px; padding: 7px 8px; border-left-width: 4px; }

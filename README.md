@@ -270,7 +270,7 @@ A repost is real: it lists the thing on the reposter's Aha page, and the thread 
   refused with a reason the author sees. Comment text is shown as plain text, never as HTML.
 - **Where:** `src/lib/social/` (client, shape crop, hooks), `src/components/social/` (`Comments`, `Reactions`,
   `ShapeGallery`, `ShapeSubmit`), `src/styles/social.css`; words in three languages in `src/components/social/copy.ts`
-  (the blog uses English or Chinese by the post's language). Blog threads are `site:s1lin:blog/<slug>`, Life's is
+  (blog threads are in English under every post, whatever its language). Blog threads are `site:s1lin:blog/<slug>`, Life's is
   `site:s1lin:life`, a shape is `shape:<id>`. Comments load in the browser, so prerendered pages carry no thread.
 - **Try it without Aha:** `node scripts/social-mock.mjs 8799`, then open `/life/?social=http://127.0.0.1:8799` on localhost
   (a token for the mock is any 16+ character string in `localStorage` under `tokensbeat-social-token`).
