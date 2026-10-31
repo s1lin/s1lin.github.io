@@ -1,0 +1,26 @@
+/* Pagination (pagination.tsx): square mono steps, the page shown in reverse. Its own container: narrow, the numbers go. */
+@layer components {
+  .s1-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; container-type: inline-size; min-width: 0; }
+  .s1-pages__summary, .s1-pages__status { margin: 0; font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink-2); font-variant-numeric: tabular-nums; }
+  /* "Page 3 of 12" is read always, and seen only when the numbers are not. */
+  .s1-pages__status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .s1-pages__list { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+  .s1-pages__page, .s1-pages__step {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-width: 34px; height: 34px; margin: 0; padding: 0 9px;
+    border: 1px solid var(--s1-rule); background: var(--s1-paper); color: var(--s1-ink); text-decoration: none;
+    font: 500 12px/1 var(--s1-font-mono); font-variant-numeric: tabular-nums; cursor: pointer;
+  }
+  .s1-pages__step { border-color: var(--s1-rule-strong); }
+  .s1-pages__page:hover, .s1-pages__step:hover { border-color: var(--s1-ink); }
+  .s1-pages__page[aria-current="page"] { background: var(--s1-ink); border-color: var(--s1-ink); color: var(--s1-paper); cursor: default; }
+  .s1-pages__step:is([aria-disabled="true"], :disabled) { border-style: dashed; color: var(--s1-ink-3); cursor: default; }
+  .s1-pages__step:is([aria-disabled="true"], :disabled):hover { border-color: var(--s1-rule-strong); }
+  .s1-pages a:focus-visible, .s1-pages button:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-pages__gap { min-width: 18px; text-align: center; font: 400 12px/1 var(--s1-font-mono); color: var(--s1-ink-2); }
+  @container (max-width: 30rem) {
+    .s1-pages__n, .s1-pages__gap, .s1-pages__word { display: none; }
+    .s1-pages__status { position: static; width: auto; height: auto; overflow: visible; clip-path: none; order: 1; }
+    .s1-pages__list { order: 2; }
+  }
+  @media (forced-colors: active) { .s1-pages__page[aria-current="page"] { border-width: 2px; text-decoration: underline; } }
+}

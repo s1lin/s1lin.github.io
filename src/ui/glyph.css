@@ -1,0 +1,17 @@
+/* Glyph (glyph.tsx): a shape the size of the type's x-height and a little more, cut out of the current colour. */
+@layer components {
+  .s1-glyph {
+    display: inline-block; flex: none; box-sizing: border-box;
+    width: 0.78em; height: 0.78em; vertical-align: -0.06em;
+    background: currentColor;
+  }
+  .s1-glyph--neutral { clip-path: inset(38% 4% 38% 4%); }
+  .s1-glyph--info { background: none; border: max(1.5px, 0.14em) solid currentColor; border-radius: 50%; }
+  .s1-glyph--ok { clip-path: polygon(0 56%, 15% 41%, 38% 63%, 85% 14%, 100% 29%, 38% 93%); }
+  .s1-glyph--warn { clip-path: polygon(50% 2%, 100% 96%, 0 96%); }
+  .s1-glyph--bad { clip-path: polygon(18% 4%, 50% 36%, 82% 4%, 96% 18%, 64% 50%, 96% 82%, 82% 96%, 50% 64%, 18% 96%, 4% 82%, 36% 50%, 4% 18%); }
+  /* High-contrast modes paint backgrounds away: draw the shapes as their outline's colour instead. */
+  @media (forced-colors: active) {
+    .s1-glyph:not(.s1-glyph--info) { background: CanvasText; forced-color-adjust: none; }
+  }
+}

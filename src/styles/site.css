@@ -72,8 +72,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Links grey under the pointer; the library's buttons keep their ink. */
-a:where(:not(.s1-btn)):hover { color: var(--ink-3); }
+/* Links grey under the pointer; the library's parts (a button, a menu item, a page number) keep their ink. */
+a:where(:not([class^="s1-"], [class*=" s1-"])):hover { color: var(--ink-3); }
 
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden;

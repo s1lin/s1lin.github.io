@@ -1,0 +1,14 @@
+/* Spinner (spinner.tsx): a ring in the rule, a quarter of it in ink, turning. Slower for readers who prefer less motion. */
+@layer components {
+  .s1-spinner { display: inline-flex; align-items: center; gap: 8px; vertical-align: middle; color: var(--s1-ink); }
+  .s1-spinner__ring {
+    display: block; flex: none; box-sizing: border-box; width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid var(--s1-rule); border-top-color: currentColor;
+    animation: s1-spin 0.8s linear infinite;
+  }
+  .s1-spinner__ring--sm { width: 12px; height: 12px; }
+  .s1-spinner__ring--lg { width: 28px; height: 28px; border-width: 2px; }
+  .s1-spinner__label { font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-ink-2); }
+  @keyframes s1-spin { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .s1-spinner__ring { animation-duration: 2.4s; } }
+}

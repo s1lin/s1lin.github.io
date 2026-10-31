@@ -1,0 +1,9 @@
+/* DescriptionList (description-list.tsx): the list is its own container, so its rows stack by its width, not the screen's. */
+@layer components {
+  .s1-dl { margin: 0; container-type: inline-size; border-top: 1px solid var(--s1-rule-strong); }
+  .s1-dl__row { display: grid; grid-template-columns: minmax(8em, 13em) minmax(0, 1fr); gap: 2px 18px; padding: 9px 0; border-bottom: 1px solid var(--s1-rule); }
+  .s1-dl dt { margin: 0; padding-top: 0.25em; font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); overflow-wrap: anywhere; }
+  .s1-dl dd { margin: 0; min-width: 0; font: 400 15px/1.5 var(--s1-font-sans); color: var(--s1-ink); overflow-wrap: anywhere; }
+  .s1-dl--stacked .s1-dl__row { grid-template-columns: minmax(0, 1fr); }
+  @container (max-width: 26em) { .s1-dl__row { grid-template-columns: minmax(0, 1fr); } }
+}
