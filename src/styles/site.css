@@ -987,7 +987,7 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 /* ------------------------------------------------------------------ colophon */
 
 .colophon { padding-bottom: 64px; }
-.okuzuke { grid-column: 1 / span 7; position: relative; border: 0.5px solid var(--rule-strong); padding: clamp(18px, 2.4vw, 32px); }
+.okuzuke { grid-column: 1 / span 6; position: relative; border: 0.5px solid var(--rule-strong); padding: clamp(18px, 2.4vw, 32px); }
 .okuzuke::after { content: ""; position: absolute; inset: -6px; pointer-events: none; background: var(--corners); }
 /* The closing plates take turns, each on its own sky, so the box is held at their 2:1 before a canvas starts. */
 .closing { grid-column: 1 / -1; margin: clamp(48px, 6vw, 88px) 0 0; }
@@ -1011,12 +1011,13 @@ pre.ascii, canvas.ascii { font-family: "JetBrains Mono", "ascii.rest mono", ui-m
 .mark-set-out__guide { fill: none; stroke: var(--ink-3); stroke-width: 0.8; }
 .mark-set-out__cross { fill: none; stroke: var(--paper); stroke-width: 3.75; }
 .mark-set-out__pin { fill: var(--sumi); }
-.contact { grid-column: 9 / span 4; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
-.contact h2 { margin: 0; font: 400 clamp(2.6rem, 4.6vw, 4.6rem)/0.95 var(--f-display); }
-.contact ul { list-style: none; margin: 18px 0 0; padding: 0; border-top: 0.5px solid var(--rule-strong); }
-.contact li a { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 0.5px solid var(--rule); text-decoration: none; font: 500 0.98rem/1.2 var(--f-sans); }
-.contact li a span { font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
-.motto { margin: 0; font: 400 1.05rem/1.5 var(--f-display); color: var(--ink-2); }
+/* Find the editor: the links, then the letters (social.css), then the motto at the foot. */
+.contact { grid-column: 8 / span 5; display: flex; flex-direction: column; gap: 40px; }
+.contact__find h2 { margin: 0; font: 400 clamp(2.6rem, 4.6vw, 4.6rem)/0.95 var(--f-display); }
+.contact__find ul { list-style: none; margin: 18px 0 0; padding: 0; border-top: 0.5px solid var(--rule-strong); }
+.contact__find li a { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 0.5px solid var(--rule); text-decoration: none; font: 500 0.98rem/1.2 var(--f-sans); }
+.contact__find li a span { font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
+.motto { margin: auto 0 0; font: 400 1.05rem/1.5 var(--f-display); color: var(--ink-2); }
 .motto [lang="zh-Hans"] { display: block; font-size: 1.1rem; letter-spacing: 0.2em; color: var(--sumi); }
 .endmark { grid-column: 1 / -1; margin-top: 56px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 14px; border-top: 0.5px solid var(--rule-strong); }
 .endmark p { margin: 0; }

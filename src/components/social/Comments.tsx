@@ -117,8 +117,8 @@ function RepostedBy({ by, total, c }: { by: Reposter[]; total: number; c: Social
   );
 }
 
-/** A thread under a page: reactions to the page itself, the comment box, then the comments. */
-export function Comments({ target, lang }: { target: string; lang: Lang }) {
+/** A thread under a page: reactions to the page itself, the comment box, then the comments. A page may name the thread and the box in its own words. */
+export function Comments({ target, lang, title, placeholder }: { target: string; lang: Lang; title?: string; placeholder?: string }) {
   const c = SOCIAL_COPY[lang];
   const { session } = useSession();
   const [thread, setThread] = useState<Thread | null>(null);
@@ -163,12 +163,12 @@ export function Comments({ target, lang }: { target: string; lang: Lang }) {
   return (
     <section className="soc" aria-labelledby={`soc-${target}`} lang={lang === "zh" ? "zh-Hans" : lang}>
       <header className="soc__head">
-        <h2 id={`soc-${target}`}>{c.commentsH}</h2>
+        <h2 id={`soc-${target}`}>{title ?? c.commentsH}</h2>
         <Reactions target={target} state={page} onState={setPage} c={c} comments={thread?.counts.comments ?? 0} />
       </header>
 
       <RepostedBy by={thread?.repostedBy ?? []} total={page.reposts} c={c} />
-      <Composer target={target} c={c} lang={lang} placeholder={c.placeholder} onDone={reload} />
+      <Composer target={target} c={c} lang={lang} placeholder={placeholder ?? c.placeholder} onDone={reload} />
 
       {state === "loading" && <p className="soc__small">{c.loading}</p>}
       {state === "error" && (

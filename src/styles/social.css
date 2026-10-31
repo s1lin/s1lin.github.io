@@ -73,6 +73,8 @@
 /* On the blog the thread sits under the text, in its column. */
 .post__social { grid-column: 6 / span 6; min-width: 0; }
 @media (max-width: 900px) { .post__social { grid-column: 1 / -1; } }
+/* On the front page the letters to the editor sit under "Find the editor.", above the motto. */
+.letters .soc { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .soc__btn:active:not(:disabled) { transform: none; } }
 
 /* Who reposted this target: one quiet line under the heading, wrapping on a phone. */
