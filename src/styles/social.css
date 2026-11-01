@@ -93,6 +93,10 @@
 .soc__bar-end { margin-left: auto; gap: 12px; }
 .soc__bar-out { margin-left: auto; }
 .soc__bar :is(.s1-btn--plain, .s1-btn--go):not(.s1-btn--sm) { min-height: 36px; padding: 0 14px; }
+/* The model chip and Revise as tall as Post, so the bar is one height. */
+.soc__bar .s1-btn--chip:not(.s1-btn--sm) { min-height: 36px; }
+/* Here a link Button is a word in a sentence (Retry, Reply, Sign out), not a box in a row: the line's height. */
+.soc .s1-btn--link { min-height: 0; }
 .soc__len { margin-left: 0; font: 400 11px/1 var(--f-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .soc__len.is-over { color: var(--soc-red); font-weight: 600; }
 

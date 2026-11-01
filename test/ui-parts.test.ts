@@ -167,6 +167,19 @@ test("Input: words before and after are read with it; outside a Field it keeps i
   for (const id of ids.slice(0, 2)) assert.match(m, new RegExp(`id="${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>(\\$|USD)<`));
   assert.equal(attr(m, /<input[^>]*>/, "aria-invalid"), "true");
   assert.match(m, /class="s1-input s1-input--md"[^>]*data-invalid=""/);
+  assert.match(m, /^<span class="s1-input s1-input--md"/, "no action: the box alone, as before");
+});
+
+test("Input: an action, or a Button handed in as the suffix, is set after the box, never inside it", async () => {
+  const { Input } = await part("input");
+  const { Button } = await part("button");
+  const apply = h(Button, { variant: "ghost" }, "Apply");
+  for (const props of [{ action: apply }, { suffix: apply }]) {
+    const m = html(h(Input, { "aria-label": "Coupon", size: "sm", ...props }));
+    assert.match(m, /^<span class="s1-input__row s1-input__row--sm"><span class="s1-input s1-input--sm"[^>]*><input[^>]*><\/span><span class="s1-input__action"><button type="button" class="s1-btn s1-btn--ghost">Apply<\/button><\/span><\/span>$/);
+  }
+  // words in the suffix stay in the box
+  assert.match(html(h(Input, { "aria-label": "Amount", suffix: "USD" })), /^<span class="s1-input s1-input--md"><input[^>]*><span class="s1-input__affix s1-input__affix--end"[^>]*>USD<\/span><\/span>$/);
 });
 
 test("Select: a placeholder shows until a choice, and cannot be chosen again when required", async () => {

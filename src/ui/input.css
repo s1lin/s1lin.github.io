@@ -23,15 +23,31 @@
   .s1-input__affix + .s1-input__control { padding-left: 8px; }
   .s1-input__affix--end { padding: 0 12px 0 0; }
   .s1-input__control:has(+ .s1-input__affix--end) { padding-right: 8px; }
-  /* A button inside the box sits in from its edges. */
-  .s1-input__affix:has(> .s1-btn) { padding: 3px; }
-  .s1-input__affix > .s1-btn { min-height: 100%; }
+  /*
+   * An action after the box, outside it, on its line: the row is the box's height, and a Button in it is a ghost
+   * of that height (no line, no paper, no shadow, a tint under the pointer), centred with the box; a link Button
+   * stays words. Never a box drawn inside the box.
+   */
+  .s1-input__row { display: flex; align-items: stretch; gap: 4px; box-sizing: border-box; width: 100%; min-width: 0; }
+  .s1-input__row > .s1-input { flex: 1 1 auto; width: auto; }
+  .s1-input__action { display: flex; flex: none; align-items: stretch; }
+  .s1-input__action > .s1-btn:not(.s1-btn--link) {
+    min-height: 0; border-color: transparent; background-color: transparent; background-image: none; box-shadow: none; color: var(--s1-ink);
+  }
+  .s1-input__row--md .s1-input__action > .s1-btn:not(.s1-btn--link) { padding: 0 12px; font-size: 12px; }
+  .s1-input__row--sm .s1-input__action > .s1-btn:not(.s1-btn--link) { padding: 0 8px; font-size: 11px; }
+  .s1-input__row--md .s1-input__action .s1-btn__icon { width: 16px; height: 16px; }
+  .s1-input__row--sm .s1-input__action .s1-btn__icon { width: 14px; height: 14px; }
+  .s1-input__action > .s1-btn:not(.s1-btn--link):hover:not(:disabled) { background-color: var(--s1-paper-2); }
+  .s1-input__action > .s1-btn:not(.s1-btn--link):active:not(:disabled) { transform: none; box-shadow: none; }
+  .s1-input__action > .s1-btn:not(.s1-btn--link):disabled { opacity: 1; color: var(--s1-ink-3); }
+  .s1-input__action > .s1-btn--link { align-self: center; padding: 0 8px; }
+  .s1-input__action > .s1-btn:focus-visible { outline-offset: 0; }
 
   .s1-input--sm { min-height: 30px; font-size: 14px; }
   .s1-input--sm .s1-input__control { padding-inline: 8px; }
   .s1-input--sm .s1-input__affix { padding-left: 8px; }
   .s1-input--sm .s1-input__affix--end { padding: 0 8px 0 0; }
-  .s1-input--sm .s1-input__affix:has(> .s1-btn) { padding: 2px; }
   /* Phones zoom into type under 16px: the small box keeps its height, the type goes to 16px. */
   @media (pointer: coarse) { .s1-input--sm { font-size: 16px; } }
 
@@ -43,4 +59,5 @@
 
   /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
   .s1-input__affix:lang(zh), .s1-input__affix [lang|="zh"] { font-weight: 500; letter-spacing: 0; }
+  .s1-input__row--sm .s1-input__action > .s1-btn:not(.s1-btn--link):lang(zh) { font-size: 12px; }
 }

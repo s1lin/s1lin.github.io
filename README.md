@@ -138,8 +138,12 @@ shadcn's schema, and every exported component in `src/components` is in the list
 of site parts. `test/ui-parts.test.ts` holds the parts to the house rules (each
 stylesheet one `@layer components` block, `s1-` classes, `--s1-` tokens, no colour
 of its own, `tokens.css` imported first) and renders each console part on a
-server, as an app would, to check its roles, names and wiring. The docs page
-never mounts the social parts, so it never signs in, posts or calls Aha. The page
+server, as an app would, to check its roles, names and wiring.
+`test/heights.test.ts` lays the buttons out in headless Chrome, in their own
+stylesheets alone, and holds every variant (with words, an icon and words, an icon
+alone, as an `<a>`, in English and in Chinese) to one height at its size, 40px and
+30px, and an Input's action to its box's; it is skipped where there is no Chrome
+(set `CHROME` to one). The docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
 ### The console's parts
@@ -148,7 +152,8 @@ The parts a web console needs (keys, usage, top-ups and orders, a model plaza, a
 account), in the registry's `console` category and in five groups on `/ui/`:
 
 - **Forms**: Field and Fieldset (label, hint and error wired to the control by
-  `useField`), Input, Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
+  `useField`), Input (its action, an Apply or a Max, after the box and as tall as it,
+never inside it), Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements throughout.
 - **Data**: Table (caption, row headers, sort, empty and loading rows, row
