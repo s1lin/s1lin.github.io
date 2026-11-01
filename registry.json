@@ -1073,7 +1073,7 @@
       "name": "secret",
       "type": "registry:ui",
       "title": "Secret",
-      "description": "An API key as dots with its ends showing, Show and Copy; the value is not in the page while hidden.",
+      "description": "An API key as dots with its ends showing in a box of its own, Show and Copy after it as ghost buttons the box's height; the value is not in the page while hidden.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",

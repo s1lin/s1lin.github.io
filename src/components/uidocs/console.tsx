@@ -881,7 +881,12 @@ export function SecretDemo() {
   return (
     <div className="ud-stack ud-stack--wide">
       <Secret value={KEY} label="API key" keep={[6, 4]} />
-      <Secret value="whsec_b81f0c2d9e4a" label="Webhook secret" noCopy />
+      <Secret value="whsec_b81f0c2d9e4a" label="Webhook secret" size="sm" noCopy />
+      <div lang="zh-CN">
+        <S1Words words={ZH}>
+          <Secret value={KEY} label="API 密钥" keep={[6, 4]} />
+        </S1Words>
+      </div>
     </div>
   );
 }

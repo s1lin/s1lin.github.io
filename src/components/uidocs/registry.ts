@@ -1420,11 +1420,12 @@ const ok = await copyText(text);`,
     item: "secret",
     exports: ["Secret"],
     summary:
-      "An API key as dots with its ends left showing, Show and Copy, each with its mark (an eye, two sheets). Copy takes the whole key without showing it. While it is hidden the page holds only the dots and the ends, so the key is not in the HTML, a screenshot or the accessibility tree.",
+      "An API key as dots with its ends left showing, in a box of its own; after the box, outside it, Show and Copy, each with its mark (an eye, two sheets), as ghost buttons the box's height: never segments drawn inside the box. Copy takes the whole key without showing it. While it is hidden the page holds only the dots and the ends, so the key is not in the HTML, a screenshot or the accessibility tree.",
     example: "live",
     usage: `import { Secret } from "@/components/s1lin/secret";
 
-<Secret value={key.secret} label="API key" keep={[3, 4]} />`,
+<Secret value={key.secret} label="API key" keep={[3, 4]} />
+<Secret value={webhook.secret} label="Webhook secret" size="sm" noCopy />`,
     props: [
       { name: "value", type: "string", required: true, desc: "The secret." },
       { name: "label", type: "string", default: "\"Secret\"", desc: "What it is: names the group and the buttons (\"Show API key\", \"Copy API key\")." },
@@ -1434,11 +1435,13 @@ const ok = await copyText(text);`,
       { name: "onRevealedChange", type: "(revealed: boolean) => void", desc: "Called on Show and Hide." },
       { name: "noCopy", type: "boolean", default: "false", desc: "No Copy button." },
       { name: "words", type: "{ show, hide, hidden }", desc: "The words, translated." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "The value's box 40px tall, as an Input, or 30px; Show and Copy are `ghost` Buttons of that size, so they are the box's height." },
       CLASS,
     ],
     notes: [
       { label: "Accessibility", text: "A group named by the label. Hidden, a screen reader hears \"API key, hidden\", not a string of dots; Show and Hide are named \"Show API key\" and \"Hide API key\" and keep the visible word first. If the copy fails, the key is shown and selected for copying by hand." },
-      { label: "Phone", text: "The key breaks anywhere; the buttons wrap under it and take the row." },
+      { label: "Phone", text: "The key breaks anywhere; the buttons wrap under the box." },
+      { label: "Styles", text: "The group (`s1-secret`) is the row: the box (`s1-secret__value`) takes the room, the buttons (`s1-secret__actions`) what they need, 4px after it, centred on its line. As an Input's action is set." },
     ],
   },
   {
