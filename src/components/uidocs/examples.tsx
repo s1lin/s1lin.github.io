@@ -420,6 +420,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.DialogDemo />;
     case "menu":
       return <demos.MenuDemo />;
+    case "side-nav":
+      return <demos.SideNavDemo />;
     case "tabs":
       return <demos.TabsDemo />;
     case "toast":

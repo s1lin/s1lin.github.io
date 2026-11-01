@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type CSSProperties, type HTMLAttributes, type Key, type MouseEvent, type ReactNode } from "react";
 import { cn } from "./cn";
+import { EmptyState } from "./empty-state";
 import { Skeleton } from "./skeleton";
 import { useOverflow } from "./use-overflow";
 import { VisuallyHidden } from "./visually-hidden";
@@ -122,6 +123,8 @@ export type TableProps<Row> = Body<Row> & {
   rowProps?: (row: Row, index: number) => RowProps;
   /** Shown in one row across the table when there are no rows: words, or an EmptyState (the words' `empty` by default). */
   empty?: ReactNode;
+  /** A mark for the empty row (an app's one-colour logo): the words are then set as a small EmptyState under it. */
+  emptyMark?: ReactNode;
   /** Rows still coming: that many rows of bars (5 for true), the frame marked busy. */
   loading?: boolean | number;
   /** The sort shown: the column marked and its direction. The table does not sort; sort the rows yourself. */
@@ -191,6 +194,7 @@ export function Table<Row>(props: TableProps<Row>) {
     rowHeader,
     rowProps,
     empty,
+    emptyMark,
     loading = false,
     sort,
     onSortChange,
@@ -319,7 +323,7 @@ export function Table<Row>(props: TableProps<Row>) {
   const nothing = (
     <tr>
       <td colSpan={span} className="s1-table__empty">
-        {empty ?? w.empty}
+        {emptyMark != null && (empty == null || typeof empty === "string" || typeof empty === "number") ? <EmptyState size="sm" mark={emptyMark} title={empty ?? w.empty} /> : (empty ?? w.empty)}
       </td>
     </tr>
   );

@@ -82,7 +82,7 @@ test("a part or hook that uses React's hooks or handlers is marked \"use client\
 });
 
 test("the console's parts are in the console category, and no page but /ui/ imports one", () => {
-  const consoleGroups = new Set(["forms", "data", "overlays", "feedback", "text"]);
+  const consoleGroups = new Set(["forms", "data", "navigation", "overlays", "feedback", "text"]);
   const isConsole = new Map(MANIFEST.items.map((i) => [i.name, Boolean(i.categories?.includes("console"))]));
   for (const e of ENTRIES) {
     if (e.item && consoleGroups.has(e.group)) assert.ok(isConsole.get(e.item), `${e.item}: documented with the console's parts, so category "console" (vite.config.ts keeps it off the issue's stylesheet)`);
@@ -387,6 +387,59 @@ test("Dialog, Menu, Tabs, Toaster: closed overlays are in the server HTML, wired
   assert.doesNotMatch(t, />B</, "only the open panel is mounted");
 
   assert.equal(html(h(Toaster, {})), '<section class="s1-toaster s1-toaster--bottom-end" aria-label="Notifications"><ol aria-live="polite"></ol></section>');
+});
+
+test("SideNav: a named nav of lists; the current item says page, the sections round it true; heads, actions, icons, status words, folding sections", async () => {
+  const { SideNav } = await part("side-nav");
+  const svg = h("svg", { viewBox: "0 0 16 16" });
+  const sections = [
+    { id: "ch", number: "01", title: "Parts", href: "#parts", sections: [{ id: "fam", title: "Editorial", count: 2, href: "#fam", items: [{ id: "a", label: "Button", href: "#a" }, { id: "b", label: "Kicker", href: "#b" }] }] },
+    { id: "chats", title: "Chats", action: h("button", { type: "button" }, "+"), items: [{ id: "c1", label: "Video", icon: svg, meta: "2m", status: "info", statusLabel: "running", onSelect: () => {} }] },
+    { id: "proj", title: "Projects", collapsible: true, defaultOpen: false, items: [{ id: "p1", label: "Thesis", href: "/p1" }] },
+  ];
+  const m = html(h(SideNav, { label: "Main", title: "Index", sections, current: "a" }));
+  assert.match(m, /^<nav class="s1-sidenav" aria-label="Main">/);
+  assert.doesNotMatch(m, /s1-sidenav__bar/, "no sheet asked for: no bar");
+  assert.match(m, /<ol class="s1-sidenav__tree">/);
+  assert.match(m, /<a class="s1-sidenav__item" href="#a" aria-current="page">/);
+  assert.match(m, /<a class="s1-sidenav__item" href="#b">/);
+  assert.match(m, /<a class="s1-sidenav__heading" href="#parts" aria-current="true">/, "the chapter round it");
+  assert.match(m, /<a class="s1-sidenav__heading" href="#fam" aria-current="true">.*?<span class="s1-sidenav__count">2<\/span>/);
+  assert.match(m, /<span class="s1-sidenav__action"><button type="button">\+<\/button><\/span>/);
+  assert.match(m, /<button type="button" class="s1-sidenav__item s1-sidenav__item--icon"><span class="s1-sidenav__icon" aria-hidden="true"><svg/);
+  assert.match(m, /<span class="s1-sidenav__status"><span class="s1-glyph s1-glyph--info" aria-hidden="true"><\/span><span class="s1-visually-hidden">, running<\/span><\/span><span class="s1-sidenav__meta">2m<\/span>/);
+  const toggle = /<button type="button" class="s1-sidenav__heading" aria-expanded="false" aria-controls="([^"]+)">/;
+  const body = m.match(toggle)?.[1];
+  assert.ok(body, "a folding head is a button that says it is closed");
+  assert.match(m, new RegExp(`<div class="s1-sidenav__body" id="${body}" hidden="">`));
+  // a router's link, the rail, the sheet
+  const routed = html(h(SideNav, { label: "Main", sections, current: "p1", defaultExpanded: ["proj"], renderLink: ({ href, ...link }: { href: string }) => h("x-link", { "data-to": href, ...link }) }));
+  assert.match(routed, /<x-link data-to="\/p1" class="s1-sidenav__item" aria-current="page">/);
+  const rail = html(h(SideNav, { label: "Main", sections, current: "a", rail: true }));
+  assert.match(rail, /class="s1-sidenav s1-sidenav--rail"/);
+  assert.match(rail, /<a class="s1-sidenav__item" title="Button" href="#a" aria-current="page"><span class="s1-sidenav__monogram" aria-hidden="true">B<\/span><span class="s1-sidenav__label">Button<\/span>/);
+  const phone = html(h(SideNav, { label: "Main", title: "Index", sections, current: "a", sheet: 900, currentType: "location" }));
+  assert.match(phone, /class="s1-sidenav s1-sidenav--sheet-900"/);
+  const bar = phone.match(/<button type="button" class="s1-sidenav__bar" aria-expanded="false" aria-controls="([^"]+)">/);
+  assert.ok(bar, "the bar says the sheet is closed and which it opens");
+  assert.match(phone, new RegExp(`<div class="s1-sidenav__panel" id="${bar![1]}">`));
+  assert.match(phone, /<span class="s1-sidenav__here">Editorial · Button<\/span>/);
+  assert.match(phone, /aria-current="location"/);
+});
+
+test("EmptyState: an app's mark in place of the frame, hidden; Table's emptyMark sets its words as a small EmptyState under it", async () => {
+  const { EmptyState } = await part("empty-state");
+  const { Table } = await part("table");
+  const svg = h("svg", { viewBox: "0 0 48 48" });
+  assert.match(html(h(EmptyState, { title: "No keys" })), /<span class="s1-empty__mark" aria-hidden="true"><\/span>/);
+  const own = html(h(EmptyState, { title: "No friends yet", mark: svg }));
+  assert.match(own, /^<div class="s1-empty s1-empty--md"><span class="s1-empty__own" aria-hidden="true"><svg viewBox="0 0 48 48"><\/svg><\/span><p class="s1-empty__title">No friends yet<\/p><\/div>$/);
+  assert.doesNotMatch(own, /s1-empty__mark/);
+  const t = html(h(Table, { caption: "Orders", columns: [{ key: "id", header: "Order" }], rows: [], rowKey: "id", emptyMark: svg, empty: "No orders yet" }));
+  assert.match(t, /<td colSpan="1" class="s1-table__empty"><div class="s1-empty s1-empty--sm"><span class="s1-empty__own" aria-hidden="true"><svg[^>]*><\/svg><\/span><p class="s1-empty__title">No orders yet<\/p><\/div><\/td>/);
+  // an empty that is already an element is shown as it is
+  const given = html(h(Table, { caption: "Orders", columns: [{ key: "id", header: "Order" }], rows: [], rowKey: "id", emptyMark: svg, empty: h("b", null, "None") }));
+  assert.match(given, /class="s1-table__empty"><b>None<\/b><\/td>/);
 });
 
 test("Secret: hidden, the page holds only the dots and the ends; the buttons are named for what they do", async () => {
