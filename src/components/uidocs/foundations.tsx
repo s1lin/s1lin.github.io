@@ -19,12 +19,14 @@ const COLOURS = [
   { token: "--s1-accent", light: "#d62d20", dark: "#f0574b" },
 ];
 
-const FAMILIES = [
-  { token: "--s1-font-display", name: "Instrument Serif", sample: "Architecture, set like a magazine." },
-  { token: "--s1-font-sans", name: "Inter Tight", sample: "One gateway to every model." },
-  { token: "--s1-font-mono", name: "JetBrains Mono", sample: "VOL.30 · 2026 · 0123456789" },
-  { token: "--s1-font-mincho", name: "Shippori Mincho B1", sample: "設計 部品", ja: true },
-  { token: "--s1-font-gothic", name: "Zen Kaku Gothic New", sample: "夜 紙 随筆", ja: true },
+const FAMILIES: { token: string; name: string; sample: string; zh?: string; lang?: string }[] = [
+  { token: "--s1-font-display", name: "Instrument Serif", sample: "Architecture, set like a magazine.", zh: "建筑，像杂志一样排版。" },
+  { token: "--s1-font-sans", name: "Inter Tight", sample: "One gateway to every model.", zh: "一个网关，连接所有模型。" },
+  { token: "--s1-font-mono", name: "JetBrains Mono", sample: "VOL.30 · 2026 · 0123456789", zh: "新建用户 · API 密钥 · 2026" },
+  { token: "--s1-font-mincho", name: "Shippori Mincho B1", sample: "設計 部品", lang: "ja" },
+  { token: "--s1-font-gothic", name: "Zen Kaku Gothic New", sample: "夜 紙 随筆", lang: "ja" },
+  { token: "--s1-font-cjk", name: "PingFang SC · Microsoft YaHei · Noto Sans CJK SC", sample: "新建 · 编辑 · 删除 · 保存", lang: "zh-CN" },
+  { token: "--s1-font-cjk-serif", name: "Noto Serif SC · Songti SC", sample: "部件，随身带走。", lang: "zh-CN" },
 ];
 
 /** Each colour as a chip in the theme now showing, with both its values; the typefaces; the marks. */
@@ -49,8 +51,13 @@ export function Tokens() {
               <b>{f.name}</b>
               var({f.token})
             </p>
-            <p className="ud-type__sample" style={{ fontFamily: `var(${f.token})` }} lang={f.ja ? "ja" : undefined}>
+            <p className="ud-type__sample" style={{ fontFamily: `var(${f.token})` }} lang={f.lang}>
               {f.sample}
+              {f.zh && (
+                <span className="ud-type__zh" lang="zh-CN" style={{ fontFamily: `var(${f.token})` }}>
+                  {f.zh}
+                </span>
+              )}
             </p>
           </li>
         ))}

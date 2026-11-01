@@ -14,4 +14,7 @@
     }
   }
   @keyframes s1-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-section-label:lang(zh), .s1-section-label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

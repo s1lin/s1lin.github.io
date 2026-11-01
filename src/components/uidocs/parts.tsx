@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Check, Copy as CopyIcon } from "lucide-react";
 import manifest from "../../../registry.json";
 import { REGISTRY, type Entry, type Note, type PropDoc } from "@/components/uidocs/registry";
 import { Button } from "@/ui/button";
@@ -159,7 +160,7 @@ export function Install({ item }: { item: string }) {
             </option>
           ))}
         </Select>
-        <Button size="sm" className="ud-install__copy" onClick={() => void copy()} aria-label={`Copy: ${command}`}>
+        <Button size="sm" className="ud-install__copy" icon={said === "Copied" ? <Check /> : <CopyIcon />} onClick={() => void copy()} aria-label={`Copy: ${command}`}>
           {said === "Copied" ? "Copied" : "Copy"}
         </Button>
       </div>

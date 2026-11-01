@@ -1,5 +1,30 @@
 import { useRef, useState } from "react";
 import * as typewriter from "ascii.rest/pieces/typewriter";
+import {
+  ArrowUpRight,
+  Ban,
+  ChevronDown,
+  Copy as CopyIcon,
+  Download,
+  FileDown,
+  FileUp,
+  LogOut,
+  Moon,
+  Pencil,
+  PlugZap,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Search,
+  Send,
+  Settings,
+  Sun,
+  Trash2,
+  Upload,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import * as demos from "@/components/uidocs/console";
 import { DarkDemo, Tokens } from "@/components/uidocs/foundations";
 import { AsciiArt } from "@/ui/ascii-art";
@@ -28,38 +53,157 @@ import { useScale } from "@/ui/use-scale";
 
 const PHRASES = { prefix: "parts: ", phrases: ["roundels.", "barcodes.", "registration marks.", "one ink."] };
 
-/** Every button; pressing one only says so here. */
+/** An action's word and its icon, by lucide-react's name: the rule the Button's notes give. */
+const VERBS: [word: string, Icon: LucideIcon, name: string][] = [
+  ["Create", Plus, "Plus"],
+  ["Edit", Pencil, "Pencil"],
+  ["Delete", Trash2, "Trash2"],
+  ["Save", Save, "Save"],
+  ["Cancel", X, "X"],
+  ["Copy", CopyIcon, "Copy"],
+  ["Refresh", RefreshCw, "RefreshCw"],
+  ["Export", FileDown, "FileDown"],
+  ["Import", FileUp, "FileUp"],
+  ["Upload", Upload, "Upload"],
+  ["Download", Download, "Download"],
+  ["Test", PlugZap, "PlugZap"],
+  ["Send", Send, "Send"],
+  ["Search", Search, "Search"],
+  ["Revoke", Ban, "Ban"],
+  ["Retry", RotateCcw, "RotateCcw"],
+  ["Sign out", LogOut, "LogOut"],
+  ["Settings", Settings, "Settings"],
+];
+
+/** Every button, the actions with their icons, the same in Chinese, and the verbs' icons; pressing one only says so here. */
 function Buttons() {
   const [last, setLast] = useState("");
   const [open, setOpen] = useState(false);
+  const [lang, setLang] = useState<"en" | "zh">("en");
   const say = (what: string) => () => setLast(what);
   return (
     <div className="ud-buttons">
       <p className="ud-row">
-        <Button onClick={say("Load more")}>Load more</Button>
-        <Button variant="go" onClick={say("Post")}>
-          Post
+        <Button variant="go" icon={<Plus />} onClick={say("Create key")}>
+          Create key
         </Button>
-        <Button disabled>Disabled</Button>
+        <Button icon={<Pencil />} onClick={say("Edit")}>
+          Edit
+        </Button>
+        <Button icon={<Trash2 />} onClick={say("Delete")}>
+          Delete
+        </Button>
+        <Button icon={<Save />} disabled>
+          Save
+        </Button>
       </p>
       <p className="ud-row">
-        <Button size="sm" onClick={say("Cancel")}>
+        <Button size="sm" icon={<X />} onClick={say("Cancel")}>
           Cancel
         </Button>
-        <Button variant="go" size="sm" onClick={say("Use this")}>
-          Use this
+        <Button variant="go" size="sm" icon={<Send />} onClick={say("Send")}>
+          Send
         </Button>
-        <Button variant="chip" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-          qwen-3.8 {open ? "▴" : "▾"}
+        <Button variant="chip" aria-expanded={open} iconEnd={<ChevronDown />} onClick={() => setOpen((o) => !o)}>
+          qwen-3.8
         </Button>
         <span className={buttonClass({ variant: "chip" }, "ud-quiet")}>a span, as a chip</span>
+        <Button variant="link" href="#button" iconEnd={<ArrowUpRight />}>
+          Docs
+        </Button>
         <Button variant="link" onClick={say("Sign out")}>
           Sign out
         </Button>
       </p>
-      <p className="cap" aria-live="polite">
-        {last ? `Pressed ${last}: nothing is sent from this page.` : "Press one; the chip opens and closes."}
+      <p className="ud-row ud-row--tight">
+        <Button variant="ghost" icon={<RefreshCw />} onClick={say("Refresh")}>
+          Refresh
+        </Button>
+        <span className="ud-pair" role="group" aria-label="Language">
+          <Button variant="ghost" size="sm" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>
+            EN
+          </Button>
+          <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>
+            中文
+          </Button>
+        </span>
+        <Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={say("Dark mode")} />
+        <Button variant="icon" size="sm" icon={<Download />} aria-label="Download" title="Download" onClick={say("Download")} />
       </p>
+      <p className="ud-row" lang="zh-CN">
+        <Button variant="go" icon={<Plus />} onClick={say("新建用户")}>
+          新建用户
+        </Button>
+        <Button icon={<Pencil />} onClick={say("编辑")}>
+          编辑
+        </Button>
+        <Button icon={<Trash2 />} onClick={say("删除")}>
+          删除
+        </Button>
+        <Button size="sm" icon={<X />} onClick={say("取消")}>
+          取消
+        </Button>
+        <Button variant="ghost" size="sm" icon={<RefreshCw />} onClick={say("刷新")}>
+          刷新
+        </Button>
+      </p>
+      <p className="cap" aria-live="polite">
+        {last ? `Pressed ${last}: nothing is sent from this page.` : "Press one; the chip opens and closes, EN and 中文 take turns. The fourth row is in Chinese (lang=\"zh-CN\")."}
+      </p>
+      <figure className="ud-verbs">
+        <figcaption className="cap">An action and its icon, by lucide-react&rsquo;s name:</figcaption>
+        <ul>
+          {VERBS.map(([word, Icon, name]) => (
+            <li key={word}>
+              <Button size="sm" icon={<Icon />} onClick={say(word)}>
+                {word}
+              </Button>
+              <code>{name}</code>
+            </li>
+          ))}
+        </ul>
+      </figure>
+    </div>
+  );
+}
+
+/** A head: the brand and the controls on one row, centred on it; its own language and night, to try without the page's. */
+function HeadDemo({ start }: { start: "en" | "zh" }) {
+  const [lang, setLang] = useState(start);
+  const [night, setNight] = useState<boolean | null>(null);
+  const page = useDark();
+  const dark = night ?? page;
+  const zh = lang === "zh";
+  const mode = dark ? (zh ? "浅色模式" : "Light mode") : zh ? "深色模式" : "Dark mode";
+  return (
+    <header className="ud-head" lang={zh ? "zh-CN" : "en"} data-theme={night === null ? undefined : night ? "dark" : "light"}>
+      <a className="ud-head__brand" href="#head" aria-label={zh ? "TokensBeat 控制台，首页" : "TokensBeat Console, home"}>
+        <Mark className="ud-head__mark" />
+        <b className="ud-head__name">TokensBeat</b>
+        <span className="ud-head__product">{zh ? "控制台" : "Console"}</span>
+      </a>
+      <span className="ud-head__now">{zh ? "API 密钥" : "API keys"}</span>
+      <div className="ud-head__controls">
+        <div className="ud-head__lang" role="group" aria-label={zh ? "语言" : "Language"}>
+          <Button variant="ghost" size="sm" lang="en" aria-pressed={!zh} onClick={() => setLang("en")}>
+            EN
+          </Button>
+          <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={zh} onClick={() => setLang("zh")}>
+            中文
+          </Button>
+        </div>
+        <Button variant="ghost" size="sm" icon={dark ? <Sun /> : <Moon />} aria-label={mode} title={mode} onClick={() => setNight(!dark)} />
+      </div>
+    </header>
+  );
+}
+
+function Heads() {
+  return (
+    <div className="ud-heads">
+      <HeadDemo start="en" />
+      <HeadDemo start="zh" />
+      <p className="cap">In English and in Chinese. Press EN or 中文 to switch a head, the moon for its night; the page stays as it is.</p>
     </div>
   );
 }
@@ -127,6 +271,8 @@ export function Demo({ id }: { id: string }) {
       return <DarkDemo />;
     case "words":
       return <demos.WordsDemo />;
+    case "head":
+      return <Heads />;
 
     case "button":
       return <Buttons />;

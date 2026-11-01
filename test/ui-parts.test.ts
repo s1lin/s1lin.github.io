@@ -125,6 +125,23 @@ const html = (node: ReactNode) => renderToString(node as never).replaceAll("<!--
 /** An attribute of the first element matching a tag and a class (or any element, by attribute). */
 const attr = (markup: string, element: RegExp, name: string) => markup.match(element)?.[0].match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 
+test("Button: an icon is hidden and the words stay the name; with no words it is a square; no icon, the markup of before", async () => {
+  const { Button } = await part("button");
+  const svg = h("svg", { viewBox: "0 0 24 24" });
+  assert.equal(html(h(Button, null, "Save")), '<button type="button" class="s1-btn s1-btn--plain">Save</button>');
+  assert.equal(
+    html(h(Button, { variant: "go", icon: svg }, "Create key")),
+    '<button type="button" class="s1-btn s1-btn--go s1-btn--with-icon"><span class="s1-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span>Create key</button>',
+  );
+  assert.equal(
+    html(h(Button, { size: "sm", iconEnd: svg, href: "/docs" }, "Docs")),
+    '<a class="s1-btn s1-btn--plain s1-btn--sm s1-btn--with-icon" href="/docs">Docs<span class="s1-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span></a>',
+  );
+  const only = html(h(Button, { variant: "ghost", size: "sm", icon: svg, "aria-label": "Dark mode", title: "Dark mode" }));
+  assert.match(only, /^<button type="button" class="s1-btn s1-btn--ghost s1-btn--sm s1-btn--with-icon s1-btn--icon-only" aria-label="Dark mode" title="Dark mode"><span class="s1-btn__icon" aria-hidden="true">/);
+  assert.match(html(h(Button, { variant: "ghost", "aria-pressed": true }, "EN")), /^<button type="button" class="s1-btn s1-btn--ghost" aria-pressed="true">EN<\/button>$/);
+});
+
 test("Field: the label points at the control, which is described by the error then the hint, invalid and required", async () => {
   const { Field } = await part("field");
   const { Input } = await part("input");
@@ -199,6 +216,10 @@ test("RadioGroup: a radiogroup fieldset; one name; each radio named by its label
   const desc = attr(radios[0], /.*/, "aria-describedby")!;
   assert.match(m, new RegExp(`id="${desc}">the least</span>`));
   assert.equal(attr(radios[1], /.*/, "aria-describedby"), undefined);
+  // quiet, its legend out of sight: still a radiogroup named by the legend, which stays in the page
+  const q = html(h(RadioGroup, { legend: "Language", variant: "segmented", quiet: true, hideLegend: true, defaultValue: "en", options: [{ value: "en", label: "EN" }, { value: "zh", label: "中文" }] }));
+  assert.equal(attr(q, fs, "class"), "s1-fieldset s1-radios s1-radios--segmented s1-radios--quiet s1-radios--legend-hidden");
+  assert.match(q, /<legend class="s1-field__label">Language<\/legend>/);
 });
 
 test("Table: caption, column and row headers, aria-sort, an empty row across, rows of bars and aria-busy while loading", async () => {
@@ -362,8 +383,8 @@ test("Secret: hidden, the page holds only the dots and the ends; the buttons are
   assert.ok(!m.includes(key.slice(3, -4)), "the hidden middle is not in the HTML");
   assert.match(m, /role="group" aria-label="API key"/);
   assert.match(m, /<span aria-hidden="true">sk-<span class="s1-secret__dots">•+<\/span>8f6a<\/span><span class="s1-visually-hidden">API key, hidden<\/span>/);
-  assert.match(m, /aria-label="Show API key"[^>]*>Show</);
-  assert.match(m, /aria-label="Copy API key"[^>]*>Copy</);
+  assert.match(m, /aria-label="Show API key"[^>]*><span class="s1-btn__icon" aria-hidden="true"><svg class="s1-secret__mark"[^]*?<\/svg><\/span>Show</);
+  assert.match(m, /aria-label="Copy API key"[^>]*><span class="s1-btn__icon" aria-hidden="true"><svg[^]*?<\/svg><\/span>Copy</);
   assert.ok(html(h(Secret, { value: key, defaultRevealed: true })).includes(key));
 });
 
@@ -372,7 +393,12 @@ test("Copy, Code, Spinner, VisuallyHidden: the result is said in a status beside
   const { Code } = await part("code");
   const { Spinner } = await part("spinner");
   const c = html(h(Copy, { value: "x", label: "Copy the base URL" }));
-  assert.match(c, /<button type="button" class="s1-btn s1-btn--plain s1-btn--sm" aria-label="Copy the base URL">Copy<\/button><span class="s1-visually-hidden" role="status"><\/span>/);
+  assert.match(
+    c,
+    /<button type="button" class="s1-btn s1-btn--plain s1-btn--sm s1-btn--with-icon" aria-label="Copy the base URL"><span class="s1-btn__icon" aria-hidden="true"><svg class="s1-copy__mark"[^>]*>.*?<\/svg><\/span>Copy<\/button><span class="s1-visually-hidden" role="status"><\/span>/,
+    "the mark is hidden; the name is the label",
+  );
+  assert.match(html(h(Copy, { value: "x", icon: null })), /<button type="button" class="s1-btn s1-btn--plain s1-btn--sm">Copy<\/button>/, "icon null: the word alone");
   const b = html(h(Code, { block: true, copy: true, label: "curl" }, "curl https://…"));
   assert.match(b, /aria-label="Copy curl"/);
   assert.match(b, /<pre class="s1-code-block__pre"><code>curl https:\/\/…<\/code><\/pre>/, "no tab stop until it overflows");
@@ -424,7 +450,7 @@ test("S1Words: the parts say the words given, nested providers keep the outer wo
   assert.match(m, /aria-label="第 1 页" aria-current="page"/);
   assert.match(m, /第 1 页，共 12 页/);
   assert.match(m, /API 密钥, 已隐藏/);
-  assert.match(m, /aria-label="显示 API 密钥">显示</);
+  assert.match(m, /aria-label="显示 API 密钥">(<span class="s1-btn__icon"[^]*?<\/span>)?显示</);
   assert.match(m, /aria-label="复制API 密钥"/);
   assert.match(m, /<span class="s1-visually-hidden">加载中<\/span>/);
   assert.match(m, /<span class="s1-visually-hidden">警告：<\/span>余额不足/);
@@ -434,7 +460,7 @@ test("S1Words: the parts say the words given, nested providers keep the outer wo
   const nested = html(h(S1Words, { words: zh }, h(S1Words, { words: { next: "下页" } }, h(Pagination, { page: 1, pageCount: 3 }), h(Secret, { value: "sk-0123456789abcdef", label: "API 密钥", revealed: true }))));
   assert.match(nested, /aria-label="下页"/);
   assert.match(nested, /aria-label="上一页"/);
-  assert.match(nested, /aria-label="Hide API 密钥">Hide</);
+  assert.match(nested, /aria-label="Hide API 密钥">(<span class="s1-btn__icon"[^]*?<\/span>)?Hide</);
   // a part's own prop wins over the provider
   const own = html(h(S1Words, { words: zh }, h(Copy, { value: "x" }, "Copy the key"), h(Pagination, { page: 1, pageCount: 2, label: "Keys" }), h(Spinner, { label: "Saving" })));
   assert.match(own, />Copy the key<\/button>/);

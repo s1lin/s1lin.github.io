@@ -121,4 +121,8 @@
     .s1-table__arrow::before, .s1-table__arrow::after, .s1-table__chevron { background: CanvasText; forced-color-adjust: none; }
     .s1-table__toggle, .s1-table__all { border-color: ButtonText; }
   }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  :is(.s1-table__caption, .s1-table thead th, .s1-table__all, .s1-table__hint):lang(zh), :is(.s1-table__caption, .s1-table thead th, .s1-table__all, .s1-table__hint) [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-table__gmeta:lang(zh), .s1-table__gmeta [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; }
 }

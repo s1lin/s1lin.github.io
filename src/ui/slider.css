@@ -91,4 +91,9 @@
     .s1-slider__input:disabled::-moz-range-thumb { border-color: GrayText; }
     .s1-slider__mark::before { background: CanvasText; }
   }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-slider__label:lang(zh), .s1-slider__label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-slider__value:lang(zh), .s1-slider__value [lang|="zh"] { font-weight: 500; letter-spacing: 0; }
+  .s1-slider__tick-label:lang(zh), .s1-slider__tick-label [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; }
 }

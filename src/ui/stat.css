@@ -28,4 +28,8 @@
   }
   .s1-stats > .s1-stat { padding: 16px 18px 18px; box-shadow: -1px 0 0 var(--s1-rule), 0 -1px 0 var(--s1-rule); }
   @media (forced-colors: active) { .s1-stat__trend { background: CanvasText; forced-color-adjust: none; } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-stat__label:lang(zh), .s1-stat__label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  :is(.s1-stat__unit, .s1-stat__delta):lang(zh), :is(.s1-stat__unit, .s1-stat__delta) [lang|="zh"] { font-weight: 500; letter-spacing: 0; }
 }

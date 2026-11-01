@@ -11,4 +11,7 @@
   .s1-spinner__label { font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-ink-2); }
   @keyframes s1-spin { to { transform: rotate(1turn); } }
   @media (prefers-reduced-motion: reduce) { .s1-spinner__ring { animation-duration: 2.4s; } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-spinner__label:lang(zh), .s1-spinner__label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

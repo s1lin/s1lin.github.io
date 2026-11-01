@@ -25,4 +25,7 @@
   .s1-menu__item:focus .s1-menu__hint { color: inherit; }
   .s1-menu__sep { display: block; height: 1px; margin: 4px 0; background: var(--s1-rule); }
   @media (forced-colors: active) { .s1-menu__item:focus { outline: 2px solid Highlight; } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-menu__hint:lang(zh), .s1-menu__hint [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; }
 }

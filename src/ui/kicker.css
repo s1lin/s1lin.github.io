@@ -6,4 +6,7 @@
     display: flex; align-items: center; gap: 10px;
   }
   .s1-kicker [lang="ja"] { font: 700 13px/1 var(--s1-font-mincho); letter-spacing: 0.2em; color: var(--s1-ink); }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-kicker:lang(zh), .s1-kicker [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

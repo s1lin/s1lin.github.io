@@ -32,13 +32,17 @@ export type RadioGroupProps = Omit<FieldsetHTMLAttributes<HTMLFieldSetElement>, 
   variant?: "list" | "cards" | "segmented";
   /** "horizontal" sets a list's radios in a row that wraps. */
   orientation?: "vertical" | "horizontal";
+  /** A segmented row with no box round it, the chosen word in the ink with a bar under it: for a head or a toolbar. */
+  quiet?: boolean;
+  /** The legend is read, not shown: where the row says what it is by itself (a language, a range in a toolbar). */
+  hideLegend?: boolean;
 };
 
 /**
  * One choice of a few: native radios with one name, in a fieldset that is the
  * radiogroup, so Tab enters at the chosen one and the arrow keys move and
  * choose, as browsers do. As a list, as cards to pick an amount or a plan, or
- * as a segmented row for a range.
+ * as a segmented row for a range; quiet, the row loses its box, for a head.
  */
 export function RadioGroup({
   legend,
@@ -52,6 +56,8 @@ export function RadioGroup({
   required,
   variant = "list",
   orientation = "vertical",
+  quiet,
+  hideLegend,
   className,
   ...rest
 }: RadioGroupProps) {
@@ -66,7 +72,14 @@ export function RadioGroup({
       role="radiogroup"
       aria-required={required || undefined}
       aria-invalid={error ? true : undefined}
-      className={cn("s1-radios", `s1-radios--${variant}`, orientation === "horizontal" && "s1-radios--row", className)}
+      className={cn(
+        "s1-radios",
+        `s1-radios--${variant}`,
+        orientation === "horizontal" && "s1-radios--row",
+        quiet && "s1-radios--quiet",
+        hideLegend && "s1-radios--legend-hidden",
+        className,
+      )}
       {...rest}
     >
       {options.map((o, i) => {

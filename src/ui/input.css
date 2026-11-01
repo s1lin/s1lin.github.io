@@ -40,4 +40,7 @@
   .s1-input[data-readonly] { background: var(--s1-paper-2); }
   .s1-input:is([data-disabled], :has(> .s1-input__control:disabled)) { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
   .s1-input:is([data-disabled], :has(> .s1-input__control:disabled)) .s1-input__control { cursor: not-allowed; }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-input__affix:lang(zh), .s1-input__affix [lang|="zh"] { font-weight: 500; letter-spacing: 0; }
 }

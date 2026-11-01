@@ -16,4 +16,7 @@
   }
   .s1-badge--bad { border-color: var(--s1-bad, var(--s1-ink)); background: var(--s1-bad, var(--s1-ink)); color: var(--s1-on-status, var(--s1-paper)); }
   @media (forced-colors: active) { .s1-badge--bad { border-width: 2px; } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-badge:lang(zh), .s1-badge [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

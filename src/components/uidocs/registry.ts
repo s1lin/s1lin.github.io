@@ -31,7 +31,7 @@ export const GROUPS: Group[] = [
     id: "foundations",
     name: "Foundations",
     chapter: "Foundations",
-    blurb: "What every part is drawn in and says: the tokens, the night, the status hues, the words. Set them once and the parts take your colours, your night and your language.",
+    blurb: "What every part is drawn in and says: the tokens, the night, the status hues, the words; and the head an app's parts sit under. Set them once and the parts take your colours, your night and your language.",
   },
   {
     id: "parts",
@@ -90,7 +90,7 @@ export interface PropDoc {
 }
 
 export interface Note {
-  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server";
+  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese";
   text: string;
 }
 
@@ -147,7 +147,7 @@ export const ENTRIES: Entry[] = [
     item: "tokens",
     exports: [],
     summary:
-      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, five typefaces, the \"+\" marks, and the scheme for native controls. They come in with any part; set them to restyle the lot.",
+      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, five typefaces and the Chinese faces they end in, the \"+\" marks, and the scheme for native controls. They come in with any part; set them to restyle the lot.",
     example: "live",
     propsTitle: "Variables",
     props: [
@@ -169,18 +169,27 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-info-tint", type: "colour", default: "unset: the paper", desc: "The ground of an info badge." },
       { name: "--s1-on-status", type: "colour", default: "unset: the paper", desc: "The words on a solid status fill: the bad badge's." },
       { name: "--s1-scheme", type: "light | dark", default: "light · dark", desc: "The colour scheme native controls are drawn in: a select's list, a number's arrows, a date's picker." },
-      { name: "--s1-font-display", type: "font stack", default: "Instrument Serif…", desc: "Headlines." },
-      { name: "--s1-font-sans", type: "font stack", default: "Inter Tight…", desc: "Text, and the roundel's letter." },
-      { name: "--s1-font-mono", type: "font stack", default: "JetBrains Mono…", desc: "Labels, buttons, numbers." },
+      { name: "--s1-font-display", type: "font stack", default: "Instrument Serif… Chinese serif, Chinese sans, serif", desc: "Headlines. Chinese takes `--s1-font-cjk-serif`, then the Chinese sans: never SimSun." },
+      { name: "--s1-font-sans", type: "font stack", default: "Inter Tight… var(--s1-font-cjk), sans-serif", desc: "Text, and the roundel's letter." },
+      { name: "--s1-font-mono", type: "font stack", default: "JetBrains Mono… var(--s1-font-cjk), monospace", desc: "Labels, buttons, numbers. Chinese in a label is set in the Chinese sans, never in the browser's monospace (SimSun on Windows)." },
+      { name: "--s1-font-cjk", type: "font list", default: "PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans SC, Noto Sans CJK SC, Source Han Sans SC", desc: "The Chinese sans faces every stack ends in, after its Latin faces and before its generic family: macOS, Windows, then Linux and Android. End your own sans and mono in it." },
+      { name: "--s1-font-cjk-serif", type: "font list", default: "Noto Serif SC, Noto Serif CJK SC, Source Han Serif SC, Songti SC", desc: "The Chinese serif faces the display stack tries before the sans." },
       { name: "--s1-font-mincho", type: "font stack", default: "Shippori Mincho B1…", desc: "The Japanese word in a kicker or a label." },
       { name: "--s1-font-gothic", type: "font stack", default: "Zen Kaku Gothic New…", desc: "Japanese in text." },
       { name: "--s1-corners", type: "background", desc: "Eight gradients that draw a \"+\" at each corner of a box, in its text colour. Plate uses it; give any box an `::after` 11px larger with it." },
     ],
-    usage: `/* your CSS: the press in one ink, and your own face for text */
-:root { --s1-accent: var(--s1-ink); --s1-font-sans: "Geist", system-ui, sans-serif; }
-.dark { --s1-paper: #141816; }`,
+    usage: `/* your CSS: the press in one ink, and your own face for text, still ending in the Chinese faces */
+:root {
+  --s1-accent: var(--s1-ink);
+  --s1-font-sans: "Geist", system-ui, "Segoe UI", var(--s1-font-cjk), sans-serif;
+  --s1-font-mono: "Geist Mono", ui-monospace, Menlo, Consolas, var(--s1-font-cjk), monospace;
+}
+.dark { --s1-paper: #141816; }
+
+<html lang="zh-CN">   <!-- say the language, so the parts set their Chinese labels for it -->`,
     notes: [
       { label: "Styles", text: "The typefaces are named first and fall back to the system's: load Instrument Serif, Inter Tight and JetBrains Mono (Fontsource has them all) for the site's look, or point the font tokens at your own." },
+      { label: "Chinese", text: "Every stack ends in Chinese faces before its generic family, so Chinese is never left to the browser's own pick, which on Windows is SimSun (a thin, bitmap-hinted serif) for `monospace` and `serif`. They come after the Latin faces, so Latin text is set as before. A stack of your own should end in `var(--s1-font-cjk)` the same way. Set `lang` (`zh-CN`) on the page or the element: under it the parts' small mono labels drop their tracking and capitals and set Chinese at 12px and weight 500 at least." },
       { label: "Dark mode", text: "Each colour has a night value, the second of the two above: see Dark mode, next." },
     ],
   },
@@ -278,6 +287,54 @@ const zh: Partial<S1WordMap> = {
     ],
   },
 
+  {
+    id: "head",
+    name: "Head",
+    group: "foundations",
+    exports: [],
+    summary:
+      "The row at the top of an app: the brand (its mark, its name, the product in small capitals) at one end and the controls (the language, night and day) at the other, on one line and centred on it. The controls are `ghost` buttons, with no line round them and none round their group: the pressed one is in the ink with a bar under it, the others in the second ink.",
+    example: "live",
+    usage: `import { Button } from "@/components/s1lin/button";
+import { Moon, Sun } from "lucide-react";
+
+<header className="head">
+  <a className="head__brand" href="/">
+    <Logo className="head__mark" />
+    <b className="head__name">TokensBeat</b>
+    <span className="head__product">{t("Console")}</span>
+  </a>
+  <nav className="head__now">…</nav>
+  <div className="head__controls">
+    <div role="group" aria-label={t("Language")}>
+      <Button variant="ghost" size="sm" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</Button>
+      <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</Button>
+    </div>
+    <Button variant="ghost" size="sm" icon={dark ? <Sun /> : <Moon />} onClick={flip}
+      aria-label={dark ? t("Light mode") : t("Dark mode")} title={dark ? t("Light mode") : t("Dark mode")} />
+  </div>
+</header>
+
+/* one row; everything in it centred on it: no baseline, no nudging by a pixel */
+.head { display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--s1-rule); }
+.head__brand { display: inline-flex; align-items: center; gap: 8px; height: 30px; color: var(--s1-ink); text-decoration: none; }
+.head__mark { display: block; flex: none; width: 22px; height: 22px; }
+.head__name { font: 700 15px/1 var(--s1-font-sans); }
+.head__product {
+  padding-left: 8px; border-left: 1px solid var(--s1-rule-strong);
+  font: 500 11px/14px var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2);
+}
+.head__product:lang(zh) { font-size: 12px; letter-spacing: 0; text-transform: none; }
+.head__now { flex: 1; min-width: 0; }
+.head__controls { display: flex; align-items: center; gap: 2px; }
+.head__controls > [role="group"] { display: flex; }`,
+    notes: [
+      { label: "Styles", text: "One height for the row and one for what is in it: the controls are `sm` (30px), the brand is a 30px box, and the row centres them all, the mark too (`align-items: center`), never on a baseline and never nudged by a pixel or two. The brand's words are set at `line-height: 1`, so each box is its type and centres with it." },
+      { label: "Accessibility", text: "The language is a group of buttons, each `aria-pressed`, the group named by `aria-label`; each carries its own `lang`, so 中文 is read as Chinese and set at 12px. The night button is a mark alone, so it has an `aria-label` and a `title`, both saying what it does next. Where the choice belongs to a form, a quiet RadioGroup (`variant=\"segmented\" quiet hideLegend`) looks the same." },
+      { label: "Phone", text: "When the row is short the product's name goes first; the mark, the name and the controls stay on the line." },
+    ],
+  },
+
   // ------------------------------------------------------------ parts
   {
     id: "button",
@@ -286,28 +343,44 @@ const zh: Partial<S1WordMap> = {
     item: "button",
     exports: ["Button", "buttonClass", "ButtonProps", "ButtonVariant", "ButtonSize"],
     summary:
-      "The house buttons. `plain` is a hairline box in mono type; `go`, the same in ink with an offset shadow in the accent, is for the one thing to do; `chip` is a pill; `link` is words underlined; `icon` is the plain box made square, for a mark with an aria-label. Pressed, a box sinks into its shadow.",
+      "The house buttons. `plain` is a hairline box in mono type; `go`, the same in ink with an offset shadow in the accent, is for the one thing to do; `ghost` is the box without its line, for a head or a toolbar; `chip` is a pill; `link` is words underlined; `icon` is the plain box made square, for a mark with an aria-label. An action shows an icon and a word: Create, Edit, Delete, Save. Pressed, a box sinks into its shadow.",
     example: "live",
     usage: `import { Button } from "@/components/s1lin/button";
+import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
 
-<Button variant="go" onClick={post}>Post</Button>
-<Button size="sm" onClick={cancel}>Cancel</Button>
-<Button variant="link" onClick={signOut}>Sign out</Button>
-<Button variant="go" href="/signup">Create an account</Button>
-<Button variant="icon" aria-label="Close" onClick={close}><svg …/></Button>`,
+// an action: its icon, then its word
+<Button variant="go" icon={<Plus />} onClick={create}>Create key</Button>
+<Button icon={<Pencil />} onClick={edit}>Edit</Button>
+<Button icon={<Trash2 />} onClick={remove}>Delete</Button>
+<Button size="sm" icon={<X />} onClick={cancel}>Cancel</Button>
+<Button variant="go" type="submit" icon={<Save />}>Save</Button>
+
+// after the words: a link elsewhere, a menu's caret
+<Button variant="link" href="https://docs.tokensbeat.com" iconEnd={<ArrowUpRight />}>Docs</Button>
+
+// in a head or a toolbar: ghost, no line; one pressed of a group is marked by a bar
+<Button variant="ghost" size="sm" aria-pressed={lang === "en"} onClick={…}>EN</Button>
+<Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={…} />
+
+// a dense row's mark alone: an aria-label for its name, a title for its tooltip
+<Button variant="icon" size="sm" icon={<RefreshCw />} aria-label="Refresh" title="Refresh" onClick={reload} />`,
     props: [
-      { name: "variant", type: "\"plain\" | \"go\" | \"chip\" | \"link\" | \"icon\"", default: "\"plain\"", desc: "Which button. `icon` is 40px square (30px at `sm`) for an svg or one character, and needs an `aria-label`." },
-      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm` is 30px tall in 11px type, for a row of small actions." },
+      { name: "variant", type: "\"plain\" | \"go\" | \"ghost\" | \"chip\" | \"link\" | \"icon\"", default: "\"plain\"", desc: "Which button. `ghost` has no line and no paper, a tint under the pointer, the focus ring kept; with `aria-pressed` the pressed one is in the ink with a bar under its words and the others in the second ink. `icon` is 40px square (30px at `sm`) for an svg or one character, and needs an `aria-label`." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm` is 30px tall in 11px type (12px for Chinese), for a row of small actions or a head." },
+      { name: "icon", type: "ReactNode", desc: "A picture before the words: an svg (lucide's, or your own) drawn at 16px, 14px at `sm`, 6px from them, in the button's ink. It is `aria-hidden`; the words stay the name. With no words the button is a square and needs an `aria-label`, and a `title` for its tooltip." },
+      { name: "iconEnd", type: "ReactNode", desc: "A picture after the words: `ArrowUpRight` on a link elsewhere, `ChevronDown` on a menu." },
       { name: "href", type: "string", desc: "Makes it a link, `<a>`, that looks the part; the other props go to the `<a>`." },
       { name: "type", type: "\"button\" | \"submit\" | \"reset\"", default: "\"button\"", desc: "As on `<button>`; it submits a form only when asked to." },
       CLASS,
       { name: "buttonClass", type: "({ variant, size }?, className?) => string", desc: "The same classes, for an element that cannot be a Button: a `<span>` chip, a `<label>`." },
     ],
     notes: [
-      { label: "Accessibility", text: "A real `<button>` or `<a>`, every other prop passed on (`aria-*`, `disabled`, `ref`). Focus shows a 2px outline in the ink." },
+      { label: "Icons", text: "An action button shows an icon and a word, everywhere: the icon says what kind of thing happens, the word says what. Create, New and Add: `Plus`. Edit: `Pencil`. Delete and Remove: `Trash2`. Save: `Save`. Cancel: `X`. Copy: `Copy` (the Copy part draws its own). Refresh: `RefreshCw`. Export: `FileDown`. Import: `FileUp`. Upload: `Upload`. Download: `Download`. Test: `PlugZap`. Send: `Send`. Search: `Search`. Revoke: `Ban`. Retry: `RotateCcw`. Sign out: `LogOut`. Settings: `Settings`. A link elsewhere: `ArrowUpRight` after the words. The names are lucide-react's; the kit brings no icons, so pass any 16px svg drawn in `currentColor`. An icon alone only in a dense toolbar or a row's actions, with an `aria-label` and a `title`." },
+      { label: "Accessibility", text: "A real `<button>` or `<a>`, every other prop passed on (`aria-*`, `disabled`, `ref`). The icon is `aria-hidden`, so a screen reader hears the words alone. Focus shows a 2px outline in the ink, on `ghost` too." },
+      { label: "Chinese", text: "Under `lang=\"zh-CN\"` an `sm` button sets its words at 12px, not 11px; the mono stack ends in the Chinese sans, so 新建 never falls to SimSun." },
       { label: "Reduced motion", text: "The press does not move." },
     ],
-    where: "The comments: Post, Load more, Use this, the model chip, Sign out. On this page: Copy, the dialogs, the menus.",
+    where: "The comments: Post, Load more, Use this, the model chip, Sign out. On this page: Copy, the dialogs, the menus, the head.",
   },
   {
     id: "section-label",
@@ -673,7 +746,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     item: "radio-group",
     exports: ["RadioGroup", "RadioGroupProps", "RadioOption"],
     summary:
-      "One choice of a few: native radios with one name in a fieldset that is the radiogroup. As a list, as cards to pick an amount or a plan, or as a segmented row for a range (24h · 7d · 30d).",
+      "One choice of a few: native radios with one name in a fieldset that is the radiogroup. As a list, as cards to pick an amount or a plan, or as a segmented row for a range (24h · 7d · 30d); quiet, the row has no box round it, for a head or a toolbar.",
     example: "live",
     usage: `import { RadioGroup } from "@/components/s1lin/radio-group";
 
@@ -681,7 +754,10 @@ import { Checkbox } from "@/components/s1lin/checkbox";
   options={[{ value: "10", label: "$10", hint: "about 2M tokens" }, { value: "20", label: "$20" }]} />
 
 <RadioGroup legend="Range" variant="segmented" defaultValue="7d"
-  options={["24h", "7d", "30d"].map((r) => ({ value: r, label: r }))} />`,
+  options={["24h", "7d", "30d"].map((r) => ({ value: r, label: r }))} />
+
+// in a head or a toolbar: no box, the chosen word in the ink with a bar under it
+<RadioGroup legend="Range" hideLegend variant="segmented" quiet defaultValue="7d" options={…} />`,
     props: [
       { name: "legend", type: "ReactNode", required: true, desc: "What the choice is: the group's name." },
       { name: "options", type: "RadioOption[]", required: true, desc: "`{ value, label, hint?, disabled? }` each; the hint is read as the option's description." },
@@ -690,6 +766,8 @@ import { Checkbox } from "@/components/s1lin/checkbox";
       { name: "onValueChange", type: "(value: string) => void", desc: "Called with the value chosen." },
       { name: "variant", type: "\"list\" | \"cards\" | \"segmented\"", default: "\"list\"", desc: "Radios down the page; a tile each, in a grid that wraps; one joined row, the chosen word in reverse." },
       { name: "orientation", type: "\"vertical\" | \"horizontal\"", default: "\"vertical\"", desc: "A list's radios in a row that wraps." },
+      { name: "quiet", type: "boolean", default: "false", desc: "A segmented row with no box round it and none round the chosen word, which is in the ink with a bar under it; the others in the second ink. For a head or a toolbar, beside `ghost` buttons." },
+      { name: "hideLegend", type: "boolean", default: "false", desc: "The legend is read, not shown, where the row says what it is by itself." },
       { name: "name", type: "string", desc: "The radios' name in a form; one is made up if not given." },
       { name: "hint", type: "ReactNode", desc: "Under the legend." },
       { name: "error", type: "ReactNode", desc: "Under the options; the group is marked invalid." },
@@ -1304,7 +1382,7 @@ Send <Code>Authorization: Bearer …</Code> with each request.
     item: "copy",
     exports: ["Copy", "copyText"],
     summary:
-      "A button that copies a value and says \"Copied\" for two seconds, to the eye and to a screen reader. Where the Clipboard API is unavailable (a page on http, an old browser) it uses the copy command; where that fails too, it says so and tells the page.",
+      "A button, its mark and the word Copy, that copies a value and says \"Copied\" for two seconds, to the eye and to a screen reader. Where the Clipboard API is unavailable (a page on http, an old browser) it uses the copy command; where that fails too, it says so and tells the page.",
     example: "live",
     usage: `import { Copy, copyText } from "@/components/s1lin/copy";
 
@@ -1322,6 +1400,7 @@ const ok = await copyText(text);`,
       { name: "onCopy", type: "(ok: boolean) => void", desc: "After each press. On false, show the text to copy by hand (Secret does)." },
       { name: "variant", type: "ButtonVariant", default: "\"plain\"", desc: "The Button's look." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"sm\"", desc: "The Button's size." },
+      { name: "icon", type: "ReactNode | null", default: "two sheets", desc: "The picture before the word, as on Button: the house's two sheets, a tick after a copy and a cross after a refusal. Give lucide's `Copy` or your own; `null` for the word alone." },
       CLASS,
       { name: "copyText", type: "(text, near?) => Promise<boolean>", desc: "The same, without a button. Pass the element pressed as `near`, so the fallback works inside a modal dialog." },
     ],
@@ -1337,7 +1416,7 @@ const ok = await copyText(text);`,
     item: "secret",
     exports: ["Secret"],
     summary:
-      "An API key as dots with its ends left showing, Show and Copy. Copy takes the whole key without showing it. While it is hidden the page holds only the dots and the ends, so the key is not in the HTML, a screenshot or the accessibility tree.",
+      "An API key as dots with its ends left showing, Show and Copy, each with its mark (an eye, two sheets). Copy takes the whole key without showing it. While it is hidden the page holds only the dots and the ends, so the key is not in the HTML, a screenshot or the accessibility tree.",
     example: "live",
     usage: `import { Secret } from "@/components/s1lin/secret";
 
