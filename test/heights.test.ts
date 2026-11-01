@@ -12,7 +12,7 @@ import ts from "typescript";
 /*
  * One height for every button at a size, measured in a real browser: each variant of Button (and an <a> that is
  * one), with words, with an icon and words, and as an icon alone, in English and in Chinese, at md (40px) and sm
- * (30px); and an Input's action, after the box and as tall as it. Headless Chrome lays the parts out in their
+ * (30px); and an Input's action and a Secret's Show and Copy, after their box and as tall as it. Headless Chrome lays the parts out in their
  * own stylesheets alone (no reset, the system's fonts) and prints what it measured. Skipped where there is no
  * Chrome: set CHROME to one.
  */
@@ -58,11 +58,12 @@ const icon = () => h("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "curre
 const SIZES = { md: 40, sm: 30 } as const;
 const WORDS = { en: "Save", "zh-CN": "新建用户" } as const;
 
-test("every button is one height at a size: each variant, with and without an icon, in English and in Chinese; an Input's action is its box's height", async (t) => {
+test("every button is one height at a size: each variant, with and without an icon, in English and in Chinese; an Input's action and a Secret's buttons are their box's height, after it", async (t) => {
   const bin = chrome();
   if (!bin) return t.skip("no Chrome here: set CHROME to run it");
   const { Button } = await part("button");
   const { Input } = await part("input");
+  const { Secret } = await part("secret");
 
   const cases: ReactNode[] = [];
   const mark = (key: string, node: ReactNode) => cases.push(h("div", { "data-case": key, key, className: "case" }, node));
@@ -90,21 +91,33 @@ test("every button is one height at a size: each variant, with and without an ic
           h(Input, { size, "aria-label": "Amount", prefix: "$", suffix: h(Button, { size: "sm", "data-m": "input suffix Button" }, word) }),
         ),
       );
+      // a Secret: its value's box, then Show and Copy after it, hidden and shown
+      const words = lang === "en" ? undefined : { show: "显示", hide: "隐藏", hidden: "已隐藏" };
+      mark(
+        `${size} ${lang} secret`,
+        h(
+          "div",
+          { lang, className: "row", "data-size": size },
+          h(Secret, { size, value: "sk-tb-4f7c9e2a81d04b6f93a5c0e7d2b18f6a", label: lang === "en" ? "API key" : "API 密钥", keep: [6, 4], words }),
+          h(Secret, { size, value: "whsec_b81f0c2d9e4a", label: "Webhook", defaultRevealed: true, words }),
+        ),
+      );
     }
   }
 
-  const css = ["tokens.css", "button.css", "input.css"].map((f) => readFileSync(path.join(UI, f), "utf8")).join("\n");
-  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>@layer base, components;\n${css}\n.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px; } .row > .s1-input, .row > .s1-input__row { width: 320px; }</style></head>
+  const css = ["tokens.css", "button.css", "input.css", "copy.css", "secret.css", "visually-hidden.css"].map((f) => readFileSync(path.join(UI, f), "utf8")).join("\n");
+  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>@layer base, components;\n${css}\n.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px; } .row > .s1-input, .row > .s1-input__row, .row > .s1-secret { width: 520px; }</style></head>
 <body>${renderToStaticMarkup(h("main", null, cases))}
 <pre id="out"></pre>
 <script>
   const r = (el) => el.getBoundingClientRect();
   const got = [];
+  for (const b of document.querySelectorAll(".s1-secret__actions .s1-btn")) b.dataset.m = "secret " + (b.closest(".s1-copy") ? "Copy" : "Show/Hide") + " (" + b.textContent.trim() + ")";
   for (const b of document.querySelectorAll("[data-m]")) {
     const row = b.closest(".row");
-    const box = b.closest(".s1-input__row")?.querySelector(".s1-input");
+    const box = b.closest(".s1-input__row")?.querySelector(".s1-input") ?? b.closest(".s1-secret")?.querySelector(".s1-secret__value");
     got.push({ m: b.dataset.m, size: row.dataset.size, lang: row.lang, h: r(b).height, w: r(b).width, square: b.hasAttribute("data-square"),
-      box: box ? { h: r(box).height, right: r(box).right, left: r(b).left, inside: box.contains(b) } : null });
+      box: box ? { h: r(box).height, right: r(box).right, left: r(b).left, inside: box.contains(b), mid: r(box).top + r(box).height / 2, bmid: r(b).top + r(b).height / 2 } : null });
   }
   document.getElementById("out").textContent = JSON.stringify(got);
 </script></body></html>`;
@@ -117,7 +130,7 @@ test("every button is one height at a size: each variant, with and without an ic
     return t.skip(`Chrome would not run (${bin}): ${String(e).slice(0, 200)}`);
   }
   const text = dom.match(/<pre id="out">([\s\S]*?)<\/pre>/)?.[1] ?? "";
-  type Got = { m: string; size: "md" | "sm"; lang: string; h: number; w: number; square: boolean; box: { h: number; right: number; left: number; inside: boolean } | null };
+  type Got = { m: string; size: "md" | "sm"; lang: string; h: number; w: number; square: boolean; box: { h: number; right: number; left: number; inside: boolean; mid: number; bmid: number } | null };
   const got = JSON.parse(text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&")) as Got[];
   assert.ok(got.length > 60, `measured ${got.length} buttons`);
   if (process.env.S1LIN_HEIGHTS) writeFileSync(process.env.S1LIN_HEIGHTS, JSON.stringify(got, null, 1)); // the measurements, for a report
@@ -126,8 +139,10 @@ test("every button is one height at a size: each variant, with and without an ic
   assert.deepEqual(wrong, [], "a button off its size's height");
   const notSquare = got.filter((g) => g.square && g.w !== g.h).map((g) => `${g.size} ${g.lang} ${g.m}: ${g.w}×${g.h}`);
   assert.deepEqual(notSquare, [], "an icon alone is a square");
-  for (const g of got.filter((x) => x.m.startsWith("input"))) {
+  assert.equal(got.filter((x) => x.m.startsWith("secret")).length, 16, "Show and Copy of two Secrets (hidden, shown) in each of four rows");
+  for (const g of got.filter((x) => x.m.startsWith("input") || x.m.startsWith("secret"))) {
     assert.ok(g.box, `${g.m}: in a row with its box`);
+    assert.ok(Math.abs(g.box.mid - g.box.bmid) < 0.5, `${g.size} ${g.lang} ${g.m}: centred on the box's line`);
     assert.equal(g.box.inside, false, `${g.size} ${g.lang} ${g.m}: outside the box`);
     assert.ok(g.box.left >= g.box.right, `${g.size} ${g.lang} ${g.m}: after the box`);
     assert.equal(g.box.h, SIZES[g.size], `${g.size} ${g.lang} ${g.m}: the box keeps its height`);

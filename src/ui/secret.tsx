@@ -25,6 +25,8 @@ type Props = {
   noCopy?: boolean;
   /** The words for Show, Hide and the hidden value; from S1Words by default. */
   words?: { show: string; hide: string; hidden: string };
+  /** "md": the value's box 40px tall, as an Input; "sm": 30px. The buttons are the box's height. */
+  size?: "md" | "sm";
   className?: string;
 };
 
@@ -41,8 +43,10 @@ function EyeMark({ shown }: { shown: boolean }) {
 }
 
 /**
- * A secret shown as dots with its ends left showing, a Show button with its eye, and Copy,
- * which copies the whole value without showing it. While it is hidden the
+ * A secret shown as dots with its ends left showing, in a box of its own;
+ * after the box, outside it, Show with its eye and Copy, which copies the
+ * whole value without showing it, both without a line, the box's height.
+ * While it is hidden the
  * page holds only the dots and the ends, so the value is not in the HTML, and
  * a screen reader hears "API key, hidden". If the copy fails, it is shown and
  * selected, for copying by hand.
@@ -56,6 +60,7 @@ export function Secret({
   keep = [0, 4],
   noCopy = false,
   words: given,
+  size = "md",
   className,
 }: Props) {
   const w = useS1Words();
@@ -87,7 +92,7 @@ export function Secret({
   }
 
   return (
-    <div className={cn("s1-secret", className)} role="group" aria-label={label} data-revealed={shown ? "" : undefined}>
+    <div className={cn("s1-secret", `s1-secret--${size}`, className)} role="group" aria-label={label} data-revealed={shown ? "" : undefined}>
       <code className="s1-secret__value" ref={text}>
         {shown ? (
           value
@@ -105,10 +110,10 @@ export function Secret({
         )}
       </code>
       <span className="s1-secret__actions">
-        <Button size="sm" icon={<EyeMark shown={shown} />} aria-label={`${shown ? words.hide : words.show} ${label}`} onClick={() => set(!shown)}>
+        <Button variant="ghost" size={size} icon={<EyeMark shown={shown} />} aria-label={`${shown ? words.hide : words.show} ${label}`} onClick={() => set(!shown)}>
           {shown ? words.hide : words.show}
         </Button>
-        {!noCopy && <Copy value={value} label={w.copyName(label)} onCopy={(ok) => !ok && failed()} />}
+        {!noCopy && <Copy value={value} label={w.copyName(label)} variant="ghost" size={size} onCopy={(ok) => !ok && failed()} />}
       </span>
     </div>
   );
