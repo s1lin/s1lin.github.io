@@ -83,7 +83,8 @@ function Buttons() {
   const say = (what: string) => () => setLast(what);
   return (
     <div className="ud-buttons">
-      <p className="ud-row">
+      {/* one size a row: every box in a row is the same height, 40px at md, 30px at sm */}
+      <p className="ud-row" data-size="md">
         <Button variant="go" icon={<Plus />} onClick={say("Create key")}>
           Create key
         </Button>
@@ -96,29 +97,34 @@ function Buttons() {
         <Button icon={<Save />} disabled>
           Save
         </Button>
-      </p>
-      <p className="ud-row">
-        <Button size="sm" icon={<X />} onClick={say("Cancel")}>
-          Cancel
-        </Button>
-        <Button variant="go" size="sm" icon={<Send />} onClick={say("Send")}>
-          Send
+        <Button variant="ghost" icon={<RefreshCw />} onClick={say("Refresh")}>
+          Refresh
         </Button>
         <Button variant="chip" aria-expanded={open} iconEnd={<ChevronDown />} onClick={() => setOpen((o) => !o)}>
           qwen-3.8
         </Button>
-        <span className={buttonClass({ variant: "chip" }, "ud-quiet")}>a span, as a chip</span>
+        <Button variant="icon" icon={<Download />} aria-label="Download" title="Download" onClick={say("Download")} />
         <Button variant="link" href="#button" iconEnd={<ArrowUpRight />}>
           Docs
         </Button>
-        <Button variant="link" onClick={say("Sign out")}>
+      </p>
+      <p className="ud-row" data-size="sm">
+        <Button variant="go" size="sm" icon={<Send />} onClick={say("Send")}>
+          Send
+        </Button>
+        <Button size="sm" icon={<X />} onClick={say("Cancel")}>
+          Cancel
+        </Button>
+        <Button variant="ghost" size="sm" icon={<RefreshCw />} onClick={say("Refresh")}>
+          Refresh
+        </Button>
+        <span className={buttonClass({ variant: "chip", size: "sm" }, "ud-quiet")}>a span, as a chip</span>
+        <Button variant="icon" size="sm" icon={<Download />} aria-label="Download" title="Download" onClick={say("Download")} />
+        <Button variant="link" size="sm" onClick={say("Sign out")}>
           Sign out
         </Button>
       </p>
-      <p className="ud-row ud-row--tight">
-        <Button variant="ghost" icon={<RefreshCw />} onClick={say("Refresh")}>
-          Refresh
-        </Button>
+      <p className="ud-row ud-row--tight" data-size="sm">
         <span className="ud-pair" role="group" aria-label="Language">
           <Button variant="ghost" size="sm" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>
             EN
@@ -128,9 +134,8 @@ function Buttons() {
           </Button>
         </span>
         <Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={say("Dark mode")} />
-        <Button variant="icon" size="sm" icon={<Download />} aria-label="Download" title="Download" onClick={say("Download")} />
       </p>
-      <p className="ud-row" lang="zh-CN">
+      <p className="ud-row" lang="zh-CN" data-size="md">
         <Button variant="go" icon={<Plus />} onClick={say("新建用户")}>
           新建用户
         </Button>
@@ -140,15 +145,29 @@ function Buttons() {
         <Button icon={<Trash2 />} onClick={say("删除")}>
           删除
         </Button>
+        <Button icon={<X />} onClick={say("取消")}>
+          取消
+        </Button>
+        <Button variant="ghost" icon={<RefreshCw />} onClick={say("刷新")}>
+          刷新
+        </Button>
+      </p>
+      <p className="ud-row" lang="zh-CN" data-size="sm">
+        <Button variant="go" size="sm" icon={<Save />} onClick={say("保存")}>
+          保存
+        </Button>
         <Button size="sm" icon={<X />} onClick={say("取消")}>
           取消
         </Button>
         <Button variant="ghost" size="sm" icon={<RefreshCw />} onClick={say("刷新")}>
           刷新
         </Button>
+        <Button variant="chip" size="sm" iconEnd={<ChevronDown />} onClick={say("模型")}>
+          模型
+        </Button>
       </p>
       <p className="cap" aria-live="polite">
-        {last ? `Pressed ${last}: nothing is sent from this page.` : "Press one; the chip opens and closes, EN and 中文 take turns. The fourth row is in Chinese (lang=\"zh-CN\")."}
+        {last ? `Pressed ${last}: nothing is sent from this page.` : "One size a row: 40px, then 30px; the head's controls; the same in Chinese (lang=\"zh-CN\"), at 40px and at 30px. Press one; the chip opens and closes, EN and 中文 take turns."}
       </p>
       <figure className="ud-verbs">
         <figcaption className="cap">An action and its icon, by lucide-react&rsquo;s name:</figcaption>

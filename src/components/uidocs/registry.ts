@@ -645,17 +645,20 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     item: "input",
     exports: ["Input", "InputProps"],
     summary:
-      "A text box: a native `<input>` of any text type (text, number, search, password, email, url) in a hairline box, 40px tall as a Button or 30px as a small one, with words or a button inside it before or after.",
+      "A text box: a native `<input>` of any text type (text, number, search, password, email, url) in a hairline box, 40px tall as a Button or 30px as a small one, with words inside it before or after, and an action after it: a Button beside the box, outside it, as tall as it, with no line of its own. Never a box drawn in the box.",
     example: "live",
     usage: `import { Input } from "@/components/s1lin/input";
 
 <Field label="Amount"><Input type="number" inputMode="decimal" min={5} prefix="$" suffix="USD" /></Field>
 <Input type="search" size="sm" aria-label="Search keys" placeholder="Search keys" />
-<Input suffix={<Button size="sm" onClick={apply}>Apply</Button>} aria-label="Coupon" />`,
+<Field label="Coupon">
+  <Input action={<Button variant="ghost" icon={<Check />} onClick={apply}>Apply</Button>} />
+</Field>`,
     props: [
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px tall in 16px type, or 30px in 14px (16px on a touch screen, which would zoom into smaller type)." },
       { name: "prefix", type: "ReactNode", desc: "Before the text, inside the box: a currency, a scheme. Words here are read as part of its description." },
-      { name: "suffix", type: "ReactNode", desc: "After the text: a unit, or a small Button. Words here are read as part of its description." },
+      { name: "suffix", type: "ReactNode", desc: "After the text, inside the box: a unit. Words here are read as part of its description. A Button given here is set after the box, as `action` is." },
+      { name: "action", type: "ReactNode", desc: "After the box, outside it, on its line: a Button that acts on what is typed (Apply, Max, Show), its icon and its word. It is drawn as a ghost (no line, no paper, a tint under the pointer) the box's height, 40px or 30px, whatever size it was given; a `link` Button stays words." },
       { name: "invalid", type: "boolean", desc: "In error without a Field around it; sets `aria-invalid`." },
       { name: "type", type: "string", default: "\"text\"", desc: "Any text type. Numbers are set in mono; give them `inputMode=\"decimal\"` for a phone's number pad." },
       { name: "className", type: "string", desc: "Added to the box (`s1-input`); every other prop goes to the `<input>`, `ref` too." },
@@ -663,6 +666,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     notes: [
       { label: "Accessibility", text: "A native input: its name comes from the Field's label, or give it `aria-label`. Focus draws a 2px ring in the ink round the whole box; in error the line doubles, so the state is not told by colour. Placeholder text is in the third ink and is never the label." },
       { label: "Dark mode", text: "Native parts of the control (a number's arrows, a search's clear) follow `--s1-scheme`." },
+      { label: "Styles", text: "With an action the Input is a row (`s1-input__row`): the box takes the room, the action (`s1-input__action`) what it needs, 4px after the box, both the box's height and centred on one line. `className` still goes to the box." },
     ],
   },
   {

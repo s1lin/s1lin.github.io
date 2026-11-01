@@ -1,5 +1,5 @@
 import { useRef, useState, type CSSProperties, type FormEvent } from "react";
-import { Ban, Check, Eraser, FileDown, KeyRound, Plus, RefreshCw, RotateCcw, Save, Wallet, X } from "lucide-react";
+import { Ban, Check, Eraser, FileDown, KeyRound, Plus, RefreshCw, RotateCcw, Save, Search, Wallet, X } from "lucide-react";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
@@ -127,8 +127,8 @@ export function InputDemo() {
           value={coupon}
           onChange={(e) => setCoupon(e.target.value)}
           placeholder="SPRING26"
-          suffix={
-            <Button size="sm" icon={<Check />} onClick={() => setSaid(coupon ? "bad" : "")}>
+          action={
+            <Button variant="ghost" icon={<Check />} onClick={() => setSaid(coupon ? "bad" : "")}>
               Apply
             </Button>
           }
@@ -137,8 +137,30 @@ export function InputDemo() {
       <Field label="Base URL" disabled>
         <Input defaultValue="https://api.tokensbeat.com/v1" />
       </Field>
-      <div className="ud-span2">
-        <Input type="search" size="sm" aria-label="Search keys" placeholder="Search keys (sm)" />
+      <div lang="zh-CN">
+        <Field label="优惠码" hint="每个账户限用一次。">
+          <Input
+            placeholder="SPRING26"
+            action={
+              <Button variant="ghost" icon={<Check />} onClick={() => setSaid("")}>
+                使用
+              </Button>
+            }
+          />
+        </Field>
+      </div>
+      <div>
+        <Input
+          type="search"
+          size="sm"
+          aria-label="Search keys"
+          placeholder="Search keys (sm)"
+          action={
+            <Button variant="ghost" size="sm" icon={<Search />}>
+              Search
+            </Button>
+          }
+        />
       </div>
     </div>
   );

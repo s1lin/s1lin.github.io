@@ -1,4 +1,8 @@
-/* Button (button.tsx). The press is a translate, so it holds still for readers who prefer reduced motion. */
+/*
+ * Button (button.tsx). Every box is one height at its size, whatever its variant, its icon or its language: 40px,
+ * and 30px a size down (test/heights.test.ts measures it in Chrome). The go button's shadow is drawn outside its
+ * box and takes nothing from it. The press is a translate, so it holds still for readers who prefer reduced motion.
+ */
 @layer components {
   .s1-btn { font: 500 12px/1 var(--s1-font-mono); cursor: pointer; }
   .s1-btn--plain, .s1-btn--go, .s1-btn--ghost, .s1-btn--icon {
@@ -34,17 +38,24 @@
     background-origin: content-box; background-position: left bottom 4px; background-size: 100% 2px;
   }
 
+  /* A pill, the height of the other boxes at its size (40px, 30px a size down), so a row of them is one height. */
   .s1-btn--chip {
-    display: inline-flex; align-items: center; gap: 6px; min-height: 32px; max-width: 100%; padding: 0 10px 0 8px;
+    display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 40px; max-width: 100%; padding: 0 14px 0 12px;
     color: var(--s1-ink); background: var(--s1-paper); border: 1px solid var(--s1-rule-strong); border-radius: 999px; text-decoration: none;
   }
+  .s1-btn--chip.s1-btn--sm { min-height: 30px; padding: 0 10px 0 8px; }
   .s1-btn--chip:hover, .s1-btn--chip[aria-expanded="true"] { background: var(--s1-paper-2); }
 
-  .s1-btn--link { background: none; border: 0; padding: 0; color: var(--s1-ink-2); text-decoration: underline; text-underline-offset: 3px; }
+  /* Words underlined, with no box to see, but the box's height, so a link in a row of buttons sits on their line. */
+  .s1-btn--link {
+    display: inline-flex; align-items: center; box-sizing: border-box; min-height: 40px;
+    background: none; border: 0; padding: 0; color: var(--s1-ink-2); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .s1-btn--link.s1-btn--sm { min-height: 30px; padding: 0; }
 
   /* An icon and the words: the icon 16px (14px a size down), 6px before them; with no words, a square. */
   .s1-btn--with-icon { gap: 6px; }
-  .s1-btn--link.s1-btn--with-icon { display: inline-flex; align-items: center; vertical-align: middle; }
+  .s1-btn--link.s1-btn--with-icon { vertical-align: middle; }
   .s1-btn__icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 16px; height: 16px; }
   .s1-btn--sm .s1-btn__icon { width: 14px; height: 14px; }
   .s1-btn .s1-btn__icon > svg { display: block; width: 100%; height: 100%; flex: none; }

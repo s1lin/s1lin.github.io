@@ -391,11 +391,12 @@
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
-      "description": "A native text box of any text type (text, number, search, password) in a hairline box, two sizes, words or a button inside it before or after; wired to the Field around it.",
+      "description": "A native text box of any text type (text, number, search, password) in a hairline box, two sizes, words inside it before or after and an action after it, outside the box; wired to the Field around it.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json",
         "https://s1lin.tokensbeat.com/r/field.json"
       ],
       "files": [
