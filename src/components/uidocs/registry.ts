@@ -10,7 +10,7 @@
  * src/components appears in the list of site parts.
  */
 
-export type GroupId = "start" | "foundations" | "parts" | "forms" | "data" | "overlays" | "feedback" | "text" | "hooks";
+export type GroupId = "start" | "foundations" | "parts" | "forms" | "data" | "navigation" | "overlays" | "feedback" | "text" | "hooks";
 
 export interface Group {
   id: GroupId;
@@ -50,6 +50,12 @@ export const GROUPS: Group[] = [
     chapter: "Parts",
     name: "Data",
     blurb: "Tables, figures and statuses for a console: keys, usage, orders, models. Statuses are told apart by line, fill and shape in one ink, never by hue alone, so they read in greyscale and to anyone who does not see colour.",
+  },
+  {
+    id: "navigation",
+    chapter: "Parts",
+    name: "Navigation",
+    blurb: "How a reader finds their way: the index beside these docs, and the sidebar of an app (chats, projects, settings), one part for both. A list of links in a nav landmark, the current one marked for the eye and for a screen reader.",
   },
   {
     id: "overlays",
@@ -902,6 +908,7 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
       { name: "rowHeader", type: "string", default: "the first column", desc: "The column whose cells name their rows (`<th scope=\"row\">`)." },
       { name: "rowProps", type: "(row, index) => RowProps", desc: "Attributes for a row's `<tr>`: a class, `data-` attributes, a click that follows the row's own link." },
       { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "One row across the table when there are no rows: words, or an EmptyState. By default the `empty` of the words in force (`S1Words`)." },
+      { name: "emptyMark", type: "ReactNode", desc: "A mark for the empty row (your one-colour logo): the words are then set as a small EmptyState under it. An `empty` that is already an element is shown as it is." },
       { name: "loading", type: "boolean | number", default: "false", desc: "Rows of bars in place of the rows (5, or the number given), and `aria-busy` on the table." },
       { name: "sort", type: "{ key, dir: \"asc\" | \"desc\" } | null", desc: "The sort to show: that header marked, and `aria-sort` on it." },
       { name: "onSortChange", type: "(sort) => void", desc: "Called when a sortable header is pressed: ascending first, then the other way. Sort the rows yourself." },
@@ -1122,24 +1129,100 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
     group: "data",
     item: "empty-state",
     exports: ["EmptyState"],
-    summary: "Nothing here yet, said plainly: an empty frame marked at its corners, a line in the display face, what to do next. For an empty list, a search with no results, a page before its first use.",
+    summary: "Nothing here yet, said plainly: an empty frame marked at its corners, or your app's own mark in one colour, a line in the display face, what to do next. For an empty list, a search with no results, a page before its first use.",
     example: "live",
     usage: `import { EmptyState } from "@/components/s1lin/empty-state";
 
 <EmptyState title="No keys yet" action={<Button variant="go" onClick={create}>Create key</Button>}>
   <p>A key lets an app call the models on your balance.</p>
-</EmptyState>`,
+</EmptyState>
+
+// your mark in place of the frame: a one-colour svg in currentColor (your logo)
+<EmptyState mark={<Logo />} title="No friends yet" />
+<Table … emptyMark={<Logo />} empty="No orders yet" />`,
     props: [
       { name: "title", type: "ReactNode", required: true, desc: "What is missing." },
       { name: "children", type: "ReactNode", desc: "Why, or what to do." },
       { name: "action", type: "ReactNode", desc: "The one thing to do." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm` inside a table or a small panel." },
+      { name: "mark", type: "ReactNode", desc: "Your own mark in place of the frame: a one-colour svg drawn in `currentColor` (an app's logo), 56px square, 40px at `sm`, in the second ink, so it is one colour on either paper. Hidden from screen readers. The kit brings none: pass yours." },
       CLASS,
     ],
-    notes: [{ label: "Accessibility", text: "The frame is decorative; the title is a paragraph, not a heading, so it can sit in a table cell. Put a heading round it where it stands for a whole page." }],
+    notes: [
+      { label: "Accessibility", text: "The frame, or the mark, is decorative; the title is a paragraph, not a heading, so it can sit in a table cell. Put a heading round it where it stands for a whole page." },
+      { label: "Dark mode", text: "A mark drawn in `currentColor` takes the second ink of the paper it is on; an `<img>` keeps its own colours, so give it one that reads on both." },
+    ],
   },
 
   // ------------------------------------------------------------ overlays
+  {
+    id: "side-nav",
+    name: "SideNav",
+    group: "navigation",
+    item: "side-nav",
+    exports: ["SideNav", "SideNavProps", "SideNavItem", "SideNavSection", "SideNavLinkProps"],
+    summary:
+      "The index beside these docs, as a part: a title in small capitals over a rule; chapters in mono capitals, numbered; families with a count; items in the sans on a hairline rail, the current one in the ink with a 2px bar and no ground. An app's sidebar adds what it needs: an icon before an item, a time or a count after it, a status mark, an action at the end of a section (a \"+\"), nested items, sections that open and close. It folds to a rail of icons, and on a phone it is one bar that says where you are and opens the tree as a sheet.",
+    example: "live",
+    usage: `import { SideNav, type SideNavSection } from "@/components/s1lin/side-nav";
+import { Button } from "@/components/s1lin/button";
+import { Link } from "react-router-dom";
+import { MessageSquare, Plus } from "lucide-react";
+
+const sections: SideNavSection[] = [
+  {
+    id: "chats", title: t("Chats"),
+    action: <Button variant="ghost" size="sm" icon={<Plus />} aria-label={t("New chat")} title={t("New chat")} onClick={newChat} />,
+    items: chats.map((c) => ({
+      id: c.id, label: c.title, href: \`/chat/\${c.id}\`, icon: <MessageSquare />,
+      meta: ago(c.updated),                                   // "2m"
+      status: c.running ? "info" : undefined, statusLabel: t("running"),
+    })),
+  },
+  { id: "projects", title: t("Projects"), count: projects.length, collapsible: true, items: … },
+];
+
+<SideNav
+  label={t("Main")} title="Aha" sections={sections}
+  current={chatId}                                            // aria-current="page" on it
+  renderLink={({ href, ...link }) => <Link to={href} {...link} />}
+  expanded={open} onExpandedChange={setOpen}                 // or defaultExpanded, and let it keep them
+  rail={folded}                                              // icons only, the labels as tooltips
+  sheet={1023}                                               // up to 1023px: one bar, the tree as a sheet
+/>
+
+// the docs' index: numbered chapters, families with a count, places on one page
+<SideNav label="Library" title="Index" currentType="location" sheet={900} sections={chapters} current={active} here={where} />`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "The nav landmark's name: \"Main\", \"Library\", \"Account\"." },
+      { name: "sections", type: "SideNavSection[]", required: true, desc: "The tree. A section: `{ id, title?, text?, number?, count?, action?, href?, onSelect?, collapsible?, defaultOpen?, sections?, items?, lang? }`. A `number` sets it as a chapter (mono capitals, its contents indented); without one it is a family or a list (smaller capitals, `count` or `action` at the end). A section with no title shows its items alone." },
+      { name: "SideNavItem", type: "{ id, label, text?, href?, onSelect?, icon?, meta?, status?, statusLabel?, items?, disabled?, lang? }", desc: "An item: `href` makes it a link (through `renderLink`), else a button that calls `onSelect`. `icon` 16px before the label; `meta` after it in mono (\"2m\", a count, a Badge); `status` a Glyph shape, said by `statusLabel`; `items` nest under it. `text` is the label in plain words where it is not a string." },
+      { name: "title", type: "ReactNode", desc: "The line over the tree, in small capitals over a rule: \"Index\"." },
+      { name: "titleAction", type: "ReactNode", desc: "At the end of the title's line: Buttons (a new chat, fold the sidebar)." },
+      { name: "current", type: "string | null", desc: "The id of the item or section you are at. It is marked `aria-current`, in the ink, with the 2px bar; the sections round it say `aria-current=\"true\"`." },
+      { name: "currentType", type: "\"page\" | \"location\" | \"step\" | \"true\"", default: "\"page\"", desc: "What `aria-current` says on the current one: `page` for routes, `location` for places on one page (these docs)." },
+      { name: "renderLink", type: "(link: SideNavLinkProps) => ReactNode", desc: "Your router's link: it is handed `href`, `className`, `aria-current`, `onClick`, `title`, `lang` and `children`; spread them on it. A plain `<a>` without it." },
+      { name: "onNavigate", type: "(target) => void", desc: "After every choice (the item's own `onSelect` first). The phone's sheet closes by itself." },
+      { name: "expanded", type: "string[]", desc: "The collapsible sections that are open, when the app keeps them (in storage, in the route)." },
+      { name: "defaultExpanded", type: "string[]", desc: "Open at first, when it does not; else each collapsible section's `defaultOpen` (open unless false)." },
+      { name: "onExpandedChange", type: "(expanded: string[]) => void", desc: "Called with the open ids when a head is pressed." },
+      { name: "rail", type: "boolean", default: "false", desc: "Icons only (a section's first letter where an item has none): the labels stay for screen readers and come up as tooltips; heads, times and the footer go." },
+      { name: "sheet", type: "boolean | 640 | 768 | 900 | 1023", default: "false", desc: "Up to this width the tree waits behind one bar (the title, where you are, a \"+\") and opens as a sheet over the page: focus goes in, Tab stays in it, Esc, a choice or a tap outside closes it. `true`: always. Without script the tree stays in the page." },
+      { name: "here", type: "ReactNode", desc: "Where you are, on the bar: the current section and item by default (\"Editorial · Button\")." },
+      { name: "barLabel", type: "ReactNode", desc: "The bar's label; the title by default." },
+      { name: "followCurrent", type: "boolean", default: "true", desc: "When the tree scrolls in its own box, keep the current item in view by scrolling that box alone, never the page." },
+      { name: "footer", type: "ReactNode", desc: "Under the tree: the account, a note." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Accessibility", text: "A `nav` landmark named by `label`; the tree is lists (`ol` of sections, `ul` of items), so a screen reader says how many. The current item has `aria-current`; a collapsible head is a button with `aria-expanded` and `aria-controls`; icons are hidden and a status mark is said by its `statusLabel`. In the rail the label is still the item's name, and its tooltip. Focus is a 2px ring in the ink." },
+      { label: "Keyboard", text: "Tab through the links; Enter follows one. On a phone the bar opens the sheet and focus goes to the current item; Tab and Shift+Tab stay among the bar and the sheet; Esc closes it and gives focus back to the bar." },
+      { label: "Phone", text: "Turn the sheet on below your breakpoint with `sheet` (640, 768, 900, 1023 or `true`), all in CSS, so the server's HTML is right on any screen. Rows get taller in the sheet for a thumb." },
+      { label: "Styles", text: "The nav sets no type of its own; the indent under a chapter is 2.4ch + 10px of the page's type, or `--s1-sidenav-indent`. Hold it in place (sticky, a scrolling box) from your own CSS: these docs keep the panel (`s1-sidenav__panel`) in a box that scrolls and fades at its foot." },
+      { label: "Chinese", text: "Under `lang=\"zh-CN\"` the title, the heads and the bar's label drop their tracking and capitals and are 12px; times and counts are 500." },
+    ],
+    where: "This page's index, on the left (on a phone, the bar under the running head); the app sidebar in the example.",
+  },
   {
     id: "dialog",
     name: "Dialog",

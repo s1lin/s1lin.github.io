@@ -563,6 +563,7 @@
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/empty-state.json",
         "https://s1lin.tokensbeat.com/r/skeleton.json",
         "https://s1lin.tokensbeat.com/r/use-overflow.json",
         "https://s1lin.tokensbeat.com/r/visually-hidden.json",
@@ -889,6 +890,35 @@
       "categories": [
         "console",
         "overlays"
+      ]
+    },
+    {
+      "name": "side-nav",
+      "type": "registry:ui",
+      "title": "SideNav",
+      "description": "Side navigation: the index of the s1lin docs and an app's sidebar. A title over a rule, numbered chapters, families with a count or an action, items on a hairline rail with the current one in a 2px bar, icons, times, status marks, nested and collapsible; folded to a rail of icons, or on a phone one bar that opens the tree as a sheet.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/side-nav.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/side-nav.tsx"
+        },
+        {
+          "path": "src/ui/side-nav.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/side-nav.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "navigation"
       ]
     },
     {

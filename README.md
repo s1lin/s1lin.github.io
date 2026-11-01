@@ -119,14 +119,17 @@ the manner of shadcn's, in five chapters: 01 Getting started (the registry in
 `components.json`, the first part, how the stylesheets sit beside an app's own,
 with Tailwind or without), 02 Foundations (tokens, dark mode, theming, words, the
 head an app's parts sit under), 03
-Parts by family (Editorial, Forms, Data, Overlays, Feedback, Text and keys), 04
+Parts by family (Editorial, Forms, Data, Navigation, Overlays, Feedback, Text and
+keys), 04
 Hooks and `cn`, 05 Site parts (marked not published). Every item has the same
 anatomy: its name and one line, a live example on a quiet stage, one install line
 (npm, pnpm, yarn or bun, with Copy; the choice is shared by the page and kept in
 `localStorage`), then its reference in tabs: Usage, Props, Notes, Files (all in the
 prerendered HTML; printed or without JavaScript they show one after another). The
 index beside it is the whole tree and marks the item being read; on a phone it is
-a bar saying where you are that opens the same tree. The examples are
+a bar saying where you are that opens the same tree as a sheet. The index is the
+library's own SideNav (`src/ui/side-nav.tsx`), the part apps use for their
+sidebars. The examples are
 the published files themselves, from `src/ui/` (the console's, in
 `src/components/uidocs/console.tsx`, with made-up keys and figures; one
 `<Toaster />` sits at the foot of the page). The inventory is data, in
@@ -144,13 +147,17 @@ stylesheets alone, and holds every variant (with words, an icon and words, an ic
 alone, as an `<a>`, in English and in Chinese) to one height at its size, 40px and
 30px, and an Input's action and a Secret's Show and Copy to their box's, after it;
 it is skipped where there is no Chrome
-(set `CHROME` to one). The docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
+(set `CHROME` to one). `test/side-nav.test.ts` has Vite bundle a page of SideNav
+and EmptyState as an app would and runs it in the same Chrome, at a desktop's width
+and a phone's: the current item's bar, the rail, the phone's sheet (it opens, focus
+goes in and stays, Esc, a tap outside and a choice close it), the mark's size. The
+docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
 ### The console's parts
 
 The parts a web console needs (keys, usage, top-ups and orders, a model plaza, an
-account), in the registry's `console` category and in five groups on `/ui/`:
+account), in the registry's `console` category and in six groups on `/ui/`:
 
 - **Forms**: Field and Fieldset (label, hint and error wired to the control by
   `useField`), Input (its action, an Apply or a Max, after the box and as tall as it,
@@ -161,7 +168,11 @@ never inside it), Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
   actions, a sticky header, row groups that open and close with "Expand all", a
   `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
   Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
-  EmptyState.
+  EmptyState (its frame, or an app's own one-colour mark).
+- **Navigation**: SideNav (the docs' index and an app's sidebar: numbered chapters,
+  families with a count or an action, items with an icon, a time, a status mark,
+  nested and collapsible; a rail of icons; on a phone one bar that opens the tree
+  as a sheet).
 - **Overlays**: Dialog (the native `<dialog>`), Menu (the ARIA menu button, in the
   top layer), Tabs, Toast (`toast()` and one `<Toaster />`).
 - **Feedback**: Notice, Spinner, Skeleton.

@@ -1,5 +1,28 @@
 import { useRef, useState, type CSSProperties, type FormEvent } from "react";
-import { Ban, Check, Eraser, FileDown, KeyRound, Plus, RefreshCw, RotateCcw, Save, Search, Wallet, X } from "lucide-react";
+import {
+  Ban,
+  BookOpen,
+  Check,
+  Clapperboard,
+  Code as CodeIcon,
+  Eraser,
+  FileDown,
+  Folder,
+  Image as ImageIcon,
+  KeyRound,
+  MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Search,
+  Settings,
+  Store,
+  Wallet,
+  X,
+} from "lucide-react";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
@@ -19,6 +42,7 @@ import { Panel } from "@/ui/panel";
 import { RadioGroup } from "@/ui/radio-group";
 import { Secret } from "@/ui/secret";
 import { Select } from "@/ui/select";
+import { SideNav, type SideNavSection } from "@/ui/side-nav";
 import { Skeleton } from "@/ui/skeleton";
 import { Slider } from "@/ui/slider";
 import { Spinner } from "@/ui/spinner";
@@ -552,15 +576,149 @@ export function PanelDemo() {
   );
 }
 
+/** A sample one-colour mark, drawn in currentColor, as an app passes its own logo: three bars of a level meter. */
+function SampleMark() {
+  return (
+    <svg viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
+      <rect x="6" y="22" width="8" height="20" />
+      <rect x="20" y="12" width="8" height="30" />
+      <rect x="34" y="4" width="8" height="38" />
+      <rect x="2" y="44" width="44" height="2" />
+    </svg>
+  );
+}
+
 export function EmptyDemo() {
   return (
-    <div className="ud-grid2 ud-grid2--top">
-      <EmptyState title="No keys yet" action={<Button variant="go" icon={<Plus />}>Create key</Button>}>
-        <p>A key lets an app call the models on your balance.</p>
-      </EmptyState>
-      <EmptyState size="sm" title="No results">
-        <p>Nothing matches &ldquo;prod-old&rdquo;.</p>
-      </EmptyState>
+    <div className="ud-stack ud-stack--wide">
+      <div className="ud-grid2 ud-grid2--top">
+        <EmptyState title="No keys yet" action={<Button variant="go" icon={<Plus />}>Create key</Button>}>
+          <p>A key lets an app call the models on your balance.</p>
+        </EmptyState>
+        <EmptyState size="sm" title="No results">
+          <p>Nothing matches &ldquo;prod-old&rdquo;.</p>
+        </EmptyState>
+        <EmptyState mark={<SampleMark />} title="No friends yet">
+          <p>An app&rsquo;s own one-colour mark in place of the frame, in the second ink.</p>
+        </EmptyState>
+        <div lang="zh-CN">
+          <EmptyState size="sm" mark={<SampleMark />} title="还没有好友" />
+        </div>
+      </div>
+      <Table caption="Orders" columns={[{ key: "id", header: "Order" }, { key: "amount", header: "Amount", align: "end" }]} rows={[] as { id: string; amount: string }[]} rowKey="id" emptyMark={<SampleMark />} empty="No orders yet" />
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ navigation
+
+/** A small index in the manner of this page's own: numbered chapters, families with a count. */
+const INDEX: SideNavSection[] = [
+  { id: "x-start", number: "01", title: "Getting started", items: [{ id: "x-install", label: "Install" }, { id: "x-styles", label: "Styles and Tailwind" }] },
+  {
+    id: "x-parts",
+    number: "02",
+    title: "Parts",
+    sections: [
+      { id: "x-editorial", title: "Editorial", count: 3, items: [{ id: "x-button", label: "Button" }, { id: "x-kicker", label: "Kicker" }, { id: "x-plate", label: "Plate" }] },
+      { id: "x-forms", title: "Forms", count: 2, items: [{ id: "x-field", label: "Field" }, { id: "x-input", label: "Input" }] },
+    ],
+  },
+  { id: "x-site", number: "03", title: "Site parts", onSelect: () => {} },
+];
+
+/** An app's sidebar: a list without a head, chats with an action, times and status marks, projects that fold, apps. */
+function appSections(zh: boolean): SideNavSection[] {
+  const t = (en: string, cn: string) => (zh ? cn : en);
+  const add = <Button variant="ghost" size="sm" icon={<Plus />} aria-label={t("New chat", "新建对话")} title={t("New chat", "新建对话")} />;
+  return [
+    {
+      id: "top",
+      items: [
+        { id: "new", label: t("New chat", "新建对话"), icon: <Plus /> },
+        { id: "search", label: t("Search", "搜索"), icon: <Search />, meta: "⌘K" },
+      ],
+    },
+    {
+      id: "chats",
+      title: t("Chats", "对话"),
+      action: add,
+      items: [
+        { id: "c1", label: t("Video storyboard", "视频分镜"), icon: <Clapperboard />, meta: "2m", status: "info", statusLabel: t("running", "运行中") },
+        { id: "c2", label: t("Fix the login redirect", "修复登录跳转"), icon: <CodeIcon />, meta: "1h" },
+        { id: "c3", label: t("A week in Kyoto", "京都一周"), icon: <MessageSquare />, meta: t("3d", "3 天"), status: "bad", statusLabel: t("failed", "失败") },
+      ],
+    },
+    {
+      id: "projects",
+      title: t("Projects", "项目"),
+      count: 2,
+      collapsible: true,
+      items: [
+        { id: "p1", label: "tokensbeat.com", icon: <Folder />, items: [{ id: "p1a", label: t("Homepage copy", "首页文案") }, { id: "p1b", label: t("Pricing", "定价") }] },
+        { id: "p2", label: t("Thesis", "论文"), icon: <BookOpen /> },
+      ],
+    },
+    {
+      id: "apps",
+      title: t("Apps", "应用"),
+      items: [
+        { id: "store", label: t("Store", "商店"), icon: <Store /> },
+        { id: "draw", label: t("Draw", "绘图"), icon: <ImageIcon /> },
+        { id: "settings", label: t("Settings", "设置"), icon: <Settings /> },
+      ],
+    },
+  ];
+}
+
+function AppSideNav({ zh = false, startRail = false }: { zh?: boolean; startRail?: boolean }) {
+  const [current, setCurrent] = useState("c1");
+  const [rail, setRail] = useState(startRail);
+  const sections = appSections(zh).map((sec) => ({ ...sec, items: sec.items?.map((i) => ({ ...i, onSelect: () => setCurrent(i.id), items: i.items?.map((n) => ({ ...n, onSelect: () => setCurrent(n.id) })) })) }));
+  const fold = zh ? (rail ? "展开侧栏" : "收起侧栏") : rail ? "Unfold the sidebar" : "Fold the sidebar";
+  return (
+    <div className={rail ? "ud-navbox ud-navbox--rail" : "ud-navbox"} lang={zh ? "zh-CN" : "en"}>
+      <SideNav
+        label={zh ? "主导航" : "Main"}
+        title="Aha"
+        titleAction={<Button variant="ghost" size="sm" icon={rail ? <PanelLeftOpen /> : <PanelLeftClose />} aria-label={fold} title={fold} onClick={() => setRail((r) => !r)} />}
+        sections={sections}
+        current={current}
+        rail={rail}
+        footer={<p className="ud-navbox__foot">s1lin · {zh ? "免费版" : "Free"}</p>}
+      />
+    </div>
+  );
+}
+
+/** The docs' index, an app's sidebar in English and in Chinese, folded to a rail, and the phone's bar and sheet. */
+export function SideNavDemo() {
+  const [at, setAt] = useState("x-button");
+  const [phoneAt, setPhoneAt] = useState("c2");
+  const index = INDEX.map((c) => ({
+    ...c,
+    onSelect: c.onSelect && (() => setAt(c.id)),
+    items: c.items?.map((i) => ({ ...i, onSelect: () => setAt(i.id) })),
+    sections: c.sections?.map((f) => ({ ...f, items: f.items?.map((i) => ({ ...i, onSelect: () => setAt(i.id) })) })),
+  }));
+  const phone = appSections(false).map((sec) => ({ ...sec, items: sec.items?.map((i) => ({ ...i, onSelect: () => setPhoneAt(i.id) })) }));
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <div className="ud-navs">
+        <div className="ud-navbox">
+          <SideNav label="Library (example)" title="Index" sections={index} current={at} currentType="location" />
+        </div>
+        <AppSideNav />
+        <AppSideNav startRail />
+        <AppSideNav zh />
+      </div>
+      <div className="ud-phone">
+        <SideNav label="Main (phone)" title="Aha" sections={phone} current={phoneAt} sheet />
+        <p className="ud-p">
+          A phone: one bar that says where you are; press it for the tree. Esc, a choice or a tap outside closes it.
+        </p>
+      </div>
+      <Said text="The index: chapters, families, the current item in the ink with its bar. Aha's sidebar: icons, a + at the end of Chats, times, a running chat and a failed one, Projects folding, the fold button in the title (a rail of icons, the names as tooltips); the same in Chinese." />
     </div>
   );
 }

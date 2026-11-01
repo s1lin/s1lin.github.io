@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import manifest from "../../../registry.json";
 import { Runhead } from "@/components/Runhead";
 import { Demo } from "@/components/uidocs/examples";
@@ -6,6 +6,7 @@ import { Guide } from "@/components/uidocs/guides";
 import { Example, Inline, Install, Path, Reference } from "@/components/uidocs/parts";
 import { ENTRIES, GROUPS, LISTED, REGISTRY, type Entry, type Group } from "@/components/uidocs/registry";
 import { Kicker } from "@/ui/kicker";
+import { SideNav, type SideNavItem, type SideNavSection } from "@/ui/side-nav";
 import { Toaster } from "@/ui/toast";
 
 const RUN = "部品 · UI library";
@@ -99,59 +100,28 @@ const GROUP_IDS = new Set<string>([...GROUPS.map((g) => g.id), "site"]);
 /** The group the reader is in, whether at its heading or at one of its items. */
 const groupOf = (active: string | null) => (active && GROUP_IDS.has(active) ? active : ENTRIES.find((e) => e.id === active)?.group);
 
-/** The whole index, chapter by chapter, the parts by family: the same tree on a desktop and in the phone's drawer. */
-function Tree({ active, onPick }: { active: string | null; onPick?: () => void }) {
-  const group = groupOf(active);
-  const items = (g: Family) => (
-    <ul className="ud-tree__items">
-      {g.entries.map((e) => (
-        <li key={e.id}>
-          <a href={`#${e.id}`} aria-current={active === e.id ? "location" : undefined} onClick={onPick}>
-            {e.name}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-  return (
-    <ol className="ud-tree">
-      {CHAPTERS.map((c, i) => (
-        <li key={c.name} className="ud-tree__chapter">
-          <a className="ud-tree__head" href={`#${c.groups[0].id}`} aria-current={c.groups.some((g) => g.id === group) ? "true" : undefined} onClick={onPick}>
-            <span className="ud-tree__no">{pad(i + 1)}</span>
-            {c.name}
-          </a>
-          {c.groups.length > 1 ? (
-            <ol className="ud-tree__families">
-              {c.groups.map((g) => (
-                <li key={g.id}>
-                  <a className="ud-tree__family" href={`#${g.id}`} aria-current={g.id === group ? "true" : undefined} onClick={onPick}>
-                    {g.name} <span className="ud-tree__count">{g.entries.length}</span>
-                  </a>
-                  {items(g)}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            items(c.groups[0])
-          )}
-        </li>
-      ))}
-      <li className="ud-tree__chapter">
-        <a className="ud-tree__head" href="#site" aria-current={group === "site" ? "true" : undefined} onClick={onPick}>
-          <span className="ud-tree__no">{pad(SITE_NO)}</span>
-          Site parts
-        </a>
-      </li>
-    </ol>
-  );
-}
+/** The whole index, chapter by chapter, the parts by family, as the library's SideNav: the same tree on a desktop and in the phone's sheet. */
+const entryItem = (e: Entry): SideNavItem => ({ id: e.id, label: e.name, href: `#${e.id}` });
+const NAV: SideNavSection[] = [
+  ...CHAPTERS.map((c, i): SideNavSection =>
+    c.groups.length > 1
+      ? {
+          id: `chapter-${c.groups[0].id}`,
+          number: pad(i + 1),
+          title: c.name,
+          href: `#${c.groups[0].id}`,
+          sections: c.groups.map((g) => ({ id: g.id, title: g.name, count: g.entries.length, href: `#${g.id}`, items: g.entries.map(entryItem) })),
+        }
+      : { id: c.groups[0].id, number: pad(i + 1), title: c.name, href: `#${c.groups[0].id}`, items: c.groups[0].entries.map(entryItem) },
+  ),
+  { id: "site", number: pad(SITE_NO), title: "Site parts", href: "#site" },
+];
 
 /**
  * The index. On a desktop it is held on the left, whole, the part being read
  * marked and kept in view. On a phone it is a bar under the running head that
- * says where you are and opens the same tree; a native <details>, so it opens
- * without JavaScript too.
+ * says where you are and opens the same tree as a sheet (without script the
+ * tree stays in the page).
  */
 function Nav() {
   const active = useActive(IDS);
@@ -159,55 +129,7 @@ function Nav() {
   const group = groupOf(active);
   const groupName = group === "site" ? "Site parts" : (GROUPS.find((g) => g.id === group) ?? GROUPS[0]).name;
   const here = entry ? `${groupName} · ${entry.name}` : groupName;
-  const side = useRef<HTMLDivElement>(null);
-  const drawer = useRef<HTMLDetailsElement>(null);
-
-  // Keep the current link in view inside the held index, by scrolling the index alone, never the page.
-  useEffect(() => {
-    const box = side.current;
-    const link = box?.querySelector<HTMLElement>("a[aria-current='location']") ?? box?.querySelector<HTMLElement>(".ud-tree__family[aria-current], .ud-tree__head[aria-current]");
-    if (!box || !link || box.scrollHeight <= box.clientHeight) return;
-    const top = link.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
-    if (top < box.scrollTop + 48 || top > box.scrollTop + box.clientHeight - 48) box.scrollTo({ top: top - box.clientHeight / 3 });
-  }, [active]);
-
-  // The drawer closes on Esc, giving focus back to its bar.
-  useEffect(() => {
-    const d = drawer.current;
-    if (!d) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && d.open) {
-        d.open = false;
-        d.querySelector("summary")?.focus();
-      }
-    };
-    d.addEventListener("keydown", onKey);
-    return () => d.removeEventListener("keydown", onKey);
-  }, []);
-
-  return (
-    <nav className="ud-nav" aria-label="Library">
-      <details className="ud-nav__drawer" ref={drawer}>
-        <summary className="ud-nav__bar">
-          <span className="ud-nav__label">Index</span>
-          <span className="ud-nav__here">{here}</span>
-          <span className="ud-nav__sign" aria-hidden="true" />
-        </summary>
-        <div className="ud-nav__sheet">
-          <Tree
-            active={active}
-            onPick={() => {
-              if (drawer.current) drawer.current.open = false;
-            }}
-          />
-        </div>
-      </details>
-      <div className="ud-nav__side" ref={side}>
-        <p className="ud-nav__title">Index</p>
-        <Tree active={active} />
-      </div>
-    </nav>
-  );
+  return <SideNav className="ud-nav" label="Library" title="Index" sections={NAV} current={active} currentType="location" sheet={900} here={here} />;
 }
 
 /** A group's opening: where it stands, its name, what is in it. */
