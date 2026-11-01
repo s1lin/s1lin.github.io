@@ -21,4 +21,8 @@
   .s1-fieldset > .s1-field__error { margin-top: 10px; }
   .s1-fieldset__body { display: grid; gap: 10px; min-width: 0; }
   .s1-fieldset:disabled > legend { color: var(--s1-ink-3); }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-field__label:lang(zh), .s1-field__label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-field__aside:lang(zh), .s1-field__aside [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; }
 }

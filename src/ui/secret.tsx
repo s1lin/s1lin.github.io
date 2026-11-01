@@ -30,8 +30,18 @@ type Props = {
 
 const DOTS = "••••••••••••";
 
+/** The house's eye for Show, struck through for Hide, in the button's ink. */
+function EyeMark({ shown }: { shown: boolean }) {
+  return (
+    <svg className="s1-secret__mark" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8s-2.4 4.5-6.5 4.5S1.5 8 1.5 8zM10 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+      {shown && <path d="M2.5 2.5l11 11" />}
+    </svg>
+  );
+}
+
 /**
- * A secret shown as dots with its ends left showing, a Show button, and Copy,
+ * A secret shown as dots with its ends left showing, a Show button with its eye, and Copy,
  * which copies the whole value without showing it. While it is hidden the
  * page holds only the dots and the ends, so the value is not in the HTML, and
  * a screen reader hears "API key, hidden". If the copy fails, it is shown and
@@ -95,7 +105,7 @@ export function Secret({
         )}
       </code>
       <span className="s1-secret__actions">
-        <Button size="sm" aria-label={`${shown ? words.hide : words.show} ${label}`} onClick={() => set(!shown)}>
+        <Button size="sm" icon={<EyeMark shown={shown} />} aria-label={`${shown ? words.hide : words.show} ${label}`} onClick={() => set(!shown)}>
           {shown ? words.hide : words.show}
         </Button>
         {!noCopy && <Copy value={value} label={w.copyName(label)} onCopy={(ok) => !ok && failed()} />}

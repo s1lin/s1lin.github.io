@@ -117,7 +117,8 @@ python3 scripts/patch-particle-scroll.py src/components/canvasui/ParticleScroll.
 `/ui/` (listed under the workshop in the contents, as U) is the library's docs, in
 the manner of shadcn's, in five chapters: 01 Getting started (the registry in
 `components.json`, the first part, how the stylesheets sit beside an app's own,
-with Tailwind or without), 02 Foundations (tokens, dark mode, theming, words), 03
+with Tailwind or without), 02 Foundations (tokens, dark mode, theming, words, the
+head an app's parts sit under), 03
 Parts by family (Editorial, Forms, Data, Overlays, Feedback, Text and keys), 04
 Hooks and `cn`, 05 Site parts (marked not published). Every item has the same
 anatomy: its name and one line, a live example on a quiet stage, one install line
@@ -163,7 +164,11 @@ account), in the registry's `console` category and in five groups on `/ui/`:
   VisuallyHidden; and the hook useOverflow.
 
 They keep to one ink: statuses differ in line, fill and shape (a tick, a
-triangle, a cross, hatching, reverse), never in hue alone. They add no npm
+triangle, a cross, hatching, reverse), never in hue alone. An action button shows
+an icon and a word (Button's `icon`, `iconEnd`; the verbs' lucide icons are listed
+on `/ui/#button`); the kit brings no icon set, and draws only its own marks (Copy's
+two sheets, Secret's eye). A head's controls are `ghost` buttons, with no line round
+them (`/ui/#head`). They add no npm
 package beyond `clsx`. The issue's pages never load them: `vite.config.ts` puts
 only the items outside the `console` category in the stylesheet every page
 starts with, and a test fails if a page other than `/ui/` imports one.
@@ -277,6 +282,14 @@ page, and needs Google Fonts reachable):
 ```bash
 npm run build && node scripts/fonts.mjs && npm run build
 ```
+
+The library's font tokens (`src/ui/tokens.css`) end every stack in Chinese faces
+(`--s1-font-cjk`: PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans SC,
+Noto Sans CJK SC, Source Han Sans SC; the display stack tries `--s1-font-cjk-serif`
+first), after the Latin faces and before the generic family, so an app's Chinese
+never falls to the browser's own pick (SimSun on Windows, for `monospace` and
+`serif`). Under `lang="zh-…"` the parts' small mono labels drop their tracking and
+capitals and set Chinese at 12px and weight 500 at least.
 
 The fonts are under the SIL Open Font License; the script writes each one's
 copyright notice and the licence into `public/assets/OFL.txt`, which is served

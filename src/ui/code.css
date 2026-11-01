@@ -16,4 +16,7 @@
   }
   .s1-code-block__pre > code { font: inherit; background: none; border: 0; padding: 0; white-space: pre; }
   .s1-code-block__pre:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: -2px; }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-code-block__label:lang(zh), .s1-code-block__label [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

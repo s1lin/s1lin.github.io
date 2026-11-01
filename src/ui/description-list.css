@@ -6,4 +6,7 @@
   .s1-dl dd { margin: 0; min-width: 0; font: 400 15px/1.5 var(--s1-font-sans); color: var(--s1-ink); overflow-wrap: anywhere; }
   .s1-dl--stacked .s1-dl__row { grid-template-columns: minmax(0, 1fr); }
   @container (max-width: 26em) { .s1-dl__row { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-dl dt:lang(zh), .s1-dl dt [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
 }

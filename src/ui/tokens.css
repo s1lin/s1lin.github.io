@@ -1,9 +1,10 @@
 /*
  * The tokens every part of the library is drawn in: one ink on plain stock, a
  * second paper for plates and wells, two greys, two hairline strengths, one
- * accent (the go button's offset shadow), five typefaces, the "+" marks, and
- * the scheme native controls are drawn in (a select's list, a number's arrows).
- * Set any of them on :root, or on an element for its part of the page.
+ * accent (the go button's offset shadow), five typefaces and the Chinese faces
+ * they end in, the "+" marks, and the scheme native controls are drawn in (a
+ * select's list, a number's arrows). Set any of them on :root, or on an
+ * element for its part of the page.
  *
  * Status hues are left unset: an app's theme may set them (see the end of the
  * :root block), and until it does every status is drawn in the ink.
@@ -24,11 +25,19 @@
     --s1-accent: #d62d20;
     --s1-scheme: light;
 
-    --s1-font-display: "Instrument Serif", "Shippori Mincho B1", "Times New Roman", serif;
-    --s1-font-sans: "Inter Tight", "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --s1-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --s1-font-mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
-    --s1-font-gothic: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+    /* Chinese: every stack ends in these before its generic family, after its Latin faces, so Latin
+       text is set as before and Chinese never falls to the browser's own pick: on Windows that is
+       SimSun, a thin bitmap-hinted serif, for "monospace" and "serif" alike. The sans faces come
+       before anything serif; a heading in Chinese takes a Chinese serif, else the sans, never SimSun.
+       An app that sets its own sans or mono ends it in var(--s1-font-cjk) too (set on :root). */
+    --s1-font-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC";
+    --s1-font-cjk-serif: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC";
+
+    --s1-font-display: "Instrument Serif", "Shippori Mincho B1", "Times New Roman", var(--s1-font-cjk-serif), var(--s1-font-cjk), serif;
+    --s1-font-sans: "Inter Tight", "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", var(--s1-font-cjk), sans-serif;
+    --s1-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, var(--s1-font-cjk), monospace;
+    --s1-font-mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Serif CJK JP", "Source Han Serif JP", serif;
+    --s1-font-gothic: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "Noto Sans CJK JP", "Source Han Sans JP", "Meiryo", sans-serif;
 
     /* A "+" registration mark at each corner of a box, in its text colour. The
        box should be 11px larger than the one it marks, 5.5px on every side. */

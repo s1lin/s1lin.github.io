@@ -58,10 +58,25 @@ type Props = {
   messages?: { copied: string; failed: string };
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /**
+   * The picture before the word: the house's two sheets unless given (an svg of
+   * your own, lucide's Copy), none when null. After a copy it is a tick, after
+   * a refusal a cross.
+   */
+  icon?: ReactNode;
   /** Called after each press: true if the text is on the clipboard. */
   onCopy?: (ok: boolean) => void;
   className?: string;
 };
+
+/** The house's marks for Copy, in the button's ink: two sheets, a tick once copied, a cross when the clipboard refused. */
+function CopyMark({ state }: { state: "idle" | "copied" | "failed" }) {
+  return (
+    <svg className="s1-copy__mark" viewBox="0 0 16 16" aria-hidden="true">
+      <path d={state === "copied" ? "M3 8.5l3.2 3.2L13 4.8" : state === "failed" ? "M4 4l8 8M12 4l-8 8" : "M5.5 5.5h8v8h-8zM10.5 5.5v-3h-8v8h3"} />
+    </svg>
+  );
+}
 
 /**
  * A button that copies a value, says "Copied" for two seconds and tells a
@@ -78,6 +93,7 @@ export function Copy({
   messages,
   variant = "plain",
   size = "sm",
+  icon,
   onCopy,
   className,
 }: Props) {
@@ -99,7 +115,14 @@ export function Copy({
 
   return (
     <span className={cn("s1-copy", className)} data-state={state}>
-      <Button ref={button} variant={variant} size={size} aria-label={state === "idle" ? label : undefined} onClick={() => void press()}>
+      <Button
+        ref={button}
+        variant={variant}
+        size={size}
+        icon={icon === null || icon === false ? undefined : state === "idle" && icon !== undefined ? icon : <CopyMark state={state} />}
+        aria-label={state === "idle" ? label : undefined}
+        onClick={() => void press()}
+      >
         {state === "copied" ? (copiedText ?? w.copied) : state === "failed" ? (failedText ?? w.copyFailed) : (children ?? w.copy)}
       </Button>
       <VisuallyHidden role="status">{state === "copied" ? said.copied : state === "failed" ? said.failed : ""}</VisuallyHidden>

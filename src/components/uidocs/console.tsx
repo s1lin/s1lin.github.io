@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { Ban, Check, Eraser, FileDown, KeyRound, Plus, RefreshCw, RotateCcw, Save, Wallet, X } from "lucide-react";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
@@ -89,11 +90,12 @@ export function FieldDemo() {
         <Input value="s1lin" readOnly />
       </Field>
       <p className="ud-row">
-        <Button variant="go" type="submit">
+        <Button variant="go" type="submit" icon={<Check />}>
           Check
         </Button>
         <Button
           type="button"
+          icon={<Eraser />}
           onClick={() => {
             setName("");
             setScopes([]);
@@ -126,7 +128,7 @@ export function InputDemo() {
           onChange={(e) => setCoupon(e.target.value)}
           placeholder="SPRING26"
           suffix={
-            <Button size="sm" onClick={() => setSaid(coupon ? "bad" : "")}>
+            <Button size="sm" icon={<Check />} onClick={() => setSaid(coupon ? "bad" : "")}>
               Apply
             </Button>
           }
@@ -232,6 +234,42 @@ export function RadioDemo() {
         ]}
       />
       <RadioGroup legend="Range" variant="segmented" defaultValue="7d" options={["24h", "7d", "30d", "90d"].map((r) => ({ value: r, label: r }))} />
+      <div className="ud-toolbar">
+        <RadioGroup legend="Range" hideLegend variant="segmented" quiet defaultValue="7d" options={["24h", "7d", "30d", "90d"].map((r) => ({ value: r, label: r }))} />
+        <span className="ud-toolbar__end">
+          <Button variant="ghost" size="sm" icon={<RefreshCw />}>
+            Refresh
+          </Button>
+          <Button variant="ghost" size="sm" icon={<FileDown />}>
+            Export
+          </Button>
+        </span>
+      </div>
+      <div className="ud-toolbar" lang="zh-CN">
+        <RadioGroup
+          legend="时间范围"
+          hideLegend
+          variant="segmented"
+          quiet
+          defaultValue="7d"
+          options={[
+            { value: "24h", label: "24 小时" },
+            { value: "7d", label: "7 天" },
+            { value: "30d", label: "30 天" },
+          ]}
+        />
+        <RadioGroup
+          legend="语言"
+          hideLegend
+          variant="segmented"
+          quiet
+          defaultValue="zh"
+          options={[
+            { value: "en", label: <span lang="en">EN</span> },
+            { value: "zh", label: "中文" },
+          ]}
+        />
+      </div>
       <RadioGroup
         legend="When the budget runs out"
         error="Choose what happens at the limit."
@@ -359,7 +397,7 @@ export function TableDemo() {
         sort={sort}
         onSortChange={setSort}
         empty={
-          <EmptyState size="sm" title="No keys yet" action={<Button variant="go" size="sm" onClick={() => setView("rows")}>Create key</Button>}>
+          <EmptyState size="sm" title="No keys yet" action={<Button variant="go" size="sm" icon={<Plus />} onClick={() => setView("rows")}>Create key</Button>}>
             <p>A key lets an app call the models on your balance.</p>
           </EmptyState>
         }
@@ -477,7 +515,7 @@ export function PanelDemo() {
         title="API keys"
         description="Keys belong to this workspace and spend its balance."
         actions={
-          <Button variant="go" size="sm">
+          <Button variant="go" size="sm" icon={<Plus />}>
             Create key
           </Button>
         }
@@ -495,7 +533,7 @@ export function PanelDemo() {
 export function EmptyDemo() {
   return (
     <div className="ud-grid2 ud-grid2--top">
-      <EmptyState title="No keys yet" action={<Button variant="go">Create key</Button>}>
+      <EmptyState title="No keys yet" action={<Button variant="go" icon={<Plus />}>Create key</Button>}>
         <p>A key lets an app call the models on your balance.</p>
       </EmptyState>
       <EmptyState size="sm" title="No results">
@@ -517,6 +555,7 @@ export function DialogDemo() {
       <p className="ud-row">
         <Button
           variant="go"
+          icon={<Plus />}
           onClick={() => {
             setName("");
             setError("");
@@ -525,8 +564,12 @@ export function DialogDemo() {
         >
           Create a key
         </Button>
-        <Button onClick={() => setOpen("revoke")}>Revoke…</Button>
-        <Button onClick={() => setOpen("once")}>A key shown once</Button>
+        <Button icon={<Ban />} onClick={() => setOpen("revoke")}>
+          Revoke…
+        </Button>
+        <Button icon={<KeyRound />} onClick={() => setOpen("once")}>
+          A key shown once
+        </Button>
       </p>
       <Dialog
         open={open === "create"}
@@ -535,8 +578,10 @@ export function DialogDemo() {
         description="Keys can call every model on your balance."
         actions={
           <>
-            <Button onClick={close}>Cancel</Button>
-            <Button variant="go" type="submit" form="ud-new-key">
+            <Button icon={<X />} onClick={close}>
+              Cancel
+            </Button>
+            <Button variant="go" type="submit" form="ud-new-key" icon={<Plus />}>
               Create
             </Button>
           </>
@@ -576,11 +621,12 @@ export function DialogDemo() {
         description="Apps using it stop at once. This cannot be undone."
         actions={
           <>
-            <Button onClick={close} data-autofocus>
+            <Button icon={<X />} onClick={close} data-autofocus>
               Keep it
             </Button>
             <Button
               variant="go"
+              icon={<Ban />}
               onClick={() => {
                 close();
                 toast({ title: "prod-backend revoked", status: "bad", action: { label: "Undo", onClick: () => toast({ title: "prod-backend restored", status: "ok" }) } });
@@ -598,7 +644,7 @@ export function DialogDemo() {
         title="Your new key"
         description="Copy it now: it is not shown again."
         actions={
-          <Button variant="go" onClick={close}>
+          <Button variant="go" icon={<Check />} onClick={close}>
             I have copied it
           </Button>
         }
@@ -694,7 +740,7 @@ export function NoticeDemo() {
         status="warn"
         title="Balance low"
         action={
-          <Button size="sm" variant="go">
+          <Button size="sm" variant="go" icon={<Wallet />}>
             Top up
           </Button>
         }
@@ -707,7 +753,7 @@ export function NoticeDemo() {
         </Notice>
       ) : (
         <p className="ud-row">
-          <Button size="sm" onClick={() => setShown(true)}>
+          <Button size="sm" icon={<RotateCcw />} onClick={() => setShown(true)}>
             Show the error again
           </Button>
         </p>
@@ -731,12 +777,13 @@ export function SpinnerDemo() {
           variant="go"
           disabled={busy}
           aria-busy={busy}
+          icon={busy ? <Spinner size="sm" decorative /> : <Save />}
           onClick={() => {
             setBusy(true);
             window.setTimeout(() => setBusy(false), 1500);
           }}
         >
-          {busy && <Spinner size="sm" decorative />} {busy ? "Saving" : "Save"}
+          {busy ? "Saving" : "Save"}
         </Button>
       </p>
     </div>
@@ -888,7 +935,7 @@ export function WordsDemo() {
         onValueChange={setLang}
         options={[
           { value: "en", label: "English" },
-          { value: "zh", label: "中文" },
+          { value: "zh", label: <span lang="zh-CN">中文</span> },
         ]}
       />
       <S1Words words={lang === "zh" ? ZH : {}}>

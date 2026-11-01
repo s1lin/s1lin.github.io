@@ -1,13 +1,13 @@
 /* Button (button.tsx). The press is a translate, so it holds still for readers who prefer reduced motion. */
 @layer components {
   .s1-btn { font: 500 12px/1 var(--s1-font-mono); cursor: pointer; }
-  .s1-btn--plain, .s1-btn--go, .s1-btn--icon {
+  .s1-btn--plain, .s1-btn--go, .s1-btn--ghost, .s1-btn--icon {
     display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
     min-height: 40px; padding: 0 16px; line-height: 1;
     background: var(--s1-paper); color: var(--s1-ink); border: 1px solid var(--s1-rule-strong); text-decoration: none;
   }
   .s1-btn--go { background: var(--s1-ink); color: var(--s1-paper); box-shadow: 3px 3px 0 var(--s1-accent); }
-  .s1-btn--plain:disabled, .s1-btn--go:disabled, .s1-btn--icon:disabled { opacity: 0.5; cursor: default; }
+  .s1-btn--plain:disabled, .s1-btn--go:disabled, .s1-btn--ghost:disabled, .s1-btn--icon:disabled { opacity: 0.5; cursor: default; }
   /* A go button that cannot go loses its shadow and its ink: half an ink block on a shadow read as broken. */
   .s1-btn--go:disabled { opacity: 1; background: var(--s1-paper-2); color: var(--s1-ink-3); border-color: var(--s1-rule); box-shadow: none; }
   .s1-btn--plain:active:not(:disabled), .s1-btn--go:active:not(:disabled), .s1-btn--icon:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--s1-accent); }
@@ -17,6 +17,23 @@
   .s1-btn--icon.s1-btn--sm { width: 30px; padding: 0; }
   .s1-btn--icon svg { width: 16px; height: 16px; flex: none; }
 
+  /*
+   * Ghost: the box without its line or its paper, for the controls in a head or a toolbar, and an action
+   * beside a stronger one. The line is there but clear, so the box keeps its size and shows in forced
+   * colours; the pointer tints it. One that is pressed (aria-pressed, a language, a view) is in the ink
+   * with a bar under its words; the others of its group are in the second ink.
+   */
+  .s1-btn--ghost { padding: 0 12px; background: transparent; border-color: transparent; }
+  .s1-btn--ghost.s1-btn--sm { padding: 0 8px; }
+  .s1-btn--ghost:hover:not(:disabled), .s1-btn--ghost[aria-expanded="true"] { background-color: var(--s1-paper-2); }
+  .s1-btn--ghost[aria-pressed="false"] { color: var(--s1-ink-2); }
+  .s1-btn--ghost[aria-pressed="false"]:hover:not(:disabled) { color: var(--s1-ink); }
+  .s1-btn--ghost[aria-pressed="true"] {
+    color: var(--s1-ink);
+    background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
+    background-origin: content-box; background-position: left bottom 4px; background-size: 100% 2px;
+  }
+
   .s1-btn--chip {
     display: inline-flex; align-items: center; gap: 6px; min-height: 32px; max-width: 100%; padding: 0 10px 0 8px;
     color: var(--s1-ink); background: var(--s1-paper); border: 1px solid var(--s1-rule-strong); border-radius: 999px; text-decoration: none;
@@ -25,6 +42,21 @@
 
   .s1-btn--link { background: none; border: 0; padding: 0; color: var(--s1-ink-2); text-decoration: underline; text-underline-offset: 3px; }
 
+  /* An icon and the words: the icon 16px (14px a size down), 6px before them; with no words, a square. */
+  .s1-btn--with-icon { gap: 6px; }
+  .s1-btn--link.s1-btn--with-icon { display: inline-flex; align-items: center; vertical-align: middle; }
+  .s1-btn__icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 16px; height: 16px; }
+  .s1-btn--sm .s1-btn__icon { width: 14px; height: 14px; }
+  .s1-btn .s1-btn__icon > svg { display: block; width: 100%; height: 100%; flex: none; }
+  .s1-btn--icon-only:not(.s1-btn--link, .s1-btn--chip) { width: 40px; padding: 0; flex: none; }
+  .s1-btn--icon-only.s1-btn--sm:not(.s1-btn--link, .s1-btn--chip) { width: 30px; }
+
   .s1-btn:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) { .s1-btn:active:not(:disabled) { transform: none; } }
+  @media (forced-colors: active) {
+    .s1-btn--ghost[aria-pressed="true"] { text-decoration: underline 2px; text-underline-offset: 5px; }
+  }
+
+  /* Chinese: a size down is still 12px, so the strokes hold; the words are never tracked. */
+  .s1-btn--sm:lang(zh), .s1-btn--sm [lang|="zh"] { font-size: 12px; letter-spacing: 0; }
 }

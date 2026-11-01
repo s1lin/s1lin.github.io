@@ -65,9 +65,10 @@ function InstallGuide() {
           stylesheet beside it and imported by it, so there is no CSS to wire up.
         </p>
         <Code>{`import { Button } from "@/components/s1lin/button";
+import { Save as SaveIcon } from "lucide-react";
 
 export function Save() {
-  return <Button variant="go" type="submit">Save</Button>;
+  return <Button variant="go" type="submit" icon={<SaveIcon />}>Save</Button>;
 }`}</Code>
       </li>
     </ol>
