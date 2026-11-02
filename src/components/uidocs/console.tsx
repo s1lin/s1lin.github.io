@@ -5,16 +5,19 @@ import {
   CalendarDays,
   Check,
   Clapperboard,
+  Ellipsis,
   Code as CodeIcon,
   Eraser,
   FileDown,
   Folder,
+  FolderInput,
   Image as ImageIcon,
   Keyboard,
   KeyRound,
   MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -22,6 +25,7 @@ import {
   Search,
   Settings,
   Store,
+  Trash2,
   Wallet,
   X,
 } from "lucide-react";
@@ -31,6 +35,7 @@ import { Checkbox } from "@/ui/checkbox";
 import { Code } from "@/ui/code";
 import { Copy } from "@/ui/copy";
 import { DescriptionList } from "@/ui/description-list";
+import { Dropdown, DropdownCheckItem, DropdownGroup, DropdownItem, DropdownLabel, DropdownList, DropdownRadioGroup, DropdownRadioItem, DropdownSeparator, DropdownSub, DropdownSubList, DropdownSubTrigger, DropdownTrigger } from "@/ui/dropdown";
 import { Dialog } from "@/ui/dialog";
 import { EmptyState } from "@/ui/empty-state";
 import { Field, Fieldset } from "@/ui/field";
@@ -1298,6 +1303,91 @@ const RANGES = [
   { value: "7d", en: "Last 7 days", zh: "最近 7 天" },
   { value: "30d", en: "Last 30 days", zh: "最近 30 天" },
 ];
+
+const FOLDERS = [
+  { id: "thesis", en: "Thesis", zh: "论文" },
+  { id: "work", en: "Work", zh: "工作" },
+  { id: "trips", en: "Trips", zh: "旅行" },
+];
+
+/** A project's menu: actions with icons, a submenu, a setting and a choice that keep it open, a row of its own, a danger. */
+function DropdownSet({ zh, said }: { zh: boolean; said: (what: string) => void }) {
+  const [pinned, setPinned] = useState(true);
+  const [sort, setSort] = useState("recent");
+  const w = (en: string, cn: string) => (zh ? cn : en);
+  return (
+    <div className="ud-row">
+      <Dropdown>
+        <DropdownTrigger>
+          <Button icon={<Folder />}>{w("Project", "项目")}</Button>
+        </DropdownTrigger>
+        <DropdownList>
+          <p className="ud-who">{w("Signed in as", "当前账号")} ada@example.com</p>
+          <DropdownItem icon={<Pencil />} hint="R" onSelect={() => said(w("Rename", "重命名"))}>
+            {w("Rename", "重命名")}
+          </DropdownItem>
+          <DropdownSub>
+            <DropdownSubTrigger icon={<FolderInput />}>{w("Move to", "移到")}</DropdownSubTrigger>
+            <DropdownSubList>
+              {FOLDERS.map((f) => (
+                <DropdownItem key={f.id} icon={<Folder />} onSelect={() => said(`${w("Move to", "移到")} ${w(f.en, f.zh)}`)}>
+                  {w(f.en, f.zh)}
+                </DropdownItem>
+              ))}
+            </DropdownSubList>
+          </DropdownSub>
+          <DropdownItem icon={<Ban />} disabled>
+            {w("Archive", "归档")}
+          </DropdownItem>
+          <DropdownSeparator />
+          <DropdownCheckItem checked={pinned} onCheckedChange={setPinned} keepOpen>
+            {w("Pinned", "置顶")}
+          </DropdownCheckItem>
+          <DropdownGroup label={w("Sort by", "排序")}>
+            <DropdownRadioGroup value={sort} onValueChange={setSort} label={w("Sort by", "排序")}>
+              <DropdownRadioItem value="recent" keepOpen>
+                {w("Most recent", "最近")}
+              </DropdownRadioItem>
+              <DropdownRadioItem value="name" keepOpen>
+                {w("Name", "名称")}
+              </DropdownRadioItem>
+            </DropdownRadioGroup>
+          </DropdownGroup>
+          <DropdownSeparator />
+          <DropdownItem icon={<Trash2 />} danger onSelect={() => said(w("Delete", "删除"))}>
+            {w("Delete", "删除")}
+          </DropdownItem>
+        </DropdownList>
+      </Dropdown>
+      <Dropdown>
+        <DropdownTrigger>
+          <Button variant="icon" aria-label={w("More actions for prod-backend", "prod-backend 的更多操作")}>
+            <Ellipsis />
+          </Button>
+        </DropdownTrigger>
+        <DropdownList align="end">
+          <DropdownGroup>
+            <DropdownLabel>{w("Key", "密钥")}</DropdownLabel>
+            <DropdownItem onSelect={() => said(w("Copy id", "复制 ID"))}>{w("Copy id", "复制 ID")}</DropdownItem>
+            <DropdownItem danger onSelect={() => said(w("Revoke", "吊销"))}>
+              {w("Revoke", "吊销")}
+            </DropdownItem>
+          </DropdownGroup>
+        </DropdownList>
+      </Dropdown>
+    </div>
+  );
+}
+
+export function DropdownDemo() {
+  const [said, setSaid] = useState("");
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <Overlays>{(zh) => <DropdownSet zh={zh} said={setSaid} />}</Overlays>
+      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Open one with the mouse or with ↓; → opens Move to, ← closes it; Pinned and the sort keep the menu open; Esc closes it."} />
+    </div>
+  );
+}
 
 /** Help that opens beside its button and a range picker the page keeps, closed by a choice. */
 function PopoverPair({ zh }: { zh: boolean }) {

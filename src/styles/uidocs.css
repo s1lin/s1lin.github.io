@@ -355,6 +355,7 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-pop { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; min-width: 180px; }
 .ud-pop dt { font: 500 12px/1.5 var(--s1-font-mono); }
 .ud-pop dd { margin: 0; color: var(--s1-ink-2); }
+.ud-who { margin: 0; padding: 8px 10px 10px; border-bottom: 1px solid var(--s1-rule); margin-bottom: 4px; font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink-2); }
 /* The language switch's rows: what each shows, then the switch; a box of them at night in the kit's own tokens. */
 .ud-langbox { display: grid; background: var(--s1-paper); color: var(--s1-ink); border-top: 0.5px solid var(--s1-rule); }
 .ud-langs { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 8px 12px; border-bottom: 0.5px solid var(--s1-rule); }

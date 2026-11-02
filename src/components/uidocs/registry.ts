@@ -1498,6 +1498,53 @@ const LANGS = [
     ],
   },
   {
+    id: "dropdown",
+    name: "Dropdown",
+    group: "overlays",
+    item: "dropdown",
+    exports: ["Dropdown", "DropdownTrigger", "DropdownList", "DropdownItem", "DropdownCheckItem", "DropdownRadioGroup", "DropdownRadioItem", "DropdownGroup", "DropdownLabel", "DropdownSeparator", "DropdownSub", "DropdownSubTrigger", "DropdownSubList"],
+    summary:
+      "A menu button built from parts, for the menus Menu's data cannot say: items with an icon, settings turned on and off, one choice of a few, groups under a heading, a submenu, and rows of your own between them (who is signed in, two items side by side). The menu button of the ARIA practices, as Menu, its list in the top layer (the Popover API), so no frame clips it. Menu stays the short way for a short list of actions.",
+    example: "live",
+    usage: `import { Dropdown, DropdownItem, DropdownList, DropdownSeparator, DropdownTrigger } from "@/components/s1lin/dropdown";
+
+<Dropdown>
+  <DropdownTrigger><Button variant="icon" aria-label={\`Actions for \${project.name}\`}><Ellipsis /></Button></DropdownTrigger>
+  <DropdownList align="end">
+    <DropdownItem icon={<Pencil />} onSelect={rename}>Rename</DropdownItem>
+    <DropdownSub>
+      <DropdownSubTrigger icon={<FolderInput />}>Move to</DropdownSubTrigger>
+      <DropdownSubList>{folders.map((f) => <DropdownItem key={f.id} onSelect={() => move(f.id)}>{f.name}</DropdownItem>)}</DropdownSubList>
+    </DropdownSub>
+    <DropdownCheckItem checked={pinned} onCheckedChange={setPinned} keepOpen>Pinned</DropdownCheckItem>
+    <DropdownSeparator />
+    <DropdownItem icon={<Trash2 />} danger onSelect={confirmDelete}>Delete</DropdownItem>
+  </DropdownList>
+</Dropdown>`,
+    props: [
+      { name: "Dropdown", type: "{ children, open?, defaultOpen?, onOpenChange? }", desc: "The root: open or not, the app's (`open`, `onOpenChange`) or its own (`defaultOpen`). It renders nothing of its own." },
+      { name: "DropdownTrigger", type: "{ children: ReactElement }", desc: "The one element that opens it, a `<button>` or a Button: given its id, `aria-haspopup=\"menu\"`, `aria-expanded`, `aria-controls`, a click that opens and closes it (after its own `onClick`) and ↓ ↑ that open it on the first or the last item." },
+      { name: "DropdownList", type: "{ align?, side?, label?, className? }", desc: "The menu, named by its trigger (or `label`): below it, or above (`side=\"top\"`, and the other side when there is no room), lined up with its `start` or `end` edge, at least as wide. What is in it is mounted while it is open." },
+      { name: "DropdownItem", type: "{ icon?, onSelect?, danger?, disabled?, keepOpen?, hint?, href?, className? }", desc: "An action. `icon`: drawn at 16px in the second ink before the words. `onSelect` runs after the menu has closed and focus is back on the trigger, unless `keepOpen`. `danger`: in the bad status's hue, heavier, a cross before it when it has no icon. `hint`: words at the right. `href` makes it a link. Other attributes (`title`, `data-*`, `aria-*`) go to the item." },
+      { name: "DropdownCheckItem", type: "{ checked, onCheckedChange, icon?, keepOpen?, disabled? }", desc: "A setting turned on or off: `menuitemcheckbox`, a tick at its start when on; `keepOpen` keeps the menu open for the next." },
+      { name: "DropdownRadioGroup", type: "{ value, onValueChange, label? }", desc: "One choice of a few: its radio items, in a group named by `label`." },
+      { name: "DropdownRadioItem", type: "{ value, keepOpen?, disabled? }", desc: "One choice: `menuitemradio`, a dot at its start when it is the one chosen." },
+      { name: "DropdownGroup", type: "{ label? }", desc: "Items that belong together, named by the DropdownLabel at their head (or `label`)." },
+      { name: "DropdownLabel", type: "{ children }", desc: "A group's heading in small capitals; not an item, so the arrows pass it." },
+      { name: "DropdownSeparator", type: "()", desc: "A line between groups." },
+      { name: "DropdownSub", type: "{ children }", desc: "A submenu: its DropdownSubTrigger and DropdownSubList." },
+      { name: "DropdownSubTrigger", type: "{ icon? }", desc: "The item that opens the submenu, with a caret at its end: → , Enter, Space or the pointer resting on it." },
+      { name: "DropdownSubList", type: "{ className? }", desc: "The submenu's list, beside its trigger, or to its left when there is no room on the right." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "On the trigger, Enter, Space or ↓ opens it on the first item, ↑ on the last. ↑ ↓ move and wrap, Home and End go to the ends, a letter jumps to the next item that starts with it, Enter or Space chooses, Esc closes and gives focus back to the trigger (kept from a Dialog around it), Tab closes and moves on. On a submenu's trigger → opens it on its first item; in it ← or Esc closes it back to its trigger. Focus follows the pointer." },
+      { label: "Accessibility", text: "The trigger has `aria-haspopup=\"menu\"` and `aria-expanded`; the list is a `menu` named by the trigger; its items are `menuitem`, `menuitemcheckbox` and `menuitemradio` with `aria-checked`; groups are `group`s named by their headings; a submenu's trigger says it opens a menu, and whether it is open. A disabled item stays in the list and the arrows reach it (`aria-disabled`), as the ARIA practices have it. Rows of your own (who is signed in) are not items: the arrows pass them." },
+      { label: "Icons", text: "An item's `icon` is any svg, lucide's or your own, at 16px; it takes the reversed colours with the item under focus." },
+      { label: "Phone", text: "Kept 8px inside the screen; it scrolls when it is taller than its room (`--s1-dropdown-room`, set on it as it opens) or 420px." },
+    ],
+  },
+  {
     id: "popover",
     name: "Popover",
     group: "overlays",
