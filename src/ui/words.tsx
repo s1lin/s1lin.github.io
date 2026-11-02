@@ -49,6 +49,9 @@ export interface S1WordMap {
   hidden: string;
   /** Menu: the three-dots button's name when it is given none. */
   moreActions: string;
+  /** Combobox: the names of the button that empties the box and of the one that opens its list. */
+  clear: string;
+  showOptions: string;
   /** Spinner's status, and Table's while it loads. */
   loading: string;
   /** Table: the hint under a table that scrolls, the sort button's state, the empty row, the actions column's name. */
@@ -96,6 +99,8 @@ export const S1_WORDS: S1WordMap = {
   hide: "Hide",
   hidden: "hidden",
   moreActions: "More actions",
+  clear: "Clear",
+  showOptions: "Show options",
   loading: "Loading",
   scrollHint: "Scroll sideways for more",
   sortAscending: "sorted ascending",
