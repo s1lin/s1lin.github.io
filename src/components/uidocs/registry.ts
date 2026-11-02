@@ -1209,19 +1209,21 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
     name: "MetroMap",
     group: "data",
     item: "metro-map",
-    exports: ["MetroMap", "MetroMapProps", "MetroLine", "MetroStation", "MetroColour", "MetroFigure", "MetroZone", "MetroAxis", "MetroFare", "MetroInterchange", "MetroGlyph", "metroHue"],
+    exports: ["MetroMap", "MetroMapProps", "MetroLine", "MetroStation", "MetroStatus", "MetroColour", "MetroFigure", "MetroZone", "MetroAxis", "MetroFare", "MetroInterchange", "MetroGlyph", "metroHue"],
     summary:
-      "A metro map of prices, or of anything placed on one axis, in SVG. Each line starts at a roundel with its mark and runs in its colour; each station sits at its `x` on the axis (log by default), its label and value placed beside it by a collision pass, never on the track nor across another's leader, tiers further out or along the line with a leader when it is crowded. Zones lie behind as bands named at the top. Stations of different lines at one fare (within 5 %) meet at an interchange: a bar behind the tracks, a ring on each member's track and the fare on a tag, so a line that only passes crosses it unbroken; two stations of one line at one fare share a twin stop. Under 720px the axis runs down as a strip map with the words in one column: nothing scrolls sideways. Small trains ride the tracks; a line lights up under the pointer, stops and interchanges have tooltips, and `lit` / `onLit` tie it to a table beside it. Without an axis, a line's stations are evenly spaced in their order.",
+      "A metro map of prices, or of anything placed on one axis, in SVG. Each line starts at a roundel with its mark and runs in its colour; each station sits at its `x` on the axis (log by default), its label and value placed beside it by a collision pass, never on the track nor across another's leader, tiers further out or along the line with a leader when it is crowded. Zones lie behind as bands named at the top. Stations of different lines at one fare (within 5 %) meet at an interchange: a bar behind the tracks, a ring on each member's track and the fare on a tag, so a line that only passes crosses it unbroken; two stations of one line at one fare share a twin stop. Under 720px the axis runs down as a strip map with the words in one column: nothing scrolls sideways. Small trains ride the tracks; a line lights up under the pointer, stops and interchanges have tooltips, and `lit` / `onLit` tie it to a table beside it. A station's card can end in its status: a word in its tone and a strip of cells (a service's last 24 hours). Without an axis, a line's stations are evenly spaced in their order.",
     example: "live",
     usage: `import { MetroGlyph, MetroMap, type MetroLine, type MetroZone } from "@/components/s1lin/metro-map";
 
 const lines: MetroLine[] = [
   { id: "gpt", name: "GPT", mark: <OpenAiLogo />, colour: "var(--c-vendor-openai)", stations: [
     { id: "gpt-5.5-nano", label: "gpt-5.5-nano", value: "0.05 / 0.40", x: 0.4, href: "?model=gpt-5.5-nano",
-      note: "Input / output, USD per 1M tokens" },
+      note: "Input / output, USD per 1M tokens",
+      status: { label: "Normal", tone: "ok", cells: ["neutral", "ok", "ok", /* … 24 */ "warn", "ok"],
+        summary: "last 24 hours: 22 normal, 1 degraded, 1 without data" } },
     { id: "text-embedding-4", label: "text-embedding-4", value: "0.02 / 0.00", x: 0.02, kind: "input" },
   ] },
-  { id: "gemini", name: "Gemini", colour: { light: "#1a5fd0", dark: "#86b3ff" }, stations: [ … ] },
+  { id: "gemini", name: "Gemini", colour: { light: "#c21919", dark: "#f44a37" }, stations: [ … ] },
 ];
 const zones: MetroZone[] = [
   { id: "z1", from: null, to: 0.5, name: "Zone 1 · under $0.50" },
@@ -1240,7 +1242,7 @@ const [lit, setLit] = useState<string[] | null>(null);   // a table's rows light
         name: "lines",
         type: "MetroLine[]",
         required: true,
-        desc: "Each `{ id, name, mark?, colour?, stations }`, top to bottom in the order given (keep it fixed: a line that moves with the prices cannot be found). A station is `{ id, label, value?, x?, kind?, unit?, href?, note?, figures? }`: `x` its place on the axis (null or missing: not drawn), `kind: \"input\"` a square stop, `unit` what `x` is in where one map mixes units (stations meet only within one). A line with no station to draw is left off; with none at all the map shows `empty`.",
+        desc: "Each `{ id, name, mark?, colour?, stations }`, top to bottom in the order given (keep it fixed: a line that moves with the prices cannot be found). A station is `{ id, label, value?, x?, kind?, unit?, href?, note?, figures?, status? }`: `x` its place on the axis (null or missing: not drawn), `kind: \"input\"` a square stop, `unit` what `x` is in where one map mixes units (stations meet only within one), `status` a MetroStatus for its card. A line with no station to draw is left off; with none at all the map shows `empty`.",
       },
       { name: "axis", type: "{ scale?, domain?, ticks?, format?, cue? }", desc: "Stations placed by their `x`: log by default (`scale: \"linear\"`), from the cheapest ÷ 1.7 to the dearest × 1.7 unless `domain` says; `ticks` marked under the map in `format`; `cue` the words at the two ends above it. Without an axis, each line's stations are evenly spaced in their order." },
       { name: "zones", type: "MetroZone[]", desc: "Bands of the axis, each `{ id, from, to, name }` (null is open), shaded in turn with a dashed hairline at each edge and the name at the top (up the left edge, down a phone). A station's tooltip names its zone." },
@@ -1256,12 +1258,13 @@ const [lit, setLit] = useState<string[] | null>(null);   // a table's rows light
       { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "Shown when no station can be drawn: words, set as an EmptyState, or your own node." },
       { name: "emptyMark", type: "ReactNode", desc: "Your one-colour mark for that EmptyState." },
       { name: "details", type: "string", desc: "The id of the same data as a table (a Timetable, a list), named in the figure's `aria-details`: the drawing's text alternative." },
+      { name: "MetroStatus", type: "{ label, tone?, cells?, summary? }", desc: "A station's `status`, under its value on its card: `label` the word (\"Normal\", \"No status yet\"), set in mono caps with the Glyph of its `tone` (`ok`, `warn`, `bad`, `info` or `neutral`, the default) in the theme's status hue; `cells` a strip, oldest first, a tone a cell (ok full, warn hatched and shorter, bad short, neutral a dotted outline: no data); `summary` what the strip shows, said after the word in the station's name. In an interchange's tooltip each member shows its tone's glyph. No `status`: no line. The words are the app's: the kit adds none." },
       { name: "MetroGlyph", type: "({ kind }) => JSX.Element", desc: "A legend's shape: `stop` (a ring), `input` (a square), `interchange` (a bar)." },
       { name: "metroHue", type: "(colour?: MetroColour) => string | undefined", desc: "A line's colour as the CSS value the map draws it in (`--s1-metro-hue`): a pair becomes `light-dark()`, and a hex too dark (or too light) for one paper gives way to the ink there. For a row or a band of your own beside the map." },
       CLASS,
     ],
     notes: [
-      { label: "Accessibility", text: "A `<figure>` with its caption and `aria-details` naming the table of the same data. The drawing is a group with a name; each line a group named by its line; each station a link (with `href`) named \"label, value\", two at a twin stop, each its own; each interchange is focusable and named by `announce`. Roundels, tracks, zones, bars and trains are hidden from screen readers; the tooltip repeats what the station already says. Colour never stands alone: the mark, the line's place, the label and the stop's shape say it too. In forced colours, tracks, stops, rings, bars and tags are drawn in `CanvasText` on `Canvas`, the zones' shading dropped, and a lit stop fills in `Highlight`." },
+      { label: "Accessibility", text: "A `<figure>` with its caption and `aria-details` naming the table of the same data. The drawing is a group with a name; each line a group named by its line; each station a link (with `href`) named \"label, value\" (then its status's word and summary), two at a twin stop, each its own; each interchange is focusable and named by `announce`. Roundels, tracks, zones, bars and trains are hidden from screen readers; the tooltip repeats what the station already says. Colour never stands alone: the mark, the line's place, the label and the stop's shape say it too, and a status by its glyph, its word and each cell's shape. In forced colours, tracks, stops, rings, bars and tags are drawn in `CanvasText` on `Canvas`, the zones' shading dropped, a status's word and strip drawn in `CanvasText` (the cells still told by their shape), and a lit stop fills in `Highlight`." },
       { label: "Keyboard", text: "Tab reaches each stop with a link in line order, then each interchange; focus lights the line and opens the tooltip; Esc closes it." },
       { label: "Reduced motion", text: "The trains are hidden and their clock is stopped (`pauseAnimations`); a line lights up without a fade." },
       { label: "Phone", text: "In `auto`, a frame under 720px draws the strip map: the lines side by side, the cheapest at the top, the words in one relaxed column on the right, joined to their stops by leaders. Nothing scrolls sideways; a label longer than the column ends in \"…\" (the link's name keeps it whole)." },

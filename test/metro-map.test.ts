@@ -223,6 +223,44 @@ test("MetroMap: stations the app lights: their stop and line lit, the tooltip op
   assert.deepEqual(said, []);
 });
 
+test("MetroMap: a station's status on its card: the word with its tone's glyph, the strip oldest first, a tone a cell; said with its name; none, no line", async () => {
+  const { MetroMap } = await part("metro-map");
+  const cells = ["neutral", ...Array(20).fill("ok"), "warn", "bad", "ok"];
+  const lines = [
+    {
+      ...LINES[1],
+      stations: [
+        st("claude-haiku-4-5", 0.44, 2.2, { note: "in / out", status: { label: "Normal", tone: "ok", cells, summary: "last 24 hours: 21 normal, 1 degraded, 1 down, 1 without data" } }),
+        st("claude-opus-5", 8.25, 41.25, { status: { label: "No status yet" } }),
+      ],
+    },
+    { ...LINES[0], stations: [st("gpt-5.5-nano", 0.05, 0.4)] },
+  ];
+  const lit = html(h(MetroMap, { lines, axis: AXIS, lit: ["claude-haiku-4-5"], trains: false }));
+  const tip = /<div class="s1-metro__tip"[^>]*>([\s\S]*?)<\/div>/.exec(lit)![1];
+  assert.match(
+    tip,
+    /<span class="s1-metro__tip-value">0\.44 \/ 2\.20<\/span><span class="s1-metro__status" data-tone="ok"><span class="s1-metro__status-word"><span class="s1-glyph s1-glyph--ok" aria-hidden="true"><\/span>Normal<\/span><span class="s1-metro__strip">/,
+    "under the value: the glyph and the word in its tone",
+  );
+  assert.deepEqual(all(tip, /<i data-tone="([a-z]+)"><\/i>/g).map((c) => c[1]), cells, "the strip, a cell a tone, in order");
+  assert.match(tip, /<\/i><\/span><\/span><\/span><span class="s1-metro__tip-note">in \/ out<\/span>$/, "the note after it, last");
+  assert.match(lit, /aria-label="claude-haiku-4-5, 0\.44 \/ 2\.20, Normal, last 24 hours: 21 normal, 1 degraded, 1 down, 1 without data"/, "the word and the summary said with the station");
+  const none = html(h(MetroMap, { lines, axis: AXIS, lit: ["claude-opus-5"], trains: false }));
+  assert.match(none, /<span class="s1-metro__status" data-tone="neutral"><span class="s1-metro__status-word"><span class="s1-glyph s1-glyph--neutral" aria-hidden="true"><\/span>No status yet<\/span><\/span>/, "neutral by default; no cells, no strip");
+  assert.match(none, /aria-label="claude-opus-5, 8\.25 \/ 41\.25, No status yet"/);
+  const plain = html(h(MetroMap, { lines, axis: AXIS, lit: ["gpt-5.5-nano"], trains: false }));
+  assert.doesNotMatch(plain, /s1-metro__status/, "a station without a status has no status line");
+  assert.match(plain, /aria-label="gpt-5\.5-nano, 0\.05 \/ 0\.40"/);
+  const css = readFileSync(path.join(UI, "metro-map.css"), "utf8");
+  for (const [tone, token] of [["ok", "--s1-ok"], ["warn", "--s1-warn"], ["bad", "--s1-bad"]]) {
+    assert.match(css, new RegExp(`\\.s1-metro__status\\[data-tone="${tone}"\\] \\.s1-metro__status-word \\{ color: var\\(${token}, var\\(--s1-ink\\)\\)`), `${tone}: the word in ${token}, the ink unset`);
+  }
+  assert.match(css, /\.s1-metro__strip i\[data-tone="warn"\] \{\s*height: 72%;[^}]*repeating-linear-gradient/, "warn: hatched and shorter");
+  assert.match(css, /\.s1-metro__strip i\[data-tone="bad"\] \{ height: 48%;/, "bad: short");
+  assert.match(css, /\.s1-metro__strip i\[data-tone="neutral"\] \{ background: transparent; outline: 1px dotted/, "no data: an outline");
+});
+
 test("MetroMap: nothing to draw is said with the empty words or a mark; loading draws ghosts and says so", async () => {
   const { MetroMap } = await part("metro-map");
   const { S1Words } = await part("words");
@@ -337,7 +375,14 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { MetroMap } from ${JSON.stringify(path.join(ROOT, "src/ui/metro-map.tsx"))};
 
-const st = (id, i, o) => ({ id, label: id, x: o || i, kind: o ? "stop" : "input", value: i.toFixed(2) + " / " + o.toFixed(2), href: "#" + id, note: "in / out" });
+const hours = (bad, warn, none) => Array.from({ length: 24 }, (_, i) => (bad.includes(i) ? "bad" : warn.includes(i) ? "warn" : none.includes(i) ? "neutral" : "ok"));
+const STATUS = {
+  "claude-haiku-5": { label: "Degraded", tone: "warn", cells: hours([5], [22, 23], [0]), summary: "last 24 hours: 20 normal, 2 degraded, 1 down, 1 without data" },
+  "gpt-5.5-nano": { label: "Normal", tone: "ok", cells: hours([], [], []) },
+  "gemini-3.8-flash-lite": { label: "Down", tone: "bad", cells: hours([23], [], []) },
+  "grok-4-3-mini": { label: "No status yet" },
+};
+const st = (id, i, o) => ({ id, label: id, x: o || i, kind: o ? "stop" : "input", value: i.toFixed(2) + " / " + o.toFixed(2), href: "#" + id, note: "in / out", status: STATUS[id] });
 const lines = [
   ["GPT", "#0e7251", [["gpt-5.5-nano", .05, .4], ["gpt-5.5-mini", .175, 1.4], ["gpt-realtime-2.1-mini", .6, 2.4], ["gpt-transcribe", 1.25, 5], ["gpt-5.5", .875, 7], ["gpt-5.5-codex", 1.25, 10], ["gpt-4o-mini-tts", .6, 12], ["gpt-realtime-2.1", 4, 16], ["gpt-realtime-2", 4, 16]]],
   ["Claude", "#a24b09", [["claude-haiku-4-5", .44, 2.2], ["claude-haiku-5-5", .55, 2.75], ["claude-haiku-5", 1, 5], ["claude-sonnet-5", 1.65, 8.25], ["claude-sonnet-4-6", 1.65, 8.25], ["claude-fable-5-1", 2.75, 13.75], ["claude-opus-5", 8.25, 41.25], ["claude-opus-4-8", 8.25, 41.25]]],
@@ -363,7 +408,7 @@ const root = createRoot(document.getElementById("app"));
 // headless Chrome keeps a window 500px wide at least: a phone's column (390 less two 16px gutters) is set on the box
 const phone = location.search.includes("phone");
 const shown = location.search.includes("squeeze") ? squeeze : lines;
-flushSync(() => root.render(<div id="box" style={phone ? { width: 358 } : undefined}><MetroMap lines={shown} axis={axis} zones={zones} interchange={interchange} caption="Prices" label="Prices by family" /></div>));
+flushSync(() => root.render(<div id="box" style={{ "--s1-warn": "#925600", ...(phone ? { width: 358 } : {}) }}><MetroMap lines={shown} axis={axis} zones={zones} interchange={interchange} caption="Prices" label="Prices by family" /></div>));
 
 const boxOf = (el) => { const b = el.getBBox(); return { l: b.x, r: b.x + b.width, t: b.y, b: b.y + b.height }; };
 const union = (bs) => bs.reduce((u, b) => ({ l: Math.min(u.l, b.l), r: Math.max(u.r, b.r), t: Math.min(u.t, b.t), b: Math.max(u.b, b.b) }));
@@ -441,12 +486,24 @@ setTimeout(() => {
   setTimeout(() => {
     const tip = $(".s1-metro__tip");
     got.tip = tip ? tip.textContent : null;
+    // the status line under the value, before the note: the word in the theme's warn, the strip a cell an hour
+    const status = tip && tip.querySelector(".s1-metro__status");
+    got.status = status && {
+      after: status.previousElementSibling?.className,
+      word: getComputedStyle(status.querySelector(".s1-metro__status-word")).color,
+      cells: [...status.querySelectorAll(".s1-metro__strip i")].map((i) => i.dataset.tone + ":" + Math.round(i.getBoundingClientRect().height)),
+      strip: Math.round(status.querySelector(".s1-metro__strip").getBoundingClientRect().width),
+      inside: (() => { const a = tip.getBoundingClientRect(), b = status.getBoundingClientRect(); return b.left >= a.left && b.right <= a.right; })(),
+      forced: getComputedStyle(status.querySelector('.s1-metro__strip i[data-tone="ok"]')).backgroundColor,
+      forcedBad: getComputedStyle(status.querySelector('.s1-metro__strip i[data-tone="bad"]')).backgroundColor,
+    };
     document.getAnimations().forEach((a) => a.finish());
     got.lit = $$(".s1-metro__line").map((g) => g.getAttribute("aria-label") + ":" + getComputedStyle(g).opacity);
     $(".s1-metro__interchange").focus();
     setTimeout(() => {
       const tip2 = $(".s1-metro__tip");
       got.interTip = tip2 ? tip2.textContent : null;
+      got.interTones = tip2 ? [...tip2.querySelectorAll(".s1-metro__tip-tone")].map((t) => t.dataset.tone) : null;
       document.getAnimations().forEach((a) => a.finish());
       got.interLit = $$(".s1-metro__line").filter((g) => getComputedStyle(g).opacity === "1").map((g) => g.getAttribute("aria-label"));
       document.getElementById("out").textContent = JSON.stringify(got);
@@ -512,7 +569,7 @@ test("MetroMap in a browser: labels never meet, rings only on members, tooltips;
   assert.equal(desk.zones, 5);
   assert.ok(desk.rings.length >= 6, "the fixture's interchanges");
   assert.deepEqual(desk.rings.filter((r: { ok: boolean }) => !r.ok), [], "rings on member lines only");
-  assert.ok(desk.names.includes("gpt-5.5-nano, 0.05 / 0.40"));
+  assert.ok(desk.names.includes("gpt-5.5-nano, 0.05 / 0.40, Normal"), "a status without a summary: its word");
   assert.ok(desk.names.includes("claude-opus-4-8, 8.25 / 41.25"), "a twin's second station is its own link");
   assert.ok(desk.interchanges.includes("Same fare: gpt-5.5-nano, gemini-3.8-flash-lite and grok-4-3-mini, $0.40"));
   assert.ok(desk.interchanges.includes("Same fare: qwen-3.8 and deepseek-v4, $0.96–1.01"), "within 5 %");
@@ -520,7 +577,16 @@ test("MetroMap in a browser: labels never meet, rings only on members, tooltips;
   assert.deepEqual(desk.lineNames, ["GPT", "Claude", "Gemini", "DeepSeek", "Kimi", "GLM", "Grok", "Qwen", "MiniMax", "Jev"]);
   assert.equal(desk.trains, "inline", "trains ride");
   assert.equal(desk.paused, false);
-  assert.match(desk.tip, /^Claude · Zone 3claude-haiku-51\.00 \/ 5\.00in \/ out$/, "a focused station opens its tooltip, with its zone");
+  assert.match(desk.tip, /^Claude · Zone 3claude-haiku-51\.00 \/ 5\.00Degradedin \/ out$/, "a focused station opens its tooltip, with its zone and status");
+  assert.equal(desk.status.after, "s1-metro__tip-value", "the status under the value");
+  assert.equal(desk.status.word, "rgb(146, 86, 0)", "the word in the theme's --s1-warn");
+  assert.equal(desk.status.cells.length, 24);
+  assert.deepEqual([desk.status.cells[0], desk.status.cells[1], desk.status.cells[23]], ["neutral:12", "ok:12", "warn:9"], "no data an outline, ok full, warn shorter");
+  assert.ok(desk.status.strip >= 96, "a strip a reader can see");
+  assert.equal(desk.status.inside, true, "inside its card");
+  assert.ok(desk.names.includes("claude-haiku-5, 1.00 / 5.00, Degraded, last 24 hours: 20 normal, 2 degraded, 1 down, 1 without data"), "the status said with the station");
+  assert.equal(desk.status.cells[5], "bad:6", "bad: short");
+  assert.ok(desk.names.includes("grok-4-3-mini, 0.24 / 0.40, No status yet"));
   assert.deepEqual(
     desk.lit.map((l: string) => l.split(":")[1]),
     ["0.22", "1", "0.22", "0.22", "0.22", "0.22", "0.22", "0.22", "0.22", "0.22"],
@@ -528,6 +594,7 @@ test("MetroMap in a browser: labels never meet, rings only on members, tooltips;
   );
   assert.deepEqual(desk.interLit, ["GPT", "Gemini", "Grok"], "an interchange lights its members' lines");
   assert.match(desk.interTip, /^⇄ Same fare · \$0\.40change heregpt-5\.5-nano0\.05 \/ 0\.40gemini-3\.8-flash-lite0\.10 \/ 0\.40grok-4-3-mini0\.24 \/ 0\.40$/);
+  assert.deepEqual(desk.interTones, ["ok", "bad", "neutral"], "an interchange's members each with their tone's glyph");
 
   const squeezed = run(plainPage, "1280,900", [], "?squeeze");
   if (!squeezed) return;
@@ -553,5 +620,8 @@ test("MetroMap in a browser: labels never meet, rings only on members, tooltips;
   if (!forced) return;
   assert.equal(forced.trackStroke, forced.canvasText, "forced colours: tracks in CanvasText");
   assert.equal(forced.zoneFill, "none", "and no shading behind");
+  assert.equal(forced.status.word, forced.canvasText, "a status's word in CanvasText");
+  assert.equal(forced.status.forced, forced.canvasText, "and its strip's cells in CanvasText");
+  assert.equal(forced.status.forcedBad, forced.canvasText, "a bad cell too, not the theme's red");
   assert.notEqual(desk.trackStroke, desk.canvasText, "(not so without them)");
 });

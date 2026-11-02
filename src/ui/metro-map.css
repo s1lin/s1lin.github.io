@@ -4,7 +4,8 @@
  * --s1-metro-hue on its group, from the app; without one a line is drawn in the ink. Zones are bands of paper-2 with
  * a dashed hairline at each edge; an interchange is a bar of paper outlined in the ink, behind the tracks, with a
  * ring for each member and the fare on a tag. Labels in mono, values in the line's colour. Nothing scrolls sideways:
- * under 720px the axis runs down.
+ * under 720px the axis runs down. A station's status on its card: the word with its glyph in the status hue
+ * (--s1-ok, --s1-warn, --s1-bad: the ink until a theme sets them) and a strip of cells, each told by its shape too.
  */
 @layer components {
   .s1-metro { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 24px; min-width: 0; margin: 0; color: var(--s1-ink); color-scheme: var(--s1-scheme); }
@@ -94,6 +95,34 @@
   .s1-metro__tip-list .s1-metro__tip-label { font-size: 11.5px; font-weight: 400; }
   .s1-metro__tip-list .s1-metro__tip-value { margin-left: auto; font-size: 11.5px; font-weight: 400; color: var(--s1-ink-2); }
 
+  /* a station's status: the word and its glyph in the status hue, then the strip, oldest first, a cell a period:
+     ok full and solid, warn hatched and shorter, bad short and solid, neutral (no data) a dotted outline */
+  .s1-metro__status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--s1-rule); }
+  .s1-metro__status-word {
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    font: 500 10.5px/1.2 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2);
+  }
+  .s1-metro__status[data-tone="ok"] .s1-metro__status-word { color: var(--s1-ok, var(--s1-ink)); }
+  .s1-metro__status[data-tone="info"] .s1-metro__status-word { color: var(--s1-info, var(--s1-ink)); }
+  .s1-metro__status[data-tone="warn"] .s1-metro__status-word { color: var(--s1-warn, var(--s1-ink)); font-weight: 600; }
+  .s1-metro__status[data-tone="bad"] .s1-metro__status-word { color: var(--s1-bad, var(--s1-ink)); font-weight: 600; }
+  .s1-metro__strip { display: flex; flex: 1 1 120px; align-items: flex-end; gap: 1.5px; min-width: 96px; height: 12px; }
+  .s1-metro__strip i { flex: 1; min-width: 2px; height: 100%; border-radius: 1px; background: var(--s1-ok, var(--s1-ink-2)); }
+  .s1-metro__strip i[data-tone="info"] { background: var(--s1-info, var(--s1-ink-2)); }
+  .s1-metro__strip i[data-tone="warn"] {
+    height: 72%; box-sizing: border-box;
+    background: repeating-linear-gradient(-45deg, var(--s1-warn, var(--s1-ink)) 0 1.5px, transparent 1.5px 3.5px);
+    box-shadow: inset 0 0 0 1px var(--s1-warn, var(--s1-ink));
+  }
+  .s1-metro__strip i[data-tone="bad"] { height: 48%; background: var(--s1-bad, var(--s1-ink)); }
+  .s1-metro__strip i[data-tone="neutral"] { background: transparent; outline: 1px dotted var(--s1-ink-3); outline-offset: -1px; }
+  /* an interchange's list: each member's status as its glyph alone, at the end of its line */
+  .s1-metro__tip-tone { flex: none; display: inline-flex; font-size: 10px; color: var(--s1-ink-2); }
+  .s1-metro__tip-tone[data-tone="ok"] { color: var(--s1-ok, var(--s1-ink)); }
+  .s1-metro__tip-tone[data-tone="info"] { color: var(--s1-info, var(--s1-ink)); }
+  .s1-metro__tip-tone[data-tone="warn"] { color: var(--s1-warn, var(--s1-ink)); }
+  .s1-metro__tip-tone[data-tone="bad"] { color: var(--s1-bad, var(--s1-ink)); }
+
   /* while the data comes: the lines as ghosts, in the hairline */
   .s1-metro__ghost { display: block; }
   .s1-metro__ghost line { stroke: var(--s1-rule); stroke-width: 4; stroke-linecap: round; }
@@ -125,10 +154,15 @@
     .s1-metro__station:is(:hover, [data-lit]) .s1-metro__stop, .s1-metro__xring[data-lit] { fill: Highlight; }
     .s1-metro__glyph { border-color: CanvasText; background: Canvas; }
     .s1-metro__tip { box-shadow: none; border-color: CanvasText; }
+    .s1-metro__status[data-tone] .s1-metro__status-word, .s1-metro__tip-tone[data-tone] { color: CanvasText; }
+    .s1-metro__strip i { forced-color-adjust: none; }
+    .s1-metro__strip i[data-tone] { background: CanvasText; }
+    .s1-metro__strip i[data-tone="warn"] { background: repeating-linear-gradient(-45deg, CanvasText 0 1.5px, transparent 1.5px 3.5px); box-shadow: inset 0 0 0 1px CanvasText; }
+    .s1-metro__strip i[data-tone="neutral"] { background: transparent; outline-color: CanvasText; }
   }
 
   /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
-  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend):lang(zh),
-  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend) [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend, .s1-metro__status-word):lang(zh),
+  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend, .s1-metro__status-word) [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
   :is(.s1-metro__zone-name, .s1-metro__xhead):lang(zh) { font-size: 11px; letter-spacing: 0; text-transform: none; }
 }
