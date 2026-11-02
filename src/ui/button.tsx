@@ -35,12 +35,14 @@ const none = (n: ReactNode) => n === undefined || n === null || n === false || n
 /**
  * The house buttons: "plain", a hairline box in mono type; "go", the same in
  * ink with an offset shadow in the accent, for the one thing to do; "ghost",
- * the box without its line, for a head or a toolbar (pressed, aria-pressed,
- * it is marked by a bar under it); "chip", a pill; "link", words underlined;
+ * the box without its line, for a head or a toolbar (with aria-pressed it is
+ * a toggle, the pressed one filled); "chip", a pill; "link", words underlined;
  * "icon", the plain box made square, for a mark that needs an aria-label
  * (close, more actions). "sm" is a size down. An action shows an `icon` and
- * a word. Pressed, a box sinks into its shadow. With `href` it is a link that
- * looks the part; without, a <button type="button">.
+ * a word. Under the pointer a button turns over, the ink and the paper
+ * changing places (a toggle keeps its own fill). Pressed, a box sinks into
+ * its shadow. With `href` it is a link that looks the part; without, a
+ * <button type="button">.
  */
 export function Button({ variant, size, icon, iconEnd, className, children, ...rest }: ButtonProps) {
   const pictured = !none(icon) || !none(iconEnd);

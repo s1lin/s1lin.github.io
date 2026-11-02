@@ -108,27 +108,24 @@ a:where(:not([class^="s1-"], [class*=" s1-"])):hover { color: var(--ink-3); }
   display: flex; align-items: center; gap: 16px;
   font: 500 11px/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase;
 }
-.runhead__brand { text-decoration: none; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
-.runhead__brand b { font: 800 15px/1 var(--f-sans); letter-spacing: -0.01em; }
-.runhead__brand span { font-family: var(--f-mincho); font-size: 13px; letter-spacing: 0.2em; }
-.runhead__mark { width: 18px; height: 18px; flex: none; align-self: center; }
+/* The mark and the name on one line, the mark's box centred on the capitals (owner, 2026-11-02: "the logo and text
+   is not vertically aligned"): the name's box is trimmed to its cap height where the browser can (text-box), and
+   is the line's em box elsewhere, whose middle is the capitals' in Inter Tight. test/runhead.test.ts measures it. */
+.runhead__brand { text-decoration: none; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.runhead__brand b { font: 800 15px/1 var(--f-sans); letter-spacing: -0.01em; text-box: trim-both cap alphabetic; }
+.runhead__mark { width: 18px; height: 18px; flex: none; }
 
 .runhead__now {
   flex: 1; text-align: center; color: var(--ink-2);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .runhead__now b { color: var(--sumi); font-weight: 500; }
-.runhead__vol { white-space: nowrap; color: var(--ink-2); }
-/* Paper or night: a switcher in the head, so no line round it (owner, 2026-11-02); the pointer tints it. */
-.theme-toggle {
-  appearance: none; border: 0; background: transparent; color: inherit;
-  font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; padding: 7px 9px; border-radius: 2px; cursor: pointer;
-}
-.theme-toggle:hover { background: var(--paper-2); color: var(--sumi); }
-.theme-toggle [lang="ja"] { font-family: var(--f-mincho); }
+/* Night: the kit's ghost Button with aria-pressed (Runhead.tsx), a toggle drawn as the filled switchers are, with no
+   line in any state (owner, 2026-11-02); here only the 夜 in the mincho, a size up beside the moon. */
+.theme-toggle { flex: none; }
+.theme-toggle [lang="ja"] { font: 500 13px/1 var(--f-mincho); }
 
 @media (max-width: 640px) {
-  .runhead__vol { display: none; }
   .runhead__now { text-align: right; }
 }
 

@@ -92,7 +92,7 @@ export function DarkDemo() {
         <dt>useDark()</dt>
         <dd>{String(dark)}</dd>
       </dl>
-      <p className="cap">Flip the theme with 夜 / 紙 in the running head and watch every example on this page turn with it.</p>
+      <p className="cap">Turn night on and off with 夜 · in the running head and watch every example on this page turn with it.</p>
     </>
   );
 }
