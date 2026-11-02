@@ -473,6 +473,36 @@
       ]
     },
     {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "A text box that suggests: the ARIA combobox with a list that autocompletes, the options in groups filtered by the app, the arrows, Enter or a click to choose; drawn as Input with a clear and an open button; wired to the Field around it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/input.json",
+        "https://s1lin.tokensbeat.com/r/field.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/combobox.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/combobox.tsx"
+        },
+        {
+          "path": "src/ui/combobox.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/combobox.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
       "name": "checkbox",
       "type": "registry:ui",
       "title": "Checkbox",

@@ -33,6 +33,7 @@ import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
 import { Code } from "@/ui/code";
+import { Combobox } from "@/ui/combobox";
 import { Copy } from "@/ui/copy";
 import { DescriptionList } from "@/ui/description-list";
 import { Dropdown, DropdownCheckItem, DropdownGroup, DropdownItem, DropdownLabel, DropdownList, DropdownRadioGroup, DropdownRadioItem, DropdownSeparator, DropdownSub, DropdownSubList, DropdownSubTrigger, DropdownTrigger } from "@/ui/dropdown";
@@ -242,6 +243,67 @@ export function SelectDemo() {
           <option value="100">100 a page</option>
         </Select>
       </div>
+    </div>
+  );
+}
+
+type City = { id: string; en: string; zh: string; region: string };
+const CITIES: City[] = [
+  { id: "sh", en: "Shanghai", zh: "上海", region: "cn" },
+  { id: "bj", en: "Beijing", zh: "北京", region: "cn" },
+  { id: "sz", en: "Suzhou", zh: "苏州", region: "cn" },
+  { id: "tpe", en: "Taipei", zh: "台北", region: "tw" },
+  { id: "khh", en: "Kaohsiung", zh: "高雄", region: "tw" },
+  { id: "sg", en: "Singapore", zh: "新加坡", region: "sg" },
+  { id: "nyc", en: "New York", zh: "纽约", region: "us" },
+  { id: "sf", en: "San Francisco", zh: "旧金山", region: "us" },
+];
+const REGIONS: [string, string, string][] = [
+  ["cn", "Mainland China", "中国大陆"],
+  ["tw", "Taiwan", "台湾"],
+  ["sg", "Singapore", "新加坡"],
+  ["us", "United States", "美国"],
+];
+
+/** A city, by region, in either language: the page filters the cities from the text it is given. */
+function CityPicker({ zh }: { zh: boolean }) {
+  const [city, setCity] = useState<City | null>(null);
+  const [text, setText] = useState("");
+  const name = (c: City) => (zh ? c.zh : c.en);
+  const q = city && text === name(city) ? "" : text.trim().toLowerCase();
+  const groups = REGIONS.map(([key, en, cn]) => ({
+    key,
+    label: zh ? cn : en,
+    items: CITIES.filter((c) => c.region === key && (!q || c.en.toLowerCase().includes(q) || c.zh.includes(q))),
+  })).filter((g) => g.items.length > 0);
+  return (
+    <Field label={zh ? "城市" : "City"} hint={city ? `${zh ? "已选" : "Chosen"}: ${city.id}` : zh ? "输入中文或英文城市名。" : "Type a city in English or Chinese."}>
+      <Combobox
+        groups={groups}
+        value={city}
+        onValueChange={setCity}
+        onInputChange={setText}
+        itemText={name}
+        itemKey={(c) => c.id}
+        renderItem={(c) => (
+          <>
+            {name(c)} <span className="ud-alt">{zh ? c.en : c.zh}</span>
+          </>
+        )}
+        empty={zh ? "没有匹配的城市。" : "No matching city."}
+        placeholder={zh ? "例如 上海、Taipei" : "e.g. 上海, Taipei"}
+        clearLabel={zh ? "清除城市" : "Clear city"}
+        showLabel={zh ? "显示城市" : "Show cities"}
+      />
+    </Field>
+  );
+}
+
+export function ComboboxDemo() {
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <Overlays>{(zh) => <CityPicker zh={zh} />}</Overlays>
+      <Said text="Type part of a name in either language, or press ↓: the arrows move, Enter chooses, Esc closes; × clears it. Nothing is sent from this page." />
     </div>
   );
 }

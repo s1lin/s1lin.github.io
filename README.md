@@ -161,7 +161,8 @@ account), in the registry's `console` category and in six groups on `/ui/`:
 
 - **Forms**: Field and Fieldset (label, hint and error wired to the control by
   `useField`), Input (its action, an Apply or a Max, after the box and as tall as it,
-never inside it), Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
+never inside it), Textarea, Select, Combobox (a text box that suggests, its options
+  in groups, filtered by the app), Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements throughout.
 - **Data**: Table (caption, row headers, sort, empty and loading rows, row

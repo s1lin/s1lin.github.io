@@ -775,6 +775,52 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     ],
   },
   {
+    id: "combobox",
+    name: "Combobox",
+    group: "forms",
+    item: "combobox",
+    exports: ["Combobox", "ComboboxGroup", "ComboboxProps"],
+    summary:
+      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a button that clears it and one that opens the list. For a short fixed list, Select.",
+    example: "live",
+    usage: `import { Combobox } from "@/components/s1lin/combobox";
+
+const [city, setCity] = useState<City | null>(null);
+const [text, setText] = useState("");
+const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, items }]
+
+<Field label="City">
+  <Combobox groups={groups} value={city} onValueChange={setCity} onInputChange={setText}
+    itemText={(c) => c.name} itemKey={(c) => c.id} renderItem={(c) => <>{c.name} <small>{c.region}</small></>}
+    empty="No matching city." placeholder="e.g. Taipei, Singapore" />
+</Field>`,
+    props: [
+      { name: "groups", type: "ComboboxGroup<T>[]", required: true, desc: "The options to show now, `{ key, label?, items }` each, already filtered by the text; a group with no label has no heading." },
+      { name: "value", type: "T | null", required: true, desc: "The chosen item." },
+      { name: "onValueChange", type: "(value: T | null) => void", required: true, desc: "Called with the item chosen, or null when the box is cleared." },
+      { name: "onInputChange", type: "(text: string) => void", desc: "Called with the text on every edit, with the item's words after a choice, and with \"\" after a clear: filter `groups` with it." },
+      { name: "itemText", type: "(item: T) => string", required: true, desc: "An item in words: what the box shows when it is chosen, and the option's name for screen readers." },
+      { name: "itemKey", type: "(item: T) => string", required: true, desc: "An item's key, unique among them; the chosen one is found by it." },
+      { name: "renderItem", type: "(item: T) => ReactNode", desc: "What an option shows; its words by default." },
+      { name: "empty", type: "ReactNode", desc: "Shown in the list when nothing matches; without it, the list stays shut." },
+      { name: "placeholder", type: "string", desc: "Words in the empty box." },
+      { name: "aria-labelledby", type: "string", desc: "The label's id, when it is not a Field's." },
+      { name: "invalid", type: "boolean", desc: "In error without a Field around it." },
+      { name: "disabled", type: "boolean", desc: "Nothing can be typed or chosen." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px or 30px tall, as Input." },
+      { name: "clearLabel", type: "string", default: "\"Clear\"", desc: "The clear button's name." },
+      { name: "showLabel", type: "string", default: "\"Show options\"", desc: "The name of the button that opens the list." },
+      { name: "className", type: "string", desc: "Added to the box (`s1-input`)." },
+      { name: "listClassName", type: "string", desc: "Added to the list." },
+    ],
+    notes: [
+      { label: "Keyboard", text: "Typing opens the list on its first option; ↓ and ↑ open it (on the chosen option, if it is there) and move through it, wrapping; Home and End stay in the text; Enter chooses; Esc closes the list, and a second Esc puts back the chosen item's words; Tab closes it and moves on. The two buttons are left out of the Tab order; their keys are these." },
+      { label: "Accessibility", text: "The box is a `combobox` with `aria-autocomplete=\"list\"` and `aria-expanded`; the list a `listbox` of `option`s in `group`s named by their headings; focus stays in the box and the option under the arrows is its `aria-activedescendant`, the chosen one `aria-selected` with a tick. In a Field it takes the label, the hint and the error from it. What an empty list says is a status, read as it changes." },
+      { label: "Phone", text: "The list is in the top layer, at least as wide as the box, kept 8px inside the screen, above the box when there is no room under it, and never taller than its room (`--s1-combobox-room`) or 320px." },
+      { label: "Chinese", text: "A group's heading is set at 12px and 500, never tracked or cased." },
+    ],
+  },
+  {
     id: "checkbox",
     name: "Checkbox",
     group: "forms",

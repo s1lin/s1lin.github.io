@@ -383,6 +383,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.TextareaDemo />;
     case "select":
       return <demos.SelectDemo />;
+    case "combobox":
+      return <demos.ComboboxDemo />;
     case "checkbox":
       return <demos.CheckboxDemo />;
     case "radio-group":
