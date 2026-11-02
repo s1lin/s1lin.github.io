@@ -55,7 +55,7 @@ export const GROUPS: Group[] = [
     id: "navigation",
     chapter: "Parts",
     name: "Navigation",
-    blurb: "How a reader finds their way: the index beside these docs, and the sidebar of an app (chats, projects, settings), one part for both. A list of links in a nav landmark, the current one marked for the eye and for a screen reader.",
+    blurb: "How a reader finds their way: the index beside these docs, and the sidebar of an app (chats, projects, settings), one part for both; and the language a page is read in. A list of links in a nav landmark, the current one marked for the eye and for a screen reader.",
   },
   {
     id: "overlays",
@@ -153,7 +153,7 @@ export const ENTRIES: Entry[] = [
     item: "tokens",
     exports: [],
     summary:
-      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, five typefaces and the Chinese faces they end in, the \"+\" marks, and the scheme for native controls. They come in with any part; set them to restyle the lot.",
+      "Every part is drawn in these CSS variables: a paper, a second paper for plates and wells, the ink, two greys, two hairline strengths, one accent, a light blue for \"here\", five typefaces and the Chinese faces they end in, the \"+\" marks, and the scheme for native controls. They come in with any part; set them to restyle the lot.",
     example: "live",
     propsTitle: "Variables",
     props: [
@@ -165,6 +165,7 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-rule", type: "colour", default: "ink at 14%", desc: "Hairlines between things." },
       { name: "--s1-rule-strong", type: "colour", default: "ink at 80%", desc: "Hairlines under a label, round a box or a button." },
       { name: "--s1-accent", type: "colour", default: "#d62d20 · #f0574b", desc: "The one colour: the go button's offset shadow. Set it to the ink for a press in one ink." },
+      { name: "--s1-here", type: "colour", default: "#3780e6 · #7fb2ff", desc: "Here: the dot under the language in force (LangSwitch). A light blue in the status blue's hue, a mark beside the ink and weight that also say it (3.6:1 on paper, 8.9:1 at night). Set it to the ink for a switch in one ink." },
       { name: "--s1-ok", type: "colour", default: "unset: the ink", desc: "A good status: an ok badge's line and tick, a notice's edge, a meter's fill, a stat that rises, a switch that is on. See Theming." },
       { name: "--s1-ok-tint", type: "colour", default: "unset: the paper", desc: "The ground of an ok badge." },
       { name: "--s1-warn", type: "colour", default: "unset: the ink", desc: "A warning: a warn badge's line, hatch and triangle, a notice's hatched edge, a meter past its warning share." },
@@ -299,10 +300,13 @@ const zh: Partial<S1WordMap> = {
     group: "foundations",
     exports: [],
     summary:
-      "The row at the top of an app: the brand (its mark, its name, the product in small capitals) at one end and the controls (the language, night and day) at the other, on one line and centred on it. The controls are `ghost` buttons, with no line round them and none round their group: the pressed one is in the ink with a bar under it, the others in the second ink.",
+      "The row at the top of an app: the brand (its mark, its name, the product in small capitals) at one end and the controls (the language, night and day) at the other, on one line and centred on it. Nothing there has a line round it, nor does any group: the language is a LangSwitch (the words, the one in force with a light-blue dot under it, the others dimmer), night and day a `ghost` icon button, each 30px tall.",
     example: "live",
     usage: `import { Button } from "@/components/s1lin/button";
+import { LangSwitch } from "@/components/s1lin/lang-switch";
 import { Moon, Sun } from "lucide-react";
+
+const LANGS = [{ value: "en", label: "EN", name: "English", lang: "en" }, { value: "zh", label: "中文", lang: "zh-CN" }];
 
 <header className="head">
   <a className="head__brand" href="/">
@@ -312,10 +316,7 @@ import { Moon, Sun } from "lucide-react";
   </a>
   <nav className="head__now">…</nav>
   <div className="head__controls">
-    <div role="group" aria-label={t("Language")}>
-      <Button variant="ghost" size="sm" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</Button>
-      <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</Button>
-    </div>
+    <LangSwitch label={t("Language")} options={LANGS} value={lang} onValueChange={setLang} />
     <Button variant="ghost" size="sm" icon={dark ? <Sun /> : <Moon />} onClick={flip}
       aria-label={dark ? t("Light mode") : t("Dark mode")} title={dark ? t("Light mode") : t("Dark mode")} />
   </div>
@@ -332,11 +333,10 @@ import { Moon, Sun } from "lucide-react";
 }
 .head__product:lang(zh) { font-size: 12px; letter-spacing: 0; text-transform: none; }
 .head__now { flex: 1; min-width: 0; }
-.head__controls { display: flex; align-items: center; gap: 2px; }
-.head__controls > [role="group"] { display: flex; }`,
+.head__controls { display: flex; align-items: center; gap: 2px; }`,
     notes: [
-      { label: "Styles", text: "One height for the row and one for what is in it: the controls are `sm` (30px), the brand is a 30px box, and the row centres them all, the mark too (`align-items: center`), never on a baseline and never nudged by a pixel or two. The brand's words are set at `line-height: 1`, so each box is its type and centres with it." },
-      { label: "Accessibility", text: "The language is a group of buttons, each `aria-pressed`, the group named by `aria-label`; each carries its own `lang`, so 中文 is read as Chinese and set at 12px. The night button is a mark alone, so it has an `aria-label` and a `title`, both saying what it does next. Where the choice belongs to a form, a quiet RadioGroup (`variant=\"segmented\" quiet hideLegend`) looks the same." },
+      { label: "Styles", text: "One height for the row and one for what is in it: the controls are `sm` (30px: the LangSwitch, the icon buttons, a go button if the head has one), the brand is a 30px box, and the row centres them all, the mark too (`align-items: center`), never on a baseline and never nudged by a pixel or two. The brand's words are set at `line-height: 1`, so each box is its type and centres with it." },
+      { label: "Accessibility", text: "The language is a LangSwitch: a group named by its label, each language a button (`aria-pressed`) or a link (`aria-current=\"page\"`) with its own `lang`, so 中文 is read as Chinese and set in the Chinese sans at 12px. The night button is a mark alone, so it has an `aria-label` and a `title`, both saying what it does next." },
       { label: "Phone", text: "When the row is short the product's name goes first; the mark, the name and the controls stay on the line." },
     ],
   },
@@ -364,8 +364,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
 // after the words: a link elsewhere, a menu's caret
 <Button variant="link" href="https://docs.tokensbeat.com" iconEnd={<ArrowUpRight />}>Docs</Button>
 
-// in a head or a toolbar: ghost, no line; one pressed of a group is marked by a bar
-<Button variant="ghost" size="sm" aria-pressed={lang === "en"} onClick={…}>EN</Button>
+// in a head or a toolbar: ghost, no line (the language beside it is a LangSwitch); one pressed of a group is marked by a bar
+<Button variant="ghost" size="sm" aria-pressed={view === "grid"} onClick={…}>Grid</Button>
 <Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={…} />
 
 // a dense row's mark alone: an aria-label for its name, a title for its tooltip
@@ -1222,6 +1222,50 @@ const sections: SideNavSection[] = [
       { label: "Chinese", text: "Under `lang=\"zh-CN\"` the title, the heads and the bar's label drop their tracking and capitals and are 12px; times and counts are 500." },
     ],
     where: "This page's index, on the left (on a phone, the bar under the running head); the app sidebar in the example.",
+  },
+  {
+    id: "lang-switch",
+    name: "LangSwitch",
+    group: "navigation",
+    item: "lang-switch",
+    exports: ["LangSwitch", "LangSwitchProps", "LangOption", "LangSwitchLinkProps"],
+    summary:
+      "The language switch of an app's head, its foot and its phone sheet: the languages as words, each written in itself (EN, 中文), with no line, box or fill round them or round the group. The one in force is in the ink, a weight heavier, with a dot centred under it in the light blue of `--s1-here`; the others are dimmer, and the pointer raises them. Buttons for a language kept in state, or links to the page in each language.",
+    example: "live",
+    usage: `import { LangSwitch } from "@/components/s1lin/lang-switch";
+
+const LANGS = [
+  { value: "en", label: "EN", name: "English", lang: "en" },
+  { value: "zh", label: "中文", lang: "zh-CN" },
+];
+
+// a language kept in state: buttons, the one in force aria-pressed
+<LangSwitch label={t("Language")} options={LANGS} value={lang} onValueChange={setLang} />
+
+// a page in each language: links, the one in force aria-current="page"; 24px in a foot
+<LangSwitch label={t("Language")} value={lang} size="xs" options={LANGS.map((l) => ({ ...l, href: pathIn(l.value) }))} />
+
+// through your router
+<LangSwitch label={t("Language")} value={lang} options={routes} renderLink={({ href, ...link }) => <Link to={href} {...link} />} />`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "The group's name, in the page's language: \"Language\", \"语言\"." },
+      { name: "options", type: "LangOption[]", required: true, desc: "The languages, in the order shown: `{ value, label, name?, lang, href? }`. `label` is what shows, written in that language (\"EN\", \"中文\"); `name` its full name where the label is short (\"English\"), for screen readers; `lang` its tag (\"zh-CN\"); `href` makes it a link to this page in that language." },
+      { name: "value", type: "string", required: true, desc: "The `value` of the language in force." },
+      { name: "onValueChange", type: "(value: string) => void", desc: "Called with the language chosen: a button's press, or a link's click before it is followed. Never for the one in force." },
+      { name: "renderLink", type: "(link: LangSwitchLinkProps) => ReactNode", desc: "Your router's link, for the options with an `href`: it is handed `href`, `className`, `lang`, `hrefLang`, `aria-label`, `aria-current`, `onClick` and `children`; spread them on it. A plain `<a>` without it." },
+      { name: "size", type: "\"md\" | \"sm\" | \"xs\"", default: "\"sm\"", desc: "One height, as the buttons beside it: `sm` 30px for a head, `md` 40px for a phone's sheet or a form, `xs` 24px (the least a target may be) for a foot or a line of text." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Styles", text: "Why words and a dot: a choice of two or three is read at a glance, so the switch takes the least ink that still says which one is in force. A box round the pair, or a filled segment, made it the heaviest thing in the head, heavier than the one thing to do (owner, 2026-11-02: \"no outside border is the key\"). The dot says \"here\" as the index's 2px bar does, without a box; it is the head's only colour beside the brand, a light blue (`--s1-here`, the status blue's hue), so it reads as neither an action (the go button's shadow) nor a status. The others are halfway from the second ink to the third (`--s1-lang-dim` on the group): 4.9:1 on paper, 6.5:1 at night, dim and still AA. Latin is set in mono capitals as the head's labels are; the dot is centred under the letters, not under their tracking." },
+      { label: "Accessibility", text: "A group named by `label`. Each language is a `<button>` with `aria-pressed`, or a link with `aria-current=\"page\"` on the one in force, and carries its own `lang` (a link `hrefLang` too), so 中文 is read as Chinese; a short label is named in full by `name`, which contains it (EN, English). The one in force is told by the ink, the weight and the dot together, never by a colour alone; in forced colours the dot is drawn in the text's colour. Every target is 24px square at least (30px at `sm`), with a 2px focus ring in the ink." },
+      { label: "Keyboard", text: "Tab to each language; Enter (and Space on a button) chooses it. Pressing the one in force does nothing." },
+      { label: "Reduced motion", text: "Where motion is welcome the dot grows in under the new language in 160ms and the ink eases; under `prefers-reduced-motion: reduce` both are simply there. The dot never slides from one language to the other: each has its own." },
+      { label: "Chinese", text: "中文 is set in the Chinese sans (`--s1-font-cjk`, never SimSun), at 12px (13px at `md`), never tracked or in capitals, whatever the language of the page around it." },
+      { label: "Dark mode", text: "`--s1-here` is #3780e6 on paper and #7fb2ff at night; the dimmer ink follows the inks." },
+      { label: "Phone", text: "Two languages fit a phone's head at `sm`. Where the head is full, take the switch out of it and put one at `md` in the sheet the head opens." },
+    ],
+    where: "The head example (Foundations, Head) and the Button example's head row on this page; the heads and foot of the TokensBeat apps.",
   },
   {
     id: "dialog",

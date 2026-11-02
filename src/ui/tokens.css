@@ -1,10 +1,11 @@
 /*
  * The tokens every part of the library is drawn in: one ink on plain stock, a
  * second paper for plates and wells, two greys, two hairline strengths, one
- * accent (the go button's offset shadow), five typefaces and the Chinese faces
- * they end in, the "+" marks, and the scheme native controls are drawn in (a
- * select's list, a number's arrows). Set any of them on :root, or on an
- * element for its part of the page.
+ * accent (the go button's offset shadow), one light blue for "here" (the dot
+ * under the language in force), five typefaces and the Chinese faces they end
+ * in, the "+" marks, and the scheme native controls are drawn in (a select's
+ * list, a number's arrows). Set any of them on :root, or on an element for its
+ * part of the page.
  *
  * Status hues are left unset: an app's theme may set them (see the end of the
  * :root block), and until it does every status is drawn in the ink.
@@ -23,6 +24,10 @@
     --s1-rule: rgb(17 17 17 / 0.14);
     --s1-rule-strong: rgb(17 17 17 / 0.8);
     --s1-accent: #d62d20;
+    /* "Here": the dot under the language in force. The status blue's hue (215°): at night it is that blue
+       (#7fb2ff, the apps' --s1-info); by day a lighter step than their #1f5fb8, which reads as navy at 4px
+       (3.6:1 on paper, 3.3 on paper-2: a mark, beside the ink and the weight that also say it). */
+    --s1-here: #3780e6;
     --s1-scheme: light;
 
     /* Chinese: every stack ends in these before its generic family, after its Latin faces, so Latin
@@ -74,6 +79,7 @@
       --s1-rule: rgb(237 237 237 / 0.14);
       --s1-rule-strong: rgb(237 237 237 / 0.8);
       --s1-accent: #f0574b;
+      --s1-here: #7fb2ff;
       --s1-scheme: dark;
     }
   }
@@ -87,6 +93,7 @@
     --s1-rule: rgb(237 237 237 / 0.14);
     --s1-rule-strong: rgb(237 237 237 / 0.8);
     --s1-accent: #f0574b;
+    --s1-here: #7fb2ff;
     --s1-scheme: dark;
   }
 
@@ -100,6 +107,7 @@
     --s1-rule: rgb(17 17 17 / 0.14);
     --s1-rule-strong: rgb(17 17 17 / 0.8);
     --s1-accent: #d62d20;
+    --s1-here: #3780e6;
     --s1-scheme: light;
   }
 }

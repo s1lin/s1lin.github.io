@@ -1,0 +1,53 @@
+/*
+ * LangSwitch (lang-switch.tsx). The languages as words, with no line, no box and no fill round them or round their
+ * group (owner, 2026-11-02: "no outside border is the key"). The one in force is in the ink, a weight heavier, with a
+ * dot centred under it in --s1-here; the others are dimmer, halfway from the second ink to the third (AA on both
+ * papers), and the pointer raises them to the ink. Latin in mono capitals, Chinese in the Chinese sans at 12px, never
+ * SimSun. One height at each size, as the buttons beside it: 30px (sm), 40px (md), 24px (xs). Where motion is welcome
+ * the dot grows in; where it is not, it is simply there. The dot never slides: each language has its own.
+ */
+@layer components {
+  .s1-lang {
+    --s1-lang-dim: color-mix(in srgb, var(--s1-ink-2) 50%, var(--s1-ink-3));
+    display: inline-flex; align-items: center; gap: 4px; flex: none; margin: 0; padding: 0; border: 0; background: none;
+  }
+  .s1-lang__item {
+    appearance: none; position: relative; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    min-width: 30px; min-height: 30px; margin: 0; padding: 0 6px; border: 0; border-radius: 0; background: none; box-shadow: none;
+    color: var(--s1-lang-dim); font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none; white-space: nowrap; cursor: pointer;
+  }
+  .s1-lang__item:hover { color: var(--s1-ink); }
+  .s1-lang__item[aria-pressed="true"], .s1-lang__item[aria-current="page"] { color: var(--s1-ink); font-weight: 650; cursor: default; }
+
+  /* The words' own box (the tracking after the last letter left out), so the dot is centred under the letters. */
+  .s1-lang__label { position: relative; display: block; margin-inline-end: -0.1em; }
+  .s1-lang__label::after {
+    content: ""; position: absolute; left: 50%; top: calc(100% + 3px); width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+    background: var(--s1-here, var(--s1-ink)); opacity: 0; transform: scale(0.25);
+  }
+  .s1-lang__item[aria-pressed="true"] > .s1-lang__label::after,
+  .s1-lang__item[aria-current="page"] > .s1-lang__label::after { opacity: 1; transform: none; }
+
+  .s1-lang--md .s1-lang__item { min-width: 40px; min-height: 40px; padding: 0 10px; font-size: 12px; }
+  .s1-lang--md .s1-lang__label::after { top: calc(100% + 4px); }
+  .s1-lang--xs { gap: 2px; }
+  .s1-lang--xs .s1-lang__item { min-width: 24px; min-height: 24px; padding: 0 4px; font-size: 10.5px; }
+  .s1-lang--xs .s1-lang__label::after { top: calc(100% + 2px); width: 3px; height: 3px; margin-left: -1.5px; }
+
+  /* Chinese: the Chinese sans (never the browser's pick, SimSun on Windows), 12px at least, never tracked or capitalised. */
+  .s1-lang__item:lang(zh) { font-family: var(--s1-font-cjk), sans-serif; font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-lang--md .s1-lang__item:lang(zh) { font-size: 13px; }
+  .s1-lang__item:lang(zh) > .s1-lang__label { margin-inline-end: 0; }
+
+  .s1-lang__item:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 0; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-lang__item { transition: color 0.12s ease; }
+    .s1-lang__label::after { transition: opacity 0.16s ease, transform 0.16s ease; }
+  }
+  /* Forced colours flatten the inks: the dot stays, in the text's colour, beside the heavier weight. */
+  @media (forced-colors: active) {
+    .s1-lang__label::after { forced-color-adjust: none; background: CanvasText; }
+  }
+}

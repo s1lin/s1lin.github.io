@@ -243,7 +243,6 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-buttons .cap { margin: 0; }
 .ud-buttons .ud-row--tight { gap: 12px 6px; }
 .ud-quiet { color: var(--ink-3); border-style: dashed; cursor: default; }
-.ud-pair { display: inline-flex; gap: 2px; }
 .ud-verbs { margin: 6px 0 0; padding-top: 18px; border-top: 0.5px solid var(--rule); }
 .ud-verbs .cap { margin: 0 0 12px; }
 .ud-verbs ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 14px 12px; margin: 0; padding: 0; list-style: none; }
@@ -269,7 +268,6 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-head__product:lang(zh) { font-size: 12px; letter-spacing: 0; text-transform: none; }
 .ud-head__now { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 14px/1 var(--s1-font-sans); color: var(--s1-ink-2); }
 .ud-head__controls { display: flex; align-items: center; gap: 2px; flex: none; }
-.ud-head__lang { display: flex; gap: 2px; }
 @container (max-width: 460px) { .ud-head__now { visibility: hidden; } }
 @container (max-width: 360px) { .ud-head { gap: 8px; padding-left: 12px; } .ud-head__product { display: none; } }
 
@@ -340,6 +338,11 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-navbox { min-width: 0; }
 .ud-navbox--rail { justify-self: start; width: 56px; }
 .ud-navbox__foot { margin: 0; padding-top: 12px; border-top: 0.5px solid var(--s1-rule); font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink-2); }
+/* The language switch's rows: what each shows, then the switch; a box of them at night in the kit's own tokens. */
+.ud-langbox { display: grid; background: var(--s1-paper); color: var(--s1-ink); border-top: 0.5px solid var(--s1-rule); }
+.ud-langs { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 8px 12px; border-bottom: 0.5px solid var(--s1-rule); }
+.ud-langs__name { font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); }
+.ud-langs__name:lang(zh) { font-size: 12px; letter-spacing: 0; text-transform: none; }
 .ud-phone { display: grid; gap: 12px; max-width: 360px; padding: 0 16px 16px; border: 0.5px dashed var(--rule-strong); }
 .ud-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 6px 0; border-top: 0.5px solid var(--rule); border-bottom: 0.5px solid var(--rule); }
 .ud-toolbar__end { display: flex; gap: 2px; }

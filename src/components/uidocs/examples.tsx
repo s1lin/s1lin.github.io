@@ -33,6 +33,7 @@ import { Button, buttonClass } from "@/ui/button";
 import { cn } from "@/ui/cn";
 import { Folio } from "@/ui/folio";
 import { Kicker } from "@/ui/kicker";
+import { LangSwitch } from "@/ui/lang-switch";
 import { Mark, MarkSetOut } from "@/ui/mark";
 import { Plate } from "@/ui/plate";
 import { Roundel } from "@/ui/roundel";
@@ -52,6 +53,12 @@ import { useScale } from "@/ui/use-scale";
  */
 
 const PHRASES = { prefix: "parts: ", phrases: ["roundels.", "barcodes.", "registration marks.", "one ink."] };
+
+/** English and Chinese, each written in itself, for the heads' LangSwitch. */
+const LANGS = [
+  { value: "en", label: "EN", name: "English", lang: "en" },
+  { value: "zh", label: "中文", lang: "zh-CN" },
+];
 
 /** An action's word and its icon, by lucide-react's name: the rule the Button's notes give. */
 const VERBS: [word: string, Icon: LucideIcon, name: string][] = [
@@ -79,7 +86,7 @@ const VERBS: [word: string, Icon: LucideIcon, name: string][] = [
 function Buttons() {
   const [last, setLast] = useState("");
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<"en" | "zh">("en");
+  const [lang, setLang] = useState("en");
   const say = (what: string) => () => setLast(what);
   return (
     <div className="ud-buttons">
@@ -125,14 +132,7 @@ function Buttons() {
         </Button>
       </p>
       <p className="ud-row ud-row--tight" data-size="sm">
-        <span className="ud-pair" role="group" aria-label="Language">
-          <Button variant="ghost" size="sm" lang="en" aria-pressed={lang === "en"} onClick={() => setLang("en")}>
-            EN
-          </Button>
-          <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>
-            中文
-          </Button>
-        </span>
+        <LangSwitch label="Language" options={LANGS} value={lang} onValueChange={setLang} />
         <Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={say("Dark mode")} />
       </p>
       <p className="ud-row" lang="zh-CN" data-size="md">
@@ -188,7 +188,7 @@ function Buttons() {
 
 /** A head: the brand and the controls on one row, centred on it; its own language and night, to try without the page's. */
 function HeadDemo({ start }: { start: "en" | "zh" }) {
-  const [lang, setLang] = useState(start);
+  const [lang, setLang] = useState<string>(start);
   const [night, setNight] = useState<boolean | null>(null);
   const page = useDark();
   const dark = night ?? page;
@@ -203,14 +203,7 @@ function HeadDemo({ start }: { start: "en" | "zh" }) {
       </a>
       <span className="ud-head__now">{zh ? "API 密钥" : "API keys"}</span>
       <div className="ud-head__controls">
-        <div className="ud-head__lang" role="group" aria-label={zh ? "语言" : "Language"}>
-          <Button variant="ghost" size="sm" lang="en" aria-pressed={!zh} onClick={() => setLang("en")}>
-            EN
-          </Button>
-          <Button variant="ghost" size="sm" lang="zh-CN" aria-pressed={zh} onClick={() => setLang("zh")}>
-            中文
-          </Button>
-        </div>
+        <LangSwitch label={zh ? "语言" : "Language"} options={LANGS} value={lang} onValueChange={setLang} />
         <Button variant="ghost" size="sm" icon={dark ? <Sun /> : <Moon />} aria-label={mode} title={mode} onClick={() => setNight(!dark)} />
       </div>
     </header>
@@ -422,6 +415,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.MenuDemo />;
     case "side-nav":
       return <demos.SideNavDemo />;
+    case "lang-switch":
+      return <demos.LangSwitchDemo />;
     case "tabs":
       return <demos.TabsDemo />;
     case "toast":
