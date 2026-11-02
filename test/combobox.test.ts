@@ -234,6 +234,23 @@ if (mode === "dialog") {
   });
   step(() => {
     got.foot = { box: box($("#foot").parentElement), list: box(pop("foot")), room: pop("foot").style.getPropertyValue("--s1-combobox-room") };
+    // a box emptied from the keyboard and left is cleared: the keyboard's way to choose nothing
+    $("#a").focus();
+    typeIn($("#a"), "sing");
+  });
+  step(() => {
+    key($("#a"), "Enter");
+  });
+  step(() => {
+    got.rechosen = state("a").value;
+    typeIn($("#a"), "");
+  });
+  step(() => {
+    got.logAt = log.length;
+    $("#else").focus();
+  });
+  step(() => {
+    got.emptied = { ...state("a"), said: log.slice(got.logAt) };
   });
 }
 
@@ -313,6 +330,10 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   // at the window's foot: above the box, capped by its room
   assert.equal(got.foot.list.bottom, got.foot.box.top - 4);
   assert.match(got.foot.room, /^\d+px$/);
+  // emptied from the keyboard and left: no value (but the words of something matched stay theirs, above)
+  assert.equal(got.rechosen, "Singapore");
+  assert.deepEqual([got.emptied.value, got.emptied.expanded], ["", "false"]);
+  assert.ok(got.emptied.said.includes("a:null"), `cleared: ${JSON.stringify(got.emptied.said)}`);
 
   // in a Dialog: Esc closes the list and keeps the dialog open
   const dialog = run("dialog");

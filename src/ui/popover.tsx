@@ -99,11 +99,19 @@ export function Popover({ trigger, children, open: given, defaultOpen = false, o
       const to = e.relatedTarget as Node | null;
       if (to && !p.contains(to) && !anchor()?.contains(to)) set(false, "outside");
     };
+    // content that grows or shrinks while it is open (a section unfolding, a picture arriving) is placed again, focus
+    // left where it is: on a change to what it holds, and on a change of its size
+    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => place()) : null;
+    grows?.observe(p);
+    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => place()) : null;
+    changes?.observe(p, { childList: true, subtree: true, characterData: true });
     document.addEventListener("pointerdown", outside, true);
     p.addEventListener("focusout", away);
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
     return () => {
+      grows?.disconnect();
+      changes?.disconnect();
       document.removeEventListener("pointerdown", outside, true);
       p.removeEventListener("focusout", away);
       window.removeEventListener("resize", place);

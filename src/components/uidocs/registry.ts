@@ -814,7 +814,7 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
       { name: "listClassName", type: "string", desc: "Added to the list." },
     ],
     notes: [
-      { label: "Keyboard", text: "Typing opens the list on its first option; ↓ and ↑ open it (on the chosen option, if it is there) and move through it, wrapping; Home and End stay in the text; Enter chooses; Esc closes the list, and a second Esc puts back the chosen item's words; Tab closes it and moves on. The two buttons are left out of the Tab order; their keys are these." },
+      { label: "Keyboard", text: "Typing opens the list on its first option; ↓ and ↑ open it (on the chosen option, if it is there) and move through it, wrapping; Home and End stay in the text; Enter chooses; Esc closes the list, and a second Esc puts back the chosen item's words; Tab closes it and moves on. Leaving the box puts the chosen item's words back, unless the box was emptied: then it is cleared, the keyboard's × (onValueChange(null)). The two buttons are left out of the Tab order; their keys are these." },
       { label: "Accessibility", text: "The box is a `combobox` with `aria-autocomplete=\"list\"` and `aria-expanded`; the list a `listbox` of `option`s in `group`s named by their headings; focus stays in the box and the option under the arrows is its `aria-activedescendant`, the chosen one `aria-selected` with a tick. In a Field it takes the label, the hint and the error from it. What an empty list says is a status, read as it changes." },
       { label: "Phone", text: "The list is in the top layer, at least as wide as the box, kept 8px inside the screen, above the box when there is no room under it, and never taller than its room (`--s1-combobox-room`) or 320px." },
       { label: "Chinese", text: "A group's heading is set at 12px and 500, never tracked or cased." },
@@ -1597,7 +1597,7 @@ const LANGS = [
     item: "popover",
     exports: ["Popover", "PopoverProps"],
     summary:
-      "A panel that opens beside its button, over the page but not modal: a short form, a date picker, a list to choose from, help for the controls. It sits in the top layer (the Popover API), so no frame clips it; it opens on its side, or the other when there is no room, and is never taller than the room it has. Esc, a press outside or focus moving elsewhere closes it.",
+      "A panel that opens beside its button, over the page but not modal: a short form, a date picker, a list to choose from, help for the controls. It sits in the top layer (the Popover API), so no frame clips it; it opens on its side, or the other when there is no room, is never taller than the room it has, and is placed again when what it holds grows or shrinks (a section unfolding). Esc, a press outside or focus moving elsewhere closes it.",
     example: "live",
     usage: `import { Popover } from "@/components/s1lin/popover";
 

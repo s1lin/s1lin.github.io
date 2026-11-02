@@ -121,6 +121,17 @@ export function Combobox<T>({
     setDraft(null);
     if (draft !== chosen) onInputChange?.(chosen);
   }
+  // Leaving the box: words that match nothing chosen give way to the chosen item's, but a box left empty is a choice of
+  // nothing (the keyboard's way to clear it, as × is the pointer's).
+  function leave() {
+    if (draft !== null && draft.trim() === "" && value != null) {
+      setDraft(null);
+      onValueChange(null);
+      onInputChange?.("");
+      return;
+    }
+    restore();
+  }
 
   useLayoutEffect(() => {
     const p = pop.current;
@@ -143,9 +154,16 @@ export function Combobox<T>({
       p.style.top = `${Math.round(Math.max(8, up ? b.top - 4 - h : b.bottom + 4))}px`;
     };
     place();
+    // a list that grows or shrinks as it filters is placed again, above the box when it no longer fits under it
+    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => place()) : null;
+    grows?.observe(p);
+    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => place()) : null;
+    changes?.observe(p, { childList: true, subtree: true, characterData: true });
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
     return () => {
+      grows?.disconnect();
+      changes?.disconnect();
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
       if (canPop(p) && p.matches(":popover-open")) p.hidePopover();
@@ -230,7 +248,7 @@ export function Combobox<T>({
           onKeyDown={onKeyDown}
           onBlur={() => {
             setOpen(false);
-            restore();
+            leave();
           }}
         />
         {clearable && (

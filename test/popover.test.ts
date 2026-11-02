@@ -104,6 +104,15 @@ function InDialog() {
   );
 }
 const tall = Array.from({ length: 40 }, (_, i) => <p key={i} style={{ margin: 0 }}>Line {i}</p>);
+function Grows() {
+  const [more, setMore] = useState(false);
+  return (
+    <Popover trigger={<button id="grow" style={{ width: 120, height: 30 }}>Grow</button>} side="top" label="Grow">
+      <button id="more" onClick={() => setMore(true)}>More</button>
+      {more && Array.from({ length: 6 }, (_, i) => <p key={i} style={{ margin: 0 }}>More {i}</p>)}
+    </Popover>
+  );
+}
 const root = createRoot(document.getElementById("app"));
 const mode = location.search.slice(1);
 flushSync(() =>
@@ -127,6 +136,7 @@ flushSync(() =>
         <Popover trigger={<button id="tall">Tall</button>} label="Tall">{tall}</Popover>
       </div>
       <div style={{ position: "absolute", top: 120, left: 40 }}><Kept /></div>
+      <div style={{ position: "absolute", bottom: 120, left: 900 }}><Grows /></div>
       <div id="night" data-theme="dark" style={{ position: "absolute", top: 200, left: 400 }}>
         <Popover trigger={<button id="dark">Night</button>} label="Night"><p style={{ margin: 0 }}>Words</p></Popover>
       </div>
@@ -216,6 +226,17 @@ if (mode === "dialog") {
   });
   step(() => {
     got.tabbedAway = { expanded: $("#start").getAttribute("aria-expanded"), focus: document.activeElement.id };
+    $("#grow").click();
+  });
+  step(() => {
+    got.grow = { trigger: box($("#grow")), before: box(panelOf("grow")) };
+    $("#more").focus();
+    $("#more").click();
+  });
+  step(() => {
+    // content that grew while it was open: placed again above its trigger, focus where it was
+    got.grow.after = box(panelOf("grow"));
+    got.grow.focus = document.activeElement.id;
   });
 }
 
@@ -303,6 +324,11 @@ test("Popover in a browser: the top layer, placed on its side or the other, line
   assert.equal(got.night.look.color, "rgb(237, 237, 237)");
   // focus gone elsewhere on the page: closed, focus where it went
   assert.deepEqual(got.tabbedAway, { expanded: "false", focus: "after" });
+  // content that grows while open: placed again on its side, its foot still 6px above the trigger
+  assert.equal(got.grow.before.bottom, got.grow.trigger.top - 6);
+  assert.ok(got.grow.after.height > got.grow.before.height, "it grew");
+  assert.equal(got.grow.after.bottom, got.grow.trigger.top - 6);
+  assert.equal(got.grow.focus, "more");
 
   // in a Dialog: Esc closes the popover and keeps the dialog open, focus back on the popover's trigger
   const dialog = run("dialog");
