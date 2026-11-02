@@ -37,7 +37,7 @@ import { Input } from "@/ui/input";
 import { LangSwitch, type LangSwitchLinkProps } from "@/ui/lang-switch";
 import { Menu } from "@/ui/menu";
 import { Meter } from "@/ui/meter";
-import { MetroGlyph, MetroMap, metroHue, type MetroAxis, type MetroColour, type MetroFare, type MetroInterchange, type MetroLine, type MetroZone } from "@/ui/metro-map";
+import { MetroGlyph, MetroMap, metroHue, type MetroAxis, type MetroColour, type MetroFare, type MetroInterchange, type MetroLine, type MetroStatus, type MetroZone } from "@/ui/metro-map";
 import { Notice } from "@/ui/notice";
 import { Pagination } from "@/ui/pagination";
 import { Panel } from "@/ui/panel";
@@ -479,12 +479,12 @@ type Family = { id: string; name: string; colour: MetroColour; fares: Fare[] };
 
 /** Made-up prices by family, in the order an app keeps its lines (USD per 1M tokens). Output 0: priced on input. */
 const FAMILIES: Family[] = [
-  { id: "gpt", name: "GPT", colour: { light: "#0e7251", dark: "#5ad1a3" }, fares: [["gpt-5.5-nano", 0.05, 0.4], ["gpt-5.5-mini", 0.25, 2], ["gpt-5.5", 1.25, 10], ["gpt-5.5-codex", 1.25, 10], ["gpt-realtime-2", 4, 16]] },
-  { id: "claude", name: "Claude", colour: { light: "#a24b09", dark: "#f0a16a" }, fares: [["claude-haiku-5", 1, 5], ["claude-sonnet-5", 3, 15], ["claude-opus-5", 15, 75]] },
-  { id: "gemini", name: "Gemini", colour: { light: "#1a5fd0", dark: "#86b3ff" }, fares: [["gemini-embedding-2", 0.15, 0], ["gemini-3.8-flash-lite", 0.1, 0.4], ["gemini-3.8-flash", 0.3, 2.5], ["gemini-3.8-pro", 2, 12]] },
-  { id: "deepseek", name: "DeepSeek", colour: { light: "#016a77", dark: "#2b919f" }, fares: [["deepseek-v4", 0.56, 1.68], ["deepseek-v4-pro", 1.1, 4.4]] },
+  { id: "gpt", name: "GPT", colour: { light: "#156d8b", dark: "#4ec7dc" }, fares: [["gpt-5.5-nano", 0.05, 0.4], ["gpt-5.5-mini", 0.25, 2], ["gpt-5.5", 1.25, 10], ["gpt-5.5-codex", 1.25, 10], ["gpt-realtime-2", 4, 16]] },
+  { id: "claude", name: "Claude", colour: { light: "#732c04", dark: "#f0a16a" }, fares: [["claude-haiku-5", 1, 5], ["claude-sonnet-5", 3, 15], ["claude-opus-5", 15, 75]] },
+  { id: "gemini", name: "Gemini", colour: { light: "#c21919", dark: "#f44a37" }, fares: [["gemini-embedding-2", 0.15, 0], ["gemini-3.8-flash-lite", 0.1, 0.4], ["gemini-3.8-flash", 0.3, 2.5], ["gemini-3.8-pro", 2, 12]] },
+  { id: "deepseek", name: "DeepSeek", colour: { light: "#0126ac", dark: "#2896f5" }, fares: [["deepseek-v4", 0.56, 1.68], ["deepseek-v4-pro", 1.1, 4.4]] },
   { id: "kimi", name: "Kimi", colour: { light: "#b0286c", dark: "#f58fc2" }, fares: [["kimi-k3", 0.6, 2.5]] },
-  { id: "glm", name: "GLM", colour: { light: "#312b88", dark: "#6676fe" }, fares: [["glm-5", 0.6, 2.2]] },
+  { id: "glm", name: "GLM", colour: { light: "#1e7424", dark: "#6ece6f" }, fares: [["glm-5", 0.6, 2.2]] },
   { id: "grok", name: "Grok", colour: { light: "#4d4d4d", dark: "#b3b3b3" }, fares: [["grok-4-3-mini", 0.3, 0.4], ["grok-4-3", 3, 15]] },
   { id: "qwen", name: "Qwen", colour: { light: "#5b48d6", dark: "#b3a4ff" }, fares: [["qwen-3.8", 0.4, 1.6], ["qwen-3.8-coder", 0.45, 1.8]] },
 ];
@@ -501,7 +501,33 @@ function zonesFor(zh: boolean): MetroZone[] {
   });
 }
 
-function fareLines(zh: boolean): MetroLine[] {
+/**
+ * Made-up last 24 hours for a station, as an app would give them: most normal; one degraded this hour, one down,
+ * and one with nothing measured yet. The words are the app's, in its language.
+ */
+function statusOf(id: string, zh: boolean): MetroStatus {
+  const hours = (bad: number[], warn: number[], none: number[]) =>
+    Array.from({ length: 24 }, (_, i) => (bad.includes(i) ? "bad" : warn.includes(i) ? "warn" : none.includes(i) ? "neutral" : "ok") as Status);
+  const said = (cells: Status[]) => {
+    const n = (t: Status) => cells.filter((c) => c === t).length;
+    return zh
+      ? `过去 24 小时：${n("ok")} 小时正常，${n("warn")} 小时降级，${n("bad")} 小时中断，${n("neutral")} 小时无数据`
+      : `last 24 hours: ${n("ok")} normal, ${n("warn")} degraded, ${n("bad")} down, ${n("neutral")} without data`;
+  };
+  if (id === "claude-sonnet-5") {
+    const cells = hours([], [9, 10, 23], [0]);
+    return { label: zh ? "降级" : "Degraded", tone: "warn", cells, summary: said(cells) };
+  }
+  if (id === "deepseek-v4-pro") {
+    const cells = hours([21, 22, 23], [20], []);
+    return { label: zh ? "中断" : "Down", tone: "bad", cells, summary: said(cells) };
+  }
+  if (id === "glm-5") return { label: zh ? "暂无状态" : "No status yet", tone: "neutral" };
+  const cells = hours([], id.length % 5 === 0 ? [14] : [], id.length % 3 === 0 ? [0, 1] : []);
+  return { label: zh ? "正常" : "Normal", tone: "ok", cells, summary: said(cells) };
+}
+
+function fareLines(zh: boolean, status = false): MetroLine[] {
   return FAMILIES.map((f) => ({
     id: f.id,
     name: f.name,
@@ -515,6 +541,7 @@ function fareLines(zh: boolean): MetroLine[] {
       value: `${price(input)} / ${price(output)}`,
       note: output ? (zh ? "输入 / 输出，每百万 token 美元" : "Input / output, USD per 1M tokens") : zh ? "按输入计价，输出免费" : "Priced on input; output is free",
       figures: { input, output },
+      status: status ? statusOf(id, zh) : undefined,
     })),
   }));
 }
@@ -579,8 +606,9 @@ export function MetroDemo() {
   const [layout, setLayout] = useState("auto");
   const [show, setShow] = useState("prices");
   const [trains, setTrains] = useState(true);
+  const [status, setStatus] = useState(true);
   const zh = lang === "zh";
-  const lines = useMemo(() => fareLines(zh), [zh]);
+  const lines = useMemo(() => fareLines(zh, status), [zh, status]);
   const zones = useMemo(() => zonesFor(zh), [zh]);
   const shown = show === "prices" || show === "order" ? lines : show === "partly" ? partly(lines) : [];
   const byPrice = show !== "order";
@@ -615,6 +643,9 @@ export function MetroDemo() {
         <Switch checked={trains} onChange={(e) => setTrains(e.target.checked)}>
           Trains
         </Switch>
+        <Switch checked={status} onChange={(e) => setStatus(e.target.checked)}>
+          Status
+        </Switch>
       </div>
       <S1Words words={zh ? METRO_ZH : {}}>
         <div lang={zh ? "zh-CN" : "en"} className="ud-min">
@@ -640,7 +671,7 @@ export function MetroDemo() {
           />
         </div>
       </S1Words>
-      <Said text="Point at a line, a stop or an interchange, or Tab through them: each stop is a link to this entry; Esc closes a tooltip." />
+      <Said text="Point at a line, a stop or an interchange, or Tab through them: each stop is a link to this entry; Esc closes a tooltip. With Status, each card ends in the station's last 24 hours (claude-sonnet-5 degraded, deepseek-v4-pro down, glm-5 not measured yet)." />
     </div>
   );
 }

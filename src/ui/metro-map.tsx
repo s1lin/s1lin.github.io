@@ -3,6 +3,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "./cn";
 import { EmptyState } from "./empty-state";
+import { Glyph, type Status } from "./glyph";
 import { VisuallyHidden } from "./visually-hidden";
 import { useS1Words, type S1WordMap } from "./words";
 import "./tokens.css";
@@ -30,6 +31,23 @@ export interface MetroStation {
   note?: string;
   /** Figures by key, for a table of the same data. */
   figures?: Record<string, MetroFigure>;
+  /** Its state, on its card under the value: a word in a tone and a strip (a service's last 24 hours, say). */
+  status?: MetroStatus;
+}
+
+/**
+ * A station's state as its card shows it: the word with its glyph, in its tone, and a strip of cells, oldest first,
+ * each in its own tone and shape. The app says what the words are; none: the card has no status line.
+ */
+export interface MetroStatus {
+  /** The word: "Normal", "Degraded", "No status yet". Said with the station's name. */
+  label: string;
+  /** Its tone, as the kit's glyph and status hue (the ink until a theme sets them); neutral by default. */
+  tone?: Status;
+  /** The strip, oldest first, a tone a cell: ok full, warn hatched and shorter, bad short, neutral (no data) an outline. */
+  cells?: Status[];
+  /** What the strip shows, said after the word: "last 24 hours: 23 normal, 1 degraded". */
+  summary?: string;
 }
 
 /** A CSS colour (a token, `var(--brand)`, a hex), or one for light and one for dark. */
@@ -148,6 +166,29 @@ export function metroHue(colour?: MetroColour): string | undefined {
 }
 
 const hueStyle = (hue: string | undefined) => (hue ? ({ "--s1-metro-hue": hue } as CSSProperties) : undefined);
+
+/** A station's status on its card: the word with its glyph in its tone, then the strip, oldest first. */
+function StatusLine({ status }: { status: MetroStatus }) {
+  const tone = status.tone ?? "neutral";
+  return (
+    <span className="s1-metro__status" data-tone={tone}>
+      <span className="s1-metro__status-word">
+        <Glyph status={tone} />
+        {status.label}
+      </span>
+      {status.cells && status.cells.length > 0 && (
+        <span className="s1-metro__strip">
+          {status.cells.map((tone, i) => (
+            <i key={i} data-tone={tone} />
+          ))}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** What a screen reader hears for a station: "label, value, status, what the strip shows". */
+const stationName = (m: MetroStation) => [m.label, m.value, m.status?.label, m.status?.summary].filter(Boolean).join(", ");
 
 /** The shapes a legend names: a stop, a square stop (priced on input), an interchange's bar. */
 export function MetroGlyph({ kind }: { kind: "stop" | "input" | "interchange" }) {
@@ -883,6 +924,7 @@ export function MetroMap({
             <span key={m.id} className="s1-metro__tip-station">
               <span className="s1-metro__tip-label">{m.label}</span>
               {m.value && <span className="s1-metro__tip-value">{m.value}</span>}
+              {m.status && <StatusLine status={m.status} />}
             </span>
           ))}
           {stop.members[0].note && <span className="s1-metro__tip-note">{stop.members[0].note}</span>}
@@ -906,6 +948,11 @@ export function MetroMap({
                     <i aria-hidden="true" />
                     <span className="s1-metro__tip-label">{m.label}</span>
                     {m.value && <span className="s1-metro__tip-value">{m.value}</span>}
+                    {m.status && (
+                      <span className="s1-metro__tip-tone" data-tone={m.status.tone ?? "neutral"}>
+                        <Glyph status={m.status.tone ?? "neutral"} />
+                      </span>
+                    )}
                   </li>
                 );
               })}
@@ -936,7 +983,7 @@ export function MetroMap({
   const station = (s: Stop) =>
     s.members.map((m, i) => {
       const t = s.texts[i];
-      const name = [m.label, m.value].filter(Boolean).join(", ");
+      const name = stationName(m);
       const on = litKeys.has(s.key);
       const body = (
         <>

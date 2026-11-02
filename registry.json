@@ -811,12 +811,13 @@
       "name": "metro-map",
       "type": "registry:ui",
       "title": "MetroMap",
-      "description": "A metro map of prices in SVG: lines from a roundel with their mark, stations at their place on a log axis with labels placed by a collision pass, fare zones behind, interchanges where lines meet at one fare (a bar behind the tracks, rings, a tag), twin stops; a strip map under 720px, nothing scrolling sideways. Trains (never under reduced motion), tooltips, and lit/onLit to light a table's rows and be lit by them.",
+      "description": "A metro map of prices in SVG: lines from a roundel with their mark, stations at their place on a log axis with labels placed by a collision pass, fare zones behind, interchanges where lines meet at one fare (a bar behind the tracks, rings, a tag), twin stops; a strip map under 720px, nothing scrolling sideways. Trains (never under reduced motion), tooltips with an optional status (a word in its tone and a strip of cells), and lit/onLit to light a table's rows and be lit by them.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/empty-state.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json",
         "https://s1lin.tokensbeat.com/r/visually-hidden.json",
         "https://s1lin.tokensbeat.com/r/words.json"
       ],
