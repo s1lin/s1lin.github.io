@@ -54,6 +54,7 @@ flushSync(() =>
       <div id="desk" style={{ width: 280 }}><SideNav label="Desk" title="Index" sections={sections} current="b" /></div>
       <div id="rail" style={{ width: 56 }}><SideNav label="Rail" title="Aha" rail sections={sections} current="c1" /></div>
       <div id="phone"><SideNav label="Phone" title="Index" sheet={900} sections={sections} current="b" onNavigate={(t) => chosen.push(t.id)} /></div>
+      <div id="fold" style={{ width: 280 }}><SideNav label="Fold" sections={[{ id: "shut", title: "Video", collapsible: true, action: <button type="button">+</button>, items: [{ id: "v1", label: "Clip", href: "#v1" }] }, { id: "open", title: "Tasks", collapsible: true, items: [{ id: "t1", label: "Trip", href: "#t1" }] }]} defaultExpanded={["open"]} /></div>
       <div id="em"><EmptyState mark={svg} title="No friends yet" /><EmptyState size="sm" mark={svg} title="None" /></div>
     </>,
   ),
@@ -86,6 +87,9 @@ if (!phone) {
       current: style('#rail [aria-current="page"]').boxShadow,
       heads: style("#rail .s1-sidenav__head").display,
     };
+    // A folding head's sign is a hairline chevron (right folded, down open), never a "+" beside the family's own "+".
+    const sign = (open) => { const el = $('#fold .s1-sidenav__heading[aria-expanded="' + open + '"] .s1-sidenav__sign'); const b = getComputedStyle(el, "::before"); return { bg: getComputedStyle(el).backgroundImage, lines: [b.borderRightWidth, b.borderBottomWidth, b.borderTopWidth, b.borderLeftWidth], turn: b.transform }; };
+    got.fold = { shut: sign("false"), open: sign("true") };
     got.mark = { md: box("#em .s1-empty--md .s1-empty__own"), sm: box("#em .s1-empty--sm .s1-empty__own"), color: style("#em .s1-empty__own").color, ink2: rgb(getComputedStyle(document.documentElement).getPropertyValue("--s1-ink-2").trim()), frame: !!$("#em .s1-empty__mark") };
   });
 } else {
@@ -94,7 +98,7 @@ if (!phone) {
   const state = () => ({ open: bar().getAttribute("aria-expanded"), panel: getComputedStyle(panel()).display, position: getComputedStyle(panel()).position, scrim: !!$("#phone .s1-sidenav__scrim"), focus: document.activeElement === bar() ? "bar" : panel().contains(document.activeElement) ? "sheet:" + (document.activeElement.getAttribute("aria-current") ?? document.activeElement.textContent.trim()) : document.activeElement.tagName });
   const key = (k, shift = false) => document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: k, shiftKey: shift, bubbles: true, cancelable: true }));
   const focusables = () => [...panel().querySelectorAll("a[href], button:not([disabled])")];
-  step(() => { got.closed = { bar: getComputedStyle(bar()).display, ...state() }; bar().click(); });
+  step(() => { got.closed = { bar: getComputedStyle(bar()).display, barTurn: getComputedStyle($("#phone .s1-sidenav__sign"), "::before").transform, ...state() }; bar().click(); });
   step(() => { got.opened = state(); const all = focusables(); all[all.length - 1].focus(); key("Tab"); });
   step(() => { got.tabFromLast = state().focus; key("Tab", true); });
   step(() => { got.shiftTabFromBar = state().focus === "bar" ? "bar" : document.activeElement === focusables().at(-1) ? "last" : state().focus; key("Escape"); });
@@ -160,6 +164,13 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
   assert.match(desk.rail.current, /2px 0px 0px 0px inset/);
   assert.equal(desk.rail.heads, "none");
   // EmptyState's mark: 56px, 40px at sm, in the second ink, and no frame
+  // rotate(-45deg) points right, rotate(45deg) down: the matrices Chrome reports for them
+  const turn = (deg) => { const r = (deg * Math.PI) / 180, c = Math.cos(r).toFixed(6), n = Math.sin(r).toFixed(6), m = (-Math.sin(r)).toFixed(6); return `matrix(${c}, ${n}, ${m}, ${c}, 0, 0)`.replace(/-0\.000000/g, "0.000000"); };
+  for (const [k, deg] of [["shut", -45], ["open", 45]]) {
+    assert.equal(desk.fold[k].bg, "none", `${k}: no "+" or "−" drawn on the sign`);
+    assert.deepEqual(desk.fold[k].lines, ["1px", "1px", "0px", "0px"], `${k}: two hairlines`);
+    assert.equal(desk.fold[k].turn.replace(/(\d\.\d{6})\d*/g, "$1"), turn(deg), `${k}: the chevron points ${deg < 0 ? "right" : "down"}`);
+  }
   assert.deepEqual(desk.mark.md, [56, 56]);
   assert.deepEqual(desk.mark.sm, [40, 40]);
   assert.equal(desk.mark.color, desk.mark.ink2);
@@ -170,6 +181,7 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
   assert.equal(phone.closed.bar, "flex", "a phone: the bar");
   assert.equal(phone.closed.panel, "none", "the tree behind it");
   assert.equal(phone.closed.open, "false");
+  assert.equal(phone.closed.barTurn, "matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)", "the bar's chevron points down while the sheet is shut");
   assert.deepEqual([phone.opened.open, phone.opened.panel, phone.opened.position, phone.opened.scrim], ["true", "block", "absolute", true], "pressed: the sheet over the page, the scrim behind it");
   assert.equal(phone.opened.focus, "sheet:page", "focus goes to the current item");
   assert.equal(phone.tabFromLast, "bar", "Tab from the last goes round to the bar");
