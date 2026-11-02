@@ -7,8 +7,9 @@
  * list, a number's arrows). Set any of them on :root, or on an element for its
  * part of the page.
  *
- * Status hues are left unset: an app's theme may set them (see the end of the
- * :root block), and until it does every status is drawn in the ink.
+ * Status hues and the chosen fill are left unset: an app's theme may set them
+ * (see the end of the :root block), and until it does every status is drawn in
+ * the ink and a chosen option in reverse.
  *
  * Night: the system's dark scheme, unless the root says light (data-theme,
  * class or Kumo's data-mode); or data-theme="dark", class="dark" or
@@ -66,7 +67,15 @@
          --s1-info: unset, the ink    --s1-info-tint: unset, the paper
          --s1-on-status: unset, the paper (the words on a solid status fill)
        The hue is the line, the shape and a meter's fill; the tint is a badge's
-       ground; the shapes stay, so a status never rests on colour alone. */
+       ground; the shapes stay, so a status never rests on colour alone.
+
+       The chosen option of a filled switcher (a segmented row, a card, a
+       pressed ghost button or chip), unset on purpose too, so it stays in
+       reverse until a theme gives it its brand:
+         --s1-chosen:    unset, the ink   (the fill under the chosen option)
+         --s1-on-chosen: unset, the paper (its words: AA on that fill)
+       A switcher never has a line round it; the fill and the weight say
+       which one is chosen (owner, 2026-11-02). */
   }
 
   @media (prefers-color-scheme: dark) {

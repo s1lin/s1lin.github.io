@@ -229,10 +229,15 @@ test("RadioGroup: a radiogroup fieldset; one name; each radio named by its label
   const desc = attr(radios[0], /.*/, "aria-describedby")!;
   assert.match(m, new RegExp(`id="${desc}">the least</span>`));
   assert.equal(attr(radios[1], /.*/, "aria-describedby"), undefined);
-  // quiet, its legend out of sight: still a radiogroup named by the legend, which stays in the page
-  const q = html(h(RadioGroup, { legend: "Language", variant: "segmented", quiet: true, hideLegend: true, defaultValue: "en", options: [{ value: "en", label: "EN" }, { value: "zh", label: "中文" }] }));
-  assert.equal(attr(q, fs, "class"), "s1-fieldset s1-radios s1-radios--segmented s1-radios--quiet s1-radios--legend-hidden");
-  assert.match(q, /<legend class="s1-field__label">Language<\/legend>/);
+  // dots, its legend out of sight: still a radiogroup named by the legend, which stays in the page
+  const views = [{ value: "chart", label: "Chart" }, { value: "table", label: "Table" }];
+  const q = html(h(RadioGroup, { legend: "View", variant: "dots", hideLegend: true, defaultValue: "chart", options: views }));
+  assert.equal(attr(q, fs, "class"), "s1-fieldset s1-radios s1-radios--dots s1-radios--legend-hidden");
+  assert.equal(attr(q, fs, "role"), "radiogroup");
+  assert.match(q, /<legend class="s1-field__label">View<\/legend>/);
+  // quiet, kept for the code written for it, is dots, whatever the variant beside it
+  const quiet = html(h(RadioGroup, { legend: "View", variant: "segmented", quiet: true, defaultValue: "chart", options: views }));
+  assert.equal(attr(quiet, fs, "class"), "s1-fieldset s1-radios s1-radios--dots");
 });
 
 test("Table: caption, column and row headers, aria-sort, an empty row across, rows of bars and aria-busy while loading", async () => {

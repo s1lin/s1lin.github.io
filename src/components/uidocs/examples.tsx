@@ -285,6 +285,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.WordsDemo />;
     case "head":
       return <Heads />;
+    case "switchers":
+      return <demos.SwitchersDemo />;
 
     case "button":
       return <Buttons />;
