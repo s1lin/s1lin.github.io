@@ -927,6 +927,33 @@
       ]
     },
     {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "A panel that opens beside its button, not modal, in the top layer: a short form, a picker, help; on its side or the other when there is no room, never taller than its room; Esc, a press outside or focus elsewhere closes it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/popover.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/popover.tsx"
+        },
+        {
+          "path": "src/ui/popover.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/popover.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
       "name": "tabs",
       "type": "registry:ui",
       "title": "Tabs",
