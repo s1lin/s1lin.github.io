@@ -316,6 +316,10 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-p { margin: 0; max-width: 40em; }
 .ud-stack { display: grid; gap: 14px; justify-items: start; }
 .ud-stack--wide { justify-items: stretch; gap: 22px; }
+/* a grid item around a part that scrolls in its own frame: never wider than the column */
+.ud-min { min-width: 0; }
+/* a made-up mark in a Timetable pill's roundel: a letter */
+.ud-letter { font: 600 9px/1 var(--s1-font-mono); }
 .ud-indent { padding-left: 28px; }
 .ud-form { display: grid; gap: 20px; max-width: 34rem; }
 .ud-form .ud-row { gap: 10px; }

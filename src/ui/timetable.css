@@ -1,0 +1,60 @@
+/*
+ * Timetable (timetable.tsx): the kit's Table in a MetroMap's hand, a station's departures board. A group's band is a
+ * wash of its line's colour (--s1-metro-hue on its <tbody>) with the line's pill; each row's header cell starts with
+ * its station on a rail in the row's colour, joined to the rows above and below; figures sit at the end of their
+ * cells in mono with one width. A lit row (data-lit, from the map) takes a wash of its colour and fills its ring, as
+ * a row the map's price comes from (data-fare="here") does. On its board it is the night's ink on the night's paper.
+ */
+@layer components {
+  .s1-timetable { min-width: 0; color-scheme: var(--s1-scheme); }
+  .s1-timetable--board { box-sizing: border-box; padding: 16px 18px 8px; background: var(--s1-paper); color: var(--s1-ink); border-radius: 2px; }
+  .s1-timetable--board .s1-table__caption { color: var(--s1-ink-2); }
+  .s1-timetable .s1-table__num, .s1-timetable td.s1-table__num { font-variant-numeric: tabular-nums lining-nums; }
+
+  /* the band: a wash of the line's colour, its pill first */
+  .s1-timetable .s1-table__ghead > th { background: color-mix(in srgb, var(--s1-metro-hue, var(--s1-ink)) 7%, var(--s1-paper)); }
+  .s1-timetable tbody tr.s1-table__ghead:hover > * { background: color-mix(in srgb, var(--s1-metro-hue, var(--s1-ink)) 10%, var(--s1-paper)); }
+  .s1-timetable .s1-table__group[data-open] .s1-table__ghead > th { border-bottom-color: var(--s1-rule-strong); }
+  .s1-timetable__pill {
+    display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 20px; padding: 0 10px; border-radius: 10px;
+    background: var(--s1-metro-hue, var(--s1-ink)); color: var(--s1-paper);
+    font: 500 10.5px/1 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+  }
+  .s1-timetable__pill[data-marked] { padding-left: 3px; }
+  .s1-timetable__pill-mark {
+    display: inline-grid; place-items: center; box-sizing: border-box; width: 15px; height: 15px; padding: 1.5px; border-radius: 50%;
+    background: var(--s1-paper); color: var(--s1-ink);
+  }
+  .s1-timetable__pill-mark > svg { display: block; width: 100%; height: 100%; }
+
+  /* a row: its station on the rail, the track the cell's whole height (the cell holds it), a wash when it is lit */
+  .s1-timetable tbody th[scope="row"]:has(.s1-timetable__rail) { position: relative; }
+  .s1-timetable__rail { display: block; flex: none; width: 14px; min-height: 14px; }
+  .s1-timetable__track { position: absolute; top: 0; bottom: -1px; width: 2.5px; margin-left: 5.75px; background: var(--s1-metro-hue, var(--s1-ink)); }
+  .s1-timetable__rail[data-stop="period"] .s1-timetable__track {
+    width: 1.5px; margin-left: 6.25px; background: repeating-linear-gradient(to bottom, var(--s1-metro-hue, var(--s1-ink)) 0 1.5px, transparent 1.5px 4.5px);
+  }
+  .s1-timetable__ring { position: relative; display: block; width: 14px; height: 14px; margin-top: 2px; overflow: visible; }
+  .s1-timetable__stop { fill: var(--s1-paper); stroke: var(--s1-metro-hue, var(--s1-ink)); stroke-width: 2.5; transition: fill 0.15s ease; }
+  .s1-timetable__rail[data-stop="here"] .s1-timetable__stop,
+  .s1-timetable tr:is([data-lit], [data-fare="here"]) .s1-timetable__stop { fill: var(--s1-metro-hue, var(--s1-ink)); }
+  .s1-timetable tbody tr:is(:hover, :focus-within, [data-lit]):not(.s1-table__ghead) > * { background: color-mix(in srgb, var(--s1-metro-hue, var(--s1-ink)) 8%, var(--s1-paper)); }
+  .s1-timetable tbody tr[data-lit][data-fare="here"] > * { background: color-mix(in srgb, var(--s1-metro-hue, var(--s1-ink)) 14%, var(--s1-paper)); }
+  .s1-timetable tbody tr[data-lit][data-fare="here"] .s1-timetable__stop { stroke-width: 3.5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s1-timetable__stop { transition: none; }
+  }
+  @media (forced-colors: active) {
+    .s1-timetable__pill { border: 1px solid CanvasText; }
+    .s1-timetable__rail { forced-color-adjust: none; }
+    .s1-timetable__track { background: CanvasText; }
+    .s1-timetable__rail[data-stop="period"] .s1-timetable__track { background: repeating-linear-gradient(to bottom, CanvasText 0 1.5px, transparent 1.5px 4.5px); }
+    .s1-timetable__stop { stroke: CanvasText; }
+    .s1-timetable__stop { fill: Canvas; }
+    .s1-timetable tr:is([data-lit], [data-fare="here"]) .s1-timetable__stop, .s1-timetable__rail[data-stop="here"] .s1-timetable__stop { fill: Highlight; }
+  }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-timetable__pill:lang(zh), .s1-timetable__pill [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+}

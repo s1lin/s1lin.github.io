@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import {
   Ban,
   BookOpen,
@@ -37,6 +37,7 @@ import { Input } from "@/ui/input";
 import { LangSwitch, type LangSwitchLinkProps } from "@/ui/lang-switch";
 import { Menu } from "@/ui/menu";
 import { Meter } from "@/ui/meter";
+import { MetroGlyph, MetroMap, metroHue, type MetroAxis, type MetroColour, type MetroFare, type MetroInterchange, type MetroLine, type MetroZone } from "@/ui/metro-map";
 import { Notice } from "@/ui/notice";
 import { Pagination } from "@/ui/pagination";
 import { Panel } from "@/ui/panel";
@@ -52,6 +53,7 @@ import { Switch } from "@/ui/switch";
 import { Table, type Column, type Sort } from "@/ui/table";
 import { Tabs } from "@/ui/tabs";
 import { Textarea } from "@/ui/textarea";
+import { Timetable, TimetableMark, TimetableRail } from "@/ui/timetable";
 import { toast } from "@/ui/toast";
 import { useOverflow } from "@/ui/use-overflow";
 import { VisuallyHidden } from "@/ui/visually-hidden";
@@ -465,6 +467,259 @@ export function TableDemo() {
       />
       <Pagination page={page} pageCount={12} onPageChange={setPage} summary={`${(page - 1) * 5 + 1}–${page * 5} of 58`} />
       <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Sort by a header, open a row's ⋯, change the page; on a phone the table scrolls in its frame."} />
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ metro
+
+type Fare = [id: string, input: number, output: number];
+type Family = { id: string; name: string; colour: MetroColour; fares: Fare[] };
+
+/** Made-up prices by family, in the order an app keeps its lines (USD per 1M tokens). Output 0: priced on input. */
+const FAMILIES: Family[] = [
+  { id: "gpt", name: "GPT", colour: { light: "#0e7251", dark: "#5ad1a3" }, fares: [["gpt-5.5-nano", 0.05, 0.4], ["gpt-5.5-mini", 0.25, 2], ["gpt-5.5", 1.25, 10], ["gpt-5.5-codex", 1.25, 10], ["gpt-realtime-2", 4, 16]] },
+  { id: "claude", name: "Claude", colour: { light: "#a24b09", dark: "#f0a16a" }, fares: [["claude-haiku-5", 1, 5], ["claude-sonnet-5", 3, 15], ["claude-opus-5", 15, 75]] },
+  { id: "gemini", name: "Gemini", colour: { light: "#1a5fd0", dark: "#86b3ff" }, fares: [["gemini-embedding-2", 0.15, 0], ["gemini-3.8-flash-lite", 0.1, 0.4], ["gemini-3.8-flash", 0.3, 2.5], ["gemini-3.8-pro", 2, 12]] },
+  { id: "deepseek", name: "DeepSeek", colour: { light: "#016a77", dark: "#2b919f" }, fares: [["deepseek-v4", 0.56, 1.68], ["deepseek-v4-pro", 1.1, 4.4]] },
+  { id: "kimi", name: "Kimi", colour: { light: "#b0286c", dark: "#f58fc2" }, fares: [["kimi-k3", 0.6, 2.5]] },
+  { id: "glm", name: "GLM", colour: { light: "#312b88", dark: "#6676fe" }, fares: [["glm-5", 0.6, 2.2]] },
+  { id: "grok", name: "Grok", colour: { light: "#4d4d4d", dark: "#b3b3b3" }, fares: [["grok-4-3-mini", 0.3, 0.4], ["grok-4-3", 3, 15]] },
+  { id: "qwen", name: "Qwen", colour: { light: "#5b48d6", dark: "#b3a4ff" }, fares: [["qwen-3.8", 0.4, 1.6], ["qwen-3.8-coder", 0.45, 1.8]] },
+];
+
+/** Two decimals, or as many as the price has: 0.05, 1.25, 0.125. */
+const price = (n: number) => n.toFixed(Math.max(2, (String(n).split(".")[1] ?? "").length));
+const dollars = (v: number) => `$${v < 1 ? price(v) : String(Number(v.toPrecision(3)))}`;
+const ZONE_EDGES: [number | null, number | null][] = [[null, 0.5], [0.5, 2], [2, 8], [8, 20], [20, null]];
+
+function zonesFor(zh: boolean): MetroZone[] {
+  return ZONE_EDGES.map(([from, to], i) => {
+    const range = from == null ? (zh ? `低于 ${dollars(to!)}` : `under ${dollars(to!)}`) : to == null ? (zh ? `${dollars(from)} 起` : `${dollars(from)} and up`) : `${dollars(from)}–${String(to)}`;
+    return { id: `z${i + 1}`, from, to, name: zh ? `${i + 1} 区 · ${range}` : `Zone ${i + 1} · ${range}` };
+  });
+}
+
+function fareLines(zh: boolean): MetroLine[] {
+  return FAMILIES.map((f) => ({
+    id: f.id,
+    name: f.name,
+    colour: f.colour,
+    stations: f.fares.map(([id, input, output]) => ({
+      id,
+      label: id,
+      href: "#metro-map",
+      x: output || input,
+      kind: output ? ("stop" as const) : ("input" as const),
+      value: `${price(input)} / ${price(output)}`,
+      note: output ? (zh ? "输入 / 输出，每百万 token 美元" : "Input / output, USD per 1M tokens") : zh ? "按输入计价，输出免费" : "Priced on input; output is free",
+      figures: { input, output },
+    })),
+  }));
+}
+
+/** Some stations without a price (not drawn), a line without stations (left off), fewer lines. */
+const partly = (lines: MetroLine[]): MetroLine[] => [
+  { ...lines[0], stations: lines[0].stations.map((s, i) => (i % 2 ? { ...s, x: null } : s)) },
+  { ...lines[1], stations: [] },
+  lines[3],
+  lines[6],
+];
+
+const AXIS_EN: MetroAxis = { ticks: [0.1, 0.5, 1, 2, 5, 10, 20, 50], format: dollars, cue: { start: "← Cheaper", end: "Pricier →" } };
+const AXIS_ZH: MetroAxis = { ...AXIS_EN, cue: { start: "← 更便宜", end: "更贵 →" } };
+const fareTag = (f: MetroFare) => (f.exact ? `$${price(f.min)}` : `$${price(f.min)}–${price(f.max)}`);
+const INTER_EN: MetroInterchange = { label: fareTag, tip: "Same price: change here." };
+const INTER_ZH: MetroInterchange = { label: fareTag, tip: "同价，可在此换乘。", announce: (s, fare) => `同价：${s.map((x) => x.label).join("、")}，${fare}` };
+
+/** The kit's words in Chinese for the map and the board, as an app would give them. */
+const METRO_ZH: Partial<S1WordMap> = {
+  sameFare: "同价",
+  and: " 和 ",
+  empty: "这里还没有内容。",
+  loading: "加载中",
+  scrollHint: "左右滑动查看更多",
+  sortAscending: "升序",
+  sortDescending: "降序",
+  sortNone: "排序",
+  expandAll: "全部展开",
+  collapseAll: "全部收起",
+};
+
+function Language({ lang, onChange }: { lang: string; onChange: (v: string) => void }) {
+  return (
+    <RadioGroup
+      legend="Language"
+      variant="segmented"
+      value={lang}
+      onValueChange={onChange}
+      options={[
+        { value: "en", label: "English" },
+        { value: "zh", label: <span lang="zh-CN">中文</span> },
+      ]}
+    />
+  );
+}
+
+function MapLegend({ zh }: { zh: boolean }) {
+  return zh ? (
+    <>
+      美元 / 每百万 token · 对数刻度 · <MetroGlyph kind="stop" />站 · <MetroGlyph kind="input" />按输入计价 · <MetroGlyph kind="interchange" />同价换乘
+    </>
+  ) : (
+    <>
+      USD per 1M tokens · log scale · <MetroGlyph kind="stop" />stop · <MetroGlyph kind="input" />priced on input · <MetroGlyph kind="interchange" />same fare
+    </>
+  );
+}
+
+export function MetroDemo() {
+  const [lang, setLang] = useState("en");
+  const [layout, setLayout] = useState("auto");
+  const [show, setShow] = useState("prices");
+  const [trains, setTrains] = useState(true);
+  const zh = lang === "zh";
+  const lines = useMemo(() => fareLines(zh), [zh]);
+  const zones = useMemo(() => zonesFor(zh), [zh]);
+  const shown = show === "prices" || show === "order" ? lines : show === "partly" ? partly(lines) : [];
+  const byPrice = show !== "order";
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <div className="ud-row">
+        <Language lang={lang} onChange={setLang} />
+        <RadioGroup
+          legend="Layout"
+          variant="segmented"
+          value={layout}
+          onValueChange={setLayout}
+          options={[
+            { value: "auto", label: "Auto" },
+            { value: "across", label: "Across" },
+            { value: "down", label: "Down" },
+          ]}
+        />
+        <RadioGroup
+          legend="Show"
+          variant="segmented"
+          value={show}
+          onValueChange={setShow}
+          options={[
+            { value: "prices", label: "By price" },
+            { value: "order", label: "In order" },
+            { value: "partly", label: "Partly" },
+            { value: "loading", label: "Loading" },
+            { value: "empty", label: "Empty" },
+          ]}
+        />
+        <Switch checked={trains} onChange={(e) => setTrains(e.target.checked)}>
+          Trains
+        </Switch>
+      </div>
+      <S1Words words={zh ? METRO_ZH : {}}>
+        <div lang={zh ? "zh-CN" : "en"} className="ud-min">
+          <MetroMap
+            lines={shown}
+            axis={byPrice ? (zh ? AXIS_ZH : AXIS_EN) : undefined}
+            zones={byPrice ? zones : undefined}
+            interchange={zh ? INTER_ZH : INTER_EN}
+            loading={show === "loading"}
+            layout={layout as "auto" | "across" | "down"}
+            trains={trains}
+            label={zh ? "按家族和输出价绘制的模型价格地图" : "Prices of the models, by family and output price"}
+            caption={
+              byPrice
+                ? zh
+                  ? "一个家族一条线，按输出价定位，左边便宜，右边贵。价格为示例。"
+                  : "One line a family, each stop at its output price: cheaper on the left, pricier on the right. The prices are made up."
+                : zh
+                  ? "没有坐标轴：每条线上的站按顺序等距排列。"
+                  : "No axis: each line's stations evenly spaced, in their order."
+            }
+            legend={byPrice && <MapLegend zh={zh} />}
+          />
+        </div>
+      </S1Words>
+      <Said text="Point at a line, a stop or an interchange, or Tab through them: each stop is a link to this entry; Esc closes a tooltip." />
+    </div>
+  );
+}
+
+interface FareRow {
+  family: Family;
+  id: string;
+  input: number;
+  output: number;
+}
+
+export function TimetableDemo() {
+  const [lang, setLang] = useState("en");
+  const [board, setBoard] = useState(false);
+  const [sort, setSort] = useState<Sort | null>({ key: "output", dir: "asc" });
+  const [lit, setLit] = useState<string[] | null>(null);
+  const zh = lang === "zh";
+  const lines = useMemo(() => fareLines(zh), [zh]);
+  const zones = useMemo(() => zonesFor(zh), [zh]);
+  const cheapest = useMemo(() => new Set(FAMILIES.map((f) => [...f.fares].sort((a, b) => (a[2] || a[1]) - (b[2] || b[1]))[0][0])), []);
+  const sorted = (rows: FareRow[]) =>
+    sort ? [...rows].sort((a, b) => (sort.key === "model" ? a.id.localeCompare(b.id) : a[sort.key as "input" | "output"] - b[sort.key as "input" | "output"]) * (sort.dir === "asc" ? 1 : -1)) : rows;
+  const columns: Column<FareRow>[] = [
+    { key: "model", header: zh ? "模型" : "Model", sortable: true, cell: (r) => <a href="#timetable">{r.id}</a> },
+    { key: "input", header: zh ? "输入" : "Input", numeric: true, sortable: true, cell: (r) => `$${price(r.input)}` },
+    { key: "output", header: zh ? "输出" : "Output", numeric: true, sortable: true, cell: (r) => `$${price(r.output)}` },
+  ];
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <div className="ud-row">
+        <Language lang={lang} onChange={setLang} />
+        <Switch checked={board} onChange={(e) => setBoard(e.target.checked)}>
+          Board
+        </Switch>
+      </div>
+      <S1Words words={zh ? METRO_ZH : {}}>
+        <div lang={zh ? "zh-CN" : "en"} className="ud-min ud-stack ud-stack--wide">
+          <MetroMap
+            lines={lines.slice(0, 4)}
+            axis={zh ? AXIS_ZH : AXIS_EN}
+            zones={zones}
+            interchange={zh ? INTER_ZH : INTER_EN}
+            trains={false}
+            lit={lit}
+            onLit={setLit}
+            details="timetable-demo"
+            caption={zh ? "指向一行，地图上对应的站亮起；指向一站，表格里对应的行亮起。" : "Point at a row and its station lights up; point at a station and its rows light up."}
+          />
+          <Timetable<FareRow>
+            id="timetable-demo"
+            board={board}
+            caption={zh ? "每个模型的价格，按家族" : "Prices of every model, by family"}
+            columns={columns}
+            rowKey="id"
+            sort={sort}
+            onSortChange={setSort}
+            collapsible
+            expandAll
+            rail={(r) => <TimetableRail stop={cheapest.has(r.id) ? "here" : "ring"} />}
+            rowProps={(r) => ({
+              style: { "--s1-metro-hue": metroHue(r.family.colour) } as CSSProperties,
+              "data-lit": lit?.includes(r.id) || undefined,
+              onPointerEnter: () => setLit([r.id]),
+              onPointerLeave: () => setLit(null),
+              onFocus: () => setLit([r.id]),
+              onBlur: () => setLit(null),
+            })}
+            groups={FAMILIES.slice(0, 4).map((f) => ({
+              key: f.id,
+              label: f.name,
+              mark: <TimetableMark mark={<span className="ud-letter">{f.name[0]}</span>}>{f.name}</TimetableMark>,
+              heading: <span>{zh ? `${f.name} 家族` : `The ${f.name} family`}</span>,
+              meta: zh ? `${f.fares.length} 个模型` : f.fares.length === 1 ? "1 model" : `${f.fares.length} models`,
+              rows: sorted(f.fares.map(([id, input, output]) => ({ family: f, id, input, output }))),
+              style: { "--s1-metro-hue": metroHue(f.colour) } as CSSProperties,
+            }))}
+          />
+        </div>
+      </S1Words>
+      <Said text={lit ? `Lit: ${lit.join(", ")}.` : "A filled ring is the row each line's cheapest price comes from; sort inside each band."} />
     </div>
   );
 }

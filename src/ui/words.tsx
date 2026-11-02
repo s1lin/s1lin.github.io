@@ -61,6 +61,9 @@ export interface S1WordMap {
   /** Table with collapsible groups: the button above it. */
   expandAll: string;
   collapseAll: string;
+  /** MetroMap: an interchange's heading and what a screen reader hears first ("Same fare: a, b and c, $0.40"), and the last join of a list. */
+  sameFare: string;
+  and: string;
 }
 
 /** The words in English: what every part says with no <S1Words> around it. */
@@ -102,6 +105,8 @@ export const S1_WORDS: S1WordMap = {
   actions: "Actions",
   expandAll: "Expand all",
   collapseAll: "Collapse all",
+  sameFare: "Same fare",
+  and: " and ",
 };
 
 const Words = createContext<S1WordMap>(S1_WORDS);

@@ -902,11 +902,12 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
       {
         name: "groups",
         type: "RowGroup<Row>[]",
-        desc: "Rows in groups instead: each `{ key, heading, meta?, label?, rows, empty?, className?, style? }` is a `<tbody>` under a heading row across the table. `heading` and `meta` may be functions, told whether the group is open.",
+        desc: "Rows in groups instead: each `{ key, heading, meta?, label?, mark?, rows, empty?, className?, style? }` is a `<tbody>` under a heading row across the table, `mark` before the heading (a Timetable's pill). `heading` and `meta` may be functions, told whether the group is open.",
       },
       { name: "rowKey", type: "keyof Row | (row, index) => Key", required: true, desc: "Each row's React key." },
       { name: "rowHeader", type: "string", default: "the first column", desc: "The column whose cells name their rows (`<th scope=\"row\">`)." },
       { name: "rowProps", type: "(row, index) => RowProps", desc: "Attributes for a row's `<tr>`: a class, `data-` attributes, a click that follows the row's own link." },
+      { name: "rail", type: "(row, index) => ReactNode", desc: "Drawn first in each row's header cell, beside its words: a station on a rail (a Timetable's `TimetableRail`), joined to the rows above and below." },
       { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "One row across the table when there are no rows: words, or an EmptyState. By default the `empty` of the words in force (`S1Words`)." },
       { name: "emptyMark", type: "ReactNode", desc: "A mark for the empty row (your one-colour logo): the words are then set as a small EmptyState under it. An `empty` that is already an element is shown as it is." },
       { name: "loading", type: "boolean | number", default: "false", desc: "Rows of bars in place of the rows (5, or the number given), and `aria-busy` on the table." },
@@ -1151,6 +1152,113 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
     notes: [
       { label: "Accessibility", text: "The frame, or the mark, is decorative; the title is a paragraph, not a heading, so it can sit in a table cell. Put a heading round it where it stands for a whole page." },
       { label: "Dark mode", text: "A mark drawn in `currentColor` takes the second ink of the paper it is on; an `<img>` keeps its own colours, so give it one that reads on both." },
+    ],
+  },
+  {
+    id: "metro-map",
+    name: "MetroMap",
+    group: "data",
+    item: "metro-map",
+    exports: ["MetroMap", "MetroMapProps", "MetroLine", "MetroStation", "MetroColour", "MetroFigure", "MetroZone", "MetroAxis", "MetroFare", "MetroInterchange", "MetroGlyph", "metroHue"],
+    summary:
+      "A metro map of prices, or of anything placed on one axis, in SVG. Each line starts at a roundel with its mark and runs in its colour; each station sits at its `x` on the axis (log by default), its label and value placed beside it by a collision pass, never on the track nor across another's leader, tiers further out or along the line with a leader when it is crowded. Zones lie behind as bands named at the top. Stations of different lines at one fare (within 5 %) meet at an interchange: a bar behind the tracks, a ring on each member's track and the fare on a tag, so a line that only passes crosses it unbroken; two stations of one line at one fare share a twin stop. Under 720px the axis runs down as a strip map with the words in one column: nothing scrolls sideways. Small trains ride the tracks; a line lights up under the pointer, stops and interchanges have tooltips, and `lit` / `onLit` tie it to a table beside it. Without an axis, a line's stations are evenly spaced in their order.",
+    example: "live",
+    usage: `import { MetroGlyph, MetroMap, type MetroLine, type MetroZone } from "@/components/s1lin/metro-map";
+
+const lines: MetroLine[] = [
+  { id: "gpt", name: "GPT", mark: <OpenAiLogo />, colour: "var(--c-vendor-openai)", stations: [
+    { id: "gpt-5.5-nano", label: "gpt-5.5-nano", value: "0.05 / 0.40", x: 0.4, href: "?model=gpt-5.5-nano",
+      note: "Input / output, USD per 1M tokens" },
+    { id: "text-embedding-4", label: "text-embedding-4", value: "0.02 / 0.00", x: 0.02, kind: "input" },
+  ] },
+  { id: "gemini", name: "Gemini", colour: { light: "#1a5fd0", dark: "#86b3ff" }, stations: [ … ] },
+];
+const zones: MetroZone[] = [
+  { id: "z1", from: null, to: 0.5, name: "Zone 1 · under $0.50" },
+  { id: "z2", from: 0.5, to: 2, name: "Zone 2 · $0.50–2" },
+  { id: "z3", from: 2, to: null, name: "Zone 3 · $2 and up" },
+];
+
+const [lit, setLit] = useState<string[] | null>(null);   // a table's rows light the map and back
+<MetroMap lines={lines} zones={zones} details="price-table" lit={lit} onLit={setLit}
+  axis={{ ticks: [0.1, 0.5, 2, 10], format: (v) => \`$\${v}\`, cue: { start: "← Cheaper", end: "Pricier →" } }}
+  interchange={{ label: (f) => (f.exact ? \`$\${f.min}\` : \`$\${f.min}–\${f.max}\`), tip: "Same price: change here." }}
+  caption="What you pay now, at standard hours."
+  legend={<>USD per 1M tokens · <MetroGlyph kind="stop" />stop · <MetroGlyph kind="interchange" />same fare</>} />`,
+    props: [
+      {
+        name: "lines",
+        type: "MetroLine[]",
+        required: true,
+        desc: "Each `{ id, name, mark?, colour?, stations }`, top to bottom in the order given (keep it fixed: a line that moves with the prices cannot be found). A station is `{ id, label, value?, x?, kind?, unit?, href?, note?, figures? }`: `x` its place on the axis (null or missing: not drawn), `kind: \"input\"` a square stop, `unit` what `x` is in where one map mixes units (stations meet only within one). A line with no station to draw is left off; with none at all the map shows `empty`.",
+      },
+      { name: "axis", type: "{ scale?, domain?, ticks?, format?, cue? }", desc: "Stations placed by their `x`: log by default (`scale: \"linear\"`), from the cheapest ÷ 1.7 to the dearest × 1.7 unless `domain` says; `ticks` marked under the map in `format`; `cue` the words at the two ends above it. Without an axis, each line's stations are evenly spaced in their order." },
+      { name: "zones", type: "MetroZone[]", desc: "Bands of the axis, each `{ id, from, to, name }` (null is open), shaded in turn with a dashed hairline at each edge and the name at the top (up the left edge, down a phone). A station's tooltip names its zone." },
+      { name: "interchange", type: "{ tolerance?, label?, announce?, tip? } | false", desc: "Stations of two lines or more within `tolerance` (1.05) of their run's cheapest meet at one x: a bar behind the tracks, a ring on each member's track, `label(fare)` on a tag (\"$0.40\", \"$2.20–2.25\"). `announce` is what a screen reader hears (\"Same fare: a, b and c, $0.40\" by default), `tip` a line in its tooltip. `false`: never. Runs compare with their cheapest, so near fares never chain, and stay within one `unit`." },
+      { name: "layout", type: "\"auto\" | \"across\" | \"down\"", default: "\"auto\"", desc: "Across: the axis left to right. Down: a strip map, the axis top to bottom, tracks side by side at the left, zones as rungs, the words in one column at the right with leaders. Auto: down in a frame under 720px." },
+      { name: "lit", type: "string[] | null", desc: "Stations the app lights, by id (a table row under the pointer): their stop fills, their line lights up and the others step back, and the first one's tooltip opens. The map's own pointer and focus come first." },
+      { name: "onLit", type: "(ids: string[] | null) => void", desc: "Called with the ids of a stop's stations (or an interchange's) when the pointer or focus comes to it, and null when it leaves: light their rows. Not called for `lit`." },
+      { name: "caption", type: "ReactNode", desc: "What the map shows, under it: the figure's `<figcaption>`." },
+      { name: "legend", type: "ReactNode", desc: "A key beside the caption, in mono caps: what \"1.60 / 8.00\" is in, and the shapes, with `<MetroGlyph kind=\"stop\" | \"input\" | \"interchange\" />`." },
+      { name: "label", type: "string", desc: "A name for the drawing itself (its `role=\"group\"`)." },
+      { name: "trains", type: "boolean", default: "true", desc: "Small trains in the ink ride each track to its terminus and back, stopping at every stop. Never under reduced motion." },
+      { name: "loading", type: "boolean | number", default: "false", desc: "Ghost lines in the hairline (4, or the number given) while the data comes, and `aria-busy` on the figure." },
+      { name: "empty", type: "ReactNode", default: "\"Nothing here yet.\"", desc: "Shown when no station can be drawn: words, set as an EmptyState, or your own node." },
+      { name: "emptyMark", type: "ReactNode", desc: "Your one-colour mark for that EmptyState." },
+      { name: "details", type: "string", desc: "The id of the same data as a table (a Timetable, a list), named in the figure's `aria-details`: the drawing's text alternative." },
+      { name: "MetroGlyph", type: "({ kind }) => JSX.Element", desc: "A legend's shape: `stop` (a ring), `input` (a square), `interchange` (a bar)." },
+      { name: "metroHue", type: "(colour?: MetroColour) => string | undefined", desc: "A line's colour as the CSS value the map draws it in (`--s1-metro-hue`): a pair becomes `light-dark()`, and a hex too dark (or too light) for one paper gives way to the ink there. For a row or a band of your own beside the map." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Accessibility", text: "A `<figure>` with its caption and `aria-details` naming the table of the same data. The drawing is a group with a name; each line a group named by its line; each station a link (with `href`) named \"label, value\", two at a twin stop, each its own; each interchange is focusable and named by `announce`. Roundels, tracks, zones, bars and trains are hidden from screen readers; the tooltip repeats what the station already says. Colour never stands alone: the mark, the line's place, the label and the stop's shape say it too. In forced colours, tracks, stops, rings, bars and tags are drawn in `CanvasText` on `Canvas`, the zones' shading dropped, and a lit stop fills in `Highlight`." },
+      { label: "Keyboard", text: "Tab reaches each stop with a link in line order, then each interchange; focus lights the line and opens the tooltip; Esc closes it." },
+      { label: "Reduced motion", text: "The trains are hidden and their clock is stopped (`pauseAnimations`); a line lights up without a fade." },
+      { label: "Phone", text: "In `auto`, a frame under 720px draws the strip map: the lines side by side, the cheapest at the top, the words in one relaxed column on the right, joined to their stops by leaders. Nothing scrolls sideways; a label longer than the column ends in \"…\" (the link's name keeps it whole)." },
+      { label: "Dark mode", text: "Give each line a pair, `{ light, dark }`, or a token your theme sets for both. A hex that would vanish into one paper is drawn in the ink there. Values are set in the line's colour, so pick colours that read as text on the paper (4.5:1), and check neighbouring lines apart (a validator's adjacent pairs) in both themes." },
+      { label: "Server", text: "The server's HTML draws the map 960px wide; the browser measures the frame before the first paint and lays it out again for it. Where the data comes after hydration, there is no shift." },
+      { label: "Chinese", text: "The cue, the zone names, the tooltip's heading and the legend are set at 12px, never tracked or cased, in the kit's Chinese faces; label widths count a Chinese character as nearly two. Translate `sameFare` and `and` in `S1Words`." },
+    ],
+  },
+  {
+    id: "timetable",
+    name: "Timetable",
+    group: "data",
+    item: "timetable",
+    exports: ["Timetable", "TimetableProps", "TimetableRail", "TimetableMark"],
+    summary:
+      "The kit's Table in a MetroMap's hand: a station's departures board. Not a separate data path: the same columns, rows, groups, sort and links, styled. A group's band is a wash of its line's colour with the line's pill (`mark`, a TimetableMark: a logo in a roundel of paper, the name in mono caps); each row's header cell starts with its station on a rail (`rail`, a TimetableRail), joined to the rows above and below; figures sit at the end of their cells in mono with one width. Rows light from the map through `rowProps` (`data-lit`), and the row a map's price comes from fills its ring (`data-fare=\"here\"`).",
+    example: "live",
+    usage: `import { Timetable, TimetableMark, TimetableRail } from "@/components/s1lin/timetable";
+import { metroHue } from "@/components/s1lin/metro-map";
+
+<Timetable id="price-table" caption="Prices of every model, by group" columns={columns} rowKey="key"
+  collapsible expandAll
+  rail={(r) => <TimetableRail stop={r.period ? "period" : r.cheapest ? "here" : "ring"} />}
+  rowProps={(r) => ({
+    style: { "--s1-metro-hue": metroHue(r.colour) },
+    "data-lit": lit?.includes(r.model) || undefined,
+    onPointerEnter: () => setLit([r.model]), onPointerLeave: () => setLit(null),
+  })}
+  groups={groups.map((g) => ({
+    key: g.id, label: g.name, rows: g.rows,
+    mark: <TimetableMark mark={<Logo />}>{g.platform}</TimetableMark>,
+    heading: <h3>{g.name}</h3>, meta: \`\${g.rows.length} models\`,
+    style: { "--s1-metro-hue": metroHue(g.colour) },
+  }))} />`,
+    props: [
+      { name: "TableProps", type: "TableProps<Row>", desc: "Every prop of Table, as Table takes them: `columns`, `rows` or `groups`, `rowKey`, `sort`, `collapsible`, `expandAll`, `fit`… Table's `rail` and a group's `mark` are where the board's station and pill go." },
+      { name: "board", type: "boolean", default: "false", desc: "On its own black board, as a station's departures are, in either theme (the night's tokens on the board)." },
+      { name: "id", type: "string", desc: "The element's id: give the same to the MetroMap's `details`." },
+      { name: "TimetableRail", type: "({ stop?, colour? }) => JSX.Element", desc: "A row's station: a track in the row's colour (`--s1-metro-hue`, or `colour`) with a ring; `stop=\"here\"` fills it, `\"period\"` draws a thin dashed track and no ring (a time-of-day row under its model)." },
+      { name: "TimetableMark", type: "({ mark?, colour?, children }) => JSX.Element", desc: "A band's pill in its line's colour: `mark` (a logo, `currentColor` takes the ink) in a roundel of paper, then the name." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Accessibility", text: "A real `<table>` (Table's): the caption names it, each row's header cell names its row (the rail is hidden), each band is a `<tbody>` named by its heading. The rails and pills are colour with a name beside them, never colour alone. Beside a map, keep one state of lit stations: the map's `onLit` sets it, and each row's pointer and focus; the map takes it as `lit`, the rows as `data-lit`, so a station lights every row of its model and the row its price comes from lights strongest." },
+      { label: "Phone", text: "Table's: cells keep to one line and the table scrolls in its frame, or give `fit`; the rail stays." },
+      { label: "Dark mode", text: "The rows' and bands' colours are the map's (`metroHue`), drawn in the paper's scheme; the washes mix them into the paper, so they hold in both themes. On `board` the night's, in either." },
+      { label: "Chinese", text: "A pill's Chinese is set at 12px and 500, never tracked or cased." },
     ],
   },
 
