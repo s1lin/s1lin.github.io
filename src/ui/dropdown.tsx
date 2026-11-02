@@ -231,10 +231,17 @@ export function DropdownList({ children, align = "start", side = "bottom", class
       const t = e.target as Node;
       if (!m.contains(t) && !trigger()?.contains(t)) set(false);
     };
+    // rows that come or go while it is open are placed again
+    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => again()) : null;
+    grows?.observe(m);
+    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => again()) : null;
+    changes?.observe(m, { childList: true, subtree: true, characterData: true });
     document.addEventListener("pointerdown", outside, true);
     window.addEventListener("resize", again);
     window.addEventListener("scroll", again, true);
     return () => {
+      grows?.disconnect();
+      changes?.disconnect();
       document.removeEventListener("pointerdown", outside, true);
       window.removeEventListener("resize", again);
       window.removeEventListener("scroll", again, true);
