@@ -175,6 +175,8 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-info", type: "colour", default: "unset: the ink", desc: "A note: an info badge's dotted line and ring, a notice's edge." },
       { name: "--s1-info-tint", type: "colour", default: "unset: the paper", desc: "The ground of an info badge." },
       { name: "--s1-on-status", type: "colour", default: "unset: the paper", desc: "The words on a solid status fill: the bad badge's." },
+      { name: "--s1-chosen", type: "colour", default: "unset: the ink", desc: "The fill under the chosen option of a filled switcher: a segmented row's, a card's, a pressed ghost button's or chip's. Set it to your brand; see Switchers." },
+      { name: "--s1-on-chosen", type: "colour", default: "unset: the paper", desc: "The words on `--s1-chosen`: 4.5:1 on it at least, by day and at night." },
       { name: "--s1-scheme", type: "light | dark", default: "light · dark", desc: "The colour scheme native controls are drawn in: a select's list, a number's arrows, a date's picker." },
       { name: "--s1-font-display", type: "font stack", default: "Instrument Serif… Chinese serif, Chinese sans, serif", desc: "Headlines. Chinese takes `--s1-font-cjk-serif`, then the Chinese sans: never SimSun." },
       { name: "--s1-font-sans", type: "font stack", default: "Inter Tight… var(--s1-font-cjk), sans-serif", desc: "Text, and the roundel's letter." },
@@ -224,7 +226,7 @@ export const ENTRIES: Entry[] = [
     group: "foundations",
     exports: [],
     summary:
-      "The parts are drawn in one ink, and a status says itself by its line, its fill and its shape. An app that wants hues sets the status tokens, which are left unset: a badge, a notice, a meter, a stat's change and a switch that is on then take them, and the shapes stay, so nothing rests on colour alone. Until they are set every status falls back to the ink around it, so a page that sets none looks as it always has.",
+      "The parts are drawn in one ink, and a status says itself by its line, its fill and its shape. An app that wants hues sets the status tokens, which are left unset: a badge, a notice, a meter, a stat's change and a switch that is on then take them, and the shapes stay, so nothing rests on colour alone. Until they are set every status falls back to the ink around it, so a page that sets none looks as it always has. The chosen option of a filled switcher is the same: in reverse until `--s1-chosen` and `--s1-on-chosen` give it a brand.",
     example: "none",
     usage: `/* your theme, after the parts: the status hues, and the go button's shadow in your brand */
 :root {
@@ -234,9 +236,11 @@ export const ENTRIES: Entry[] = [
   --s1-info: #1f5fb8; --s1-info-tint: #dce4ed;
   --s1-on-status: #f6f6f4;   /* the words on the solid bad badge */
   --s1-accent: #0f7a6c;
+  --s1-chosen: #0f7a6c;      /* the chosen segment, card, pressed toggle */
+  --s1-on-chosen: #f6f6f4;   /* 4.8:1 on it */
 }
 /* night: the same names, on the selectors Dark mode lists */
-.dark { --s1-ok: #5cc281; --s1-ok-tint: #1a281f; --s1-bad: #ff6b5e; --s1-on-status: #111; }
+.dark { --s1-ok: #5cc281; --s1-ok-tint: #1a281f; --s1-bad: #ff6b5e; --s1-on-status: #111; --s1-chosen: #3fd1b5; --s1-on-chosen: #0f0f0f; }
 
 // a stat whose fall is good, and one with no good way
 <Stat label="p50 latency" value="820 ms" delta="-12%" trend="down" data-good="down" />
@@ -341,6 +345,50 @@ const LANGS = [{ value: "en", label: "EN", name: "English", lang: "en" }, { valu
     ],
   },
 
+  {
+    id: "switchers",
+    name: "Switchers",
+    group: "foundations",
+    exports: [],
+    summary:
+      "A switcher picks one state or one option of a few: a language, a view, a range, a filter, on or off. It never has a line: no border, frame or ring round it, round its group or between its options, in any state (owner, 2026-11-02: \"Never have border\"). It takes one of two designs. Dots, for a few words in a head, a foot or a toolbar: the one in force in the ink, a weight heavier, a dot under it in `--s1-here`, the others dimmer (LangSwitch, RadioGroup `dots`). Filled, for a segmented picker, a filter, a toggle and a switch: the chosen one on a fill (`--s1-chosen`, the ink until a theme sets it), the others words that tint under the pointer (RadioGroup `segmented` and `cards`, a `plain`, `ghost`, `icon` or `chip` Button with `aria-pressed`, Switch).",
+    example: "live",
+    usage: `import { Button } from "@/components/s1lin/button";
+import { LangSwitch } from "@/components/s1lin/lang-switch";
+import { RadioGroup } from "@/components/s1lin/radio-group";
+import { Switch } from "@/components/s1lin/switch";
+
+// dots: words in a head, a foot or a toolbar
+<LangSwitch label={t("Language")} options={LANGS} value={lang} onValueChange={setLang} />
+<RadioGroup legend={t("View")} hideLegend variant="dots" value={view} onValueChange={setView}
+  options={[{ value: "chart", label: t("Chart") }, { value: "table", label: t("Table") }]} />
+
+// filled: a picker, a filter, a toggle, a switch
+<RadioGroup legend={t("Range")} hideLegend variant="segmented" value={range} onValueChange={setRange}
+  options={["5m", "30m", "1h", "6h", "24h"].map((r) => ({ value: r, label: r }))} />
+<Button variant="chip" size="sm" aria-pressed={platform === "openai"} onClick={…}>OpenAI</Button>
+<Button variant="ghost" size="sm" aria-pressed={view === "grid"} onClick={…}>Grid</Button>
+<Switch checked={board} onChange={(e) => setBoard(e.target.checked)}>Board</Switch>
+
+/* your theme: the chosen fill in your brand (see Theming) */
+:root { --s1-chosen: #0f7a6c; --s1-on-chosen: #f6f6f4; }
+
+/* a switcher of your own: the same two designs, never a line */
+.my-seg button { border: 0; background: none; color: var(--s1-ink-2); }
+.my-seg button:hover { background: var(--s1-paper-2); color: var(--s1-ink); }
+.my-seg button[aria-pressed="true"] { background: var(--s1-chosen, var(--s1-ink)); color: var(--s1-on-chosen, var(--s1-paper)); }
+.my-seg button:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+@media (forced-colors: active) {
+  .my-seg button[aria-pressed="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+}`,
+    notes: [
+      { label: "Styles", text: "Which design: dots where the switch sits beside the brand or among small controls and a fill would make it the heaviest thing there (a language, a view in a toolbar); filled where the choice is the matter in hand (a range over a chart, a filter over a list, a setting). No divider between options: 2px of space does it, and the fill or the dot says which one is chosen. A tile of options (cards) is filled the same way, with no frame round each tile. Tabs are navigation, not switchers: they keep the bar under the open one." },
+      { label: "Accessibility", text: "The roles stay what they are: radios in a `radiogroup` (RadioGroup), buttons with `aria-pressed` in a named group (LangSwitch, a ghost or chip toggle), a checkbox with `role=\"switch\"` (Switch). The chosen one is told by its fill or its dot and its weight together, never by a colour alone; the words on a fill are 4.5:1 at least, the off and on tracks of a switch 3:1 on the paper. The focus ring (2px, in the ink) shows only for the keyboard (`:focus-visible`) and is not a border. In forced colours the fills vanish, so the chosen segment, card or toggle is drawn in the system's `Highlight`, a dot in `CanvasText`, a switch's track in `GrayText` off and `Highlight` on, and the focus ring in `CanvasText`." },
+      { label: "Dark mode", text: "The fill is `--s1-chosen`'s night value (the ink, light at night, until a theme sets one); the dot is `--s1-here`'s." },
+    ],
+    where: "The heads' language (LangSwitch), every RadioGroup, Switch and pressed ghost Button on this page; Life's tabs, levels, stages, tools and guides; the route map's key, the Metro2Line bar and the colophon's plates on the front page.",
+  },
+
   // ------------------------------------------------------------ parts
   {
     id: "button",
@@ -364,14 +412,14 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
 // after the words: a link elsewhere, a menu's caret
 <Button variant="link" href="https://docs.tokensbeat.com" iconEnd={<ArrowUpRight />}>Docs</Button>
 
-// in a head or a toolbar: ghost, no line (the language beside it is a LangSwitch); one pressed of a group is marked by a bar
+// in a head or a toolbar: ghost, no line (the language beside it is a LangSwitch); a toggle's pressed one is filled
 <Button variant="ghost" size="sm" aria-pressed={view === "grid"} onClick={…}>Grid</Button>
 <Button variant="ghost" size="sm" icon={<Moon />} aria-label="Dark mode" title="Dark mode" onClick={…} />
 
 // a dense row's mark alone: an aria-label for its name, a title for its tooltip
 <Button variant="icon" size="sm" icon={<RefreshCw />} aria-label="Refresh" title="Refresh" onClick={reload} />`,
     props: [
-      { name: "variant", type: "\"plain\" | \"go\" | \"ghost\" | \"chip\" | \"link\" | \"icon\"", default: "\"plain\"", desc: "Which button. `ghost` has no line and no paper, a tint under the pointer, the focus ring kept; with `aria-pressed` the pressed one is in the ink with a bar under its words and the others in the second ink. `icon` is 40px square (30px at `sm`) for an svg or one character, and needs an `aria-label`." },
+      { name: "variant", type: "\"plain\" | \"go\" | \"ghost\" | \"chip\" | \"link\" | \"icon\"", default: "\"plain\"", desc: "Which button. `ghost` has no line and no paper, a tint under the pointer, the focus ring kept; A `plain`, `ghost` or `icon` button with `aria-pressed` is a toggle, a switcher: no line at all, the pressed one filled (`--s1-chosen`), the others in the second ink on no fill (see Switchers). A `chip` with `aria-pressed` is a filter, filled the same way. `icon` is 40px square (30px at `sm`) for an svg or one character, and needs an `aria-label`." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm` is 30px tall in 11px type (12px for Chinese), for a row of small actions or a head." },
       { name: "icon", type: "ReactNode", desc: "A picture before the words: an svg (lucide's, or your own) drawn at 16px, 14px at `sm`, 6px from them, in the button's ink. It is `aria-hidden`; the words stay the name. With no words the button is a square and needs an `aria-label`, and a `title` for its tooltip." },
       { name: "iconEnd", type: "ReactNode", desc: "A picture after the words: `ArrowUpRight` on a link elsewhere, `ChevronDown` on a menu." },
@@ -756,7 +804,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     item: "radio-group",
     exports: ["RadioGroup", "RadioGroupProps", "RadioOption"],
     summary:
-      "One choice of a few: native radios with one name in a fieldset that is the radiogroup. As a list, as cards to pick an amount or a plan, or as a segmented row for a range (24h · 7d · 30d); quiet, the row has no box round it, for a head or a toolbar.",
+      "One choice of a few: native radios with one name in a fieldset that is the radiogroup. As a list, as cards to pick an amount or a plan, as a segmented row for a range (24h · 7d · 30d), or as dots, for a head or a toolbar. Cards, segments and dots are switchers: no line round an option or the group, the chosen card or segment filled, the chosen word marked by a dot (see Switchers).",
     example: "live",
     usage: `import { RadioGroup } from "@/components/s1lin/radio-group";
 
@@ -766,17 +814,17 @@ import { Checkbox } from "@/components/s1lin/checkbox";
 <RadioGroup legend="Range" variant="segmented" defaultValue="7d"
   options={["24h", "7d", "30d"].map((r) => ({ value: r, label: r }))} />
 
-// in a head or a toolbar: no box, the chosen word in the ink with a bar under it
-<RadioGroup legend="Range" hideLegend variant="segmented" quiet defaultValue="7d" options={…} />`,
+// in a head or a toolbar: the words, the chosen one in the ink with a dot under it
+<RadioGroup legend="View" hideLegend variant="dots" defaultValue="chart" options={…} />`,
     props: [
       { name: "legend", type: "ReactNode", required: true, desc: "What the choice is: the group's name." },
       { name: "options", type: "RadioOption[]", required: true, desc: "`{ value, label, hint?, disabled? }` each; the hint is read as the option's description." },
       { name: "value", type: "string", desc: "The chosen value, when controlled." },
       { name: "defaultValue", type: "string", desc: "The value chosen at first, when not." },
       { name: "onValueChange", type: "(value: string) => void", desc: "Called with the value chosen." },
-      { name: "variant", type: "\"list\" | \"cards\" | \"segmented\"", default: "\"list\"", desc: "Radios down the page; a tile each, in a grid that wraps; one joined row, the chosen word in reverse." },
+      { name: "variant", type: "\"list\" | \"cards\" | \"segmented\" | \"dots\"", default: "\"list\"", desc: "Radios down the page; a tile each, in a grid that wraps, the chosen one filled; a row of short words, the chosen one filled (`--s1-chosen`, the ink until a theme sets it), the others tinted under the pointer; a row of words, the chosen one in the ink and a weight heavier with a dot under it in `--s1-here`, the others dimmer, for a head or a toolbar. None but the list has a line." },
       { name: "orientation", type: "\"vertical\" | \"horizontal\"", default: "\"vertical\"", desc: "A list's radios in a row that wraps." },
-      { name: "quiet", type: "boolean", default: "false", desc: "A segmented row with no box round it and none round the chosen word, which is in the ink with a bar under it; the others in the second ink. For a head or a toolbar, beside `ghost` buttons." },
+      { name: "quiet", type: "boolean", default: "false", desc: "Deprecated: the same as `variant=\"dots\"`, which it overrides." },
       { name: "hideLegend", type: "boolean", default: "false", desc: "The legend is read, not shown, where the row says what it is by itself." },
       { name: "name", type: "string", desc: "The radios' name in a form; one is made up if not given." },
       { name: "hint", type: "ReactNode", desc: "Under the legend." },
@@ -785,8 +833,9 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     ],
     notes: [
       { label: "Keyboard", text: "Native radios: Tab enters the group at the chosen radio (or the first), ↑ ↓ ← → move and choose, Tab leaves. Nothing is scripted." },
-      { label: "Accessibility", text: "The fieldset has `role=\"radiogroup\"`, named by the legend, with `aria-invalid` and `aria-required` when they apply. Each radio is named by its label alone and described by its hint. Cards and segments show focus as a ring round the whole tile." },
+      { label: "Accessibility", text: "The fieldset has `role=\"radiogroup\"`, named by the legend, with `aria-invalid` and `aria-required` when they apply. Each radio is named by its label alone and described by its hint. Cards and segments show focus as a ring round the whole tile, dots round the word; only for the keyboard. In forced colours the chosen card or segment is drawn in `Highlight`, a chosen word's dot in `CanvasText`." },
       { label: "Phone", text: "Cards fall to one a row under 320px; a segmented row wraps." },
+      { label: "Chinese", text: "Under `lang=\"zh-CN\"` a segmented row and dots set their words at 12px, never tracked or in capitals." },
     ],
   },
   {
@@ -795,7 +844,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     group: "forms",
     item: "switch",
     exports: ["Switch", "SwitchProps"],
-    summary: "On or off, taking effect at once: a native checkbox with `role=\"switch\"`, drawn as a track and a thumb, in ink and to the right when on. For a choice that waits for a Save, use a Checkbox.",
+    summary: "On or off, taking effect at once: a native checkbox with `role=\"switch\"`, drawn as a filled track and a thumb, with no line round either: off, the track in the third ink and the thumb at the left; on, the track in the ink (or `--s1-ok`) and the thumb at the right. For a choice that waits for a Save, use a Checkbox.",
     example: "live",
     usage: `import { Switch } from "@/components/s1lin/switch";
 
@@ -809,7 +858,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
       { name: "className", type: "string", desc: "Added to the wrapper; every other prop goes to the `<input>`." },
     ],
     notes: [
-      { label: "Accessibility", text: "A screen reader hears a switch, on or off (`role=\"switch\"` on a checkbox, so the state is the checkbox's own). Space toggles it. Off and on differ in fill and in the thumb's side, not only in colour." },
+      { label: "Accessibility", text: "A screen reader hears a switch, on or off (`role=\"switch\"` on a checkbox, so the state is the checkbox's own). Space toggles it. Off and on differ in fill and in the thumb's side, not only in colour; each track is 3:1 or more on the paper, so the control is seen without a line. In forced colours the track stays, with no line, in the system's colours: `GrayText` off, `Highlight` on." },
       { label: "Reduced motion", text: "The thumb jumps instead of sliding." },
     ],
   },
@@ -1373,7 +1422,7 @@ const LANGS = [
       { label: "Dark mode", text: "`--s1-here` is #3780e6 on paper and #7fb2ff at night; the dimmer ink follows the inks." },
       { label: "Phone", text: "Two languages fit a phone's head at `sm`. Where the head is full, take the switch out of it and put one at `md` in the sheet the head opens." },
     ],
-    where: "The head example (Foundations, Head) and the Button example's head row on this page; the heads and foot of the TokensBeat apps.",
+    where: "The head example (Foundations, Head), the Switchers example and the Button example's head row on this page; the heads and foot of the TokensBeat apps.",
   },
   {
     id: "dialog",

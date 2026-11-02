@@ -23,50 +23,65 @@
 
   .s1-radios--row .s1-fieldset__body { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 
-  /* Cards: a tile each, the whole tile the radio's to click; the chosen one in a double line. */
-  .s1-radios--cards .s1-fieldset__body { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px; }
-  .s1-radios--cards .s1-radio { box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); }
-  .s1-radios--cards .s1-radio:hover { border-color: var(--s1-ink); }
-  .s1-radios--cards .s1-radio:has(.s1-radio__input:checked) { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
-  .s1-radios--cards .s1-radio:has(.s1-radio__input:focus-visible) { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
-  .s1-radios--cards .s1-radio:has(.s1-radio__input:focus-visible) .s1-radio__dot { outline: 0; }
+  /*
+   * Cards, segmented and dots are switchers: none has a line round it, round its group or between its options, in any
+   * state (owner, 2026-11-02: "Never have border"). Cards and segmented are filled: the chosen one sits on
+   * --s1-chosen (the ink, until a theme sets it) in --s1-on-chosen, the others are words that tint under the pointer.
+   * Dots, for a head or a toolbar, has no fill at all: the chosen word is in the ink, a weight heavier, with a dot
+   * under it in --s1-here, as LangSwitch draws a language.
+   */
+  .s1-radios--cards .s1-fieldset__body { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; }
+  .s1-radios--cards .s1-radio { box-sizing: border-box; padding: 12px 14px; border: 0; background: none; }
   .s1-radios--cards .s1-radio__label { font-weight: 500; }
-  .s1-radios--cards .s1-radio--disabled { border-style: dashed; }
 
-  /* Segmented: one joined row of short words; the chosen one in reverse, as a pressed key. */
-  .s1-radios--segmented .s1-fieldset__body {
-    display: inline-flex; flex-wrap: wrap; gap: 0; max-width: 100%;
-    border: 1px solid var(--s1-rule-strong); background: var(--s1-paper);
-  }
+  .s1-radios--segmented .s1-fieldset__body { display: inline-flex; flex-wrap: wrap; gap: 2px; max-width: 100%; border: 0; background: none; }
   .s1-radios--segmented .s1-radio {
-    align-items: center; justify-content: center; min-height: 32px; padding: 0 12px;
+    align-items: center; justify-content: center; min-height: 32px; padding: 0 12px; border: 0;
     font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2);
   }
-  .s1-radios--segmented .s1-radio + .s1-radio { border-left: 1px solid var(--s1-rule); }
-  /* Where :has() is known the chosen segment is in reverse and the dot goes; elsewhere the dot stays to show it. */
-  .s1-radios--segmented .s1-radio { gap: 6px; }
-  @supports selector(:has(*)) {
-    .s1-radios--segmented .s1-radio { gap: 0; }
-    .s1-radios--segmented .s1-radio__control { position: static; width: 0; height: 0; margin: 0; }
-    .s1-radios--segmented .s1-radio__dot { display: none; }
-  }
-  .s1-radios--segmented .s1-radio:hover { color: var(--s1-ink); }
-  .s1-radios--segmented .s1-radio:has(.s1-radio__input:checked) { background: var(--s1-ink); color: var(--s1-paper); }
-  .s1-radios--segmented .s1-radio:has(.s1-radio__input:focus-visible) { outline: 2px solid var(--s1-ink); outline-offset: 2px; z-index: 1; }
   .s1-radios--segmented .s1-radio__hint { display: none; }
 
-  /* Quiet: no box round the row and none round the chosen word, which is in the ink with a bar under it; the
-     others are in the second ink and tint under the pointer. For a head or a toolbar, beside ghost buttons. */
-  .s1-radios--quiet .s1-fieldset__body { border: 0; background: none; gap: 2px; }
-  .s1-radios--quiet .s1-radio { padding: 0 8px; min-height: 30px; }
-  .s1-radios--quiet .s1-radio + .s1-radio { border-left: 0; }
-  .s1-radios--quiet .s1-radio:hover { background: var(--s1-paper-2); }
-  .s1-radios--quiet .s1-radio:has(.s1-radio__input:checked) {
-    color: var(--s1-ink); background-color: transparent;
-    background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
-    background-origin: content-box; background-position: left bottom 4px; background-size: 100% 2px;
+  :is(.s1-radios--cards, .s1-radios--segmented) .s1-radio:hover { background: var(--s1-paper-2); color: var(--s1-ink); }
+  :is(.s1-radios--cards, .s1-radios--segmented) .s1-radio:has(.s1-radio__input:checked) {
+    background: var(--s1-chosen, var(--s1-ink)); color: var(--s1-on-chosen, var(--s1-paper));
   }
-  .s1-radios--quiet .s1-radio:has(.s1-radio__input:checked):hover { background-color: var(--s1-paper-2); }
+  .s1-radios--cards .s1-radio:has(.s1-radio__input:checked) .s1-radio__hint { color: inherit; }
+  :is(.s1-radios--cards, .s1-radios--segmented) .s1-radio:has(.s1-radio__input:focus-visible) { outline: 2px solid var(--s1-ink); outline-offset: 2px; z-index: 1; }
+  :is(.s1-radios--cards, .s1-radios--segmented) :is(.s1-radio--disabled, .s1-radio--disabled:hover) { background: none; color: var(--s1-ink-3); }
+  :is(.s1-radios--cards, .s1-radios--segmented):disabled .s1-radio:not(:has(.s1-radio__input:checked)):hover { background: none; color: var(--s1-ink-3); }
+
+  .s1-radios--dots {
+    --s1-radios-dim: color-mix(in srgb, var(--s1-ink-2) 50%, var(--s1-ink-3));
+  }
+  .s1-radios--dots .s1-fieldset__body { display: inline-flex; flex-wrap: wrap; gap: 4px; max-width: 100%; border: 0; background: none; }
+  .s1-radios--dots .s1-radio {
+    align-items: center; justify-content: center; min-width: 30px; min-height: 30px; padding: 0 6px; border: 0; background: none;
+    font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-radios-dim);
+  }
+  .s1-radios--dots .s1-radio:hover { color: var(--s1-ink); }
+  .s1-radios--dots .s1-radio:has(.s1-radio__input:checked) { color: var(--s1-ink); font-weight: 650; }
+  .s1-radios--dots .s1-radio__hint { display: none; }
+  /* The words' own box (the tracking after the last letter left out), so the dot is centred under the letters. */
+  .s1-radios--dots .s1-radio__label { position: relative; display: block; margin-inline-end: -0.1em; }
+  .s1-radios--dots .s1-radio__label::after {
+    content: ""; position: absolute; left: 50%; top: calc(100% + 3px); width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+    background: var(--s1-here, var(--s1-ink)); opacity: 0; transform: scale(0.25);
+  }
+  .s1-radios--dots .s1-radio:has(.s1-radio__input:checked) .s1-radio__label::after { opacity: 1; transform: none; }
+  .s1-radios--dots .s1-radio:has(.s1-radio__input:focus-visible) { outline: 2px solid var(--s1-ink); outline-offset: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-radios--dots .s1-radio { transition: color 0.12s ease; }
+    .s1-radios--dots .s1-radio__label::after { transition: opacity 0.16s ease, transform 0.16s ease; }
+  }
+
+  /* Where :has() is known the drawn dot goes and the fill (or the dot under the word) shows the chosen one; elsewhere
+     the radio's own dot stays to show it. */
+  :is(.s1-radios--cards, .s1-radios--segmented, .s1-radios--dots) .s1-radio { gap: 6px; }
+  @supports selector(:has(*)) {
+    :is(.s1-radios--cards, .s1-radios--segmented, .s1-radios--dots) .s1-radio { gap: 0; }
+    :is(.s1-radios--cards, .s1-radios--segmented, .s1-radios--dots) .s1-radio__control { position: static; width: 0; height: 0; margin: 0; }
+    :is(.s1-radios--cards, .s1-radios--segmented, .s1-radios--dots) .s1-radio__dot { display: none; }
+  }
 
   /* The legend kept for screen readers, out of sight. */
   .s1-radios.s1-radios--legend-hidden > legend {
@@ -74,12 +89,18 @@
     clip-path: inset(50%); white-space: nowrap; border: 0;
   }
 
-  /* Chinese in a segmented row: untracked, at 12px. */
-  .s1-radios--segmented .s1-radio:lang(zh), .s1-radios--segmented .s1-radio [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  /* Chinese in a segmented row or in dots: untracked, at 12px. */
+  :is(.s1-radios--segmented, .s1-radios--dots) .s1-radio:lang(zh), :is(.s1-radios--segmented, .s1-radios--dots) .s1-radio [lang|="zh"] { font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-radios--dots .s1-radio:lang(zh) .s1-radio__label { margin-inline-end: 0; }
 
+  /* Forced colours flatten the fills: the chosen card or segment is drawn in the system's Highlight, and the dot
+     under a chosen word in the text's colour. */
   @media (forced-colors: active) {
     .s1-radio__input { opacity: 1; }
     .s1-radio__dot { display: none; }
-    .s1-radios--segmented .s1-radio__control { position: relative; width: 14px; height: 14px; margin-right: 6px; }
+    :is(.s1-radios--cards, .s1-radios--segmented) .s1-radio:has(.s1-radio__input:checked) {
+      forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: CanvasText;
+    }
+    .s1-radios--dots .s1-radio__label::after { forced-color-adjust: none; background: CanvasText; }
   }
 }

@@ -28,11 +28,15 @@ export type RadioGroupProps = Omit<FieldsetHTMLAttributes<HTMLFieldSetElement>, 
   hint?: ReactNode;
   error?: ReactNode;
   required?: boolean;
-  /** "list", radios down the page; "cards", a tile each (amounts, plans); "segmented", one joined row of short words (24h · 7d · 30d). */
-  variant?: "list" | "cards" | "segmented";
+  /**
+   * "list", radios down the page; "cards", a tile each (amounts, plans), the chosen one filled; "segmented", a row of
+   * short words (24h · 7d · 30d), the chosen one filled; "dots", a row of words with a dot under the chosen one, for a
+   * head or a toolbar. Cards, segmented and dots have no line round them (owner, 2026-11-02).
+   */
+  variant?: "list" | "cards" | "segmented" | "dots";
   /** "horizontal" sets a list's radios in a row that wraps. */
   orientation?: "vertical" | "horizontal";
-  /** A segmented row with no box round it, the chosen word in the ink with a bar under it: for a head or a toolbar. */
+  /** @deprecated The same as `variant="dots"`, which it overrides: kept so code written for it still builds. */
   quiet?: boolean;
   /** The legend is read, not shown: where the row says what it is by itself (a language, a range in a toolbar). */
   hideLegend?: boolean;
@@ -41,8 +45,9 @@ export type RadioGroupProps = Omit<FieldsetHTMLAttributes<HTMLFieldSetElement>, 
 /**
  * One choice of a few: native radios with one name, in a fieldset that is the
  * radiogroup, so Tab enters at the chosen one and the arrow keys move and
- * choose, as browsers do. As a list, as cards to pick an amount or a plan, or
- * as a segmented row for a range; quiet, the row loses its box, for a head.
+ * choose, as browsers do. As a list, as cards to pick an amount or a plan, as
+ * a segmented row for a range (the chosen one filled), or as dots, the words
+ * with a dot under the chosen one, for a head or a toolbar.
  */
 export function RadioGroup({
   legend,
@@ -74,9 +79,8 @@ export function RadioGroup({
       aria-invalid={error ? true : undefined}
       className={cn(
         "s1-radios",
-        `s1-radios--${variant}`,
+        `s1-radios--${quiet ? "dots" : variant}`,
         orientation === "horizontal" && "s1-radios--row",
-        quiet && "s1-radios--quiet",
         hideLegend && "s1-radios--legend-hidden",
         className,
       )}

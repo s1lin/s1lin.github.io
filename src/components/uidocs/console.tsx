@@ -284,7 +284,7 @@ export function RadioDemo() {
       />
       <RadioGroup legend="Range" variant="segmented" defaultValue="7d" options={["24h", "7d", "30d", "90d"].map((r) => ({ value: r, label: r }))} />
       <div className="ud-toolbar">
-        <RadioGroup legend="Range" hideLegend variant="segmented" quiet defaultValue="7d" options={["24h", "7d", "30d", "90d"].map((r) => ({ value: r, label: r }))} />
+        <RadioGroup legend="Range" hideLegend variant="dots" defaultValue="7d" options={["24h", "7d", "30d", "90d"].map((r) => ({ value: r, label: r }))} />
         <span className="ud-toolbar__end">
           <Button variant="ghost" size="sm" icon={<RefreshCw />}>
             Refresh
@@ -298,8 +298,7 @@ export function RadioDemo() {
         <RadioGroup
           legend="时间范围"
           hideLegend
-          variant="segmented"
-          quiet
+          variant="dots"
           defaultValue="7d"
           options={[
             { value: "24h", label: "24 小时" },
@@ -310,8 +309,7 @@ export function RadioDemo() {
         <RadioGroup
           legend="视图"
           hideLegend
-          variant="segmented"
-          quiet
+          variant="dots"
           defaultValue="chart"
           options={[
             { value: "chart", label: "图表" },
@@ -344,6 +342,9 @@ export function SwitchDemo() {
       </Switch>
       <Switch reverse disabled hint="Owners only.">
         Allow new keys
+      </Switch>
+      <Switch reverse disabled defaultChecked hint="Set by the organisation.">
+        Keep audit logs
       </Switch>
       <Switch defaultChecked>Beside its label</Switch>
     </div>
@@ -546,16 +547,16 @@ const METRO_ZH: Partial<S1WordMap> = {
   collapseAll: "全部收起",
 };
 
+/** The examples' language: a LangSwitch, the words with a dot under the one in force, as every head has it. */
 function Language({ lang, onChange }: { lang: string; onChange: (v: string) => void }) {
   return (
-    <RadioGroup
-      legend="Language"
-      variant="segmented"
+    <LangSwitch
+      label="Language"
       value={lang}
       onValueChange={onChange}
       options={[
-        { value: "en", label: "English" },
-        { value: "zh", label: <span lang="zh-CN">中文</span> },
+        { value: "en", label: "EN", name: "English", lang: "en" },
+        { value: "zh", label: "中文", lang: "zh-CN" },
       ]}
     />
   );
@@ -1031,6 +1032,76 @@ export function LangSwitchDemo() {
         <LangRow name={["At night · xs 24px", "夜间 · xs 24px"]} size="xs" zh />
       </div>
       <Said text="Press a language: it takes the ink and the dot, the other goes dim. No line, box or fill round any of them, nor round the group; the pointer raises a dim one. The rows are on their own, so each keeps its language." />
+    </div>
+  );
+}
+
+/** One set of every switcher, live: dots for words in a head or a toolbar, filled for a picker, a filter and a switch. */
+function SwitcherSet({ night = false }: { night?: boolean }) {
+  const [lang, setLang] = useState("en");
+  const [view, setView] = useState("chart");
+  const [range, setRange] = useState("1h");
+  const [platform, setPlatform] = useState("all");
+  const [grid, setGrid] = useState(true);
+  const [board, setBoard] = useState(true);
+  return (
+    <div className="ud-switchers" data-theme={night ? "dark" : undefined}>
+      <section className="ud-switchers__set" aria-label={night ? "Dots, at night" : "Dots"}>
+        <p className="ud-switchers__name">{night ? "Dots · at night" : "Dots · a head, a foot, a toolbar"}</p>
+        <div className="ud-row">
+          <LangSwitch label="Language" options={LANGS} value={lang} onValueChange={setLang} />
+          <RadioGroup
+            legend="View"
+            hideLegend
+            variant="dots"
+            value={view}
+            onValueChange={setView}
+            options={[
+              { value: "chart", label: "Chart" },
+              { value: "table", label: "Table" },
+            ]}
+          />
+        </div>
+      </section>
+      <section className="ud-switchers__set" aria-label={night ? "Filled, at night" : "Filled"}>
+        <p className="ud-switchers__name">{night ? "Filled · at night" : "Filled · a picker, a filter, a switch"}</p>
+        <RadioGroup legend="Range" hideLegend variant="segmented" value={range} onValueChange={setRange} options={["5m", "30m", "1h", "6h", "24h"].map((r) => ({ value: r, label: r }))} />
+        <div className="ud-row" role="group" aria-label="Platform">
+          {[
+            ["all", "All"],
+            ["openai", "OpenAI"],
+            ["anthropic", "Anthropic"],
+          ].map(([value, label]) => (
+            <Button key={value} variant="chip" size="sm" aria-pressed={platform === value} onClick={() => setPlatform(value)}>
+              {label}
+            </Button>
+          ))}
+        </div>
+        <div className="ud-row">
+          <span className="ud-row" role="group" aria-label="Layout">
+            <Button variant="ghost" size="sm" aria-pressed={grid} onClick={() => setGrid(true)}>
+              Grid
+            </Button>
+            <Button variant="ghost" size="sm" aria-pressed={!grid} onClick={() => setGrid(false)}>
+              List
+            </Button>
+          </span>
+          <Switch checked={board} onChange={(e) => setBoard(e.target.checked)}>
+            Board
+          </Switch>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/** The two designs, on paper and at night. */
+export function SwitchersDemo() {
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <SwitcherSet />
+      <SwitcherSet night />
+      <Said text="Press any of them: the chosen one takes the fill, or the ink and the dot; nothing anywhere has a line round it, round its group or between its options. Tab to one to see the focus ring, which only the keyboard brings." />
     </div>
   );
 }

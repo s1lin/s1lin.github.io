@@ -4,7 +4,11 @@
 .life__cols { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); margin-inline: auto; max-width: var(--max); padding-inline: var(--gutter); opacity: 0; transition: opacity .2s; }
 .life[data-guides="on"] .life__cols { opacity: 1; }
 .life__cols i { background: color-mix(in srgb, var(--red) 7%, transparent); border-inline: 1px solid color-mix(in srgb, var(--red) 22%, transparent); }
-.life__guides { position: fixed; right: var(--gutter); bottom: 16px; z-index: 5; font: 500 11px/1 var(--f-mono); padding: 8px 10px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer; }
+/* The guides' toggle floats over the page, so it rests on the second paper; on, it is in reverse. A switcher: no line
+   round it (owner, 2026-11-02). */
+.life__guides { position: fixed; right: var(--gutter); bottom: 16px; z-index: 5; font: 500 11px/1 var(--f-mono); padding: 9px 11px; background: var(--paper-2); color: var(--sumi); border: 0; cursor: pointer; }
+.life__guides:hover { background: color-mix(in srgb, var(--sumi) 14%, var(--paper)); }
+.life__guides[aria-pressed="true"] { background: var(--sumi); color: var(--paper); }
 
 .life__masthead { padding-block: 56px 40px; display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
 .life__kicker { grid-column: 1 / -1; font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; margin: 0; }
@@ -35,16 +39,28 @@
 .life__rule h3 { font: 800 15px/1 var(--f-sans); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
 .life__rule p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
 
-.life__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.life__tabs button, .life__btn, .life__stamps button, .life__steps button {
+.life__tabs { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 20px; }
+.life__btn {
   font: 500 12px/1 var(--f-mono); padding: 9px 12px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer;
 }
-.life__tabs button[aria-pressed="true"], .life__stamps button[aria-pressed="true"], .life__steps button[aria-current], .life__btn--go { background: var(--sumi); color: var(--paper); }
+.life__btn--go { background: var(--sumi); color: var(--paper); }
+/* The switchers (puzzle or play, the level, the stage, the tool) are filled, never lined (owner, 2026-11-02: "Never
+   have border"): the one chosen in reverse, the others words on the paper that tint under the pointer. */
+.life__tabs button, .life__steps button, .pad__stages button, .pad__tool {
+  font: 500 12px/1 var(--f-mono); padding: 10px 13px; background: none; color: var(--ink-2); border: 0; cursor: pointer;
+}
+.life__tabs button:hover, .life__steps button:hover, .pad__stages button:where(:hover:not(:disabled)), .pad__tool:hover { background: var(--paper-2); color: var(--sumi); }
+.life__tabs button[aria-pressed="true"], .life__steps button[aria-current], .pad__stages button[aria-current], .pad__tool[aria-pressed="true"] { background: var(--sumi); color: var(--paper); }
+@media (forced-colors: active) {
+  .life__guides[aria-pressed="true"], .life__tabs button[aria-pressed="true"], .life__steps button[aria-current], .pad__stages button[aria-current], .pad__tool[aria-pressed="true"] {
+    forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: CanvasText;
+  }
+}
 .life__btn--go { box-shadow: 4px 4px 0 var(--red); }
 .life__btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--red); }
 
-.life__steps { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0 0 18px; flex-wrap: wrap; }
-.life__steps button { width: 34px; padding: 9px 0; }
+.life__steps { display: flex; gap: 2px; list-style: none; padding: 0; margin: 0 0 18px; flex-wrap: wrap; }
+.life__steps button { width: 34px; padding: 10px 0; }
 .life__pair { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
 .life__pair figure { margin: 0; }
 .life__pair figcaption { font: 500 11px/1 var(--f-mono); color: var(--ink-3); margin-top: 6px; text-transform: uppercase; }
@@ -58,7 +74,6 @@
 .life__verdict { font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin-left: 8px; }
 .life__verdict[data-v="yes"] { color: #1f9d33; }
 .life__verdict[data-v="no"] { color: var(--red); }
-.life__stamps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .life__big { width: 100%; max-width: 800px; border: 2px solid var(--sumi); }
 .life__stats { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; font: 500 12px/1 var(--f-mono); color: var(--ink-2); margin-top: 12px; }
 .life__legend i { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 10px; }
@@ -126,13 +141,12 @@
 @media (max-width: 800px) { .life__why .life__h, .life__why-body { grid-column: 1 / -1; } }
 .life__block { display: contents; }
 
-.pad__stages { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0 0 10px; padding: 0; }
-.pad__stages button { display: flex; align-items: center; gap: 8px; font: 500 12px/1 var(--f-mono); padding: 9px 14px 9px 9px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer; }
+.pad__stages { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0 0 10px; padding: 0; }
+.pad__stages button { display: flex; align-items: center; gap: 8px; padding: 10px 15px 10px 10px; }
 .pad__stages b { display: grid; place-items: center; width: 22px; height: 22px; background: var(--sumi); color: var(--paper); }
 .pad__stages li:nth-child(1) b { background: var(--red); border-radius: 50%; color: #fff; }
 .pad__stages li:nth-child(2) b { background: var(--blue); color: #fff; }
 .pad__stages li:nth-child(3) b { background: var(--yellow); color: #111; clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 6px; }
-.pad__stages button[aria-current] { background: var(--sumi); color: var(--paper); }
 .pad__stages button:disabled { opacity: .4; cursor: not-allowed; }
 .pad__goal { margin: 0 0 18px; font: 400 clamp(18px, 2vw, 24px)/1.3 var(--f-display); font-style: italic; border-left: 4px solid var(--yellow); padding-left: 12px; }
 
@@ -142,8 +156,7 @@
 .pad__tools h3, .pad__read h3 { font: 800 12px/1 var(--f-sans); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 12px; }
 .pad__tools section { padding-top: 10px; margin-top: 10px; border-top: 1px solid var(--rule); }
 .pad__tools h4 { font: 500 11px/1 var(--f-mono); color: var(--ink-3); text-transform: uppercase; margin: 0 0 8px; }
-.pad__tool { display: flex; align-items: center; gap: 8px; width: 100%; margin-bottom: 4px; font: 500 12px/1.2 var(--f-mono); text-align: left; padding: 6px 8px; background: var(--paper); color: var(--sumi); border: 1px solid var(--rule-strong); cursor: pointer; }
-.pad__tool[aria-pressed="true"] { background: var(--sumi); color: var(--paper); }
+.pad__tool { display: flex; align-items: center; gap: 8px; width: 100%; margin-bottom: 2px; line-height: 1.2; text-align: left; padding: 7px 9px; }
 .pad__tool .life__board { width: 30px; height: auto; flex: none; border: 1px solid var(--rule); }
 .pad__hint { margin: 6px 0 0; font-size: 12px; color: var(--ink-3); line-height: 1.4; }
 .pad__seeds { display: flex; flex-wrap: wrap; gap: 6px; }

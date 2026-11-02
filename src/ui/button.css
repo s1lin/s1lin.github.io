@@ -24,19 +24,30 @@
   /*
    * Ghost: the box without its line or its paper, for the controls in a head or a toolbar, and an action
    * beside a stronger one. The line is there but clear, so the box keeps its size and shows in forced
-   * colours; the pointer tints it. One that is pressed (aria-pressed, a language, a view) is in the ink
-   * with a bar under its words; the others of its group are in the second ink.
+   * colours; the pointer tints it.
    */
   .s1-btn--ghost { padding: 0 12px; background: transparent; border-color: transparent; }
   .s1-btn--ghost.s1-btn--sm { padding: 0 8px; }
   .s1-btn--ghost:hover:not(:disabled), .s1-btn--ghost[aria-expanded="true"] { background-color: var(--s1-paper-2); }
-  .s1-btn--ghost[aria-pressed="false"] { color: var(--s1-ink-2); }
-  .s1-btn--ghost[aria-pressed="false"]:hover:not(:disabled) { color: var(--s1-ink); }
-  .s1-btn--ghost[aria-pressed="true"] {
-    color: var(--s1-ink);
-    background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat;
-    background-origin: content-box; background-position: left bottom 4px; background-size: 100% 2px;
+
+  /*
+   * A button with aria-pressed is a toggle (a view, a filter, alerts on), and a toggle is a switcher: whatever
+   * its variant, plain, ghost or icon, it has no line, not even a clear one (owner, 2026-11-02: "Never have
+   * border"), its size kept by its padding. The pressed one is filled (--s1-chosen, the ink until a theme sets
+   * it, in --s1-on-chosen); the others are in the second ink on no fill and tint under the pointer.
+   */
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed] { border: 0; background-color: transparent; }
+  .s1-btn--plain[aria-pressed] { padding: 0 17px; }
+  .s1-btn--ghost[aria-pressed] { padding: 0 13px; }
+  .s1-btn--sm.s1-btn--plain[aria-pressed]:not(.s1-btn--icon-only) { padding: 0 11px; }
+  .s1-btn--sm.s1-btn--ghost[aria-pressed]:not(.s1-btn--icon-only) { padding: 0 9px; }
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed="false"] { color: var(--s1-ink-2); }
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed="false"]:hover:not(:disabled) { background-color: var(--s1-paper-2); color: var(--s1-ink); }
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed="true"],
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed="true"]:hover:not(:disabled) {
+    background-color: var(--s1-chosen, var(--s1-ink)); color: var(--s1-on-chosen, var(--s1-paper));
   }
+  .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon)[aria-pressed]:active:not(:disabled) { box-shadow: none; }
 
   /* A pill, the height of the other boxes at its size (40px, 30px a size down), so a row of them is one height. */
   .s1-btn--chip {
@@ -45,6 +56,13 @@
   }
   .s1-btn--chip.s1-btn--sm { min-height: 30px; padding: 0 10px 0 8px; }
   .s1-btn--chip:hover, .s1-btn--chip[aria-expanded="true"] { background: var(--s1-paper-2); }
+  /* A chip with aria-pressed is a filter, a switcher: no line, the pressed one filled as a pressed ghost is. */
+  .s1-btn--chip[aria-pressed] { border: 0; padding: 0 15px 0 13px; background: none; color: var(--s1-ink-2); }
+  .s1-btn--chip.s1-btn--sm[aria-pressed] { padding: 0 11px 0 9px; }
+  .s1-btn--chip[aria-pressed]:hover { background: var(--s1-paper-2); color: var(--s1-ink); }
+  .s1-btn--chip[aria-pressed="true"], .s1-btn--chip[aria-pressed="true"]:hover {
+    background: var(--s1-chosen, var(--s1-ink)); color: var(--s1-on-chosen, var(--s1-paper));
+  }
 
   /* Words underlined, with no box to see, but the box's height, so a link in a row of buttons sits on their line. */
   .s1-btn--link {
@@ -64,8 +82,13 @@
 
   .s1-btn:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) { .s1-btn:active:not(:disabled) { transform: none; } }
+  /* Forced colours flatten the fills: a pressed toggle is drawn in the system's Highlight, on the selectors that
+     fill it (so they win), with its focus ring in the system's text colour. */
   @media (forced-colors: active) {
-    .s1-btn--ghost[aria-pressed="true"] { text-decoration: underline 2px; text-underline-offset: 5px; }
+    .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon, .s1-btn--chip)[aria-pressed="true"],
+    .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon, .s1-btn--chip)[aria-pressed="true"]:hover:not(:disabled) {
+      forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: CanvasText;
+    }
   }
 
   /* Chinese: a size down is still 12px, so the strokes hold; the words are never tracked. */
