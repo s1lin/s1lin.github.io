@@ -185,7 +185,9 @@ triangle, a cross, hatching, reverse), never in hue alone. An action button show
 an icon and a word (Button's `icon`, `iconEnd`; the verbs' lucide icons are listed
 on `/ui/#button`); the kit brings no icon set, and draws only its own marks (Copy's
 two sheets, Secret's eye). A head's controls are `ghost` buttons, with no line round
-them (`/ui/#head`). They add no npm
+them (`/ui/#head`). Under the pointer every button turns over, the ink and the paper
+changing places; a toggle (`aria-pressed`) keeps the switchers' rules (`/ui/#button`).
+They add no npm
 package beyond `clsx`. The issue's pages never load them: `vite.config.ts` puts
 only the items outside the `console` category in the stylesheet every page
 starts with, and a test fails if a page other than `/ui/` imports one.

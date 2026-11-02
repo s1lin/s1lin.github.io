@@ -1,9 +1,16 @@
+import { Moon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/ui/button";
 import { Mark } from "@/ui/mark";
 import { useDark } from "@/ui/use-dark";
 
 const CJK = /[぀-ヿ㐀-鿿]/;
 
+/**
+ * Night, on or off: "夜 · " and the moon, a toggle (aria-pressed) in the kit's filled design, so on night paper it
+ * sits on the chosen fill and on paper it is words that tint under the pointer. One label in both states: the fill
+ * says whether night is on. Its name is 夜 and "Night".
+ */
 function ThemeToggle() {
   const dark = useDark();
   const flip = () => {
@@ -16,9 +23,11 @@ function ThemeToggle() {
     }
   };
   return (
-    <button className="theme-toggle" type="button" aria-label="Switch between paper and night" onClick={flip}>
-      <span lang="ja">{dark ? "紙" : "夜"}</span>
-    </button>
+    <Button variant="ghost" size="sm" className="theme-toggle" aria-pressed={dark} iconEnd={<Moon />} onClick={flip}>
+      <span lang="ja">夜</span>
+      <span aria-hidden="true">·</span>
+      <span className="visually-hidden">Night</span>
+    </Button>
   );
 }
 
@@ -60,14 +69,12 @@ export function Runhead({
         <a className="runhead__brand" href={home}>
           <Mark className="runhead__mark" />
           <b>S1LIN</b>
-          <span lang="ja">設計</span>
         </a>
         <p className="runhead__now" aria-live="off">
           {ja && <b lang="ja">{ja}</b>}
           {ja && "  "}
           {en}
         </p>
-        <span className="runhead__vol">Vol.30 · 2026 Autumn</span>
         <ThemeToggle />
       </div>
     </header>

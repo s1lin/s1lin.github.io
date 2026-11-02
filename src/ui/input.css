@@ -25,8 +25,8 @@
   .s1-input__control:has(+ .s1-input__affix--end) { padding-right: 8px; }
   /*
    * An action after the box, outside it, on its line: the row is the box's height, and a Button in it is a ghost
-   * of that height (no line, no paper, no shadow, a tint under the pointer), centred with the box; a link Button
-   * stays words. Never a box drawn inside the box.
+   * of that height (no line, no paper, no shadow), centred with the box, that turns over under the pointer as a
+   * ghost does (the ink fill, its words in the paper); a link Button stays words. Never a box drawn inside the box.
    */
   .s1-input__row { display: flex; align-items: stretch; gap: 4px; box-sizing: border-box; width: 100%; min-width: 0; }
   .s1-input__row > .s1-input { flex: 1 1 auto; width: auto; }
@@ -38,11 +38,16 @@
   .s1-input__row--sm .s1-input__action > .s1-btn:not(.s1-btn--link) { padding: 0 8px; font-size: 11px; }
   .s1-input__row--md .s1-input__action .s1-btn__icon { width: 16px; height: 16px; }
   .s1-input__row--sm .s1-input__action .s1-btn__icon { width: 14px; height: 14px; }
-  .s1-input__action > .s1-btn:not(.s1-btn--link):hover:not(:disabled) { background-color: var(--s1-paper-2); }
+  .s1-input__action > .s1-btn:where(button, a[href], label, summary, [role="button"]):not(.s1-btn--link):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) { background-color: var(--s1-ink); color: var(--s1-paper); }
+  .s1-input__action > .s1-btn:where(button, a[href], label, summary, [role="button"]):not(.s1-btn--link):hover:not(:disabled, [aria-disabled="true"]) { border-color: var(--s1-ink); }
   .s1-input__action > .s1-btn:not(.s1-btn--link):active:not(:disabled) { transform: none; box-shadow: none; }
   .s1-input__action > .s1-btn:not(.s1-btn--link):disabled { opacity: 1; color: var(--s1-ink-3); }
   .s1-input__action > .s1-btn--link { align-self: center; padding: 0 8px; }
   .s1-input__action > .s1-btn:focus-visible { outline-offset: 0; }
+  /* Forced colours: under the pointer it turns over in the system's button colours, as every Button does there. */
+  @media (forced-colors: active) {
+    .s1-input__action > .s1-btn:where(button, a[href], label, summary, [role="button"]):not(.s1-btn--link):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) { background-color: ButtonText; border-color: ButtonText; color: ButtonFace; }
+  }
 
   .s1-input--sm { min-height: 30px; font-size: 14px; }
   .s1-input--sm .s1-input__control { padding-inline: 8px; }

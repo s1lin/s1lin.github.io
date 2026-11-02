@@ -2,6 +2,7 @@
  * Button (button.tsx). Every box is one height at its size, whatever its variant, its icon or its language: 40px,
  * and 30px a size down (test/heights.test.ts measures it in Chrome). The go button's shadow is drawn outside its
  * box and takes nothing from it. The press is a translate, so it holds still for readers who prefer reduced motion.
+ * Under the pointer a button turns over, the ink and the paper changing places (see "Under the pointer" below).
  */
 @layer components {
   .s1-btn { font: 500 12px/1 var(--s1-font-mono); cursor: pointer; }
@@ -24,11 +25,11 @@
   /*
    * Ghost: the box without its line or its paper, for the controls in a head or a toolbar, and an action
    * beside a stronger one. The line is there but clear, so the box keeps its size and shows in forced
-   * colours; the pointer tints it.
+   * colours; the pointer fills it with the ink. Its menu open (aria-expanded), it rests on the second paper.
    */
   .s1-btn--ghost { padding: 0 12px; background: transparent; border-color: transparent; }
   .s1-btn--ghost.s1-btn--sm { padding: 0 8px; }
-  .s1-btn--ghost:hover:not(:disabled), .s1-btn--ghost[aria-expanded="true"] { background-color: var(--s1-paper-2); }
+  .s1-btn--ghost[aria-expanded="true"] { background-color: var(--s1-paper-2); }
 
   /*
    * A button with aria-pressed is a toggle (a view, a filter, alerts on), and a toggle is a switcher: whatever
@@ -55,7 +56,7 @@
     color: var(--s1-ink); background: var(--s1-paper); border: 1px solid var(--s1-rule-strong); border-radius: 999px; text-decoration: none;
   }
   .s1-btn--chip.s1-btn--sm { min-height: 30px; padding: 0 10px 0 8px; }
-  .s1-btn--chip:hover, .s1-btn--chip[aria-expanded="true"] { background: var(--s1-paper-2); }
+  .s1-btn--chip[aria-expanded="true"] { background: var(--s1-paper-2); }
   /* A chip with aria-pressed is a filter, a switcher: no line, the pressed one filled as a pressed ghost is. */
   .s1-btn--chip[aria-pressed] { border: 0; padding: 0 15px 0 13px; background: none; color: var(--s1-ink-2); }
   .s1-btn--chip.s1-btn--sm[aria-pressed] { padding: 0 11px 0 9px; }
@@ -80,14 +81,52 @@
   .s1-btn--icon-only:not(.s1-btn--link, .s1-btn--chip) { width: 40px; padding: 0; flex: none; }
   .s1-btn--icon-only.s1-btn--sm:not(.s1-btn--link, .s1-btn--chip) { width: 30px; }
 
+  /*
+   * Under the pointer (owner, 2026-11-02: "the button hovering should have color flipping"): the ink and the paper
+   * change places, so the button under the pointer is the one in reverse, AA both ways in any theme.
+   *   go     the ink box turns to the paper, its words and its line to the ink; the accent shadow stays.
+   *   plain  the paper box fills with the ink, its words in the paper, its line the ink.
+   *   icon   as plain: the square fills with the ink and its mark is drawn in the paper.
+   *   ghost  inverse: no line and no paper to turn, so it takes the ink fill, its words in the paper (not a tint:
+   *          the second paper is too near the first to see).
+   *   chip   as plain, the pill filled with the ink.
+   *   link   words with no box to see: the ink fills the box's height and 6px either side of the words, which
+   *          turn to the paper with their line.
+   * Only what can be pressed turns (a <span> drawn as a chip does not), never a disabled one, and never a toggle
+   * (aria-pressed): a switcher keeps its rules, the others tinting and the pressed one keeping its chosen fill.
+   * The keyboard's ring stays outside the box. The colours ease over 120ms where motion is welcome. The line's
+   * colour is set apart from the fill, for every button under the pointer: a toggle's line is 0 wide, so it shows
+   * nothing there, and the rules that name a toggle (aria-pressed) never draw a line (lint: switchers-borderless).
+   */
+  .s1-btn:where(button, a[href], label, summary, [role="button"]):is(.s1-btn--plain, .s1-btn--icon, .s1-btn--ghost, .s1-btn--chip):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) {
+    background-color: var(--s1-ink); color: var(--s1-paper);
+  }
+  .s1-btn--go:where(button, a[href], label, summary, [role="button"]):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) {
+    background-color: var(--s1-paper); color: var(--s1-ink);
+  }
+  .s1-btn:where(button, a[href], label, summary, [role="button"]):is(.s1-btn--plain, .s1-btn--icon, .s1-btn--ghost, .s1-btn--chip, .s1-btn--go):hover:not(:disabled, [aria-disabled="true"]) {
+    border-color: var(--s1-ink);
+  }
+  .s1-btn--link:where(button, a[href], label, summary, [role="button"]):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) {
+    background-color: var(--s1-ink); color: var(--s1-paper); box-shadow: -6px 0 0 var(--s1-ink), 6px 0 0 var(--s1-ink);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-btn { transition: background-color 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out; }
+    .s1-btn--link { transition: background-color 120ms ease-out, color 120ms ease-out, box-shadow 120ms ease-out; }
+  }
+
   .s1-btn:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) { .s1-btn:active:not(:disabled) { transform: none; } }
   /* Forced colours flatten the fills: a pressed toggle is drawn in the system's Highlight, on the selectors that
-     fill it (so they win), with its focus ring in the system's text colour. */
+     fill it (so they win), with its focus ring in the system's text colour; a button under the pointer turns over
+     in the system's button colours (ButtonText behind ButtonFace words), with no shadow. */
   @media (forced-colors: active) {
     .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon, .s1-btn--chip)[aria-pressed="true"],
     .s1-btn:is(.s1-btn--plain, .s1-btn--ghost, .s1-btn--icon, .s1-btn--chip)[aria-pressed="true"]:hover:not(:disabled) {
       forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: CanvasText;
+    }
+    .s1-btn:where(button, a[href], label, summary, [role="button"]):is(.s1-btn--plain, .s1-btn--go, .s1-btn--icon, .s1-btn--ghost, .s1-btn--chip, .s1-btn--link):hover:not(:disabled, [aria-disabled="true"], [aria-pressed]) {
+      forced-color-adjust: none; background-color: ButtonText; color: ButtonFace; border-color: ButtonText; box-shadow: none; outline-color: CanvasText;
     }
   }
 

@@ -167,7 +167,7 @@ function Buttons() {
         </Button>
       </p>
       <p className="cap" aria-live="polite">
-        {last ? `Pressed ${last}: nothing is sent from this page.` : "One size a row: 40px, then 30px; the head's controls; the same in Chinese (lang=\"zh-CN\"), at 40px and at 30px. Press one; the chip opens and closes, EN and 中文 take turns."}
+        {last ? `Pressed ${last}: nothing is sent from this page.` : "One size a row: 40px, then 30px; the head's controls; the same in Chinese (lang=\"zh-CN\"), at 40px and at 30px. Point at one and it turns over, the ink and the paper changing places (not Save: it is disabled). Press one; the chip opens and closes, EN and 中文 take turns."}
       </p>
       <figure className="ud-verbs">
         <figcaption className="cap">An action and its icon, by lucide-react&rsquo;s name:</figcaption>
