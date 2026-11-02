@@ -34,6 +34,7 @@ import { EmptyState } from "@/ui/empty-state";
 import { Field, Fieldset } from "@/ui/field";
 import { Glyph, type Status } from "@/ui/glyph";
 import { Input } from "@/ui/input";
+import { LangSwitch, type LangSwitchLinkProps } from "@/ui/lang-switch";
 import { Menu } from "@/ui/menu";
 import { Meter } from "@/ui/meter";
 import { Notice } from "@/ui/notice";
@@ -305,14 +306,14 @@ export function RadioDemo() {
           ]}
         />
         <RadioGroup
-          legend="语言"
+          legend="视图"
           hideLegend
           variant="segmented"
           quiet
-          defaultValue="zh"
+          defaultValue="chart"
           options={[
-            { value: "en", label: <span lang="en">EN</span> },
-            { value: "zh", label: "中文" },
+            { value: "chart", label: "图表" },
+            { value: "table", label: "表格" },
           ]}
         />
       </div>
@@ -723,6 +724,62 @@ export function SideNavDemo() {
   );
 }
 
+/** English and Chinese, each written in itself. */
+const LANGS = [
+  { value: "en", label: "EN", name: "English", lang: "en" },
+  { value: "zh", label: "中文", lang: "zh-CN" },
+];
+
+/** A link that stays on this page: the example's links mark a language without leaving the docs. */
+const stay = ({ onClick, ...link }: LangSwitchLinkProps) => (
+  <a
+    {...link}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick(e);
+    }}
+  />
+);
+
+/** One row of the example: what it shows, in the row's own language, and the switch. */
+function LangRow({ name, zh, size, links = false }: { name: [string, string]; zh?: boolean; size?: "md" | "sm" | "xs"; links?: boolean }) {
+  const [lang, setLang] = useState(zh ? "zh" : "en");
+  const inZh = lang === "zh";
+  return (
+    <div className="ud-langs" lang={inZh ? "zh-CN" : "en"}>
+      <span className="ud-langs__name">{inZh ? name[1] : name[0]}</span>
+      <LangSwitch
+        label={inZh ? "语言" : "Language"}
+        options={links ? LANGS.map((l) => ({ ...l, href: "#lang-switch" })) : LANGS}
+        value={lang}
+        onValueChange={setLang}
+        renderLink={stay}
+        size={size}
+      />
+    </div>
+  );
+}
+
+/** The switch as buttons and as links, at its three heights, in English and in Chinese, on paper and at night. */
+export function LangSwitchDemo() {
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <div className="ud-langbox">
+        <LangRow name={["Buttons · a head, sm 30px", "按钮 · 页头，sm 30px"]} />
+        <LangRow name={["Buttons · a head, sm 30px", "按钮 · 页头，sm 30px"]} zh />
+        <LangRow name={["Links · a page in each language", "链接 · 每种语言一页"]} links />
+        <LangRow name={["A phone's sheet · md 40px", "手机菜单 · md 40px"]} size="md" />
+        <LangRow name={["A foot · xs 24px", "页脚 · xs 24px"]} size="xs" links />
+      </div>
+      <div className="ud-langbox" data-theme="dark">
+        <LangRow name={["At night · sm 30px", "夜间 · sm 30px"]} />
+        <LangRow name={["At night · xs 24px", "夜间 · xs 24px"]} size="xs" zh />
+      </div>
+      <Said text="Press a language: it takes the ink and the dot, the other goes dim. No line, box or fill round any of them, nor round the group; the pointer raises a dim one. The rows are on their own, so each keeps its language." />
+    </div>
+  );
+}
+
 // ------------------------------------------------------------------ overlays
 
 export function DialogDemo() {
@@ -1113,16 +1170,7 @@ export function WordsDemo() {
   const [page, setPage] = useState(3);
   return (
     <div className="ud-stack ud-stack--wide">
-      <RadioGroup
-        legend="Language"
-        variant="segmented"
-        value={lang}
-        onValueChange={setLang}
-        options={[
-          { value: "en", label: "English" },
-          { value: "zh", label: <span lang="zh-CN">中文</span> },
-        ]}
-      />
+      <LangSwitch label="Language" options={LANGS} value={lang} onValueChange={setLang} size="md" />
       <S1Words words={lang === "zh" ? ZH : {}}>
         <div className="ud-stack ud-stack--wide" lang={lang === "zh" ? "zh-CN" : "en"}>
           <Secret value={KEY} label={lang === "zh" ? "API 密钥" : "API key"} keep={[6, 4]} />

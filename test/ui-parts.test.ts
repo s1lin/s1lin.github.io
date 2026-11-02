@@ -389,6 +389,28 @@ test("Dialog, Menu, Tabs, Toaster: closed overlays are in the server HTML, wired
   assert.equal(html(h(Toaster, {})), '<section class="s1-toaster s1-toaster--bottom-end" aria-label="Notifications"><ol aria-live="polite"></ol></section>');
 });
 
+test("LangSwitch: a named group in a span; buttons with the one in force pressed, or links with it current, each in its own language", async () => {
+  const { LangSwitch } = await part("lang-switch");
+  const LANGS = [
+    { value: "en", label: "EN", name: "English", lang: "en" },
+    { value: "zh", label: "中文", name: "中文", lang: "zh-CN" },
+  ];
+  assert.equal(
+    html(h(LangSwitch, { label: "Language", options: LANGS, value: "en" })),
+    '<span role="group" aria-label="Language" class="s1-lang s1-lang--sm">' +
+      '<button type="button" class="s1-lang__item" lang="en" aria-label="English" aria-pressed="true"><span class="s1-lang__label">EN</span></button>' +
+      '<button type="button" class="s1-lang__item" lang="zh-CN" aria-pressed="false"><span class="s1-lang__label">中文</span></button></span>',
+  );
+  const links = html(h(LangSwitch, { label: "语言", size: "xs", options: LANGS.map((l) => ({ ...l, href: `/${l.value}/` })), value: "zh" }));
+  assert.match(links, /^<span role="group" aria-label="语言" class="s1-lang s1-lang--xs">/);
+  assert.match(links, /<a href="\/en\/" class="s1-lang__item" lang="en" hrefLang="en" aria-label="English">/);
+  assert.match(links, /<a href="\/zh\/" class="s1-lang__item" lang="zh-CN" hrefLang="zh-CN" aria-current="page">/);
+  assert.doesNotMatch(links, /aria-pressed/);
+  // a router's link is handed the same props
+  const routed = html(h(LangSwitch, { label: "Language", options: LANGS.map((l) => ({ ...l, href: `#${l.value}` })), value: "en", renderLink: ({ href, ...link }: { href: string }) => h("a", { "data-to": href, ...link }) }));
+  assert.match(routed, /<a data-to="#en" class="s1-lang__item" lang="en" hrefLang="en" aria-label="English" aria-current="page">/);
+});
+
 test("SideNav: a named nav of lists; the current item says page, the sections round it true; heads, actions, icons, status words, folding sections", async () => {
   const { SideNav } = await part("side-nav");
   const svg = h("svg", { viewBox: "0 0 16 16" });
