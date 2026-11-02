@@ -408,6 +408,10 @@ export function Demo({ id }: { id: string }) {
       return <demos.PanelDemo />;
     case "empty-state":
       return <demos.EmptyDemo />;
+    case "metro-map":
+      return <demos.MetroDemo />;
+    case "timetable":
+      return <demos.TimetableDemo />;
 
     case "dialog":
       return <demos.DialogDemo />;

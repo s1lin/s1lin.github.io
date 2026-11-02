@@ -105,6 +105,11 @@
   .s1-table__chevron { display: block; width: 8px; height: 8px; flex: none; background: currentColor; clip-path: polygon(25% 0, 85% 50%, 25% 100%); transition: transform 0.15s ease; }
   .s1-table__toggle[aria-expanded="true"] .s1-table__chevron, .s1-table__all[aria-expanded="true"] .s1-table__chevron { transform: rotate(90deg); }
 
+  /* A row's station on its rail (Table's `rail`): the rail first, the cell's words beside it. */
+  .s1-table__station { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+  .s1-table__station-body { min-width: 0; }
+  .s1-table__gmark { display: flex; flex: none; align-items: center; }
+
   /* Expand all: above the table, at its end. */
   .s1-table__bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
   .s1-table__all {

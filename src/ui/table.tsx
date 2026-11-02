@@ -54,6 +54,8 @@ export interface RowGroup<Row> {
   /** The group's name in words, for its toggle; without it the toggle is named by the heading. */
   label?: string;
   rows: Row[];
+  /** Before the heading, after the toggle: a line's pill, a maker's mark (a Timetable's band). */
+  mark?: ReactNode;
   /** One row across the group when it has no rows. */
   empty?: ReactNode;
   /** Added to the group's <tbody>. */
@@ -121,6 +123,8 @@ export type TableProps<Row> = Body<Row> & {
   rowHeader?: string;
   /** Attributes for each row's <tr>: a class, data attributes, a click. */
   rowProps?: (row: Row, index: number) => RowProps;
+  /** Drawn first in each row's header cell: a station on a rail (TimetableRail), joined to the rows above and below. */
+  rail?: (row: Row, index: number) => ReactNode;
   /** Shown in one row across the table when there are no rows: words, or an EmptyState (the words' `empty` by default). */
   empty?: ReactNode;
   /** A mark for the empty row (an app's one-colour logo): the words are then set as a small EmptyState under it. */
@@ -193,6 +197,7 @@ export function Table<Row>(props: TableProps<Row>) {
     rowKey,
     rowHeader,
     rowProps,
+    rail,
     empty,
     emptyMark,
     loading = false,
@@ -246,13 +251,22 @@ export function Table<Row>(props: TableProps<Row>) {
       const value = col.cell ? col.cell(r, i) : ((r as Record<string, unknown>)[col.key] as ReactNode);
       const wide = Math.max(1, Math.min(col.span?.(r, i) ?? 1, columns.length - c));
       const attrs = { className: cls(col) || undefined, title: col.title?.(r, i), colSpan: wide > 1 ? wide : undefined };
-      const content = col.clamp ? (
+      const shown = col.clamp ? (
         <span className="s1-table__clamp" style={{ WebkitLineClamp: col.clamp } as CSSProperties}>
           {value}
         </span>
       ) : (
         value
       );
+      const content =
+        rail && col.key === head ? (
+          <span className="s1-table__station">
+            {rail(r, i)}
+            <span className="s1-table__station-body">{shown}</span>
+          </span>
+        ) : (
+          shown
+        );
       cells.push(
         col.key === head ? (
           <th key={col.key} scope="row" {...attrs}>
@@ -297,6 +311,7 @@ export function Table<Row>(props: TableProps<Row>) {
                   <span className="s1-table__chevron" aria-hidden="true" />
                 </button>
               )}
+              {g.mark != null && g.mark !== false && <div className="s1-table__gmark">{g.mark}</div>}
               <div id={headingId} className="s1-table__gheading">
                 {heading}
               </div>

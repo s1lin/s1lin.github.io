@@ -1,0 +1,134 @@
+/*
+ * MetroMap (metro-map.tsx). Round-capped tracks in each line's colour from a roundel with the line's mark, stations
+ * as rings of paper in that colour, a dot at the terminus, small trains in the ink. A line's colour arrives as
+ * --s1-metro-hue on its group, from the app; without one a line is drawn in the ink. Zones are bands of paper-2 with
+ * a dashed hairline at each edge; an interchange is a bar of paper outlined in the ink, behind the tracks, with a
+ * ring for each member and the fare on a tag. Labels in mono, values in the line's colour. Nothing scrolls sideways:
+ * under 720px the axis runs down.
+ */
+@layer components {
+  .s1-metro { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 24px; min-width: 0; margin: 0; color: var(--s1-ink); color-scheme: var(--s1-scheme); }
+
+  /* the cue above: "← Cheaper ——— Pricier →" */
+  .s1-metro__cue {
+    display: flex; flex: 1 0 100%; align-items: center; gap: 12px; margin: 0 0 6px;
+    font: 500 10.5px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-ink-2);
+  }
+  .s1-metro__rule { flex: 1; height: 1px; background: linear-gradient(to right, var(--s1-rule), var(--s1-rule-strong)); }
+
+  .s1-metro__frame { position: relative; flex: 1 0 100%; box-sizing: border-box; min-width: 0; max-width: 100%; }
+  .s1-metro__map { display: block; width: 100%; height: auto; overflow: visible; }
+  .s1-metro__empty { padding-block: 8px; }
+
+  /* zones and ticks */
+  .s1-metro__zone rect { fill: none; }
+  .s1-metro__zone[data-shade] rect { fill: var(--s1-paper-2); }
+  .s1-metro__zone-edge { stroke: var(--s1-ink-3); stroke-width: 0.75; stroke-dasharray: 2 4; fill: none; }
+  .s1-metro__zone-name { fill: var(--s1-ink-2); font: 500 10px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+  .s1-metro__tick line { stroke: var(--s1-ink-3); stroke-width: 0.75; }
+  .s1-metro__tick text { fill: var(--s1-ink-3); font: 400 9.5px/1 var(--s1-font-mono); font-variant-numeric: tabular-nums; }
+
+  /* a line */
+  .s1-metro__hit { fill: none; stroke: transparent; stroke-width: 26; pointer-events: stroke; }
+  .s1-metro__track { fill: none; stroke: var(--s1-metro-hue, var(--s1-ink)); stroke-width: 4; stroke-linecap: round; pointer-events: none; transition: stroke-width 0.2s ease; }
+  .s1-metro__approach { fill: none; stroke: var(--s1-metro-hue, var(--s1-ink)); stroke-width: 1.25; stroke-dasharray: 1.5 4; stroke-linecap: round; opacity: 0.8; pointer-events: none; }
+  .s1-metro__end { fill: var(--s1-metro-hue, var(--s1-ink)); pointer-events: none; }
+  .s1-metro__roundel { fill: var(--s1-paper); stroke: var(--s1-metro-hue, var(--s1-ink)); stroke-width: 2; }
+  .s1-metro__mark { color: var(--s1-ink); }
+  .s1-metro__letter { fill: var(--s1-ink); font: 600 12px/1 var(--s1-font-mono); }
+  .s1-metro__train { fill: var(--s1-ink); }
+
+  /* a station: a ring of paper, a square one when it is priced on another figure; its words beside it */
+  .s1-metro__spot { fill: transparent; stroke: none; pointer-events: all; }
+  .s1-metro__stop { fill: var(--s1-paper); stroke: var(--s1-metro-hue, var(--s1-ink)); stroke-width: 2.5; }
+  .s1-metro__label { fill: var(--s1-ink); font: 400 11px/1 var(--s1-font-mono); }
+  .s1-metro__value { fill: var(--s1-metro-hue, var(--s1-ink)); font: 500 11px/1 var(--s1-font-mono); font-variant-numeric: tabular-nums; }
+  .s1-metro__leader { fill: none; stroke: var(--s1-ink-3); stroke-width: 0.75; pointer-events: none; }
+  .s1-metro__station { cursor: default; outline: none; }
+  a.s1-metro__station { cursor: pointer; }
+  .s1-metro__station:is(:hover, [data-lit]) .s1-metro__stop { fill: var(--s1-metro-hue, var(--s1-ink)); }
+  .s1-metro__station:is(:hover, [data-lit]) .s1-metro__label { text-decoration: underline; }
+  .s1-metro__station:focus-visible .s1-metro__stop, .s1-metro__station:focus-visible .s1-metro__xring { stroke: var(--s1-ink); stroke-width: 3.5; }
+  .s1-metro__station:focus-visible .s1-metro__label { font-weight: 600; text-decoration: underline; }
+
+  /* an interchange: the bar behind the tracks, rings for its members, the fare on a tag */
+  .s1-metro__xbar { fill: var(--s1-paper); stroke: var(--s1-ink); stroke-width: 1.5; transition: stroke-width 0.2s ease; }
+  .s1-metro__xbar[data-lit] { stroke-width: 2.5; }
+  .s1-metro__xhit { fill: transparent; stroke: none; }
+  .s1-metro__xstem { stroke: var(--s1-ink); stroke-width: 1; }
+  .s1-metro__xring { fill: var(--s1-paper); stroke: var(--s1-ink); stroke-width: 2.5; }
+  .s1-metro__xring[data-lit] { fill: var(--s1-metro-hue, var(--s1-ink)); }
+  .s1-metro__xtag rect { fill: var(--s1-paper); stroke: var(--s1-ink); stroke-width: 1; }
+  .s1-metro__xtag text { fill: var(--s1-ink); font: 600 10px/1 var(--s1-font-mono); font-variant-numeric: tabular-nums; }
+  .s1-metro__xhead { fill: var(--s1-ink); font: 600 9.5px/1 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .s1-metro__interchange { cursor: help; outline: none; }
+  .s1-metro__interchange:is(:hover, :focus-visible, [data-lit]) .s1-metro__xtag rect { fill: var(--s1-ink); }
+  .s1-metro__interchange:is(:hover, :focus-visible, [data-lit]) .s1-metro__xtag text { fill: var(--s1-paper); }
+  .s1-metro__interchange:focus-visible .s1-metro__xhead { text-decoration: underline; }
+
+  /* A line lights up under the pointer or with a station lit; the others step back. */
+  .s1-metro__line, .s1-metro__interchange { transition: opacity 0.2s ease; }
+  .s1-metro__map:is([data-lit], :has(.s1-metro__line:hover)) .s1-metro__line:not([data-lit], :hover) { opacity: 0.22; }
+  .s1-metro__map:is([data-lit], :has(.s1-metro__line:hover)) .s1-metro__interchange:not([data-lit], :hover, :focus-visible) { opacity: 0.35; }
+  .s1-metro__line:is([data-lit], :hover) .s1-metro__track { stroke-width: 6.5; }
+
+  /* the tooltip: a hairline card with the line's colour as its offset shadow */
+  .s1-metro__tip {
+    --s1-metro-tx: -50%;
+    --s1-metro-ty: -100%;
+    position: absolute; z-index: 3; display: grid; gap: 3px; box-sizing: border-box; min-width: 9rem; max-width: min(20rem, 90vw); padding: 9px 11px 10px;
+    pointer-events: none; transform: translate(var(--s1-metro-tx), var(--s1-metro-ty));
+    background: var(--s1-paper); border: 1px solid var(--s1-rule-strong); box-shadow: 3px 3px 0 var(--s1-metro-hue, var(--s1-ink));
+  }
+  .s1-metro__tip[data-align="start"] { --s1-metro-tx: -16px; }
+  .s1-metro__tip[data-align="end"] { --s1-metro-tx: calc(-100% + 16px); }
+  .s1-metro__tip[data-below] { --s1-metro-ty: 0px; }
+  .s1-metro__tip-line { font: 500 10px/1.3 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-ink-2); }
+  .s1-metro__tip-station { display: grid; }
+  .s1-metro__tip-label { font: 500 12.5px/1.35 var(--s1-font-mono); color: var(--s1-ink); overflow-wrap: anywhere; }
+  .s1-metro__tip-value { font: 600 13px/1.35 var(--s1-font-mono); font-variant-numeric: tabular-nums; color: var(--s1-metro-hue, var(--s1-ink)); }
+  .s1-metro__tip-note { font: 400 12px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); }
+  .s1-metro__tip-list { display: grid; gap: 2px; margin: 2px 0 0; padding: 0; list-style: none; }
+  .s1-metro__tip-list li { display: flex; gap: 8px; align-items: baseline; }
+  .s1-metro__tip-list i { flex: none; box-sizing: border-box; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--s1-metro-hue, var(--s1-ink)); background: var(--s1-paper); }
+  .s1-metro__tip-list .s1-metro__tip-label { font-size: 11.5px; font-weight: 400; }
+  .s1-metro__tip-list .s1-metro__tip-value { margin-left: auto; font-size: 11.5px; font-weight: 400; color: var(--s1-ink-2); }
+
+  /* while the data comes: the lines as ghosts, in the hairline */
+  .s1-metro__ghost { display: block; }
+  .s1-metro__ghost line { stroke: var(--s1-rule); stroke-width: 4; stroke-linecap: round; }
+  .s1-metro__ghost circle { fill: var(--s1-paper); stroke: var(--s1-rule); stroke-width: 2.5; }
+
+  .s1-metro__caption { flex: 1 1 20rem; order: 1; min-width: 0; margin-top: 12px; font: 400 13px/1.5 var(--s1-font-sans); color: var(--s1-ink-2); }
+  .s1-metro__legend {
+    flex: 0 1 auto; order: 2; margin: 12px 0 0 auto; min-width: 0;
+    font: 500 10.5px/1.5 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2);
+  }
+  .s1-metro[data-layout="down"] .s1-metro__legend { margin-left: 0; }
+  .s1-metro__glyph { display: inline-block; box-sizing: border-box; width: 9px; height: 9px; margin: 0 4px -1px 0; border: 2px solid var(--s1-ink); border-radius: 50%; background: var(--s1-paper); }
+  .s1-metro__glyph[data-kind="input"] { border-radius: 1.5px; }
+  .s1-metro__glyph[data-kind="interchange"] { width: 7px; height: 13px; margin-bottom: -3px; border-width: 1.5px; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s1-metro__trains { display: none; }
+    .s1-metro__line, .s1-metro__interchange, .s1-metro__track, .s1-metro__xbar { transition: none; }
+  }
+  @media (forced-colors: active) {
+    .s1-metro__map { forced-color-adjust: none; }
+    .s1-metro__zone rect, .s1-metro__zone[data-shade] rect { fill: none; }
+    .s1-metro__zone-edge, .s1-metro__tick line, .s1-metro__leader, .s1-metro__xstem { stroke: CanvasText; }
+    .s1-metro__track, .s1-metro__approach, .s1-metro__stop, .s1-metro__roundel, .s1-metro__xbar, .s1-metro__xring, .s1-metro__xtag rect { stroke: CanvasText; }
+    .s1-metro__stop, .s1-metro__roundel, .s1-metro__xbar, .s1-metro__xring, .s1-metro__xtag rect { fill: Canvas; }
+    .s1-metro__xhit { fill: transparent; stroke: none; }
+    .s1-metro__end, .s1-metro__train, .s1-metro__zone-name, .s1-metro__tick text, .s1-metro__label, .s1-metro__value, .s1-metro__letter, .s1-metro__xtag text, .s1-metro__xhead { fill: CanvasText; }
+    .s1-metro__mark { color: CanvasText; }
+    .s1-metro__station:is(:hover, [data-lit]) .s1-metro__stop, .s1-metro__xring[data-lit] { fill: Highlight; }
+    .s1-metro__glyph { border-color: CanvasText; background: Canvas; }
+    .s1-metro__tip { box-shadow: none; border-color: CanvasText; }
+  }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend):lang(zh),
+  :is(.s1-metro__cue, .s1-metro__tip-line, .s1-metro__legend) [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+  :is(.s1-metro__zone-name, .s1-metro__xhead):lang(zh) { font-size: 11px; letter-spacing: 0; text-transform: none; }
+}

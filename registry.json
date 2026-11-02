@@ -808,6 +808,66 @@
       ]
     },
     {
+      "name": "metro-map",
+      "type": "registry:ui",
+      "title": "MetroMap",
+      "description": "A metro map of prices in SVG: lines from a roundel with their mark, stations at their place on a log axis with labels placed by a collision pass, fare zones behind, interchanges where lines meet at one fare (a bar behind the tracks, rings, a tag), twin stops; a strip map under 720px, nothing scrolling sideways. Trains (never under reduced motion), tooltips, and lit/onLit to light a table's rows and be lit by them.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/empty-state.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/metro-map.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/metro-map.tsx"
+        },
+        {
+          "path": "src/ui/metro-map.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/metro-map.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "timetable",
+      "type": "registry:ui",
+      "title": "Timetable",
+      "description": "The kit's Table in a MetroMap's hand, a departures board: bands in a line's colour with its pill (TimetableMark), a station on a rail at the start of each row (TimetableRail), mono figures of one width; rows lit from the map, the priced-from row's ring filled. Not a separate data path: Table's props as they are.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/table.json",
+        "https://s1lin.tokensbeat.com/r/metro-map.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/timetable.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/timetable.tsx"
+        },
+        {
+          "path": "src/ui/timetable.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/timetable.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
