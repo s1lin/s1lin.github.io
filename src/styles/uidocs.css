@@ -347,6 +347,14 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-switchers__set { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .ud-switchers__name { margin: 0; font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); }
 
+/* The overlays' examples (Popover, Dropdown, Combobox): a box in English on paper and one in Chinese at night. */
+.ud-overlays { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); border-top: 0.5px solid var(--s1-rule); }
+.ud-overlays__box { display: grid; gap: 12px; align-content: start; min-width: 0; padding: 16px; background: var(--s1-paper); color: var(--s1-ink); }
+.ud-overlays__name { margin: 0; font: 500 11px/1.4 var(--s1-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--s1-ink-2); }
+.ud-overlays__name:lang(zh) { font-size: 12px; letter-spacing: 0; text-transform: none; }
+.ud-pop { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; min-width: 180px; }
+.ud-pop dt { font: 500 12px/1.5 var(--s1-font-mono); }
+.ud-pop dd { margin: 0; color: var(--s1-ink-2); }
 /* The language switch's rows: what each shows, then the switch; a box of them at night in the kit's own tokens. */
 .ud-langbox { display: grid; background: var(--s1-paper); color: var(--s1-ink); border-top: 0.5px solid var(--s1-rule); }
 .ud-langs { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 8px 12px; border-bottom: 0.5px solid var(--s1-rule); }

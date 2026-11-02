@@ -1,0 +1,16 @@
+/* Popover (popover.tsx): a hairline panel in the top layer, an offset plate behind, as Menu's list; never taller than
+   the room it was given (--s1-popover-room, set on it as it opens), and scrolling inside when its content is. */
+@layer components {
+  .s1-popover {
+    position: fixed; inset: auto; z-index: 1000; display: block; box-sizing: border-box; margin: 0;
+    max-width: min(360px, calc(100vw - 16px)); max-height: var(--s1-popover-room, 80vh);
+    overflow: auto; overscroll-behavior: contain; padding: 12px;
+    border: 1px solid var(--s1-rule-strong); border-radius: 0; background: var(--s1-paper); color: var(--s1-ink); color-scheme: var(--s1-scheme);
+    font: 400 14px/1.5 var(--s1-font-sans);
+    box-shadow: 6px 6px 0 -1px var(--s1-paper-2), 6px 6px 0 0 var(--s1-rule);
+  }
+  .s1-popover[hidden] { display: none; }
+  /* the panel takes focus itself when nothing inside asks for it, as a dialog's box does: its frame already says where it is */
+  .s1-popover:focus { outline: none; }
+  @media (forced-colors: active) { .s1-popover { border-color: CanvasText; } }
+}

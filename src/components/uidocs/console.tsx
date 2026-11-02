@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useMemo, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import {
   Ban,
   BookOpen,
+  CalendarDays,
   Check,
   Clapperboard,
   Code as CodeIcon,
@@ -9,6 +10,7 @@ import {
   FileDown,
   Folder,
   Image as ImageIcon,
+  Keyboard,
   KeyRound,
   MessageSquare,
   PanelLeftClose,
@@ -41,6 +43,7 @@ import { MetroGlyph, MetroMap, metroHue, type MetroAxis, type MetroColour, type 
 import { Notice } from "@/ui/notice";
 import { Pagination } from "@/ui/pagination";
 import { Panel } from "@/ui/panel";
+import { Popover } from "@/ui/popover";
 import { RadioGroup } from "@/ui/radio-group";
 import { Secret } from "@/ui/secret";
 import { Select } from "@/ui/select";
@@ -1271,6 +1274,69 @@ export function MenuDemo() {
       </p>
       <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Open one with the mouse or with ↓, move with the arrows, type a letter, Esc to close."} />
     </>
+  );
+}
+
+/** An overlay's example twice: in English on paper, and in Chinese at night, each in its own language and tokens. */
+function Overlays({ children }: { children: (zh: boolean) => ReactNode }) {
+  return (
+    <div className="ud-overlays">
+      <section className="ud-overlays__box" lang="en" aria-label="On paper, in English">
+        <p className="ud-overlays__name">On paper · English</p>
+        {children(false)}
+      </section>
+      <section className="ud-overlays__box" lang="zh-CN" data-theme="dark" aria-label="夜间，中文">
+        <p className="ud-overlays__name">夜间 · 中文</p>
+        {children(true)}
+      </section>
+    </div>
+  );
+}
+
+const RANGES = [
+  { value: "24h", en: "Last 24 hours", zh: "最近 24 小时" },
+  { value: "7d", en: "Last 7 days", zh: "最近 7 天" },
+  { value: "30d", en: "Last 30 days", zh: "最近 30 天" },
+];
+
+/** Help that opens beside its button and a range picker the page keeps, closed by a choice. */
+function PopoverPair({ zh }: { zh: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [range, setRange] = useState("7d");
+  const chosen = RANGES.find((r) => r.value === range)!;
+  return (
+    <div className="ud-row">
+      <Popover trigger={<Button icon={<Keyboard />}>{zh ? "按键" : "Keys"}</Button>} label={zh ? "按键说明" : "Keyboard help"} align="start">
+        <dl className="ud-pop">
+          <dt>← →</dt>
+          <dd>{zh ? "移动" : "Move"}</dd>
+          <dt>Space</dt>
+          <dd>{zh ? "跳" : "Jump"}</dd>
+          <dt>Z</dt>
+          <dd>{zh ? "撤销" : "Undo"}</dd>
+        </dl>
+      </Popover>
+      <Popover open={open} onOpenChange={setOpen} trigger={<Button icon={<CalendarDays />}>{zh ? chosen.zh : chosen.en}</Button>} label={zh ? "时间范围" : "Range"} align="end">
+        <RadioGroup
+          legend={zh ? "时间范围" : "Range"}
+          value={range}
+          onValueChange={(v) => {
+            setRange(v);
+            setOpen(false);
+          }}
+          options={RANGES.map((r) => ({ value: r.value, label: zh ? r.zh : r.en }))}
+        />
+      </Popover>
+    </div>
+  );
+}
+
+export function PopoverDemo() {
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <Overlays>{(zh) => <PopoverPair zh={zh} />}</Overlays>
+      <Said text="Open one with the mouse, or Tab to it and press Enter: focus goes into the panel. Esc closes it and gives focus back; a press outside, or Tab past its end, closes it too. Near the foot of the window it opens above its button." />
+    </div>
   );
 }
 

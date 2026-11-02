@@ -1498,6 +1498,45 @@ const LANGS = [
     ],
   },
   {
+    id: "popover",
+    name: "Popover",
+    group: "overlays",
+    item: "popover",
+    exports: ["Popover", "PopoverProps"],
+    summary:
+      "A panel that opens beside its button, over the page but not modal: a short form, a date picker, a list to choose from, help for the controls. It sits in the top layer (the Popover API), so no frame clips it; it opens on its side, or the other when there is no room, and is never taller than the room it has. Esc, a press outside or focus moving elsewhere closes it.",
+    example: "live",
+    usage: `import { Popover } from "@/components/s1lin/popover";
+
+<Popover trigger={<Button icon={<CircleHelp />}>Keys</Button>} side="bottom" align="end" label="Keyboard help">
+  <p>← → move, Space jumps, Z undoes.</p>
+</Popover>
+
+// kept by the app, closed after a choice
+<Popover open={open} onOpenChange={setOpen} trigger={<Button>{date}</Button>} align="start">
+  <Calendar value={date} onChange={(d) => { setDate(d); setOpen(false); }} />
+</Popover>`,
+    props: [
+      { name: "trigger", type: "ReactElement", required: true, desc: "The one element that opens it: a `<button>` or a Button. It is given `aria-haspopup=\"dialog\"`, `aria-expanded`, `aria-controls`, an id when it has none, and a click that opens and closes the panel after its own `onClick` (which may `preventDefault()` to keep it as it is)." },
+      { name: "children", type: "ReactNode", desc: "What the panel holds; mounted only while it is open." },
+      { name: "open", type: "boolean", desc: "Open or not, when the app keeps it." },
+      { name: "defaultOpen", type: "boolean", default: "false", desc: "Open at first, when the popover keeps its own state." },
+      { name: "onOpenChange", type: "(open: boolean) => void", desc: "Called with the next state: the trigger pressed, Esc, a press outside, focus gone elsewhere." },
+      { name: "side", type: "\"bottom\" | \"top\"", default: "\"bottom\"", desc: "Below the trigger or above it; the other side when the panel does not fit and there is more room there." },
+      { name: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"center\"", desc: "Which edge of the trigger the panel lines up with, or its middle; kept 8px inside the screen either way." },
+      { name: "offset", type: "number", default: "6", desc: "Pixels between the trigger and the panel." },
+      { name: "label", type: "string", desc: "The panel's name (`aria-label`), when no heading inside names it." },
+      { name: "initialFocus", type: "RefObject<HTMLElement>", desc: "What to focus on opening; by default the first element with `data-autofocus`, else the panel itself." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "Enter or Space on the trigger opens it, and focus goes into the panel; Tab moves on through what is in it, and past its end closes it; Esc closes it and gives focus back to the trigger, and is kept from a Dialog around it." },
+      { label: "Accessibility", text: "A non-modal `dialog`, controlled by its trigger (`aria-expanded`, `aria-controls`); the page stays live. Closed with focus inside (Esc, or a choice that closes it), focus goes back to the trigger; closed by a press elsewhere, focus goes where the press puts it." },
+      { label: "Phone", text: "Kept 8px inside the screen and never wider than the screen less 16px; `--s1-popover-room`, set on the panel as it opens, is the height it has on its side, and caps it, so a long panel scrolls inside." },
+      { label: "Styles", text: "It sets no width: it is as wide as what it holds, up to 360px; give it a width, a padding or a taller cap in your own CSS, `max-height: min(560px, var(--s1-popover-room))`." },
+    ],
+  },
+  {
     id: "tabs",
     name: "Tabs",
     group: "overlays",
