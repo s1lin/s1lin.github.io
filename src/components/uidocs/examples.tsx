@@ -419,6 +419,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.DialogDemo />;
     case "menu":
       return <demos.MenuDemo />;
+    case "dropdown":
+      return <demos.DropdownDemo />;
     case "popover":
       return <demos.PopoverDemo />;
     case "side-nav":

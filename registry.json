@@ -927,6 +927,34 @@
       ]
     },
     {
+      "name": "dropdown",
+      "type": "registry:ui",
+      "title": "Dropdown",
+      "description": "A menu button built from parts, for menus Menu's data cannot say: items with icons, check and radio items, labelled groups, submenus and rows of your own; the ARIA menu button's keys, in the top layer.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/glyph.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/dropdown.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/dropdown.tsx"
+        },
+        {
+          "path": "src/ui/dropdown.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/dropdown.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
       "name": "popover",
       "type": "registry:ui",
       "title": "Popover",

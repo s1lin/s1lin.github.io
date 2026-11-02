@@ -174,7 +174,9 @@ never inside it), Textarea, Select, Checkbox, RadioGroup (a list, cards, or a
   nested and collapsible; a rail of icons; on a phone one bar that opens the tree
   as a sheet).
 - **Overlays**: Dialog (the native `<dialog>`), Menu (the ARIA menu button, in the
-  top layer), Popover (a panel beside its button, not modal, in the top layer), Tabs,
+  top layer), Dropdown (a menu button built from parts: icons, check and radio items,
+  labelled groups, submenus, rows of your own), Popover (a panel beside its button, not
+  modal, in the top layer), Tabs,
   Toast (`toast()` and one `<Toaster />`).
 - **Feedback**: Notice, Spinner, Skeleton.
 - **Text and keys**: Code, Copy (with a fallback where the Clipboard API is not
