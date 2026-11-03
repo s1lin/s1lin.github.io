@@ -457,7 +457,9 @@ spent (cache reads, fresh input, cache writes, output), each agent's value
 beside it (`src/components/TokenSkyline.tsx`). Money is the cost
 cc-switch recorded; rows it left at $0 for want of a price are priced from the
 fullest price table among the machines. `scripts/token-data.py` counts them from
-cc-switch's usage database on each machine (this one, and others over SSH) and
+cc-switch's usage database on each machine (this one, others over SSH, and ones
+SSH cannot reach through a `.json` made there: its sums from `--tally`, or the
+`tokens.json` this script wrote there, added day by day) and
 writes only the totals, per agent per day, per model per day (the models
 and their companies named in `FAMILIES`, Claude model by model, the rest as
 Other) and per agent per kind, to
@@ -469,6 +471,7 @@ Keep the CSVs out of the repo:
 ```bash
 python3 -I scripts/token-data.py ~/.cc-switch/cc-switch.db ssh://user@host:port/root/.cc-switch/cc-switch.db
 python3 -I scripts/token-data.py ... --sync   # first bring in the latest session logs
+python3 -I scripts/token-data.py ~/.cc-switch/cc-switch.db other-machine.json   # a machine without SSH
 ```
 
 The machines are private, so the deploy workflow cannot run this; run it, then

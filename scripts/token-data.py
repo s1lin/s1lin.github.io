@@ -12,9 +12,11 @@ Usage:
 
 A SOURCE is a path to a cc-switch.db, ssh://user@host[:port]/path/to/cc-switch.db
 for one on another machine (the script runs itself there with python3, so
-nothing is copied), or a .json file of the same sums made on a machine this
-one cannot reach (`python3 -I - --tally <db> < token-data.py > x.json` there,
-or the equivalent self-contained command). --sync first runs `cc-switch sessions sync-usage --all` on
+nothing is copied), or a .json file from a machine this one cannot reach: the
+same sums (`python3 -I - --tally <db> < token-data.py > x.json` there, or the
+equivalent self-contained command), or, when only that is to be had, the
+tokens.json this script wrote there, whose days, models and kinds are added
+as they stand. --sync first runs `cc-switch sessions sync-usage --all` on
 each source, to bring in session logs written since cc-switch last looked.
 
 --cursor adds Cursor, which cc-switch does not see, from the usage CSVs its
@@ -189,12 +191,14 @@ def main(argv):
         return 2
 
     tallies = []
+    charts = []  # another machine's tokens.json: per day and agent, and per day and model, already counted
     for source in sources:
         if source.startswith("ssh://"):
             tallies.append(run_remote(source, sync))
         elif source.endswith(".json"):
             with open(os.path.expanduser(source)) as f:
-                tallies.append(json.load(f))
+                loaded = json.load(f)
+            (charts if "days" in loaded and "apps" in loaded else tallies).append(loaded)
         else:
             if sync:
                 subprocess.run(["cc-switch", "sessions", "sync-usage", "--all", "--json"], check=True, stdout=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
@@ -221,6 +225,22 @@ def main(argv):
                     parts[k] += v
                     parts_by_app.setdefault(app, dict.fromkeys(PARTS, 0))[k] += v
 
+    for chart in charts:
+        for day, app_tokens, app_usd, model_tokens in chart["days"]:
+            for a, n, usd in zip(chart["apps"], app_tokens, app_usd):
+                mine = days.setdefault(day, {}).setdefault(a, [0, 0.0])
+                mine[0] += n
+                mine[1] += usd
+            by_fam = model_days.setdefault(day, {})
+            for name, n in zip(chart["models"], model_tokens):
+                fam = name if name in MODELS else "Other"
+                by_fam[fam] = by_fam.get(fam, 0) + n
+        for k in PARTS:
+            parts[k] += chart["parts"][k]
+        for a, kinds in chart["partsByApp"].items():
+            for k in PARTS:
+                parts_by_app.setdefault(a, dict.fromkeys(PARTS, 0))[k] += kinds[k]
+
     apps = sorted({a for cell in days.values() for a in cell}, key=lambda a: -sum(c.get(a, [0])[0] for c in days.values()))
     rows = [
         [
@@ -235,7 +255,7 @@ def main(argv):
     data = {
         "fetched": date.today().isoformat(),
         "machines": len(sources),
-        "cursor": bool(cursor),
+        "cursor": bool(cursor) or any(c.get("cursor") for c in charts),
         "apps": apps,
         "total": sum(sum(r[1]) for r in rows),
         "byApp": {a: sum(r[1][i] for r in rows) for i, a in enumerate(apps)},
