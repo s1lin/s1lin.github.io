@@ -10,9 +10,11 @@ nothing else: no providers, model ids, costs or hosts.
 Usage:
   python3 -I scripts/token-data.py SOURCE [SOURCE ...] [--sync] [--cursor CSV ...]
 
-A SOURCE is a path to a cc-switch.db, or ssh://user@host[:port]/path/to/cc-switch.db
+A SOURCE is a path to a cc-switch.db, ssh://user@host[:port]/path/to/cc-switch.db
 for one on another machine (the script runs itself there with python3, so
-nothing is copied). --sync first runs `cc-switch sessions sync-usage --all` on
+nothing is copied), or a .json file of the same sums made on a machine this
+one cannot reach (`python3 -I - --tally <db> < token-data.py > x.json` there,
+or the equivalent self-contained command). --sync first runs `cc-switch sessions sync-usage --all` on
 each source, to bring in session logs written since cc-switch last looked.
 
 --cursor adds Cursor, which cc-switch does not see, from the usage CSVs its
@@ -190,6 +192,9 @@ def main(argv):
     for source in sources:
         if source.startswith("ssh://"):
             tallies.append(run_remote(source, sync))
+        elif source.endswith(".json"):
+            with open(os.path.expanduser(source)) as f:
+                tallies.append(json.load(f))
         else:
             if sync:
                 subprocess.run(["cc-switch", "sessions", "sync-usage", "--all", "--json"], check=True, stdout=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
