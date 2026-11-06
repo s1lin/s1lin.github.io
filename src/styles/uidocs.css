@@ -368,6 +368,11 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 /* Fields in a row (Field's "Rows" note): the row stretches its fields; each keeps its box at its top. A Switch beside
    them sits below the labels' line (11px at 1.4, 12px in Chinese) and the gap, as tall as a box, its track centred;
    on a phone the fields stand one under another and the switch needs no such line. */
+/* Table's "Rows" example: a name over a quieter line (its first line the row's, the line under it 16px), mono capitals. */
+.ud-name { display: grid; min-width: 0; }
+.ud-name__main { font-weight: 500; white-space: normal; overflow-wrap: anywhere; }
+.ud-name__sub { margin-top: 2px; font: 400 12px/16px var(--s1-font-mono); color: var(--s1-ink-3); white-space: normal; overflow-wrap: anywhere; }
+.ud-caps { font: 500 10.5px/1 var(--s1-font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--s1-ink-2); }
 .ud-fields-set { display: grid; gap: 16px; padding-top: 16px; border-top: 0.5px solid var(--rule); }
 .ud-fields { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 600px) {

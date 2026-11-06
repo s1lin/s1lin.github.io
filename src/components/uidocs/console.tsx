@@ -668,7 +668,79 @@ export function TableDemo() {
       />
       <Pagination page={page} pageCount={12} onPageChange={setPage} summary={`${(page - 1) * 5 + 1}–${page * 5} of 58`} />
       <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Sort by a header, open a row's ⋯, change the page; on a phone the table scrolls in its frame."} />
+      <TableRows />
     </div>
+  );
+}
+
+interface Route {
+  id: number;
+  name: string;
+  sub: string;
+  accounts: string;
+  note?: string;
+  status: Status;
+  health: string;
+  on: boolean;
+  spend: number;
+}
+
+const ROUTES: Route[] = [
+  { id: 2, name: "Qwen", sub: "#2 · composite", accounts: "6/6", status: "ok", health: "Healthy", on: true, spend: 19.8 },
+  { id: 9, name: "Kimi · Discount, a route whose name is long enough to wrap", sub: "#9 · moonshot · subscription", accounts: "3/4", note: "1 limited", status: "warn", health: "Degraded", on: false, spend: 142.1 },
+  { id: 14, name: "Draw", sub: "#14 · composite", accounts: "2/2", status: "ok", health: "Healthy", on: true, spend: 3.4 },
+];
+
+/**
+ * The row rule: every cell's first line on one line across the row however tall the row grows (a name that wraps over
+ * its tags, a figure over its note), an icon and its words a pair centred on each other, the row's buttons on the line.
+ */
+function TableRows() {
+  const [on, setOn] = useState<Record<number, boolean>>(Object.fromEntries(ROUTES.map((r) => [r.id, r.on])));
+  const columns: Column<Route>[] = [
+    {
+      key: "name",
+      header: "Route",
+      width: "36%",
+      cell: (r) => (
+        <span className="ud-name">
+          <span className="ud-name__main">{r.name}</span>
+          <span className="ud-name__sub">{r.sub}</span>
+        </span>
+      ),
+    },
+    { key: "accounts", header: "Accounts", numeric: true, cell: (r) => (r.note ? <span className="ud-name"><span>{r.accounts}</span><span className="ud-name__sub">{r.note}</span></span> : r.accounts) },
+    {
+      key: "health",
+      header: "Health",
+      cell: (r) => (
+        <span className="s1-table__pair">
+          <Glyph status={r.status} />
+          <span className="ud-caps">{r.health}</span>
+        </span>
+      ),
+    },
+    {
+      key: "on",
+      header: "Status",
+      cell: (r) => (
+        <span className="s1-table__pair">
+          <Switch aria-label={`Turn ${r.name} ${on[r.id] ? "off" : "on"}`} checked={on[r.id]} onChange={(e) => setOn({ ...on, [r.id]: e.target.checked })} />
+          <span className="ud-caps">{on[r.id] ? "Active" : "Inactive"}</span>
+        </span>
+      ),
+    },
+    { key: "spend", header: "Spend today", numeric: true, cell: (r) => usd(r.spend) },
+  ];
+  return (
+    <Table
+      caption="Rows: one line across"
+      fit
+      columns={columns}
+      rows={ROUTES}
+      rowKey="id"
+      actions={(r) => <Menu variant="ghost" size="sm" align="end" label={`Actions for ${r.name}`} items={[{ label: "Edit", onSelect: () => undefined }, { label: "Duplicate", onSelect: () => undefined }]} />}
+    />
   );
 }
 

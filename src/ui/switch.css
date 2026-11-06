@@ -25,6 +25,11 @@
   .s1-switch__label { min-width: 0; overflow-wrap: anywhere; }
   .s1-switch__hint { display: block; margin: 0 0 0 46px; font: 400 13px/1.45 var(--s1-font-sans); color: var(--s1-ink-2); }
 
+  /* In a table's cell the switch's row is the cell's first line (table.css, the row rule): its words in the table's type,
+     the track centred on the line. */
+  .s1-table :is(td, th) .s1-switch__row { min-height: var(--s1-table-line); align-items: center; font: inherit; line-height: var(--s1-table-line); }
+  .s1-table :is(td, th) .s1-switch__control { margin-block: calc((var(--s1-table-line) - 20px) / 2); }
+
   .s1-switch--reverse .s1-switch__row { flex-direction: row-reverse; justify-content: space-between; width: 100%; }
   .s1-switch--reverse .s1-switch__hint { margin: 0 46px 0 0; }
 
