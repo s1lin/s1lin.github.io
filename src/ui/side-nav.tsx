@@ -98,9 +98,9 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLElement>, "title" | "children
   here?: ReactNode;
   /** The bar's label; the title by default. */
   barLabel?: ReactNode;
-  /** Keep the current item in view when the tree scrolls inside its own box. */
+  /** Keep the current item in view when the tree scrolls inside its own box (the panel, or the tree itself). */
   followCurrent?: boolean;
-  /** Under the tree: the account, a footnote. */
+  /** Under the tree: the account, a footnote. Where the tree scrolls by itself it stays put under it. */
   footer?: ReactNode;
 };
 
@@ -169,6 +169,7 @@ export function SideNav({
   const root = useRef<HTMLElement>(null);
   const bar = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
+  const tree = useRef<HTMLOListElement>(null);
 
   const path = pathTo(sections, [], current);
   const at = new Set(path.map((s) => (s.section ?? s.item).id));
@@ -227,10 +228,12 @@ export function SideNav({
     return () => host?.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Keep the current item in view inside a tree that scrolls in its own box, by scrolling that box alone.
+  // Keep the current item in view inside a tree that scrolls in its own box, by scrolling that box alone: the panel, or
+  // the tree where an app's sidebar holds its footer still under a tree that scrolls by itself (a sticky footer in a
+  // scrolling panel shifted by a fraction of a pixel with each scroll: TokensBeat console and admin, 2026-11-06).
   useEffect(() => {
-    const box = panel.current;
-    if (!followCurrent || !box || box.scrollHeight <= box.clientHeight + 1) return;
+    const box = [tree.current, panel.current].find((el) => el !== null && el.scrollHeight > el.clientHeight + 1);
+    if (!followCurrent || !box) return;
     const marks = box.querySelectorAll<HTMLElement>("[aria-current]");
     const link = box.querySelector<HTMLElement>('[aria-current]:not([aria-current="true"])') ?? marks[marks.length - 1];
     if (!link) return;
@@ -369,7 +372,9 @@ export function SideNav({
             {titleAction != null && <span className="s1-sidenav__title-action">{titleAction}</span>}
           </div>
         )}
-        <ol className="s1-sidenav__tree">{sections.map((s) => renderSection(s, 1))}</ol>
+        <ol className="s1-sidenav__tree" ref={tree}>
+          {sections.map((s) => renderSection(s, 1))}
+        </ol>
         {footer != null && <div className="s1-sidenav__foot">{footer}</div>}
       </div>
     </nav>

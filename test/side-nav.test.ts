@@ -47,6 +47,19 @@ const sections = [
   { id: "chats", title: "Chats", items: [{ id: "c1", label: "Video", icon: svg, meta: "2m", status: "info", statusLabel: "running", onSelect: () => {} }, { id: "c2", label: "Thesis", icon: svg, onSelect: () => {} }] },
 ];
 const chosen = [];
+// Two sidebars of 24 pages, at the last: one whose panel scrolls (the docs' index), one whose tree scrolls by itself
+// with its footer held under it (an app's column: the console's and the admin's, 2026-11-06).
+const many = [{ id: "all", title: "Pages", items: Array.from({ length: 24 }, (_, n) => ({ id: "p" + n, label: "Page " + n, href: "#p" + n })) }];
+const sheet = document.createElement("style");
+sheet.textContent = \`
+  #by-panel .s1-sidenav__panel { max-height: 200px; overflow-y: auto; }
+  #by-tree { height: 240px; }
+  #by-tree .s1-sidenav, #by-tree .s1-sidenav__panel { height: 100%; }
+  #by-tree .s1-sidenav__panel { display: flex; flex-direction: column; }
+  #by-tree .s1-sidenav__tree { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  #by-tree .s1-sidenav__foot { flex: none; margin-top: 0; }
+\`;
+document.head.append(sheet);
 const root = createRoot(document.getElementById("app"));
 flushSync(() =>
   root.render(
@@ -56,6 +69,8 @@ flushSync(() =>
       <div id="phone"><SideNav label="Phone" title="Index" sheet={900} sections={sections} current="b" onNavigate={(t) => chosen.push(t.id)} /></div>
       <div id="fold" style={{ width: 280 }}><SideNav label="Fold" sections={[{ id: "shut", title: "Video", collapsible: true, action: <button type="button">+</button>, items: [{ id: "v1", label: "Clip", href: "#v1" }] }, { id: "open", title: "Tasks", collapsible: true, items: [{ id: "t1", label: "Trip", href: "#t1" }] }]} defaultExpanded={["open"]} /></div>
       <div id="em"><EmptyState mark={svg} title="No friends yet" /><EmptyState size="sm" mark={svg} title="None" /></div>
+      <div id="by-panel" style={{ width: 280 }}><SideNav label="By panel" sections={many} current="p23" /></div>
+      <div id="by-tree" style={{ width: 280 }}><SideNav label="By tree" sections={many} current="p23" footer={<p>Account</p>} /></div>
     </>,
   ),
 );
@@ -90,6 +105,15 @@ if (!phone) {
     // A folding head's sign is a hairline chevron (right folded, down open), never a "+" beside the family's own "+".
     const sign = (open) => { const el = $('#fold .s1-sidenav__heading[aria-expanded="' + open + '"] .s1-sidenav__sign'); const b = getComputedStyle(el, "::before"); return { bg: getComputedStyle(el).backgroundImage, lines: [b.borderRightWidth, b.borderBottomWidth, b.borderTopWidth, b.borderLeftWidth], turn: b.transform }; };
     got.fold = { shut: sign("false"), open: sign("true") };
+    const top = (s) => $(s).getBoundingClientRect().top;
+    const shown = (s, within) => { const a = $(s).getBoundingClientRect(), b = $(within).getBoundingClientRect(); return a.top >= b.top && a.bottom <= b.bottom; };
+    const foot = top("#by-tree .s1-sidenav__foot");
+    got.follow = {
+      panel: { scrolled: $("#by-panel .s1-sidenav__panel").scrollTop > 0, shown: shown('#by-panel [aria-current="page"]', "#by-panel .s1-sidenav__panel") },
+      tree: { scrolled: $("#by-tree .s1-sidenav__tree").scrollTop > 0, panel: $("#by-tree .s1-sidenav__panel").scrollTop, shown: shown('#by-tree [aria-current="page"]', "#by-tree .s1-sidenav__tree"), footEnd: Math.round($("#by-tree .s1-sidenav__foot").getBoundingClientRect().bottom - $("#by-tree").getBoundingClientRect().bottom) },
+    };
+    $("#by-tree .s1-sidenav__tree").scrollTop = 0;
+    got.follow.tree.footMoved = top("#by-tree .s1-sidenav__foot") - foot;
     got.mark = { md: box("#em .s1-empty--md .s1-empty__own"), sm: box("#em .s1-empty--sm .s1-empty__own"), color: style("#em .s1-empty__own").color, ink2: rgb(getComputedStyle(document.documentElement).getPropertyValue("--s1-ink-2").trim()), frame: !!$("#em .s1-empty__mark") };
   });
 } else {
@@ -171,6 +195,9 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
     assert.deepEqual(desk.fold[k].lines, ["1px", "1px", "0px", "0px"], `${k}: two hairlines`);
     assert.equal(desk.fold[k].turn.replace(/(\d\.\d{6})\d*/g, "$1"), turn(deg), `${k}: the chevron points ${deg < 0 ? "right" : "down"}`);
   }
+  // the current item kept in view by scrolling the box that scrolls: the panel, or the tree under which the footer holds
+  assert.deepEqual(desk.follow.panel, { scrolled: true, shown: true }, "a panel that scrolls is scrolled to the current item");
+  assert.deepEqual(desk.follow.tree, { scrolled: true, panel: 0, shown: true, footEnd: 0, footMoved: 0 }, "a tree that scrolls by itself is scrolled, the footer held at the foot");
   assert.deepEqual(desk.mark.md, [56, 56]);
   assert.deepEqual(desk.mark.sm, [40, 40]);
   assert.equal(desk.mark.color, desk.mark.ink2);

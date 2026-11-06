@@ -1596,7 +1596,7 @@ const sections: SideNavSection[] = [
       { name: "sheet", type: "boolean | 640 | 768 | 900 | 1023", default: "false", desc: "Up to this width the tree waits behind one bar (the title, where you are, a \"+\") and opens as a sheet over the page: focus goes in, Tab stays in it, Esc, a choice or a tap outside closes it. `true`: always. Without script the tree stays in the page." },
       { name: "here", type: "ReactNode", desc: "Where you are, on the bar: the current section and item by default (\"Editorial · Button\")." },
       { name: "barLabel", type: "ReactNode", desc: "The bar's label; the title by default." },
-      { name: "followCurrent", type: "boolean", default: "true", desc: "When the tree scrolls in its own box, keep the current item in view by scrolling that box alone, never the page." },
+      { name: "followCurrent", type: "boolean", default: "true", desc: "When the tree scrolls in its own box (the panel, or the tree itself where an app holds the footer under it), keep the current item in view by scrolling that box alone, never the page." },
       { name: "footer", type: "ReactNode", desc: "Under the tree: the account, a note." },
       CLASS,
     ],
