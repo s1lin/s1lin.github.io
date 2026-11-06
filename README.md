@@ -40,7 +40,7 @@ page's first stylesheet declares the cascade layers in order (see Styles).
 | `src/components/effects.tsx` | Where those effects meet the photographs and section titles, and the frost over the page |
 | `src/components/Metro2Line.tsx`, `src/hooks/useMetro2Line.ts`, `src/lib/metro.ts` | Metro2Line, playable, on the cover: ride twelve metro networks or guess a city |
 | `public/data/metro/` | Those networks, from OpenStreetMap (`scripts/metro-data.py`) |
-| `src/components/GitHubHeatmap.tsx` | The GitHub heatmap under the contents list: a year of contributions, a square a day |
+| `src/components/GitHubHeatmap.tsx`, `src/lib/calendar.ts` | The GitHub heatmap under the contents list: a year of contributions, a square a day, a week to a row |
 | `src/content/github.json` | Its counts, from GitHub (`scripts/github-data.py`); see below |
 | `src/ui/ascii-art.tsx` | [ascii.rest](https://ascii.rest) pieces: banner, typewriter, skyline, the departures board (inked in airport colours in `Departures.tsx`), and the alpine dawn and Tokyo rain that take turns at the end (`Colophon.tsx`) |
 | `src/styles/site.css` | The issue's design: its names for the library's tokens, the page frame, grid, type, every section |
@@ -394,6 +394,16 @@ The public Overpass server is often busy; the script retries. Map data ©
 OpenStreetMap contributors, under the ODbL.
 
 ## GitHub heatmap
+
+The heatmap stands on end: a week to a row, Sunday to Saturday across and the
+weeks downwards, as on a wall calendar. A year is 53 rows, so it is set in two
+columns like the page's type, the first half of the year down the left and the
+second down the right, each with its month names at the left and the weekday
+letters over it. It is never wider than 22rem, so on a phone it fills the page
+with no box to scroll sideways, and on a desktop it is a narrow column that
+stays in view beside the tokens (where the window is at least 820px tall).
+The grid, and the day under a point of it, are `src/lib/calendar.ts`;
+`test/heatmap.test.ts` holds it to that, on a server and in Chrome.
 
 The heatmap under the contents list is drawn from `src/content/github.json`
 at build time, so it is in the prerendered page and the browser asks GitHub
