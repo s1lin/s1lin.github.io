@@ -148,3 +148,100 @@ test("every button is one height at a size: each variant, with and without an ic
     assert.equal(g.box.h, SIZES[g.size], `${g.size} ${g.lang} ${g.m}: the box keeps its height`);
   }
 });
+
+/*
+ * Fields in a row (owner, 2026-11-06: "inputs in a row differ in size when one field has no hint"). A row of Fields is
+ * one grid or flex row that stretches its items to the tallest; each Field keeps its label, box and hint at its top
+ * (field.css: align-content: start), so the boxes share one line and one height whenever the labels do, and a hint
+ * hangs under its own box with nothing held for one that is not there. The row here is left to stretch, as a page's
+ * would be: the kit holds without the page's align-items. A Switch in such a row follows the docs' recipe (its track
+ * on the boxes' line: kept at the top, margin-top the label's line and the gap, 40px tall, centred).
+ */
+test("fields in one row keep their boxes on one line and one height: a hint under one, none under the next, a Select and a Switch beside them, in a grid row and a flex row, in English and in Chinese", async (t) => {
+  const bin = chrome();
+  if (!bin) return t.skip("no Chrome here: set CHROME to run it");
+  const { Field } = await part("field");
+  const { Input } = await part("input");
+  const { Select } = await part("select");
+  const { Switch } = await part("switch");
+  const WORDS = {
+    en: { priority: "Priority", lower: "Lower goes first", concurrency: "Concurrency", cost: "Cost multiplier", free: "0 counts it as free", every: "Every", range: "15 – 3600", proxy: "Proxy", none: "None", on: "On" },
+    "zh-CN": { priority: "优先级", lower: "数字小的先用", concurrency: "并发数", cost: "成本倍率", free: "0 表示免费", every: "间隔", range: "15 – 3600", proxy: "代理", none: "不用", on: "开启" },
+  } as const;
+  const rows: ReactNode[] = [];
+  for (const lang of ["en", "zh-CN"] as const) {
+    const w = WORDS[lang];
+    for (const kind of ["grid", "flex"] as const) {
+      rows.push(
+        h(
+          "div",
+          { key: `${lang}-${kind}-three`, lang, className: `frow frow--${kind}`, "data-row": `${lang} ${kind}: hint, none, hint` },
+          h(Field, { label: w.priority, hint: w.lower }, h(Input, { type: "number", defaultValue: "1" })),
+          h(Field, { label: w.concurrency }, h(Input, { type: "number", defaultValue: "20" })),
+          h(Field, { label: w.cost, hint: w.free }, h(Input, { type: "number", defaultValue: "0.5" })),
+        ),
+        h(
+          "div",
+          { key: `${lang}-${kind}-mixed`, lang, className: `frow frow--${kind}`, "data-row": `${lang} ${kind}: hint, a Select, a Switch` },
+          h(Field, { label: w.every, hint: w.range }, h(Input, { inputMode: "numeric", defaultValue: "60", suffix: "s" })),
+          h(Field, { label: w.proxy }, h(Select, { defaultValue: "" }, h("option", { value: "" }, w.none), h("option", { value: "jp" }, "jp-relay-1"))),
+          h(Switch, { defaultChecked: true }, w.on),
+        ),
+      );
+    }
+  }
+  const css = ["tokens.css", "field.css", "input.css", "select.css", "switch.css", "glyph.css", "visually-hidden.css"].map((f) => readFileSync(path.join(UI, f), "utf8")).join("\n");
+  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>@layer base, components;\n${css}
+.frow { width: 900px; margin: 16px; gap: 16px; }
+.frow--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.frow--flex { display: flex; }
+.frow--flex > * { flex: 1 1 0; }
+/* the docs' recipe for a Switch in a row of fields: below the labels' line (11px at 1.4; 12px in Chinese) and the gap,
+   as tall as a box, its track centred in it */
+.frow > .s1-switch { align-self: start; margin-top: calc(11px * 1.4 + 6px); min-height: 40px; align-content: center; }
+.frow > .s1-switch:lang(zh) { margin-top: calc(12px * 1.4 + 6px); }
+.frow > .s1-switch .s1-switch__row { align-items: center; }
+.frow > .s1-switch .s1-switch__control { margin-top: 0; }
+</style></head>
+<body>${renderToStaticMarkup(h("main", null, rows))}
+<pre id="out"></pre>
+<script>
+  const r = (el) => el.getBoundingClientRect();
+  const got = [];
+  for (const row of document.querySelectorAll("[data-row]")) {
+    const boxes = [...row.querySelectorAll(".s1-input, .s1-select__trigger")].map((b) => ({ kind: b.matches(".s1-input") ? "input" : "select", top: r(b).top, h: r(b).height, mid: r(b).top + r(b).height / 2 }));
+    const track = row.querySelector(".s1-switch__track");
+    const fields = [...row.querySelectorAll(".s1-field")].map((f) => ({ h: r(f).height, hint: !!f.querySelector(".s1-field__hint") }));
+    got.push({ row: row.dataset.row, boxes, track: track ? { mid: r(track).top + r(track).height / 2 } : null, fields });
+  }
+  document.getElementById("out").textContent = JSON.stringify(got);
+</script></body></html>`;
+  const file = path.join(out, "field-rows.html");
+  writeFileSync(file, page);
+  let dom: string;
+  try {
+    dom = execFileSync(bin, ["--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", "--window-size=1200,1400", "--dump-dom", pathToFileURL(file).href], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 60_000 });
+  } catch (e) {
+    // only a browser that cannot start here at all is a skip; a crash or a hang on the page is a failure
+    const err = e as NodeJS.ErrnoException & { stderr?: string };
+    if (err.code === "ENOENT" || err.code === "EACCES") return t.skip(`Chrome would not start (${bin}): ${err.code}`);
+    assert.fail(`Chrome failed on the page (${bin}): ${String(err.stderr ?? e).slice(0, 400)}`);
+  }
+  const text = dom.match(/<pre id="out">([\s\S]*?)<\/pre>/)?.[1] ?? "";
+  type Row = { row: string; boxes: { kind: string; top: number; h: number; mid: number }[]; track: { mid: number } | null; fields: { h: number; hint: boolean }[] };
+  const got = JSON.parse(text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&")) as Row[];
+  if (process.env.S1LIN_FIELD_ROWS) writeFileSync(process.env.S1LIN_FIELD_ROWS, JSON.stringify(got, null, 1)); // the measurements, for a report
+  assert.equal(got.length, 8, "two rows, in a grid and a flex row, in two languages");
+  for (const row of got) {
+    assert.equal(row.boxes.length, row.track ? 2 : 3, `${row.row}: every box measured`);
+    const [first, ...rest] = row.boxes;
+    for (const b of rest) {
+      assert.ok(Math.abs(b.top - first.top) < 0.5, `${row.row}: the ${b.kind} box starts at ${b.top}px, the first at ${first.top}px`);
+      assert.ok(Math.abs(b.h - first.h) < 0.5, `${row.row}: the ${b.kind} box is ${b.h}px tall, the first ${first.h}px`);
+    }
+    assert.equal(first.h, 40, `${row.row}: a box keeps its 40px`);
+    // a Field stretched by the row is as tall as the row, yet its box is where it would be alone
+    assert.ok(row.fields.some((f) => !f.hint), `${row.row}: a field with no hint is in the row`);
+    if (row.track) assert.ok(Math.abs(row.track.mid - first.mid) < 0.5, `${row.row}: the switch's track sits on the boxes' line (${row.track.mid} against ${first.mid})`);
+  }
+});

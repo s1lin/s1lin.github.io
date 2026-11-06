@@ -365,6 +365,18 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-indent { padding-left: 28px; }
 .ud-form { display: grid; gap: 20px; max-width: 34rem; }
 .ud-form .ud-row { gap: 10px; }
+/* Fields in a row (Field's "Rows" note): the row stretches its fields; each keeps its box at its top. A Switch beside
+   them sits below the labels' line (11px at 1.4, 12px in Chinese) and the gap, as tall as a box, its track centred;
+   on a phone the fields stand one under another and the switch needs no such line. */
+.ud-fields-set { display: grid; gap: 16px; padding-top: 16px; border-top: 0.5px solid var(--rule); }
+.ud-fields { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) {
+  .ud-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ud-fields > .s1-switch { align-self: start; margin-top: calc(11px * 1.4 + 6px); min-height: 40px; align-content: center; }
+  .ud-fields > .s1-switch:lang(zh) { margin-top: calc(12px * 1.4 + 6px); }
+  .ud-fields > .s1-switch .s1-switch__row { align-items: center; }
+  .ud-fields > .s1-switch .s1-switch__control { margin-top: 0; }
+}
 .ud-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 20px 24px; align-items: start; }
 .ud-grid2--top { align-items: stretch; }
 .ud-grid2 > .s1-empty { border: 0.5px dashed var(--rule-strong); }
