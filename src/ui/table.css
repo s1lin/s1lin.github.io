@@ -5,7 +5,16 @@
  * under a heading row across the table with a toggle that opens and closes it.
  */
 @layer components {
-  .s1-table { min-width: 0; max-width: 100%; }
+  /*
+   * The row rule (owner, 2026-11-06: "the table should be vertically aligned for icon+text, and each rows"). Every cell
+   * starts at the top with the same padding, and its first line is one line box of --s1-table-line (20px, the 14px type
+   * at 1.45; 18px dense), so the first lines of a row's cells lie on one line however tall the row grows (a name over
+   * its tags, a figure over its note). An icon and its words are a pair (.s1-table__pair), one line tall, its children
+   * centred on each other and so on the line, never wrapping. A control taller than the line alone in a cell (a 30px
+   * button, a menu's dots, a badge) is centred on the line: half the difference above it and half below.
+   */
+  .s1-table { --s1-table-line: 20px; min-width: 0; max-width: 100%; }
+  .s1-table--dense { --s1-table-line: 18px; }
   .s1-table__frame {
     position: relative; box-sizing: border-box; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; color-scheme: var(--s1-scheme);
     /* the shades: paper covers that scroll with the content, over shadows that stay at the frame's edges */
@@ -28,7 +37,7 @@
   .s1-table__caption--hidden {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
   }
-  .s1-table th, .s1-table td { padding: 10px 14px; text-align: start; vertical-align: middle; white-space: nowrap; border-bottom: 1px solid var(--s1-rule); }
+  .s1-table th, .s1-table td { padding: 10px 14px; text-align: start; vertical-align: top; line-height: var(--s1-table-line); white-space: nowrap; border-bottom: 1px solid var(--s1-rule); }
   .s1-table thead th {
     padding-block: 9px; background: var(--s1-paper); border-top: 1px solid var(--s1-rule-strong); border-bottom: 1px solid var(--s1-rule-strong);
     font: 500 10.5px/1.3 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-ink-2);
@@ -42,8 +51,20 @@
   .s1-table__end { text-align: end !important; }
   .s1-table__center { text-align: center !important; }
   .s1-table__wrap { white-space: normal !important; min-width: 14em; overflow-wrap: anywhere; }
-  .s1-table__actions { width: 1%; padding-block: 4px !important; text-align: end !important; }
-  .s1-table thead .s1-table__actions { padding-block: 9px !important; }
+  .s1-table__actions { width: 1%; text-align: end !important; }
+
+  /* An icon and its words (a mark and a name, a switch and its state, a shape and its label, a row's buttons): one line
+     tall, centred on each other, so whatever their sizes they sit on the cell's first line; the words keep to it. */
+  .s1-table__pair {
+    display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: var(--s1-table-line); max-width: 100%;
+    vertical-align: top; white-space: nowrap;
+  }
+  .s1-table__actions .s1-table__pair { gap: 2px; }
+  /* A control alone in a cell, taller than the line: centred on the line, the cell's padding kept. */
+  .s1-table tbody tr > :is(td, th) > :is(.s1-btn, .s1-menu, .s1-badge) { vertical-align: top; }
+  .s1-table tbody tr > :is(td, th) > .s1-btn, .s1-table tbody tr > :is(td, th) > .s1-menu > .s1-btn { margin-block: calc((var(--s1-table-line) - 40px) / 2); }
+  .s1-table tbody tr > :is(td, th) > .s1-btn--sm, .s1-table tbody tr > :is(td, th) > .s1-menu > .s1-btn--sm { margin-block: calc((var(--s1-table-line) - 30px) / 2); }
+  .s1-table tbody tr > :is(td, th) > .s1-badge { margin-block: calc((var(--s1-table-line) - 21px) / 2); }
   .s1-table__empty { padding: 0 !important; white-space: normal !important; text-align: center !important; color: var(--s1-ink-2); }
   .s1-table__empty:not(:has(.s1-empty)) { padding: 28px 14px !important; }
 

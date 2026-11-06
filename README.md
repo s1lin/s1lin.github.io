@@ -174,7 +174,11 @@ Field's label, hint and error, Chinese at night, and Esc inside a Dialog.
 `test/table-sort.test.ts` holds the Table's sort to its rule (a column's first press
 asks for its first direction, figures from the biggest and words from the start,
 the next the other way, never none, one column at a time) on a server and in Chrome,
-with `aria-sort` and the hidden words after each press. The
+with `aria-sort` and the hidden words after each press. `test/table-align.test.ts`
+holds every row to the row rule in Chrome (each cell's first line on the row's line,
+each icon and its words centred on each other, within 1px) on stories of a console's
+rows: a name that wraps, figures over notes, badges, a switch and its word, a row's
+buttons, a dense log and Chinese; it fails on the old table.css. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
@@ -195,7 +199,7 @@ never inside it), Textarea, Select (the kit's own list, not the system's: groups
   with `clearOnChoose` and no open button, a search that goes somewhere), Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements wherever the browser's own is good enough.
-- **Data**: Table (caption, row headers, sort with each column's first direction, empty and loading rows, row
+- **Data**: Table (caption, row headers, sort with each column's first direction, every row's first lines on one line and an icon and its words a pair, empty and loading rows, row
   actions, a sticky header, row groups that open and close with "Expand all", a
   `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
   Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
