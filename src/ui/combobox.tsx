@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type InputHTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { anchorPanel } from "./anchor";
 import { cn } from "./cn";
 import { useField } from "./field";
@@ -16,23 +16,32 @@ export interface ComboboxGroup<T> {
   items: T[];
 }
 
-export type ComboboxProps<T> = {
+type Own<T> = {
   /** The options to show now, in their groups, already filtered by what is typed (`onInputChange`). */
   groups: ComboboxGroup<T>[];
   /** The chosen item, or null. */
   value: T | null;
   /** Called with the item chosen, or null when the box is cleared. */
   onValueChange: (value: T | null) => void;
-  /** Called with the text on every edit, with the item's words after a choice, and with "" after a clear: filter `groups` with it. */
+  /** Called with the text on every edit, with the item's words after a choice (or "" with `clearOnChoose`), and with "" after a clear: filter `groups` with it. */
   onInputChange?: (text: string) => void;
+  /**
+   * The box empties after a choice and `onInputChange` hears "": for a search that takes the reader somewhere, where
+   * a choice is an act and not a value the box keeps. Keep `value` null.
+   */
+  clearOnChoose?: boolean;
   /** An item in words: what the box shows when it is chosen, and the option's name for screen readers. */
   itemText: (item: T) => string;
   /** An item's key, unique among them. */
   itemKey: (item: T) => string;
   /** What an option shows; its words (`itemText`) by default. */
   renderItem?: (item: T) => ReactNode;
-  /** Shown in the list when nothing matches: "No matching city." */
+  /** Shown in the list when nothing matches, and said as a status: "No matching city." */
   empty?: ReactNode;
+  /** Before the text, inside the box: a magnifier. Words are read with the box. */
+  prefix?: ReactNode;
+  /** After the text, inside the box, before its buttons: a key's hint. Words are read with the box. */
+  suffix?: ReactNode;
   placeholder?: string;
   id?: string;
   "aria-labelledby"?: string;
@@ -44,6 +53,8 @@ export type ComboboxProps<T> = {
   size?: "md" | "sm";
   /** The clear button's name; "Clear" from S1Words by default. */
   clearLabel?: string;
+  /** The button that opens the list; false for a search, whose list opens as one types. */
+  showButton?: boolean;
   /** The name of the button that opens the list; "Show options" from S1Words by default. */
   showLabel?: string;
   /** Added to the box (`s1-input`). */
@@ -52,6 +63,28 @@ export type ComboboxProps<T> = {
   listClassName?: string;
 };
 
+/** Every other prop goes to the <input>, as Input's do: name, required, aria-keyshortcuts, enterKeyHint, onFocus. */
+export type ComboboxProps<T> = Own<T> &
+  Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | keyof Own<T>
+    | "value"
+    | "defaultValue"
+    | "type"
+    | "role"
+    | "children"
+    | "onChange"
+    | "onKeyDown"
+    | "onClick"
+    | "onBlur"
+    | "aria-autocomplete"
+    | "aria-expanded"
+    | "aria-controls"
+    | "aria-activedescendant"
+  >;
+
+const isText = (n: ReactNode) => typeof n === "string" || typeof n === "number";
+
 /**
  * A text box that suggests: type, and a list of what matches opens under it,
  * in groups; the arrows move through it, Enter or a click chooses, and the box
@@ -59,17 +92,22 @@ export type ComboboxProps<T> = {
  * autocompletes: focus stays in the box, the option under the arrows is its
  * active descendant. The app filters the options from the text it is given,
  * so a search on a server works as well as a list in memory. Drawn as Input,
- * with a button that clears it and one that opens the list.
+ * with words or a mark before and after the text, a button that clears it and
+ * one that opens the list. With `clearOnChoose` and no open button it is a
+ * search that takes the reader somewhere: the box empties after a choice.
  */
 export function Combobox<T>({
   groups,
   value,
   onValueChange,
   onInputChange,
+  clearOnChoose = false,
   itemText,
   itemKey,
   renderItem,
   empty,
+  prefix,
+  suffix,
   placeholder,
   id,
   "aria-labelledby": labelledBy,
@@ -78,13 +116,18 @@ export function Combobox<T>({
   disabled,
   size = "md",
   clearLabel,
+  showButton = true,
   showLabel,
   className,
   listClassName,
+  ...rest
 }: ComboboxProps<T>) {
   const w = useS1Words();
   const auto = useId();
-  const field = useField({ id, invalid, disabled });
+  const field = useField({ id, invalid, disabled, required: rest.required, "aria-describedby": rest["aria-describedby"], "aria-invalid": rest["aria-invalid"] });
+  const prefixId = prefix != null && isText(prefix) ? `${auto}-prefix` : undefined;
+  const suffixId = suffix != null && isText(suffix) ? `${auto}-suffix` : undefined;
+  const describedBy = [prefixId, suffixId, field["aria-describedby"]].filter(Boolean).join(" ") || undefined;
   const inputId = field.id ?? `${auto}-input`;
   const listId = `${auto}-list`;
   const optionId = (i: number) => `${auto}-option-${i}`;
@@ -109,7 +152,7 @@ export function Combobox<T>({
     setActive(where === "chosen" && chosenAt >= 0 ? chosenAt : where === "last" ? flat.length - 1 : 0);
   }
   function choose(item: T) {
-    const words = itemText(item);
+    const words = clearOnChoose ? "" : itemText(item);
     setDraft(null);
     setOpen(false);
     onValueChange(item);
@@ -191,7 +234,17 @@ export function Combobox<T>({
   return (
     <>
       <span ref={box} className={cn("s1-input", `s1-input--${size}`, "s1-combobox", className)} data-invalid={isInvalid ? "" : undefined} data-disabled={field.disabled ? "" : undefined}>
+        {/* in the page from the start, so what it says when nothing matches is read as it changes */}
+        <span className="s1-combobox__status" role="status">
+          {shown && flat.length === 0 ? empty : null}
+        </span>
+        {prefix != null && (
+          <span className="s1-input__affix" id={prefixId}>
+            {prefix}
+          </span>
+        )}
         <input
+          {...rest}
           ref={input}
           type="text"
           role="combobox"
@@ -206,6 +259,7 @@ export function Combobox<T>({
           placeholder={placeholder}
           value={text}
           {...field}
+          aria-describedby={describedBy}
           id={inputId}
           onChange={(e) => {
             setDraft(e.target.value);
@@ -221,6 +275,11 @@ export function Combobox<T>({
             leave();
           }}
         />
+        {suffix != null && (
+          <span className="s1-input__affix s1-input__affix--end" id={suffixId}>
+            {suffix}
+          </span>
+        )}
         {clearable && (
           <button
             type="button"
@@ -242,26 +301,28 @@ export function Combobox<T>({
             </svg>
           </button>
         )}
-        <button
-          type="button"
-          tabIndex={-1}
-          className="s1-combobox__button"
-          aria-label={showLabel ?? w.showOptions}
-          aria-expanded={shown}
-          aria-controls={listId}
-          disabled={field.disabled}
-          onPointerDown={keep}
-          onMouseDown={keep}
-          onClick={() => {
-            if (shown) setOpen(false);
-            else show("chosen");
-            input.current?.focus();
-          }}
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M3.5 6l4.5 4.5L12.5 6" />
-          </svg>
-        </button>
+        {showButton && (
+          <button
+            type="button"
+            tabIndex={-1}
+            className="s1-combobox__button"
+            aria-label={showLabel ?? w.showOptions}
+            aria-expanded={shown}
+            aria-controls={listId}
+            disabled={field.disabled}
+            onPointerDown={keep}
+            onMouseDown={keep}
+            onClick={() => {
+              if (shown) setOpen(false);
+              else show("chosen");
+              input.current?.focus();
+            }}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3.5 6l4.5 4.5L12.5 6" />
+            </svg>
+          </button>
+        )}
       </span>
       <div ref={pop} className={cn("s1-combobox__list", listClassName)} popover="manual" hidden={!shown} onPointerDown={keep} onMouseDown={keep}>
         <div id={listId} role="listbox" aria-labelledby={labelledBy} aria-label={label}>
@@ -309,7 +370,7 @@ export function Combobox<T>({
             })()}
         </div>
         {shown && flat.length === 0 && (
-          <div className="s1-combobox__empty" role="status">
+          <div className="s1-combobox__empty" aria-hidden="true">
             {empty}
           </div>
         )}

@@ -15,6 +15,8 @@ export type GroupId = "start" | "foundations" | "parts" | "forms" | "data" | "na
 export interface Group {
   id: GroupId;
   name: string;
+  /** Its name in Chinese: the page's search finds it by either. */
+  zh: string;
   /** The chapter of the index it stands in; the parts' families share one. */
   chapter: string;
   blurb: string;
@@ -24,18 +26,21 @@ export const GROUPS: Group[] = [
   {
     id: "start",
     name: "Getting started",
+    zh: "开始使用",
     chapter: "Getting started",
     blurb: "From an empty app to the first part, and how the parts' stylesheets sit beside your own, with Tailwind or without.",
   },
   {
     id: "foundations",
     name: "Foundations",
+    zh: "基础",
     chapter: "Foundations",
     blurb: "What every part is drawn in and says: the tokens, the night, the status hues, the words; and the head an app's parts sit under. Set them once and the parts take your colours, your night and your language.",
   },
   {
     id: "parts",
     name: "Editorial",
+    zh: "版面部件",
     chapter: "Parts",
     blurb: "The parts the issue is set with, each a component and its own stylesheet, drawn in the tokens. Each brings the tokens and cn with it.",
   },
@@ -43,45 +48,55 @@ export const GROUPS: Group[] = [
     id: "forms",
     chapter: "Parts",
     name: "Forms",
+    zh: "表单",
     blurb: "Controls in the house's hairline, wired for screen readers: a Field gives its control a label, a hint and an error, and the control says it is invalid. Native where the browser's own is good enough; Select and Combobox draw their lists themselves, in the top layer. Every one works with a keyboard, a phone and a form's own submit.",
   },
   {
     id: "data",
     chapter: "Parts",
     name: "Data",
+    zh: "数据",
     blurb: "Tables, figures and statuses for a console: keys, usage, orders, models. Statuses are told apart by line, fill and shape in one ink, never by hue alone, so they read in greyscale and to anyone who does not see colour.",
   },
   {
     id: "navigation",
     chapter: "Parts",
     name: "Navigation",
+    zh: "导航",
     blurb: "How a reader finds their way: the index beside these docs, and the sidebar of an app (chats, projects, settings), one part for both; and the language a page is read in. A list of links in a nav landmark, the current one marked for the eye and for a screen reader.",
   },
   {
     id: "overlays",
     chapter: "Parts",
     name: "Overlays",
+    zh: "浮层",
     blurb: "What opens over the page or in place of part of it: a dialog, a menu of actions, tabs, toasts. Each follows the ARIA practices for its keys and its focus, on native elements where there is one (<dialog>, the Popover API).",
   },
   {
     id: "feedback",
     chapter: "Parts",
     name: "Feedback",
+    zh: "反馈",
     blurb: "What the page says while it works and after: a notice where it applies, a spinner for a moment, bars where something is still coming.",
   },
   {
     id: "text",
     chapter: "Parts",
     name: "Text and keys",
+    zh: "文字与密钥",
     blurb: "Code, API keys and the clipboard: copy that falls back where the clipboard is unavailable, a key that is not in the page while it is hidden, words for screen readers only.",
   },
   {
     id: "hooks",
     name: "Hooks and cn",
+    zh: "钩子与 cn",
     chapter: "Hooks and cn",
     blurb: "Small helpers the parts share. Each hook answers false (or 1) on the server and on the first render in the browser, so server HTML and hydration agree; the real answer comes a moment later.",
   },
 ];
+
+/** The list of site parts at the foot of the page, after the groups: its anchor and its names. */
+export const SITE = { id: "site", name: "Site parts", zh: "站内部件" } as const;
 
 /** "live": an example on the page (examples.tsx); "guide": steps written out (guides.tsx); "none": neither. */
 export type ExampleKind = "live" | "guide" | "none";
@@ -104,6 +119,10 @@ export interface Entry {
   /** The anchor; the item's name, when it documents one. */
   id: string;
   name: string;
+  /** Its name in Chinese: the page's search finds it by either. */
+  zh: string;
+  /** Other words the page's search finds it by, in either language: "modal" for Dialog, 下拉 for Menu. */
+  keywords?: string[];
   group: GroupId;
   /** The registry item (in registry.json) this entry documents. */
   item?: string;
@@ -140,6 +159,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "install",
     name: "Install",
+    zh: "安装",
+    keywords: ["setup", "get started", "npx", "shadcn", "components.json", "入门"],
     group: "start",
     exports: [],
     summary:
@@ -149,6 +170,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "tokens",
     name: "Tokens",
+    zh: "设计令牌",
+    keywords: ["colours", "colors", "palette", "typography", "type", "fonts", "typefaces", "CSS variables", "颜色", "配色", "字体", "排版", "变量"],
     group: "foundations",
     item: "tokens",
     exports: [],
@@ -205,6 +228,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "dark",
     name: "Dark mode",
+    zh: "深色模式",
+    keywords: ["night", "theme", "夜间", "暗色"],
     group: "foundations",
     exports: [],
     summary:
@@ -223,6 +248,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "theming",
     name: "Theming",
+    zh: "主题",
+    keywords: ["colours", "colors", "status", "hues", "brand", "状态色", "配色", "品牌"],
     group: "foundations",
     exports: [],
     summary:
@@ -254,6 +281,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "styles",
     name: "Styles and Tailwind",
+    zh: "样式与 Tailwind",
+    keywords: ["CSS", "stylesheet", "cascade layers", "样式表"],
     group: "start",
     exports: [],
     summary:
@@ -263,6 +292,8 @@ export const ENTRIES: Entry[] = [
   {
     id: "words",
     name: "Words",
+    zh: "文案",
+    keywords: ["i18n", "translation", "translate", "language", "locale", "strings", "翻译", "多语言", "本地化"],
     group: "foundations",
     item: "words",
     exports: ["S1Words", "useS1Words", "S1_WORDS", "S1WordMap"],
@@ -301,6 +332,8 @@ const zh: Partial<S1WordMap> = {
   {
     id: "head",
     name: "Head",
+    zh: "页头",
+    keywords: ["header", "app bar", "top bar", "brand", "logo", "顶栏", "头部"],
     group: "foundations",
     exports: [],
     summary:
@@ -348,6 +381,8 @@ const LANGS = [{ value: "en", label: "EN", name: "English", lang: "en" }, { valu
   {
     id: "switchers",
     name: "Switchers",
+    zh: "切换器",
+    keywords: ["segmented control", "toggle", "toggle group", "分段控件", "切换"],
     group: "foundations",
     exports: [],
     summary:
@@ -393,6 +428,8 @@ import { Switch } from "@/components/s1lin/switch";
   {
     id: "button",
     name: "Button",
+    zh: "按钮",
+    keywords: ["btn", "action", "call to action", "操作"],
     group: "parts",
     item: "button",
     exports: ["Button", "buttonClass", "ButtonProps", "ButtonVariant", "ButtonSize"],
@@ -440,6 +477,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "section-label",
     name: "SectionLabel",
+    zh: "分节标签",
+    keywords: ["eyebrow", "label", "heading", "小标题"],
     group: "parts",
     item: "section-label",
     exports: ["SectionLabel"],
@@ -461,6 +500,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "kicker",
     name: "Kicker",
+    zh: "眉题",
+    keywords: ["eyebrow", "overline", "tagline", "引题"],
     group: "parts",
     item: "kicker",
     exports: ["Kicker"],
@@ -479,6 +520,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "roundel",
     name: "Roundel",
+    zh: "站牌圆标",
+    keywords: ["metro", "station", "logo", "地铁", "站牌"],
     group: "parts",
     item: "roundel",
     exports: ["Roundel"],
@@ -497,6 +540,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "folio",
     name: "Folio",
+    zh: "页码",
+    keywords: ["page number", "footer", "页脚"],
     group: "parts",
     item: "folio",
     exports: ["Folio"],
@@ -512,6 +557,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "barcode",
     name: "Barcode",
+    zh: "条形码",
+    keywords: ["id", "条码"],
     group: "parts",
     item: "barcode",
     exports: ["Barcode"],
@@ -532,6 +579,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "stack",
     name: "Stack",
+    zh: "技术栈",
+    keywords: ["tags", "chips", "built with", "标签"],
     group: "parts",
     item: "stack",
     exports: ["Stack"],
@@ -546,6 +595,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "screen",
     name: "Screen",
+    zh: "截图框",
+    keywords: ["screenshot", "browser frame", "mockup", "截图", "浏览器"],
     group: "parts",
     item: "screen",
     exports: ["Screen"],
@@ -567,6 +618,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "plate",
     name: "Plate",
+    zh: "图版",
+    keywords: ["frame", "card", "registration marks", "边框"],
     group: "parts",
     item: "plate",
     exports: ["Plate"],
@@ -586,6 +639,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "mark",
     name: "Mark",
+    zh: "标志",
+    keywords: ["logo", "brand", "icon", "标识"],
     group: "parts",
     item: "mark",
     exports: ["Mark", "MarkSetOut"],
@@ -602,6 +657,8 @@ import { Pencil, Plus, Save, Trash2, X } from "lucide-react";   // or any svg
   {
     id: "ascii-art",
     name: "AsciiArt",
+    zh: "字符画",
+    keywords: ["ascii", "text art", "banner", "typewriter", "艺术字"],
     group: "parts",
     item: "ascii-art",
     exports: ["AsciiArt"],
@@ -632,6 +689,8 @@ import { AsciiArt } from "@/components/s1lin/ascii-art";
   {
     id: "tex",
     name: "Tex",
+    zh: "公式",
+    keywords: ["LaTeX", "KaTeX", "math", "maths", "equation", "数学"],
     group: "parts",
     item: "tex",
     exports: ["Tex", "setKatex"],
@@ -658,6 +717,8 @@ import { AsciiArt } from "@/components/s1lin/ascii-art";
   {
     id: "field",
     name: "Field",
+    zh: "表单字段",
+    keywords: ["label", "hint", "error", "fieldset", "form item", "标签", "提示", "错误"],
     group: "forms",
     item: "field",
     exports: ["Field", "Fieldset", "useField", "FieldProps", "FieldsetProps", "FieldControlProps"],
@@ -696,6 +757,8 @@ import { Checkbox } from "@/components/s1lin/checkbox";
   {
     id: "input",
     name: "Input",
+    zh: "输入框",
+    keywords: ["text field", "textbox", "text box", "文本框"],
     group: "forms",
     item: "input",
     exports: ["Input", "InputProps"],
@@ -727,6 +790,8 @@ import { Checkbox } from "@/components/s1lin/checkbox";
   {
     id: "textarea",
     name: "Textarea",
+    zh: "多行文本框",
+    keywords: ["multiline", "text area", "多行"],
     group: "forms",
     item: "textarea",
     exports: ["Textarea", "TextareaProps"],
@@ -749,6 +814,8 @@ import { Checkbox } from "@/components/s1lin/checkbox";
   {
     id: "select",
     name: "Select",
+    zh: "选择器",
+    keywords: ["dropdown", "picker", "options", "listbox", "native select", "下拉框", "下拉选择"],
     group: "forms",
     item: "select",
     exports: ["Select", "SelectProps", "SelectOption", "SelectGroup", "NativeSelect", "NativeSelectProps"],
@@ -813,11 +880,13 @@ import { Checkbox } from "@/components/s1lin/checkbox";
   {
     id: "combobox",
     name: "Combobox",
+    zh: "组合框",
+    keywords: ["autocomplete", "typeahead", "autosuggest", "search", "suggestions", "自动完成", "搜索", "联想"],
     group: "forms",
     item: "combobox",
     exports: ["Combobox", "ComboboxGroup", "ComboboxProps"],
     summary:
-      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a button that clears it and one that opens the list. For a fixed list, Select.",
+      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a mark or words before and after the text, a button that clears it and one that opens the list; without that one and with `clearOnChoose` it is a search that takes the reader somewhere, as the search over this page's index is. For a fixed list, Select.",
     example: "live",
     usage: `import { Combobox } from "@/components/s1lin/combobox";
 
@@ -834,24 +903,28 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
       { name: "groups", type: "ComboboxGroup<T>[]", required: true, desc: "The options to show now, `{ key, label?, items }` each, already filtered by the text; a group with no label has no heading." },
       { name: "value", type: "T | null", required: true, desc: "The chosen item." },
       { name: "onValueChange", type: "(value: T | null) => void", required: true, desc: "Called with the item chosen, or null when the box is cleared." },
-      { name: "onInputChange", type: "(text: string) => void", desc: "Called with the text on every edit, with the item's words after a choice, and with \"\" after a clear: filter `groups` with it." },
+      { name: "onInputChange", type: "(text: string) => void", desc: "Called with the text on every edit, with the item's words after a choice (\"\" with `clearOnChoose`), and with \"\" after a clear: filter `groups` with it." },
+      { name: "clearOnChoose", type: "boolean", default: "false", desc: "The box empties after a choice: a search that takes the reader somewhere, where a choice is an act, not a value the box keeps. Keep `value` null." },
       { name: "itemText", type: "(item: T) => string", required: true, desc: "An item in words: what the box shows when it is chosen, and the option's name for screen readers." },
       { name: "itemKey", type: "(item: T) => string", required: true, desc: "An item's key, unique among them; the chosen one is found by it." },
       { name: "renderItem", type: "(item: T) => ReactNode", desc: "What an option shows; its words by default." },
-      { name: "empty", type: "ReactNode", desc: "Shown in the list when nothing matches; without it, the list stays shut." },
+      { name: "empty", type: "ReactNode", desc: "Shown in the list when nothing matches, and said as a status; without it, the list stays shut." },
+      { name: "prefix", type: "ReactNode", desc: "Before the text, inside the box: a magnifier. Words here are read with the box." },
+      { name: "suffix", type: "ReactNode", desc: "After the text, inside the box, before its buttons: a key's hint. Words here are read with the box." },
       { name: "placeholder", type: "string", desc: "Words in the empty box." },
       { name: "aria-labelledby", type: "string", desc: "The label's id, when it is not a Field's." },
       { name: "invalid", type: "boolean", desc: "In error without a Field around it." },
       { name: "disabled", type: "boolean", desc: "Nothing can be typed or chosen." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px or 30px tall, as Input." },
       { name: "clearLabel", type: "string", default: "\"Clear\"", desc: "The clear button's name." },
+      { name: "showButton", type: "boolean", default: "true", desc: "The button that opens the list; false for a search, whose list opens as one types." },
       { name: "showLabel", type: "string", default: "\"Show options\"", desc: "The name of the button that opens the list." },
-      { name: "className", type: "string", desc: "Added to the box (`s1-input`)." },
+      { name: "className", type: "string", desc: "Added to the box (`s1-input`); every other prop (`name`, `required`, `aria-keyshortcuts`, `enterKeyHint`, `onFocus`) goes to the `<input>`, as Input's do." },
       { name: "listClassName", type: "string", desc: "Added to the list." },
     ],
     notes: [
       { label: "Keyboard", text: "Typing opens the list on its first option; ↓ and ↑ open it (on the chosen option, if it is there) and move through it, wrapping; Home and End stay in the text; Enter chooses; Esc closes the list, and a second Esc puts back the chosen item's words; Tab closes it and moves on. Leaving the box puts the chosen item's words back, unless the box was emptied: then it is cleared, the keyboard's × (onValueChange(null)). The two buttons are left out of the Tab order; their keys are these." },
-      { label: "Accessibility", text: "The box is a `combobox` with `aria-autocomplete=\"list\"` and `aria-expanded`; the list a `listbox` of `option`s in `group`s named by their headings; focus stays in the box and the option under the arrows is its `aria-activedescendant`, the chosen one `aria-selected` with a tick. In a Field it takes the label, the hint and the error from it. What an empty list says is a status, read as it changes." },
+      { label: "Accessibility", text: "The box is a `combobox` with `aria-autocomplete=\"list\"` and `aria-expanded`; the list a `listbox` of `option`s in `group`s named by their headings; focus stays in the box and the option under the arrows is its `aria-activedescendant`, the chosen one `aria-selected` with a tick. In a Field it takes the label, the hint and the error from it. What an empty list says is a status, in the page from the start and out of sight, so it is read as it changes." },
       { label: "Phone", text: "The list is in the top layer, at least as wide as the box, kept 8px inside the screen, above the box when there is no room under it, and never taller than its room (`--s1-combobox-room`) or 320px." },
       { label: "Chinese", text: "A group's heading is set at 12px and 500, never tracked or cased." },
     ],
@@ -859,6 +932,8 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   {
     id: "checkbox",
     name: "Checkbox",
+    zh: "复选框",
+    keywords: ["check", "tick", "勾选", "多选"],
     group: "forms",
     item: "checkbox",
     exports: ["Checkbox", "CheckboxProps"],
@@ -883,6 +958,8 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   {
     id: "radio-group",
     name: "RadioGroup",
+    zh: "单选组",
+    keywords: ["radio", "radio buttons", "segmented", "options", "单选"],
     group: "forms",
     item: "radio-group",
     exports: ["RadioGroup", "RadioGroupProps", "RadioOption"],
@@ -924,6 +1001,8 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   {
     id: "switch",
     name: "Switch",
+    zh: "开关",
+    keywords: ["toggle", "on off", "切换"],
     group: "forms",
     item: "switch",
     exports: ["Switch", "SwitchProps"],
@@ -949,6 +1028,8 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   {
     id: "slider",
     name: "Slider",
+    zh: "滑块",
+    keywords: ["range", "滑动条", "范围"],
     group: "forms",
     item: "slider",
     exports: ["Slider", "SliderProps", "SliderMark"],
@@ -990,6 +1071,8 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   {
     id: "table",
     name: "Table",
+    zh: "表格",
+    keywords: ["data table", "grid", "rows", "columns", "sort", "数据表"],
     group: "data",
     item: "table",
     exports: ["Table", "TableProps", "Column", "Sort", "RowProps", "RowGroup", "OpenGroups", "GroupWords", "ALL_GROUPS_OPEN", "ALL_GROUPS_CLOSED", "isGroupOpen", "withGroupOpen", "allGroupsOpen"],
@@ -1070,6 +1153,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "pagination",
     name: "Pagination",
+    zh: "分页",
+    keywords: ["pager", "pages", "next", "previous", "翻页"],
     group: "data",
     item: "pagination",
     exports: ["Pagination", "pageList"],
@@ -1102,6 +1187,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "badge",
     name: "Badge",
+    zh: "徽标",
+    keywords: ["tag", "label", "status", "pill", "chip", "标签", "状态"],
     group: "data",
     item: "badge",
     exports: ["Badge", "BadgeProps"],
@@ -1128,6 +1215,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "glyph",
     name: "Glyph",
+    zh: "状态符号",
+    keywords: ["status", "icon", "shape", "indicator", "图标", "状态"],
     group: "data",
     item: "glyph",
     exports: ["Glyph", "Status"],
@@ -1149,6 +1238,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "stat",
     name: "Stat",
+    zh: "统计数值",
+    keywords: ["KPI", "metric", "figure", "number", "trend", "指标", "数字"],
     group: "data",
     item: "stat",
     exports: ["Stat", "StatGroup", "StatProps"],
@@ -1182,6 +1273,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "meter",
     name: "Meter",
+    zh: "用量条",
+    keywords: ["progress", "progress bar", "quota", "usage", "gauge", "budget", "进度条", "配额", "用量"],
     group: "data",
     item: "meter",
     exports: ["Meter"],
@@ -1208,6 +1301,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "description-list",
     name: "DescriptionList",
+    zh: "描述列表",
+    keywords: ["dl", "key value", "definition list", "details", "键值"],
     group: "data",
     item: "description-list",
     exports: ["DescriptionList", "Description"],
@@ -1233,6 +1328,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "panel",
     name: "Panel",
+    zh: "面板",
+    keywords: ["card", "box", "卡片"],
     group: "data",
     item: "panel",
     exports: ["Panel"],
@@ -1259,6 +1356,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "empty-state",
     name: "EmptyState",
+    zh: "空状态",
+    keywords: ["empty", "no data", "blank", "无数据", "暂无"],
     group: "data",
     item: "empty-state",
     exports: ["EmptyState"],
@@ -1289,6 +1388,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
   {
     id: "metro-map",
     name: "MetroMap",
+    zh: "地铁图",
+    keywords: ["chart", "map", "prices", "SVG", "lines", "图表", "线路"],
     group: "data",
     item: "metro-map",
     exports: ["MetroMap", "MetroMapProps", "MetroLine", "MetroStation", "MetroStatus", "MetroColour", "MetroFigure", "MetroZone", "MetroAxis", "MetroFare", "MetroInterchange", "MetroGlyph", "metroHue"],
@@ -1358,6 +1459,8 @@ const [lit, setLit] = useState<string[] | null>(null);   // a table's rows light
   {
     id: "timetable",
     name: "Timetable",
+    zh: "时刻表",
+    keywords: ["schedule", "departures", "班次"],
     group: "data",
     item: "timetable",
     exports: ["Timetable", "TimetableProps", "TimetableRail", "TimetableMark"],
@@ -1401,6 +1504,8 @@ import { metroHue } from "@/components/s1lin/metro-map";
   {
     id: "side-nav",
     name: "SideNav",
+    zh: "侧边导航",
+    keywords: ["sidebar", "nav", "navigation", "index", "table of contents", "drawer", "侧栏", "目录", "导航"],
     group: "navigation",
     item: "side-nav",
     exports: ["SideNav", "SideNavProps", "SideNavItem", "SideNavSection", "SideNavLinkProps"],
@@ -1469,6 +1574,8 @@ const sections: SideNavSection[] = [
   {
     id: "lang-switch",
     name: "LangSwitch",
+    zh: "语言切换",
+    keywords: ["language", "locale", "i18n", "language switcher", "语言", "中英文"],
     group: "navigation",
     item: "lang-switch",
     exports: ["LangSwitch", "LangSwitchProps", "LangOption", "LangSwitchLinkProps"],
@@ -1513,6 +1620,8 @@ const LANGS = [
   {
     id: "dialog",
     name: "Dialog",
+    zh: "对话框",
+    keywords: ["modal", "popup", "lightbox", "confirm", "弹窗", "模态框", "弹框"],
     group: "overlays",
     item: "dialog",
     exports: ["Dialog"],
@@ -1550,6 +1659,8 @@ const LANGS = [
   {
     id: "menu",
     name: "Menu",
+    zh: "菜单",
+    keywords: ["dropdown", "dropdown menu", "actions", "kebab", "more", "context menu", "下拉", "操作"],
     group: "overlays",
     item: "menu",
     exports: ["Menu", "MenuItem"],
@@ -1582,6 +1693,8 @@ const LANGS = [
   {
     id: "dropdown",
     name: "Dropdown",
+    zh: "下拉菜单",
+    keywords: ["menu", "submenu", "context menu", "子菜单"],
     group: "overlays",
     item: "dropdown",
     exports: ["Dropdown", "DropdownTrigger", "DropdownList", "DropdownItem", "DropdownCheckItem", "DropdownRadioGroup", "DropdownRadioItem", "DropdownGroup", "DropdownLabel", "DropdownSeparator", "DropdownSub", "DropdownSubTrigger", "DropdownSubList"],
@@ -1629,6 +1742,8 @@ const LANGS = [
   {
     id: "popover",
     name: "Popover",
+    zh: "弹出框",
+    keywords: ["popup", "tooltip", "flyout", "气泡卡片", "气泡"],
     group: "overlays",
     item: "popover",
     exports: ["Popover", "PopoverProps"],
@@ -1668,6 +1783,8 @@ const LANGS = [
   {
     id: "tabs",
     name: "Tabs",
+    zh: "标签页",
+    keywords: ["tab", "tab bar", "选项卡"],
     group: "overlays",
     item: "tabs",
     exports: ["Tabs", "Tab"],
@@ -1699,6 +1816,8 @@ const LANGS = [
   {
     id: "toast",
     name: "Toast",
+    zh: "轻提示",
+    keywords: ["snackbar", "notification", "notify", "flash message", "消息提示", "通知"],
     group: "overlays",
     item: "toast",
     exports: ["toast", "Toaster", "ToastOptions"],
@@ -1734,6 +1853,8 @@ toast({ title: "Key revoked", action: { label: "Undo", onClick: undo } });`,
   {
     id: "notice",
     name: "Notice",
+    zh: "提示条",
+    keywords: ["alert", "banner", "callout", "message", "warning", "警告", "提示"],
     group: "feedback",
     item: "notice",
     exports: ["Notice", "NoticeProps"],
@@ -1763,6 +1884,8 @@ toast({ title: "Key revoked", action: { label: "Undo", onClick: undo } });`,
   {
     id: "spinner",
     name: "Spinner",
+    zh: "加载指示",
+    keywords: ["loading", "loader", "busy", "加载", "转圈"],
     group: "feedback",
     item: "spinner",
     exports: ["Spinner"],
@@ -1787,6 +1910,8 @@ toast({ title: "Key revoked", action: { label: "Undo", onClick: undo } });`,
   {
     id: "skeleton",
     name: "Skeleton",
+    zh: "骨架屏",
+    keywords: ["loading", "placeholder", "shimmer", "加载", "占位"],
     group: "feedback",
     item: "skeleton",
     exports: ["Skeleton"],
@@ -1814,6 +1939,8 @@ toast({ title: "Key revoked", action: { label: "Undo", onClick: undo } });`,
   {
     id: "code",
     name: "Code",
+    zh: "代码块",
+    keywords: ["code block", "snippet", "pre", "syntax", "代码"],
     group: "text",
     item: "code",
     exports: ["Code"],
@@ -1838,6 +1965,8 @@ Send <Code>Authorization: Bearer …</Code> with each request.
   {
     id: "copy",
     name: "Copy",
+    zh: "复制",
+    keywords: ["clipboard", "copy button", "剪贴板"],
     group: "text",
     item: "copy",
     exports: ["Copy", "copyText"],
@@ -1872,6 +2001,8 @@ const ok = await copyText(text);`,
   {
     id: "secret",
     name: "Secret",
+    zh: "密钥",
+    keywords: ["API key", "password", "token", "reveal", "masked", "API 密钥"],
     group: "text",
     item: "secret",
     exports: ["Secret"],
@@ -1903,6 +2034,8 @@ const ok = await copyText(text);`,
   {
     id: "visually-hidden",
     name: "VisuallyHidden",
+    zh: "读屏文字",
+    keywords: ["sr-only", "screen reader", "a11y", "accessibility", "hidden text", "无障碍", "屏幕阅读器"],
     group: "text",
     item: "visually-hidden",
     exports: ["VisuallyHidden"],
@@ -1924,6 +2057,8 @@ const ok = await copyText(text);`,
   {
     id: "use-near",
     name: "useNear",
+    zh: "临近视口",
+    keywords: ["IntersectionObserver", "viewport", "lazy", "visible", "懒加载"],
     group: "hooks",
     item: "use-near",
     exports: ["useNear"],
@@ -1940,6 +2075,8 @@ return <div ref={box}>{near ? <Heavy /> : <Still />}</div>;`,
   {
     id: "use-media",
     name: "useMedia",
+    zh: "媒体查询",
+    keywords: ["media query", "matchMedia", "breakpoint", "responsive", "响应式"],
     group: "hooks",
     item: "use-media",
     exports: ["useMedia"],
@@ -1952,6 +2089,8 @@ return <div ref={box}>{near ? <Heavy /> : <Still />}</div>;`,
   {
     id: "use-dark",
     name: "useDark",
+    zh: "深色判断",
+    keywords: ["dark mode", "night", "theme", "夜间"],
     group: "hooks",
     item: "use-dark",
     exports: ["useDark"],
@@ -1966,6 +2105,8 @@ const ink = getComputedStyle(canvas).getPropertyValue("--s1-ink");`,
   {
     id: "use-hydrated",
     name: "useHydrated",
+    zh: "水合完成",
+    keywords: ["hydration", "SSR", "mounted", "client", "水合"],
     group: "hooks",
     item: "use-hydrated",
     exports: ["useHydrated"],
@@ -1979,6 +2120,8 @@ return live ? <canvas … /> : <pre>{still}</pre>;`,
   {
     id: "use-scale",
     name: "useScale",
+    zh: "缩放比例",
+    keywords: ["SVG", "scale", "resize", "缩放"],
     group: "hooks",
     item: "use-scale",
     exports: ["useScale"],
@@ -1992,6 +2135,8 @@ return live ? <canvas … /> : <pre>{still}</pre>;`,
   {
     id: "use-overflow",
     name: "useOverflow",
+    zh: "溢出检测",
+    keywords: ["overflow", "scroll", "scrollable", "溢出"],
     group: "hooks",
     item: "use-overflow",
     exports: ["useOverflow"],
@@ -2006,6 +2151,8 @@ const over = useOverflow(frame);
   {
     id: "anchor",
     name: "anchorPanel",
+    zh: "浮层定位",
+    keywords: ["anchor", "position", "popover", "placement", "floating", "定位"],
     group: "hooks",
     item: "anchor",
     exports: ["anchorPanel", "placePanel", "AnchorOptions"],
@@ -2039,6 +2186,8 @@ useLayoutEffect(() => {
   {
     id: "cn",
     name: "cn",
+    zh: "类名合并",
+    keywords: ["classnames", "clsx", "class names", "类名"],
     group: "hooks",
     item: "cn",
     exports: ["cn"],
