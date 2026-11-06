@@ -154,8 +154,10 @@ server, as an app would, to check its roles, names and wiring.
 `test/heights.test.ts` lays the buttons out in headless Chrome, in their own
 stylesheets alone, and holds every variant (with words, an icon and words, an icon
 alone, as an `<a>`, in English and in Chinese) to one height at its size, 40px and
-30px, and an Input's action and a Secret's Show and Copy to their box's, after it;
-it is skipped where there is no Chrome
+30px, and an Input's action and a Secret's Show and Copy to their box's, after it,
+and lays Fields out in a row that stretches them (a hint under one, none under the
+next, a Select and a Switch beside them) and holds their boxes to one top and one
+height; it is skipped where there is no Chrome
 (set `CHROME` to one). `test/side-nav.test.ts` has Vite bundle a page of SideNav
 and EmptyState as an app would and runs it in the same Chrome, at a desktop's width
 and a phone's: the current item's bar, the rail, the phone's sheet (it opens, focus

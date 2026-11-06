@@ -111,7 +111,7 @@ export interface PropDoc {
 }
 
 export interface Note {
-  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese" | "Forms";
+  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese" | "Forms" | "Rows";
   text: string;
 }
 
@@ -752,6 +752,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     notes: [
       { label: "Accessibility", text: "Checked in Chrome's accessibility tree: the control's name is the label, its description the error then the hint, `aria-invalid` is true while there is an error. Move focus to the first field in error after a submit; the error is read with it. A Fieldset is a group named by its legend, described by its hint and error." },
       { label: "Phone", text: "The label and its aside wrap onto two lines at 320px; the error and hint wrap under the control." },
+      { label: "Rows", text: "Fields side by side in a grid or flex row, which stretches each to the tallest: every Field keeps its label, its box and its hint at its top (`align-content: start`), so the boxes share one line and one height whenever the labels do, a hint hangs under its own box, and nothing is held for a hint that is not there. A Switch beside them: `align-self: start; margin-top: calc(11px * 1.4 + 6px)` (12px in Chinese, the labels' line and the gap), `min-height: 40px; align-content: center`, its row centred and its control's `margin-top: 0`, so its track sits on the boxes' line. test/heights.test.ts measures both in Chrome, in English and Chinese." },
     ],
   },
   {

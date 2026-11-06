@@ -144,7 +144,42 @@ export function FieldDemo() {
         </Button>
       </p>
       <Said text={said || "Press Check with the form empty to see the errors."} />
+      <FieldRows />
     </form>
+  );
+}
+
+/**
+ * Fields in a row: a hint under one, none under the next, a Select and a Switch beside them. The boxes share one line
+ * and one height whatever is under them; a hint hangs under its own box, and nothing is held for one that is not there.
+ */
+function FieldRows() {
+  return (
+    <div className="ud-fields-set">
+      <div className="ud-fields">
+        <Field label="Priority" hint="Lower goes first">
+          <Input type="number" defaultValue="1" />
+        </Field>
+        <Field label="Concurrency">
+          <Input type="number" defaultValue="20" />
+        </Field>
+        <Field label="Cost multiplier" hint="0 counts it as free">
+          <Input type="number" defaultValue="0.5" step="0.1" />
+        </Field>
+      </div>
+      <div className="ud-fields">
+        <Field label="Every" hint="15 – 3600">
+          <Input inputMode="numeric" defaultValue="60" suffix="s" />
+        </Field>
+        <Field label="Proxy">
+          <Select defaultValue="">
+            <option value="">None</option>
+            <option value="jp-relay-1">jp-relay-1</option>
+          </Select>
+        </Field>
+        <Switch defaultChecked>On</Switch>
+      </div>
+    </div>
   );
 }
 
