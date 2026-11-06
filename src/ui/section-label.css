@@ -7,6 +7,8 @@
     display: flex; align-items: baseline; gap: 12px;
   }
   .s1-section-label [lang="ja"] { font: 700 20px/1 var(--s1-font-mincho); letter-spacing: 0.24em; text-transform: none; }
+  .s1-section-label__mark { display: inline-flex; align-self: center; width: 20px; height: 20px; }
+  .s1-section-label__mark svg { width: 100%; height: 100%; fill: currentColor; }
 
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
