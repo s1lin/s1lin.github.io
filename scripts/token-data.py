@@ -9,6 +9,7 @@ nothing else: no providers, model ids, costs or hosts.
 
 Usage:
   python3 -I scripts/token-data.py SOURCE [SOURCE ...] [--sync] [--cursor CSV ...]
+    [--copilot DIR_OR_SSH_URL ...] [--copilot-store DIR]
 
 A SOURCE is a path to a cc-switch.db, ssh://user@host[:port]/path/to/cc-switch.db
 for one on another machine (the script runs itself there with python3, so
@@ -28,6 +29,17 @@ its Total. Cursor bills most of it within a plan and prices none of it at
 list price, so its tokens count and its money stays at $0, a floor like the
 rest.
 
+--copilot adds GitHub Copilot's CLI, which cc-switch does not see, from its session
+folders (~/.copilot/session-state, or ssh://user@host[:port]/root/.copilot/session-state
+to read them where they are; the script runs itself there). Each model call is a
+session.usage_record event in <session>/events.jsonl, counted once by its usageId. Its
+inputTokens holds the whole prompt, the cache in it (the model's tokenDetails show the
+fresh input is inputTokens less cacheRead and cacheWrite), so fresh input is that
+difference, and the four kinds are the same as the rest. The CLI prunes old sessions, so
+--copilot-store DIR keeps what each run read, one JSON per session, and a later run merges
+them with what is still there: a session counts once, at the larger of its saved and
+current counts. The agent is "copilot". Priced at the list price of the model.
+
 Money is the value at API list prices, in US dollars: the cost cc-switch
 recorded, and for rows it left at $0 because its price table lacked the model,
 the tokens priced from the fullest price table among the sources. Models no
@@ -45,6 +57,7 @@ Machines are added together.
 """
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
@@ -67,8 +80,8 @@ PARTS = ("input", "output", "cacheRead", "cacheWrite")
 FAMILIES = (
     ("GPT-5", "OpenAI", r"^gpt-5|codex"),
     ("GPT-6", "OpenAI", r"^gpt-6"),
-    ("Claude Opus 5.5", "Anthropic", r"claude-opus-5-5"),
-    ("Claude Opus 5", "Anthropic", r"claude-opus-5(?!-5)"),
+    ("Claude Opus 5.5", "Anthropic", r"claude-opus-5[-.]5"),
+    ("Claude Opus 5", "Anthropic", r"claude-opus-5(?![-.]5)"),
     ("Claude Sonnet 5", "Anthropic", r"claude-sonnet-5(?![-.]\d)"),
     ("Claude Fable 5.1", "Anthropic", r"claude-fable-5-1"),
     ("Claude, other", "Anthropic", r"claude"),
@@ -86,7 +99,6 @@ MAKERS = [maker for _, maker, _ in FAMILIES] + ["Other"]
 
 def family(model):
     """The named model a model id counts as, or Other."""
-    import re
     return next((name for name, _, rx in FAMILIES if re.search(rx, model or "")), "Other")
 
 
@@ -166,6 +178,93 @@ def cursor_csv(paths):
     return {"cursor": out} if out else {}
 
 
+def copilot_sessions(root):
+    """{session: {day: {model: [fresh, output, cacheRead, cacheWrite]}}} from a Copilot CLI session-state folder."""
+    out = {}
+    root = os.path.expanduser(root)
+    for name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
+        path = os.path.join(root, name, "events.jsonl")
+        if not os.path.isfile(path):
+            continue
+        seen, days = set(), {}
+        with open(path, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if '"session.usage_record"' not in line:
+                    continue
+                try:
+                    ev = json.loads(line)
+                    u = ev["data"]["usage"]
+                    uid = (u.get("accounting") or {}).get("usageId") or ev.get("id") or line
+                    if uid in seen:
+                        continue
+                    seen.add(uid)
+                    day = ev["timestamp"][:10]
+                    cr, cw = int(u.get("cacheReadTokens") or 0), int(u.get("cacheWriteTokens") or 0)
+                    inp = int(u.get("inputTokens") or 0)
+                    cell = days.setdefault(day, {}).setdefault(u.get("model") or "", [0, 0, 0, 0])
+                except (KeyError, ValueError, TypeError):
+                    continue
+                for k, v in enumerate((max(inp - cr - cw, 0), int(u.get("outputTokens") or 0), cr, cw)):
+                    cell[k] += v
+        if days:
+            out[name] = days
+    return out
+
+
+def copilot_remote(spec):
+    """Run this script on the machine in an ssh:// Copilot SOURCE and return its sessions."""
+    target, _, path = spec[len("ssh://"):].partition("/")
+    host, _, port = target.partition(":")
+    ssh = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"] + (["-p", port] if port else []) + [host]
+    with open(__file__, "rb") as me:
+        done = subprocess.run(ssh + ["python3", "-I", "-", "--copilot-tally", "/" + path], stdin=me, capture_output=True, check=True)
+    return json.loads(done.stdout)
+
+
+def copilot(specs, store, prices):
+    """{"copilot": {day: [input, output, cacheRead, cacheWrite, usd, {family: tokens}]}}, saved sessions merged with the live ones."""
+    import time
+    sessions = {}
+    grew = []
+    def take(found):
+        for sid, days in found.items():
+            mine = sessions.setdefault(sid, {})
+            for day, models in days.items():
+                for model, cell in models.items():
+                    old = mine.setdefault(day, {}).get(model)
+                    if old is None or sum(cell) > sum(old):
+                        mine[day][model] = cell
+                        grew.append(sid)
+    if store and os.path.isdir(store):
+        for name in sorted(os.listdir(store)):
+            if name.endswith(".json"):
+                with open(os.path.join(store, name)) as f:
+                    take(json.load(f))
+    fresh = {}
+    for spec in specs:
+        found = copilot_remote(spec) if spec.startswith("ssh://") else copilot_sessions(spec)
+        grew.clear()
+        take(found)
+        fresh.update({sid: found[sid] for sid in set(grew)})
+    if store and fresh:
+        os.makedirs(store, exist_ok=True)
+        with open(os.path.join(store, f"copilot-{time.strftime('%Y-%m-%dT%H%M%SZ', time.gmtime())}.json"), "w") as f:
+            json.dump(fresh, f, separators=(",", ":"))
+    out = {}
+    for days in sessions.values():
+        for day, models in days.items():
+            for model, tokens in models.items():
+                cell = out.setdefault(day, [0, 0, 0, 0, 0.0, {}])
+                for k in range(4):
+                    cell[k] += tokens[k]
+                p = prices.get(re.sub(r"[.]", "-", model))
+                if p:
+                    cell[4] += sum(t * q for t, q in zip(tokens, p)) / 1e6
+                fam = family(model)
+                cell[5][fam] = cell[5].get(fam, 0) + sum(tokens)
+    return {"copilot": out} if out else {}
+
+
 def run_remote(spec, sync):
     """Run this script on the machine in an ssh:// SOURCE and return its tally."""
     rest = spec[len("ssh://"):]
@@ -183,9 +282,14 @@ def main(argv):
     if argv[:1] == ["--tally"]:
         print(json.dumps(tally(argv[1])))
         return 0
+    if argv[:1] == ["--copilot-tally"]:
+        print(json.dumps(copilot_sessions(argv[1])))
+        return 0
     sync = "--sync" in argv
-    cursor = [a for i, a in enumerate(argv) if i > 0 and argv[i - 1] == "--cursor"]
-    sources = [a for i, a in enumerate(argv) if a not in ("--sync", "--cursor") and not (i > 0 and argv[i - 1] == "--cursor")]
+    flags = ("--cursor", "--copilot", "--copilot-store")
+    after = lambda flag: [a for i, a in enumerate(argv) if i > 0 and argv[i - 1] == flag]
+    cursor, copilots, stores = after("--cursor"), after("--copilot"), after("--copilot-store")
+    sources = [a for i, a in enumerate(argv) if a not in ("--sync",) + flags and not (i > 0 and argv[i - 1] in flags)]
     if not sources:
         print(__doc__.strip().split("\n\n")[1], file=sys.stderr)
         return 2
@@ -212,7 +316,7 @@ def main(argv):
     model_days = {}  # day -> {family: tokens}, from the same table as the day's agents
     parts = dict.fromkeys(PARTS, 0)
     parts_by_app = {}  # app -> the four kinds, for the flow from agents to kinds
-    for by_app in [merge(t, prices) for t in tallies] + [cursor_csv(cursor)]:
+    for by_app in [merge(t, prices) for t in tallies] + [cursor_csv(cursor), copilot(copilots, stores[0] if stores else None, prices)]:
         for app, by_day in by_app.items():
             for day, cell in by_day.items():
                 mine = days.setdefault(day, {}).setdefault(app, [0, 0.0])
