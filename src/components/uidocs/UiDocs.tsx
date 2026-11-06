@@ -131,7 +131,7 @@ function Nav() {
   const group = groupOf(active);
   const groupName = group === SITE.id ? SITE.name : (GROUPS.find((g) => g.id === group) ?? GROUPS[0]).name;
   const here = entry ? `${groupName} · ${entry.name}` : groupName;
-  return <SideNav className="ud-nav" label="Library" title="Index" sections={NAV} current={active} currentType="location" sheet={900} here={here} />;
+  return <SideNav className="ud-nav" label="Library" barLabel="Index" sections={NAV} current={active} currentType="location" sheet={900} here={here} />;
 }
 
 /** A group's opening: where it stands, its name, what is in it. */

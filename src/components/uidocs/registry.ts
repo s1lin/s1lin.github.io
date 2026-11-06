@@ -886,7 +886,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     item: "combobox",
     exports: ["Combobox", "ComboboxGroup", "ComboboxProps"],
     summary:
-      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a mark or words before and after the text, a button that clears it and one that opens the list; without that one and with `clearOnChoose` it is a search that takes the reader somewhere, as the search over this page's index is. For a fixed list, Select.",
+      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a mark or words before and after the text, a button that clears it and one that opens the list; without that one and with `clearOnChoose` it is a search that takes the reader somewhere, as the search over this page's index is. With `variant=\"line\"` the box is one underline, for a search that is shut behind a title and its magnifier until it is asked for, as this page's and the console's are. For a fixed list, Select.",
     example: "live",
     usage: `import { Combobox } from "@/components/s1lin/combobox";
 
@@ -916,6 +916,7 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
       { name: "invalid", type: "boolean", desc: "In error without a Field around it." },
       { name: "disabled", type: "boolean", desc: "Nothing can be typed or chosen." },
       { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px or 30px tall, as Input." },
+      { name: "variant", type: "\"box\" | \"line\"", default: "\"box\"", desc: "\"line\" is one underline in the ink and no box, for a search that sits in a title row: the line thickens while the box has focus, and the magnifier and buttons sit on it." },
       { name: "clearLabel", type: "string", default: "\"Clear\"", desc: "The clear button's name." },
       { name: "showButton", type: "boolean", default: "true", desc: "The button that opens the list; false for a search, whose list opens as one types." },
       { name: "showLabel", type: "string", default: "\"Show options\"", desc: "The name of the button that opens the list." },

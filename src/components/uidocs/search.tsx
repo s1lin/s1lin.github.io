@@ -29,14 +29,16 @@ function Hit({ place, zh }: { place: Place; zh: boolean }) {
 }
 
 /**
- * The search over the index: the kit's Combobox, the places in the page's sections as you type, in English or in
- * Chinese. A choice scrolls there (at once under reduced motion), puts it in the address, gives its heading focus
- * and marks it for a moment; the box empties. "/" brings focus here from anywhere but a field. On a phone it is a
- * button at the end of the index's bar that opens the box over the bar.
+ * The search over the index, shut until it is asked for: the index's title row with a magnifier at its end. A click
+ * on the title or the magnifier, or "/" from anywhere but a field, opens it in place of the row as a line input (the
+ * kit's Combobox, variant "line") with its list under it: the places in the page's sections as you type, in English
+ * or in Chinese. A choice scrolls there (at once under reduced motion), puts it in the address, gives its heading
+ * focus and marks it for a moment; the box empties and the row comes back. Esc, Close and a click elsewhere put the
+ * row back too, and Esc and Close give focus back to the magnifier. On a phone the magnifier is a button at the end
+ * of the index's bar and the line opens over the bar.
  */
 export function DocSearch() {
   const [text, setText] = useState("");
-  // the phone's box, over the index's bar
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const marked = useRef<{ el: Element; timer: number } | null>(null);
@@ -51,9 +53,8 @@ export function DocSearch() {
     [text, zh],
   );
 
-  const onPhone = () => toggle.current !== null && toggle.current.offsetParent !== null;
   function show() {
-    if (onPhone()) flushSync(() => setOpen(true));
+    flushSync(() => setOpen(true));
     const box = document.getElementById(INPUT);
     if (!box) return;
     // held in sight under the running head, it needs no scroll (a phone's would move the page to put it mid-screen)
@@ -115,7 +116,13 @@ export function DocSearch() {
         if (open && !e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
       }}
     >
-      <Button ref={toggle} variant="ghost" className="ud-search__open" icon={<Glass />} aria-label="Search the parts" aria-expanded={open} aria-controls={FIELD} onClick={show} />
+      <div className="ud-search__head">
+        {/* the title is the pointer's way in; the magnifier is the one control a keyboard and a screen reader meet */}
+        <button type="button" className="ud-search__title" tabIndex={-1} aria-hidden="true" onClick={show}>
+          Index
+        </button>
+        <Button ref={toggle} variant="ghost" size="sm" className="ud-search__open" icon={<Glass />} aria-label="Search the parts" aria-keyshortcuts="/" aria-expanded={open} aria-controls={FIELD} onClick={show} />
+      </div>
       <div className="ud-search__field" id={FIELD}>
         <Combobox
           id={INPUT}
@@ -139,12 +146,8 @@ export function DocSearch() {
           itemKey={(p) => p.id}
           renderItem={(p) => <Hit place={p} zh={zh} />}
           empty={text.trim() === "" ? undefined : zh ? <span lang="zh-CN">没有匹配的部件或章节</span> : "Nothing matches"}
+          variant="line"
           prefix={<Glass className="ud-search__glass" aria-hidden="true" />}
-          suffix={
-            <kbd className="ud-search__key" aria-hidden="true">
-              /
-            </kbd>
-          }
         />
         <Button variant="ghost" size="sm" className="ud-search__close" onClick={hide}>
           Close

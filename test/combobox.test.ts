@@ -87,6 +87,11 @@ test("Combobox on a server: a combobox wired to a hidden listbox and to its Fiel
   assert.match(chosen.match(/<input[^>]*>/)![0], /value="Taipei"/);
   assert.match(chosen.match(/<input[^>]*>/)![0], /aria-invalid="true"/);
   assert.match(chosen, /class="s1-input s1-input--sm s1-combobox" data-invalid=""/);
+  // the line: the same combobox with one more class, the box's own classes kept
+  const line = renderToString(h(Combobox, { ...props, value: null, variant: "line", "aria-label": "Search" }));
+  assert.match(line, /class="s1-input s1-input--md s1-combobox s1-combobox--line"/);
+  assert.match(line.match(/<input[^>]*>/)![0], /role="combobox"/);
+  assert.doesNotMatch(empty, /s1-combobox--line/, "the box is the default");
   assert.match(chosen, /aria-label="清除"/);
   assert.match(chosen, /aria-label="显示选项"/);
   // a search: a mark before the text, a key's hint after it, inside the box; no open button; every other prop on the
@@ -133,13 +138,13 @@ const CITIES = [
   { id: "sg", name: "Singapore", region: "Singapore" },
 ];
 const log = [];
-function City({ id, size }) {
+function City({ id, size, variant }) {
   const [city, setCity] = useState(null);
   const [text, setText] = useState("");
   const q = city && text === city.name ? "" : text.trim().toLowerCase();
   const groups = ["China", "Taiwan", "Singapore"].map((r) => ({ key: r, label: r, items: CITIES.filter((c) => c.region === r && c.name.toLowerCase().includes(q)) })).filter((g) => g.items.length);
   return (
-    <Combobox id={id} aria-label="City" size={size} groups={groups} value={city} onValueChange={(c) => { log.push(id + ":" + (c ? c.id : null)); setCity(c); }} onInputChange={(t) => { log.push(id + ":text:" + t); setText(t); }}
+    <Combobox id={id} aria-label="City" size={size} variant={variant} groups={groups} value={city} onValueChange={(c) => { log.push(id + ":" + (c ? c.id : null)); setCity(c); }} onInputChange={(t) => { log.push(id + ":text:" + t); setText(t); }}
       itemText={(c) => c.name} itemKey={(c) => c.id} renderItem={(c) => <>{c.name} <small>{c.region}</small></>} empty="No matching city." />
   );
 }
@@ -170,6 +175,7 @@ flushSync(() =>
       <div style={{ position: "absolute", top: 40, left: 420, width: 240 }}><City id="small" size="sm" /></div>
       <div style={{ position: "absolute", bottom: 10, left: 40, width: 320 }}><City id="foot" /></div>
       <div style={{ position: "absolute", top: 40, left: 720, width: 320 }}><Search /></div>
+      <div style={{ position: "absolute", top: 120, left: 40, width: 320 }}><City id="line" variant="line" /></div>
       <span id="else" tabIndex={0}>else</span>
     </>),
   ),
@@ -198,6 +204,19 @@ if (mode === "dialog") {
 } else {
   step(() => {
     got.heights = { md: box($("#a").parentElement).height, sm: box($("#small").parentElement).height };
+    const lineBox = () => $("#line").parentElement;
+    const look = () => { const c = getComputedStyle(lineBox()); return { top: c.borderTopWidth, side: c.borderLeftWidth + "/" + c.borderRightWidth, bottom: c.borderBottomWidth, style: c.borderBottomStyle, bg: c.backgroundColor, height: Math.round(lineBox().getBoundingClientRect().height), shadow: c.boxShadow, outline: c.outlineStyle, color: c.borderBottomColor }; };
+    got.line = { rest: look() };
+    $("#line").focus();
+    got.line.focus = look();
+    const ink = getComputedStyle(document.documentElement).getPropertyValue("--s1-ink").trim();
+    got.line.inkShadow = got.line.focus.shadow !== "none" && got.line.focus.shadow.includes(getComputedStyle(lineBox()).borderBottomColor);
+    typeIn($("#line"), "s");
+    key($("#line"), "ArrowDown");
+    got.line.list = { expanded: $("#line").getAttribute("aria-expanded"), top: pop("line").matches(":popover-open"), under: Math.round(pop("line").getBoundingClientRect().top) - Math.round(lineBox().getBoundingClientRect().bottom) };
+    key($("#line"), "Escape");
+    key($("#line"), "Escape");
+    $("#line").blur();
     $("#a").focus();
     typeIn($("#a"), "s");
   });
@@ -410,6 +429,12 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   assert.deepEqual([got.emptied.value, got.emptied.expanded], ["", "false"]);
   assert.ok(got.emptied.said.includes("a:null"), `cleared: ${JSON.stringify(got.emptied.said)}`);
   assert.equal(got.emptied.status, "", "the status falls quiet once the list is shut");
+  // the line: no box, only the bottom edge, at Input's height; the line thickens in the ink with focus; the list opens under it
+  assert.deepEqual([got.line.rest.top, got.line.rest.side, got.line.rest.bottom, got.line.rest.style, got.line.rest.bg, got.line.rest.height], ["0px", "0px/0px", "1px", "solid", "rgba(0, 0, 0, 0)", 40]);
+  assert.equal(got.line.focus.outline, "none", "no ring around a line: the thicker ink line is its focus");
+  assert.equal(got.line.focus.bottom, "1px");
+  assert.ok(got.line.inkShadow, `focus thickens the line in the ink: ${got.line.focus.shadow}`);
+  assert.deepEqual([got.line.list.expanded, got.line.list.top, got.line.list.under], ["true", true, 4]);
   // a search: no open button, nothing to clear while empty, the mark and the hint either side of the text in the box;
   // a click in the empty box opens nothing; typing opens it; Enter goes, and the box empties and hears ""
   assert.deepEqual([got.search.buttons, got.search.order, got.search.inside, got.search.clickedEmpty], [0, true, true, "false"]);
