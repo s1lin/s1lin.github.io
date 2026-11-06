@@ -448,12 +448,14 @@
       "name": "select",
       "type": "registry:ui",
       "title": "Select",
-      "description": "The native <select> in the Input's box with a drawn chevron, a placeholder, two sizes; wired to the Field around it.",
+      "description": "A choice from a list, drawn by the kit end to end: Input's box with the chosen option's words; open, the kit's own list in the top layer, in groups under small capitals, an option with a second line or quiet tags, the chosen one ticked, a filter box once it is long; the ARIA select-only combobox's keys; a hidden native select for the form. Takes <option>/<optgroup> children or options as data; NativeSelect keeps the browser's own picker. Wired to the Field around it.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
-        "https://s1lin.tokensbeat.com/r/field.json"
+        "https://s1lin.tokensbeat.com/r/field.json",
+        "https://s1lin.tokensbeat.com/r/anchor.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
       ],
       "files": [
         {
@@ -483,7 +485,8 @@
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/input.json",
         "https://s1lin.tokensbeat.com/r/field.json",
-        "https://s1lin.tokensbeat.com/r/words.json"
+        "https://s1lin.tokensbeat.com/r/words.json",
+        "https://s1lin.tokensbeat.com/r/anchor.json"
       ],
       "files": [
         {
@@ -937,7 +940,8 @@
         "https://s1lin.tokensbeat.com/r/cn.json",
         "https://s1lin.tokensbeat.com/r/button.json",
         "https://s1lin.tokensbeat.com/r/glyph.json",
-        "https://s1lin.tokensbeat.com/r/words.json"
+        "https://s1lin.tokensbeat.com/r/words.json",
+        "https://s1lin.tokensbeat.com/r/anchor.json"
       ],
       "files": [
         {
@@ -965,7 +969,8 @@
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
-        "https://s1lin.tokensbeat.com/r/glyph.json"
+        "https://s1lin.tokensbeat.com/r/glyph.json",
+        "https://s1lin.tokensbeat.com/r/anchor.json"
       ],
       "files": [
         {
@@ -992,7 +997,8 @@
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
-        "https://s1lin.tokensbeat.com/r/cn.json"
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/anchor.json"
       ],
       "files": [
         {
@@ -1444,6 +1450,24 @@
           "path": "src/ui/use-overflow.ts",
           "type": "registry:hook",
           "target": "@components/s1lin/use-overflow.ts"
+        }
+      ],
+      "categories": [
+        "hooks",
+        "console"
+      ]
+    },
+    {
+      "name": "anchor",
+      "type": "registry:lib",
+      "title": "anchorPanel",
+      "author": "s1lin",
+      "description": "The machinery every overlay of the kit shares: a panel in the top layer held against what opened it, on its side or the other when there is no room, lined up, kept inside the screen, never taller than its room, and placed again as it or what it holds changes, on resize and on scroll.",
+      "files": [
+        {
+          "path": "src/ui/anchor.ts",
+          "type": "registry:lib",
+          "target": "@components/s1lin/anchor.ts"
         }
       ],
       "categories": [

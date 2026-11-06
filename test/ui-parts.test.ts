@@ -182,10 +182,14 @@ test("Input: an action, or a Button handed in as the suffix, is set after the bo
   assert.match(html(h(Input, { "aria-label": "Amount", suffix: "USD" })), /^<span class="s1-input s1-input--md"><input[^>]*><span class="s1-input__affix s1-input__affix--end"[^>]*>USD<\/span><\/span>$/);
 });
 
-test("Select: a placeholder shows until a choice, and cannot be chosen again when required", async () => {
-  const { Select } = await part("select");
+test("Select: a placeholder shows in the box until a choice, and the form's select is empty and required; NativeSelect's placeholder cannot be chosen again when required", async () => {
+  const { Select, NativeSelect } = await part("select");
   const m = html(h(Select, { placeholder: "Choose a model", required: true, "aria-label": "Model" }, h("option", { value: "a" }, "a")));
-  assert.match(m, /<option value="" disabled="" selected="">Choose a model<\/option>/);
+  assert.match(m, /<span class="s1-select__placeholder">Choose a model<\/span>/);
+  assert.match(m, /role="combobox"[^>]*aria-required="true"/);
+  assert.match(m, /<select class="s1-select__native" tabindex="-1" aria-hidden="true" required=""><option value="" selected=""><\/option><option value="a">a<\/option><\/select>/);
+  const n = html(h(NativeSelect, { placeholder: "Choose a model", required: true, "aria-label": "Model" }, h("option", { value: "a" }, "a")));
+  assert.match(n, /<option value="" disabled="" selected="">Choose a model<\/option>/);
 });
 
 test("Checkbox and Switch: native inputs, the hint as the description, the switch a switch", async () => {

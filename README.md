@@ -150,7 +150,10 @@ it is skipped where there is no Chrome
 (set `CHROME` to one). `test/side-nav.test.ts` has Vite bundle a page of SideNav
 and EmptyState as an app would and runs it in the same Chrome, at a desktop's width
 and a phone's: the current item's bar, the rail, the phone's sheet (it opens, focus
-goes in and stays, Esc, a tap outside and a choice close it), the mark's size. The
+goes in and stays, Esc, a tap outside and a choice close it), the mark's size.
+`test/select.test.ts` runs Select there too: its keys, its groups and filter, its
+list under the box or above it, a click, onChange, a form's submit and reset, the
+Field's label, hint and error, Chinese at night, and Esc inside a Dialog. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
@@ -161,10 +164,15 @@ account), in the registry's `console` category and in six groups on `/ui/`:
 
 - **Forms**: Field and Fieldset (label, hint and error wired to the control by
   `useField`), Input (its action, an Apply or a Max, after the box and as tall as it,
-never inside it), Textarea, Select, Combobox (a text box that suggests, its options
+never inside it), Textarea, Select (the kit's own list, not the system's: groups
+  under small capitals, an option with a second line or quiet tags, a filter once it
+  is long, the ARIA select-only combobox's keys, and a hidden native select that
+  carries the value into the form; it reads `<option>` and `<optgroup>` children, so
+  a native select becomes it by its import, and NativeSelect keeps the system's
+  picker), Combobox (a text box that suggests, its options
   in groups, filtered by the app), Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
-  with marks and a value). Native elements throughout.
+  with marks and a value). Native elements wherever the browser's own is good enough.
 - **Data**: Table (caption, row headers, sort, empty and loading rows, row
   actions, a sticky header, row groups that open and close with "Expand all", a
   `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
@@ -178,7 +186,9 @@ never inside it), Textarea, Select, Combobox (a text box that suggests, its opti
   top layer), Dropdown (a menu button built from parts: icons, check and radio items,
   labelled groups, submenus, rows of your own), Popover (a panel beside its button, not
   modal, in the top layer), Tabs,
-  Toast (`toast()` and one `<Toaster />`).
+  Toast (`toast()` and one `<Toaster />`). Menu, Dropdown, Popover, Combobox and
+  Select hold their panels against what opened them with one helper, `anchorPanel`
+  (`anchor.ts`), published for a panel of your own.
 - **Feedback**: Notice, Spinner, Skeleton.
 - **Text and keys**: Code, Copy (with a fallback where the Clipboard API is not
   there), Secret (an API key that is not in the page while hidden),

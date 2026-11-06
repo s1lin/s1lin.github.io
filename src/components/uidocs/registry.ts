@@ -43,7 +43,7 @@ export const GROUPS: Group[] = [
     id: "forms",
     chapter: "Parts",
     name: "Forms",
-    blurb: "Native controls in the house's hairline, wired for screen readers: a Field gives its control a label, a hint and an error, and the control says it is invalid. Every one works with a keyboard, a phone's own pickers and a form's own submit.",
+    blurb: "Controls in the house's hairline, wired for screen readers: a Field gives its control a label, a hint and an error, and the control says it is invalid. Native where the browser's own is good enough; Select and Combobox draw their lists themselves, in the top layer. Every one works with a keyboard, a phone and a form's own submit.",
   },
   {
     id: "data",
@@ -96,7 +96,7 @@ export interface PropDoc {
 }
 
 export interface Note {
-  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese";
+  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese" | "Forms";
   text: string;
 }
 
@@ -751,27 +751,63 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     name: "Select",
     group: "forms",
     item: "select",
-    exports: ["Select", "SelectProps"],
+    exports: ["Select", "SelectProps", "SelectOption", "SelectGroup", "NativeSelect", "NativeSelectProps"],
     summary:
-      "A choice from a list: the native `<select>`, so the phone's own picker, typing to jump and every screen reader work as they always do, drawn in the Input's box with a chevron. Options are its children.",
+      "A choice from a list, drawn by the kit end to end. Closed, it is Input's box with the chosen option's words and a chevron; open, the kit's own list in the top layer, as Menu's and Combobox's: groups under small capitals, an option with a second line or quiet tags in mono, the chosen one ticked and heavier, the one under the arrows in reverse, and a box at its head that narrows the list once it is long. The select-only combobox of the ARIA practices, and a hidden native select carries the value into the form. It takes the `<option>` and `<optgroup>` children a native select takes, and `onChange` reads `e.target.value`, so a native select becomes this one by its import; `options` gives the rich rows. `NativeSelect` is the browser's own select in the same box. To type a value that is not in the list, Combobox.",
     example: "live",
-    usage: `import { Select } from "@/components/s1lin/select";
+    usage: `import { Select, NativeSelect } from "@/components/s1lin/select";
 
+// what a native select was: the same children, the same onChange
 <Field label="Model" required>
   <Select placeholder="Choose a model" value={model} onChange={(e) => setModel(e.target.value)}>
     <option value="qwen-3.8">qwen-3.8</option>
-    <option value="gpt-image-2">gpt-image-2</option>
+    <optgroup label="Images">
+      <option value="gpt-image-2">gpt-image-2</option>
+    </optgroup>
   </Select>
-</Field>`,
+</Field>
+
+// rich rows: a name, quiet tags, a second line, groups; a filter from 8 options on
+<Field label="API key">
+  <Select name="key" value={key} onValueChange={setKey} placeholder="Choose a key"
+    options={[
+      { label: "Official", options: [
+        { value: "k1", label: "prod-backend", meta: ["Pro", "Claude"] },
+        { value: "k2", label: "nightly-batch", meta: ["Pro", "OpenAI"], description: "Last used 2 h ago" },
+      ] },
+      { label: "Discount", options: [{ value: "k3", label: "load-test", meta: ["Basic", "Qwen"], disabled: true }] },
+    ]} />
+</Field>
+
+// the browser's own picker, and multiple
+<NativeSelect size="sm" aria-label="Rows a page" defaultValue="20">…</NativeSelect>`,
     props: [
-      { name: "placeholder", type: "string", desc: "A first option with no value, shown until one is chosen; it cannot be chosen again when the select is required." },
-      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px or 30px tall, as Input." },
-      { name: "invalid", type: "boolean", desc: "In error without a Field around it." },
-      { name: "className", type: "string", desc: "Added to the box (`s1-select`); every other prop goes to the `<select>`." },
+      { name: "options", type: "(SelectOption | SelectGroup)[]", desc: "The options as data, instead of children: `{ value, label, text?, description?, meta?, disabled? }`, or a group `{ label?, options, disabled? }`. `meta` is a tag or a list of them, set small in mono at the end of the line with a dot between; `description` a second line; `text` the words type-ahead and the filter read when `label` is not a string." },
+      { name: "children", type: "ReactNode", desc: "`<option>` and `<optgroup>` elements, as a native select takes them (through fragments and `.map`): an option's `value` (its words when it has none), `disabled`, `label` and `title`; a group's `label` and `disabled`." },
+      { name: "value", type: "string | number", desc: "The chosen option's value, when the app keeps it; one that is not among the options shows the placeholder." },
+      { name: "defaultValue", type: "string | number", desc: "The first choice, when the Select keeps its own; without it, the first option that can be chosen, or nothing when there is a placeholder." },
+      { name: "onChange", type: "ChangeEventHandler<HTMLSelectElement>", desc: "After a choice, as a native select's: `e.target` is the hidden select the form reads, `e.target.value` the value. Called only when the value changes." },
+      { name: "onValueChange", type: "(value: string) => void", desc: "After a choice, with the value alone." },
+      { name: "placeholder", type: "string", desc: "In the box, in the third ink, while nothing is chosen." },
+      { name: "name", type: "string", desc: "The name the form sends the value under; `form` names a form it is not inside." },
+      { name: "required", type: "boolean", desc: "The form will not submit while nothing is chosen; the browser says so at the box. A Field around it passes it on." },
+      { name: "disabled", type: "boolean", desc: "Nothing can be opened or chosen, and the form sends nothing." },
+      { name: "filter", type: "boolean | number", default: "8", desc: "A box at the head of the list that narrows it as you type (by words, second line, tags and group, every word typed): shown from this many options on, always (`true`) or never (`false`)." },
+      { name: "filterLabel", type: "string", default: "\"Filter\"", desc: "The filter box's name and placeholder: \"Filter keys\"." },
+      { name: "empty", type: "ReactNode", default: "\"Nothing matches\"", desc: "What the list says, as a status, when nothing matches the filter." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px or 30px tall, as Input; the list is the same." },
+      { name: "invalid", type: "boolean", desc: "In error without a Field around it; sets `aria-invalid`." },
+      { name: "className", type: "string", desc: "Added to the box (`s1-select`); `listClassName` to the list's panel. Every other prop (`id`, `aria-label`, `data-*`, `onBlur`, `ref`) goes to the button that opens it." },
+      { name: "NativeSelect", type: "SelectHTMLAttributes & { size?, placeholder?, invalid? }", desc: "The browser's select in Input's box with a chevron, as before: its children, `multiple`, every prop to the `<select>`, `className` to the box (`s1-native-select`)." },
     ],
     notes: [
-      { label: "Accessibility", text: "A native select: a combobox to screen readers, opened with Space or Alt+↓, typing jumps to an option. Nothing about it is redrawn but its box." },
-      { label: "Dark mode", text: "The list of options follows `--s1-scheme` where the system draws it." },
+      { label: "Keyboard", text: "On the box: ↓, ↑, Enter, Space and Alt+↓ open the list on the chosen option (↑ on the last when none is), Home and End on the first and last; a letter opens it on the next option that starts with it, and the same letter again goes round them. In the list: ↑ ↓ move, PageUp and PageDown ten at a time, Home and End to the ends, letters type ahead; Enter, Space or Alt+↑ choose and close, Esc closes and keeps focus on the box, Tab closes and moves on. With a filter, the list opens with focus in it and a letter typed on the box goes into it; there Home and End stay in the text and Enter chooses." },
+      { label: "Accessibility", text: "The box is a `button` with `role=\"combobox\"`, `aria-haspopup=\"listbox\"`, `aria-expanded` and `aria-controls`; the list a `listbox` named by the label, of `option`s in `group`s named by their headings. Focus stays on the box (or in the filter, itself a combobox for the same list) and the option under the arrows is its `aria-activedescendant`; the chosen one is `aria-selected`. A disabled option is reached and heard, `aria-disabled`, never chosen. In a Field the label names it and the hint and error describe it; `required` is said as `aria-required`. What the filter leaves empty is a status, read as it changes. Inside a Dialog, Esc closes the list and not the dialog." },
+      { label: "Forms", text: "A native select, hidden over the box, carries `name`, the value, `required`, `disabled` and `form` into the form, its own submit, FormData and reset; a required one left empty stops the submit and the browser says so at the box. `onChange` is that select's, so `e.target.value` is the value." },
+      { label: "Phone", text: "Kept on phones, by decision: a long list of names with tags (the console's keys) is unreadable in the system's wheel or sheet, which cuts each line short and drops the groups and the filter. On a touch screen (`pointer: coarse`) the rows are 44px, type is never under 16px, and opening the list does not put focus in the filter, so the keyboard does not cover it until the filter is tapped. The list is in the top layer, at least as wide as the box, kept 8px inside the screen, above the box when there is no room under it, never taller than its room (`--s1-select-room`) or 360px. For a short plain list where the system's picker is better (a page size), NativeSelect." },
+      { label: "Dark mode", text: "The list is drawn in the tokens on the element the Select sits in, so it is at night where its box is; its scrollbar is a thin one in the third ink." },
+      { label: "Styles", text: "The box is `s1-select` (set its width there), the button `s1-select__trigger`; the panel `s1-select__panel` (`listClassName`), the filter `s1-select__filter`, an option `s1-select__option` with `[data-active]` and `[aria-selected]`, its tags `s1-select__meta`. A group's heading stays at the top as its options scroll. Forced colours outline the option under the arrows." },
+      { label: "Chinese", text: "A group's heading and the tags are set at 12px and 500, never tracked or cased. Its words come from S1Words: `filter` and `noMatches`." },
     ],
   },
   {
@@ -781,7 +817,7 @@ import { Checkbox } from "@/components/s1lin/checkbox";
     item: "combobox",
     exports: ["Combobox", "ComboboxGroup", "ComboboxProps"],
     summary:
-      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a button that clears it and one that opens the list. For a short fixed list, Select.",
+      "A text box that suggests: type, and what matches opens in a list under it, in groups; the arrows move through it, Enter or a click chooses, and the box shows what was chosen. The combobox of the ARIA practices, with a list that autocompletes. Your app filters the options from the text it is given, so a list in memory and a search on a server work alike. Drawn as Input, with a button that clears it and one that opens the list. For a fixed list, Select.",
     example: "live",
     usage: `import { Combobox } from "@/components/s1lin/combobox";
 
@@ -1540,7 +1576,7 @@ const LANGS = [
     notes: [
       { label: "Keyboard", text: "Enter, Space or ↓ opens it on the first item, ↑ on the last; ↑ ↓ move and wrap, Home and End go to the ends, a letter jumps to the next item that starts with it, Enter chooses, Esc closes and gives focus back to the button, Tab closes and moves on." },
       { label: "Accessibility", text: "The button has `aria-haspopup=\"menu\"` and `aria-expanded`; the list is a `menu` named by the button, its items `menuitem`. A disabled item stays in the list and the arrows reach it, marked `aria-disabled`, so it is heard but not chosen, as the ARIA practices have it. Choosing runs after the menu has closed and focus is back on the button, so a dialog it opens returns focus there. With no items it does not open." },
-      { label: "Phone", text: "The list is kept 8px inside the screen and scrolls when it is taller than 60% of it." },
+      { label: "Phone", text: "The list is kept 8px inside the screen, above the button when there is no room under it, and never taller than its room (`--s1-menu-room`) or 420px; it scrolls inside." },
     ],
   },
   {
@@ -1966,6 +2002,39 @@ return live ? <canvas … /> : <pre>{still}</pre>;`,
     usage: `const frame = useRef<HTMLDivElement>(null);
 const over = useOverflow(frame);
 <div ref={frame} tabIndex={over ? 0 : undefined} style={{ overflowX: "auto" }}>…</div>`,
+  },
+  {
+    id: "anchor",
+    name: "anchorPanel",
+    group: "hooks",
+    item: "anchor",
+    exports: ["anchorPanel", "placePanel", "AnchorOptions"],
+    summary:
+      "The machinery every overlay of the kit shares: Menu, Dropdown, Popover, Combobox and Select each hold their panel with it. The panel goes into the top layer (the Popover API), so no frame or table clips it; it sits on its side of what opened it, or the other when it does not fit and there is more room there; it lines up with an edge or the middle and stays 8px inside the screen; it is never taller than its room, written to a custom property its stylesheet caps it with; and it is placed again when it or what it holds grows or shrinks, when the window is resized and when anything scrolls. For a panel of your own.",
+    example: "live",
+    propsTitle: "Signature",
+    props: [
+      { name: "anchorPanel", type: "(panel, anchor: () => Element | null, options?) => () => void", desc: "Shows `panel` in the top layer and holds it against `anchor()` until the function it returns is called, which lets go and hides it. Call it in a layout effect once the panel is in the page and not `hidden`, and return what it gives." },
+      { name: "placePanel", type: "(panel, at: DOMRect, options?) => \"bottom\" | \"top\"", desc: "Places it once against a box and says the side it went to; also set on the panel as `data-side`." },
+      { name: "side", type: "\"bottom\" | \"top\"", default: "\"bottom\"", desc: "The side it opens on; the other when it does not fit there and there is more room." },
+      { name: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"start\"", desc: "The anchor's edge it lines up with, or its middle." },
+      { name: "offset", type: "number", default: "4", desc: "Pixels between the anchor and the panel." },
+      { name: "room", type: "string", desc: "A custom property to write the room on its side to, for `max-height: min(var(--my-room), 360px)`." },
+      { name: "matchWidth", type: "boolean", default: "false", desc: "At least as wide as the anchor." },
+    ],
+    usage: `import { anchorPanel } from "@/components/s1lin/anchor";
+
+useLayoutEffect(() => {
+  const p = panel.current;
+  if (!p || !open) return;
+  return anchorPanel(p, () => button.current, { side: "top", align: "end", room: "--my-room" });
+}, [open]);
+
+<div ref={panel} popover="manual" hidden={!open} className="my-panel">…</div>
+/* .my-panel { position: fixed; inset: auto; margin: 0; max-height: min(var(--my-room, 60vh), 360px); overflow: auto; } */`,
+    notes: [
+      { label: "Styles", text: "The panel needs `position: fixed; inset: auto; margin: 0` (the Popover API's own place is the middle of the screen), and an overflow for when its room is less than it holds. Where there is no Popover API it is placed all the same, fixed over the page." },
+    ],
   },
   {
     id: "cn",

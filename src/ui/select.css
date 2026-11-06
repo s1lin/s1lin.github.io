@@ -1,29 +1,160 @@
-/* Select (select.tsx): the Input's box round a native <select>, a chevron drawn on the box. */
+/* Select (select.tsx): Input's box with the chosen option's words and a chevron; open, the kit's own list in the top
+   layer, as Menu's and Combobox's (a hairline panel, an offset plate behind, the option under the arrows in reverse, the
+   chosen one ticked and heavier), with a filter box at its head once it is long. NativeSelect: the browser's select in
+   the same box. */
 @layer components {
+  /* ---------------------------------------------------------------- the box */
   .s1-select { position: relative; display: block; box-sizing: border-box; width: 100%; min-width: 0; }
-  .s1-select::after {
+  .s1-select__trigger {
+    display: flex; align-items: center; gap: 8px; box-sizing: border-box; width: 100%; min-height: 40px; margin: 0; padding: 0 12px;
+    background: var(--s1-paper); color: var(--s1-ink); border: 1px solid var(--s1-rule-strong); border-radius: 0;
+    font: 400 16px/1.25 var(--s1-font-sans); letter-spacing: inherit; text-align: start; cursor: pointer; appearance: none;
+  }
+  .s1-select__trigger:hover:not(:disabled), .s1-select__trigger[aria-expanded="true"] { border-color: var(--s1-ink); }
+  .s1-select__trigger:focus-visible, .s1-select:has(> .s1-select__native:focus) > .s1-select__trigger { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+
+  /* the chosen option's words over every option's, unseen, so a box sized by its content is the widest one's width */
+  .s1-select__value { display: grid; flex: 1 1 auto; min-width: 0; }
+  .s1-select__value > * { grid-area: 1 / 1; min-width: 0; }
+  .s1-select__shown { display: flex; align-items: baseline; gap: 10px; min-width: 0; white-space: nowrap; }
+  .s1-select__shown > .s1-select__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .s1-select__shown > .s1-select__meta { flex: 0 100 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .s1-select__placeholder { overflow: hidden; color: var(--s1-ink-3); white-space: nowrap; text-overflow: ellipsis; }
+  .s1-select__sizer { display: grid; height: 0; overflow: hidden; visibility: hidden; }
+  .s1-select__sizer > * { grid-area: 1 / 1; }
+
+  .s1-select__chevron { flex: none; width: 14px; height: 14px; margin-inline-end: -1px; fill: none; stroke: currentColor; stroke-width: 1.5; color: var(--s1-ink-2); }
+  .s1-select__trigger[aria-expanded="true"] > .s1-select__chevron { transform: rotate(180deg); color: var(--s1-ink); }
+
+  /* the browser's select the form reads: over the box, unseen and never under the pointer, so a required one left
+     empty shows its message there */
+  .s1-select__native {
+    position: absolute; inset: 0; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0;
+    opacity: 0; pointer-events: none; appearance: none;
+  }
+
+  .s1-select--sm .s1-select__trigger { min-height: 30px; gap: 6px; padding: 0 8px; font-size: 14px; }
+  .s1-select--sm .s1-select__chevron { width: 12px; height: 12px; }
+
+  /* In error: the line doubles, in the ink; the Field's message says what is wrong. */
+  .s1-select[data-invalid] > .s1-select__trigger { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
+  .s1-select__trigger:disabled { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-select__trigger:disabled .s1-select__chevron, .s1-select__trigger:disabled .s1-select__meta { color: var(--s1-ink-3); }
+
+  /* ---------------------------------------------------------------- the list */
+  .s1-select__panel {
+    display: flex; flex-direction: column; position: fixed; inset: auto; z-index: 1000; box-sizing: border-box; margin: 0; padding: 0;
+    max-width: min(480px, calc(100vw - 16px)); max-height: min(var(--s1-select-room, 60vh), 360px); overflow: hidden;
+    border: 1px solid var(--s1-rule-strong); border-radius: 0; background: var(--s1-paper); color: var(--s1-ink); color-scheme: var(--s1-scheme);
+    font: 400 14px/1.3 var(--s1-font-sans);
+    box-shadow: 6px 6px 0 -1px var(--s1-paper-2), 6px 6px 0 0 var(--s1-rule);
+  }
+  .s1-select__panel[hidden] { display: none; }
+
+  /* the filter: a box with no box, a hairline under it that turns to the ink while it has focus */
+  .s1-select__search { position: relative; display: flex; flex: none; align-items: center; border-bottom: 1px solid var(--s1-rule); }
+  .s1-select__search:focus-within { border-bottom-color: var(--s1-ink); }
+  .s1-select__glass { position: absolute; left: 12px; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; color: var(--s1-ink-3); pointer-events: none; }
+  .s1-select__filter {
+    flex: 1 1 auto; box-sizing: border-box; width: 100%; min-width: 0; height: 38px; margin: 0; padding: 0 12px 0 34px;
+    border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; outline: none; appearance: none;
+  }
+  .s1-select__filter::placeholder { color: var(--s1-ink-3); opacity: 1; }
+  .s1-select__count { flex: none; padding: 0 12px 0 4px; font: 400 11px/1 var(--s1-font-mono); letter-spacing: 0.04em; color: var(--s1-ink-3); font-variant-numeric: tabular-nums; }
+
+  /* the options scroll under the filter, on a thin bar in the third ink, never the system's grey one */
+  .s1-select__list {
+    position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 4px; outline: none;
+    scrollbar-width: thin; scrollbar-color: var(--s1-ink-3) transparent;
+  }
+  .s1-select__list::-webkit-scrollbar { width: 10px; }
+  .s1-select__list::-webkit-scrollbar-track { background: transparent; }
+  .s1-select__list::-webkit-scrollbar-thumb { border: 3px solid transparent; background: var(--s1-ink-3); background-clip: padding-box; }
+  .s1-select__list:empty { display: none; }
+
+  .s1-select__group { display: block; }
+  .s1-select__group + .s1-select__group { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--s1-rule); }
+  /* a group's heading stays at the top while its options scroll under it */
+  .s1-select__label {
+    position: sticky; top: -4px; z-index: 1; margin: 0 -4px; padding: 8px 14px 4px; background: var(--s1-paper); color: var(--s1-ink-2);
+    font: 500 10px/1.2 var(--s1-font-mono); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+
+  .s1-select__option {
+    display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: start; column-gap: 8px; box-sizing: border-box;
+    min-height: 36px; padding: 9px 10px 9px 6px; overflow-wrap: anywhere; cursor: pointer;
+  }
+  .s1-select__tick { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 18px; }
+  .s1-select__tick > svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .s1-select__words { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .s1-select__name { line-height: 18px; }
+  .s1-select__desc { color: var(--s1-ink-2); font-size: 12.5px; line-height: 16px; }
+  /* quiet tags: small mono at the end of the line, a dot between them that is drawn, not read */
+  .s1-select__meta { min-width: 0; font: 400 11px/18px var(--s1-font-mono); letter-spacing: 0.02em; color: var(--s1-ink-2); text-align: end; }
+  .s1-select__tag { white-space: nowrap; }
+  .s1-select__tag + .s1-select__tag::before { content: "·" / ""; padding: 0 5px; color: var(--s1-ink-3); }
+  .s1-select__trigger .s1-select__meta { font-size: 12px; line-height: inherit; color: var(--s1-ink-3); }
+
+  .s1-select__option[aria-selected="true"] .s1-select__name { font-weight: 600; }
+  .s1-select__option[data-active] { background: var(--s1-ink); color: var(--s1-paper); }
+  .s1-select__option[data-active] :is(.s1-select__desc, .s1-select__meta), .s1-select__option[data-active] .s1-select__tag::before { color: inherit; }
+  .s1-select__option[aria-disabled="true"] { color: var(--s1-ink-3); cursor: default; }
+  .s1-select__option[aria-disabled="true"] :is(.s1-select__desc, .s1-select__meta) { color: inherit; }
+  .s1-select__option[aria-disabled="true"][data-active] { background: var(--s1-paper-2); color: var(--s1-ink-3); }
+
+  /* what the list says when nothing matches: a status, here only while it has words */
+  .s1-select__empty { padding: 10px 12px; color: var(--s1-ink-2); font-size: 13px; line-height: 1.45; }
+  .s1-select__empty:empty { display: none; }
+
+  /* Phones: a finger's rows, and type that is never zoomed into. */
+  @media (pointer: coarse) {
+    .s1-select--sm .s1-select__trigger, .s1-select__filter { font-size: 16px; }
+    .s1-select__filter { height: 44px; }
+    .s1-select__option { min-height: 44px; padding-block: 13px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-select__chevron { transition: transform 140ms ease; }
+    .s1-select__panel { transition: opacity 90ms ease-out; }
+    @starting-style { .s1-select__panel { opacity: 0; } }
+  }
+
+  /* Forced colours: the option under the arrows and the filter with focus are outlined, as the fill is lost. */
+  @media (forced-colors: active) {
+    .s1-select__panel { border-color: CanvasText; }
+    .s1-select__option[data-active] { outline: 2px solid Highlight; outline-offset: -2px; }
+    .s1-select__search:focus-within { outline: 2px solid Highlight; outline-offset: -2px; }
+  }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-select__label:lang(zh), .s1-select__label [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+  .s1-select__meta:lang(zh), .s1-select__meta [lang|="zh"], .s1-select__count:lang(zh) { font-size: 12px; font-weight: 500; letter-spacing: 0; }
+
+  /* ---------------------------------------------------------------- NativeSelect: the browser's select in the box */
+  .s1-native-select { position: relative; display: block; box-sizing: border-box; width: 100%; min-width: 0; }
+  .s1-native-select::after {
     content: ""; position: absolute; top: 50%; right: 15px; width: 6px; height: 6px; margin-top: -5px;
     border: solid var(--s1-ink); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); pointer-events: none;
   }
-  .s1-select__control {
+  .s1-native-select__control {
     display: block; box-sizing: border-box; width: 100%; min-height: 40px; margin: 0; padding: 0 38px 0 12px;
     background: var(--s1-paper); color: var(--s1-ink); border: 1px solid var(--s1-rule-strong); border-radius: 0;
     font: 400 16px/1.25 var(--s1-font-sans); text-overflow: ellipsis; cursor: pointer;
     appearance: none; color-scheme: var(--s1-scheme);
   }
-  .s1-select__control:hover { border-color: var(--s1-ink); }
-  .s1-select__control:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
-  .s1-select__control option { background: var(--s1-paper); color: var(--s1-ink); }
+  .s1-native-select__control:hover { border-color: var(--s1-ink); }
+  .s1-native-select__control:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+  .s1-native-select__control option { background: var(--s1-paper); color: var(--s1-ink); }
 
-  .s1-select--sm .s1-select__control { min-height: 30px; padding: 0 30px 0 8px; font-size: 14px; }
-  .s1-select--sm::after { right: 11px; width: 5px; height: 5px; margin-top: -4px; }
-  @media (pointer: coarse) { .s1-select--sm .s1-select__control { font-size: 16px; } }
+  .s1-native-select--sm .s1-native-select__control { min-height: 30px; padding: 0 30px 0 8px; font-size: 14px; }
+  .s1-native-select--sm::after { right: 11px; width: 5px; height: 5px; margin-top: -4px; }
+  @media (pointer: coarse) { .s1-native-select--sm .s1-native-select__control { font-size: 16px; } }
 
-  .s1-select--multiple::after { display: none; }
-  .s1-select--multiple .s1-select__control { padding: 6px; }
-  .s1-select--multiple .s1-select__control option { padding: 5px 8px; }
+  .s1-native-select--multiple::after { display: none; }
+  .s1-native-select--multiple .s1-native-select__control { padding: 6px; }
+  .s1-native-select--multiple .s1-native-select__control option { padding: 5px 8px; }
 
-  .s1-select[data-invalid] .s1-select__control { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
-  .s1-select[data-disabled] .s1-select__control, .s1-select__control:disabled { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
-  .s1-select:is([data-disabled], :has(> .s1-select__control:disabled))::after { border-color: var(--s1-ink-3); }
+  .s1-native-select[data-invalid] .s1-native-select__control { border-color: var(--s1-ink); box-shadow: inset 0 0 0 1px var(--s1-ink); }
+  .s1-native-select[data-disabled] .s1-native-select__control, .s1-native-select__control:disabled { border-style: dashed; border-color: var(--s1-rule-strong); background: transparent; color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-native-select:is([data-disabled], :has(> .s1-native-select__control:disabled))::after { border-color: var(--s1-ink-3); }
 }

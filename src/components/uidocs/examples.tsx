@@ -462,6 +462,8 @@ export function Demo({ id }: { id: string }) {
       return <ScaleDemo />;
     case "use-overflow":
       return <demos.OverflowDemo />;
+    case "anchor":
+      return <demos.AnchorDemo />;
     case "cn":
       return <Readout label={'cn("s1-btn", false && "is-on", ["s1-btn--go"], { "s1-btn--sm": true })'} value={`"${cn("s1-btn", false, ["s1-btn--go"], { "s1-btn--sm": true })}"`} />;
     default:

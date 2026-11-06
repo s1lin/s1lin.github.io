@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { anchorPanel } from "./anchor";
 import { cn } from "./cn";
 import { useField } from "./field";
 import { useS1Words } from "./words";
@@ -50,8 +51,6 @@ export type ComboboxProps<T> = {
   /** Added to the list. */
   listClassName?: string;
 };
-
-const canPop = (el: HTMLElement) => typeof el.showPopover === "function";
 
 /**
  * A text box that suggests: type, and a list of what matches opens under it,
@@ -136,38 +135,9 @@ export function Combobox<T>({
   useLayoutEffect(() => {
     const p = pop.current;
     if (!p || !shown) return;
-    if (canPop(p) && !p.matches(":popover-open")) p.showPopover();
-    // Under the box and at least as wide, or above it when there is no room below; never taller than its room.
-    const place = () => {
-      const b = box.current?.getBoundingClientRect();
-      if (!b) return;
-      const vw = document.documentElement.clientWidth;
-      const vh = window.innerHeight;
-      const below = vh - b.bottom - 4 - 8;
-      const above = b.top - 4 - 8;
-      p.style.minWidth = `${Math.round(b.width)}px`;
-      p.style.setProperty("--s1-combobox-room", `${Math.max(0, Math.round(Math.max(below, above)))}px`);
-      const up = p.offsetHeight > below && above > below;
-      p.style.setProperty("--s1-combobox-room", `${Math.max(0, Math.round(up ? above : below))}px`);
-      const h = p.offsetHeight;
-      p.style.left = `${Math.round(Math.max(8, Math.min(b.left, vw - p.offsetWidth - 8)))}px`;
-      p.style.top = `${Math.round(Math.max(8, up ? b.top - 4 - h : b.bottom + 4))}px`;
-    };
-    place();
-    // a list that grows or shrinks as it filters is placed again, above the box when it no longer fits under it
-    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => place()) : null;
-    grows?.observe(p);
-    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => place()) : null;
-    changes?.observe(p, { childList: true, subtree: true, characterData: true });
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
-    return () => {
-      grows?.disconnect();
-      changes?.disconnect();
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
-      if (canPop(p) && p.matches(":popover-open")) p.hidePopover();
-    };
+    // under the box and at least as wide, or above it when there is no room below; never taller than its room; placed
+    // again as the list grows or shrinks while it filters
+    return anchorPanel(p, () => box.current, { room: "--s1-combobox-room", matchWidth: true });
   }, [shown, flat.length]);
 
   // the option under the arrows stays in sight in a list that scrolls
