@@ -37,7 +37,7 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 
 /* The index (the search over it, then the tree) and the parts share the page's columns; the index is held only as far as the parts go. */
 .ud-main { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
-.ud-index { --ud-search-h: 64px; grid-column: 1 / span 3; align-self: start; position: sticky; top: calc(var(--head-h) + 32px); margin-top: var(--ud-top); }
+.ud-index { --ud-search-h: 60px; grid-column: 1 / span 3; align-self: start; position: sticky; top: calc(var(--head-h) + 32px); margin-top: var(--ud-top); }
 /* The index is the library's SideNav. Here the whole tree never folds: it scrolls by itself under the search, fading at its foot. */
 @media (min-width: 901px) {
   .ud-nav .s1-sidenav__panel {
@@ -51,20 +51,25 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-body { grid-column: 4 / span 9; margin-top: var(--ud-top); }
 
 /*
- * The search: the kit's Combobox over the index, a magnifier before the words and "/" after them, a quiet key on the
- * second paper, no line of its own, gone once the box has focus or words (and on a touch screen). Its list
- * is the Combobox's, wider than the column: a name, its other name, what it is in a line.
+ * The search, shut until it is asked for: the index's title row (the title, a rule under it, a magnifier at its end)
+ * stands where the search is, and a click on it, or "/", puts a line input in its place, the kit's Combobox as a
+ * line, its list wider than the column: a name, its other name, what it is in a line. The row and the line are the
+ * same height, so nothing under them moves.
  */
 .ud-search { margin: 0 0 calc(var(--ud-search-h) - 40px); }
-.ud-search__open, .ud-search__close { display: none; }
-.ud-search__box .s1-input__affix:not(.s1-input__affix--end) { padding-left: 12px; }
-.ud-search__glass { width: 15px; height: 15px; }
-.ud-search__key {
-  display: inline-grid; place-items: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 5px;
-  background: var(--paper-2); color: var(--ink-2); font: 500 11px/1 var(--f-mono);
+.ud-search__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; box-sizing: border-box; min-height: 40px;
+  border-bottom: 0.5px solid var(--rule-strong); color: var(--ink-3); font: 500 10.5px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase;
 }
-.ud-search__box:is(:focus-within, :has(.s1-input__control:not(:placeholder-shown))) .s1-input__affix--end { display: none; }
-@media (pointer: coarse) { .ud-search__box .s1-input__affix--end { display: none; } }
+.ud-search__title { flex: 1 1 auto; align-self: stretch; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: left; text-transform: inherit; cursor: pointer; }
+.ud-search__title:hover { color: var(--ink); }
+.ud-search__open { flex: none; }
+.ud-search__field { display: none; }
+.ud-search[data-open] .ud-search__head { display: none; }
+.ud-search[data-open] .ud-search__field { display: flex; align-items: center; gap: 4px; }
+.ud-search__box { flex: 1 1 auto; width: auto; }
+.ud-search__glass { width: 15px; height: 15px; }
+.ud-search__close { flex: none; }
 
 .ud-search__list { max-height: min(var(--s1-combobox-room, 60vh), 440px); }
 .ud-search__list .s1-combobox__words { flex: 1 1 auto; }
@@ -426,15 +431,13 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
   .ud-index { top: var(--head-h); z-index: 40; margin: 40px 0 0; }
   .ud-nav .s1-sidenav__bar { width: calc(100% + 2 * var(--gutter)); margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter) calc(var(--gutter) + 40px); }
   .ud-search { position: absolute; top: 0; left: calc(var(--gutter) * -1); right: calc(var(--gutter) * -1); z-index: 3; height: 48px; margin: 0; pointer-events: none; }
-  .ud-search__open { display: inline-flex; position: absolute; top: 4px; right: calc(var(--gutter) - 8px); pointer-events: auto; }
-  .ud-search__field { display: none; }
-  .ud-search[data-open] .ud-search__open { display: none; }
+  .ud-search__head { display: contents; }
+  .ud-search__title { display: none; }
+  .ud-search__open { display: inline-flex; position: absolute; inset-block: 0; margin-block: auto; right: calc(var(--gutter) - 8px); pointer-events: auto; }
+  .ud-search[data-open] .ud-search__head { display: none; }
   .ud-search[data-open] .ud-search__field {
-    display: flex; align-items: center; gap: 8px; box-sizing: border-box; height: 48px; padding: 0 calc(var(--gutter) - 8px) 0 var(--gutter);
-    background: var(--paper); box-shadow: 0 1px 0 var(--rule-strong); pointer-events: auto;
+    box-sizing: border-box; height: 48px; padding: 0 calc(var(--gutter) - 8px) 0 var(--gutter); background: var(--paper); pointer-events: auto;
   }
-  .ud-search__box { flex: 1 1 auto; }
-  .ud-search__close { display: inline-flex; flex: none; }
   /* the tree's sheet holds focus while it is open: no search over it */
   .ud-index:has(.ud-nav[data-open]) .ud-search { display: none; }
   .ud-nav[data-open] .s1-sidenav__panel {

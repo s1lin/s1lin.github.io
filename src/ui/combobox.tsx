@@ -51,6 +51,12 @@ type Own<T> = {
   disabled?: boolean;
   /** "md" is 40px tall, as Input; "sm" 30px. */
   size?: "md" | "sm";
+  /**
+   * "box" (the default) is Input's box. "line" is one underline in the ink and no box, for a search that sits in a
+   * title row: the line thickens in the ink while the box has focus (forced colours get an outline), and the
+   * magnifier before the text and the buttons after it sit on the line.
+   */
+  variant?: "box" | "line";
   /** The clear button's name; "Clear" from S1Words by default. */
   clearLabel?: string;
   /** The button that opens the list; false for a search, whose list opens as one types. */
@@ -115,6 +121,7 @@ export function Combobox<T>({
   invalid,
   disabled,
   size = "md",
+  variant = "box",
   clearLabel,
   showButton = true,
   showLabel,
@@ -233,7 +240,7 @@ export function Combobox<T>({
 
   return (
     <>
-      <span ref={box} className={cn("s1-input", `s1-input--${size}`, "s1-combobox", className)} data-invalid={isInvalid ? "" : undefined} data-disabled={field.disabled ? "" : undefined}>
+      <span ref={box} className={cn("s1-input", `s1-input--${size}`, "s1-combobox", variant === "line" && "s1-combobox--line", className)} data-invalid={isInvalid ? "" : undefined} data-disabled={field.disabled ? "" : undefined}>
         {/* in the page from the start, so what it says when nothing matches is read as it changes */}
         <span className="s1-combobox__status" role="status">
           {shown && flat.length === 0 ? empty : null}

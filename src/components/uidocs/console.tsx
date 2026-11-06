@@ -357,7 +357,7 @@ const REGIONS: [string, string, string][] = [
 ];
 
 /** A city, by region, in either language: the page filters the cities from the text it is given. */
-function CityPicker({ zh }: { zh: boolean }) {
+function CityPicker({ zh, line }: { zh: boolean; line?: boolean }) {
   const [city, setCity] = useState<City | null>(null);
   const [text, setText] = useState("");
   const name = (c: City) => (zh ? c.zh : c.en);
@@ -385,6 +385,9 @@ function CityPicker({ zh }: { zh: boolean }) {
         placeholder={zh ? "例如 上海、Taipei" : "e.g. 上海, Taipei"}
         clearLabel={zh ? "清除城市" : "Clear city"}
         showLabel={zh ? "显示城市" : "Show cities"}
+        variant={line ? "line" : undefined}
+        showButton={!line}
+        prefix={line ? <Search className="ud-search__glass" aria-hidden="true" /> : undefined}
       />
     </Field>
   );
@@ -394,6 +397,7 @@ export function ComboboxDemo() {
   return (
     <div className="ud-stack ud-stack--wide">
       <Overlays>{(zh) => <CityPicker zh={zh} />}</Overlays>
+      <Overlays>{(zh) => <CityPicker zh={zh} line />}</Overlays>
       <Said text="Type part of a name in either language, or press ↓: the arrows move, Enter chooses, Esc closes; × clears it. Nothing is sent from this page." />
     </div>
   );

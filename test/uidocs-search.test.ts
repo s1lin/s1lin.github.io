@@ -133,10 +133,13 @@ test("the page on a server: the search in the index, a search landmark around th
   assert.match(index, /<div class="ud-search" role="search" aria-label="The parts and sections">/);
   const input = index.match(/<input[^>]*id="ud-search"[^>]*>/)?.[0] ?? "";
   for (const a of [/role="combobox"/, /aria-label="Search the parts and sections"/, /aria-keyshortcuts="\/"/, /placeholder="Search the parts"/, /aria-expanded="false"/, /value=""/]) assert.match(input, a);
-  assert.match(index, /<kbd class="ud-search__key" aria-hidden="true">\/<\/kbd>/, "the key's quiet hint, hidden from screen readers (aria-keyshortcuts says it)");
+  assert.doesNotMatch(index, /ud-search__key/, "no key's hint: the input is shown only once it is asked for");
+  assert.match(index, /<div class="ud-search__head"><button type="button" class="ud-search__title" tabindex="-1" aria-hidden="true">Index<\/button>/, "shut, the index's title is where the search is, a pointer's way in");
+  assert.match(index, /class="s1-input s1-input--md s1-combobox s1-combobox--line ud-search__box"/, "the input is a line, not a box");
   assert.match(index, /<span class="s1-combobox__status" role="status"><\/span>/, "the status, empty, in the page from the start");
   assert.doesNotMatch(index, /Show options/, "no open button: the list opens as one types");
-  assert.match(index, /<button type="button" class="[^"]*ud-search__open[^"]*" aria-label="Search the parts" aria-expanded="false" aria-controls="ud-search-field"/, "the phone's button");
+  assert.match(index, /<button type="button" class="[^"]*ud-search__open[^"]*" aria-label="Search the parts" aria-keyshortcuts="\/" aria-expanded="false" aria-controls="ud-search-field"/, "the magnifier at the title row's end, the one control a keyboard meets");
+  assert.equal(index.match(/<nav class="s1-sidenav[^"]* ud-nav"[\s\S]*?<\/nav>/)?.[0].includes("s1-sidenav__title"), false, "the tree has no title row of its own: the search's is it");
   assert.match(index, /popover="manual" hidden=""/, "the list shut");
   // every place the search can go to is on the page: its anchor and the heading that takes focus
   for (const p of PLACES) {
@@ -184,6 +187,7 @@ const list = () => {
   const act = box().getAttribute("aria-activedescendant");
   return { expanded: box().getAttribute("aria-expanded"), top: p.matches(":popover-open"), groups, active: act ? document.getElementById(act).getAttribute("aria-label") : null, rect: rect(p) };
 };
+const reopen = () => { if (!shown(box())) $(".ud-search__open").click(); };
 const status = () => box().parentElement.querySelector("[role=status]");
 const sideways = () => document.documentElement.scrollWidth - document.documentElement.clientWidth;
 const at = () => ({ hash: location.hash, focus: document.activeElement?.id || document.activeElement?.tagName, value: box().value, expanded: box().getAttribute("aria-expanded") });
@@ -192,20 +196,32 @@ const token = (name) => { const s = document.createElement("span"); document.bod
 async function desk() {
   const got = {};
   const first = status();
-  got.start = { hint: shown($(".ud-search__key")), open: shown($(".ud-search__open")), close: shown($(".ud-search__close")), box: rect(box().parentElement), nav: rect($(".ud-nav")), sideways: sideways(), hash: location.hash };
+  got.start = { title: shown($(".ud-search__title")), titleText: $(".ud-search__title").textContent, open: shown($(".ud-search__open")), field: shown($(".ud-search__field")), input: shown(box()), head: rect($(".ud-search__head")), nav: rect($(".ud-nav")), sideways: sideways(), hash: location.hash, label: $(".ud-search__open").getAttribute("aria-label"), expanded: $(".ud-search__open").getAttribute("aria-expanded") };
+  // the title opens it, as the magnifier does; the line is no box
+  $(".ud-search__title").click();
+  const cs = getComputedStyle(box().parentElement);
+  got.title = { input: shown(box()), focus: document.activeElement === box(), head: shown($(".ud-search__head")), expanded: $(".ud-search__open").getAttribute("aria-expanded"), field: rect($(".ud-search__field")), line: rect(box().parentElement), look: [cs.borderTopWidth, cs.borderLeftWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.backgroundColor], close: shown($(".ud-search__close")), glass: shown(box().parentElement.querySelector(".ud-search__glass")) };
+  // clicking away puts the title back and leaves focus where it went
+  document.body.focus(); box().blur();
+  await wait(50);
+  got.away = { input: shown(box()), title: shown($(".ud-search__title")), focusInBox: document.activeElement === box() };
+  // Close gives it back with focus on the magnifier
+  $(".ud-search__open").click();
+  $(".ud-search__close").click();
+  await wait(50);
+  got.closeBtn = { input: shown(box()), title: shown($(".ud-search__title")), focus: document.activeElement === $(".ud-search__open") };
   // "/" from the page: focus in the box, the key kept from the page
   got.slash = { prevented: key(document.body, "/"), focus: document.activeElement === box() };
   // "/" in another field is a character, not the search's
   const other = [...document.querySelectorAll(".ud-body input")].find((i) => !i.type || i.type === "text" || i.type === "search");
   other.focus();
   got.otherSlash = { prevented: key(other, "/"), focus: document.activeElement === other };
-  box().focus();
-  got.hintFocused = shown($(".ud-search__key"));
+  await wait(50);
+  reopen();
   typeIn(box(), "drop");
   await wait(150);
   got.drop = list();
   got.drop.box = rect(box().parentElement);
-  got.drop.hint = shown($(".ud-search__key"));
   got.drop.sideways = sideways();
   // Enter goes to the first: the address, the heading's focus, the mark; the box empties and shuts
   key(box(), "Enter");
@@ -216,8 +232,9 @@ async function desk() {
   got.went.head = Math.round(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop));
   await wait(1200);
   got.went.after = $("#dropdown .ud-item__head").hasAttribute("data-found");
+  got.went.shut = { input: shown(box()), title: shown($(".ud-search__title")) };
   // Chinese
-  box().focus();
+  reopen();
   typeIn(box(), "对话框");
   await wait(150);
   got.zh = list();
@@ -229,6 +246,11 @@ async function desk() {
   key(box(), "Escape");
   await wait(100);
   got.esc2 = at();
+  // a third Esc, with nothing left to undo, shuts it and puts focus on the magnifier
+  key(box(), "Escape");
+  await wait(100);
+  got.esc3 = { input: shown(box()), title: shown($(".ud-search__title")), focus: document.activeElement === $(".ud-search__open"), expanded: $(".ud-search__open").getAttribute("aria-expanded") };
+  reopen();
   // nothing matching: said in the status that was there all along
   typeIn(box(), "zzqx");
   await wait(150);
@@ -237,6 +259,7 @@ async function desk() {
   await wait(100);
   got.nothing.closed = { ...at(), status: status().textContent };
   // a click on an option goes too, at once under reduced motion
+  reopen();
   typeIn(box(), "meter");
   await wait(150);
   const o = pop().querySelector("[role=option]");
@@ -250,7 +273,7 @@ async function desk() {
 
 async function night() {
   const got = {};
-  box().focus();
+  reopen();
   typeIn(box(), "下拉");
   await wait(150);
   got.list = list();
@@ -258,7 +281,7 @@ async function night() {
   got.look = { list: getComputedStyle(p).backgroundColor, ink: getComputedStyle(p).color, paper: token("--s1-paper"), inkToken: token("--s1-ink"), theme: document.documentElement.dataset.theme };
   const active = p.querySelector("[role=option][data-active]");
   got.look.active = [getComputedStyle(active).backgroundColor, getComputedStyle(active).color, getComputedStyle(active.querySelector(".ud-hit__line")).color];
-  got.boxLook = { border: getComputedStyle(box().parentElement).borderTopColor, outline: getComputedStyle(box().parentElement).outlineStyle };
+  got.boxLook = { line: getComputedStyle(box().parentElement).borderBottomColor, ink: token("--s1-ink"), border: getComputedStyle(box().parentElement).borderTopColor, outline: getComputedStyle(box().parentElement).outlineStyle };
   return got;
 }
 
@@ -272,7 +295,7 @@ async function phone() {
   got.start = { sideways: sideways(), bar: rect(bar), open: rect(open), shownOpen: shown(open), field: shown($(".ud-search__field")), sign: rect(bar.querySelector(".s1-sidenav__sign")), here: rect(bar.querySelector(".s1-sidenav__here")), width: document.documentElement.clientWidth };
   open.click();
   await wait(100);
-  got.opened = { field: shown($(".ud-search__field")), fieldRect: rect($(".ud-search__field")), box: rect(box().parentElement), close: rect($(".ud-search__close")), focus: document.activeElement === box(), expanded: open.getAttribute("aria-expanded"), shownOpen: shown(open), sideways: sideways(), hint: shown($(".ud-search__key")) };
+  got.opened = { field: shown($(".ud-search__field")), fieldRect: rect($(".ud-search__field")), box: rect(box().parentElement), close: rect($(".ud-search__close")), focus: document.activeElement === box(), expanded: open.getAttribute("aria-expanded"), shownOpen: shown(open), sideways: sideways(), line: (({ borderTopWidth: a, borderLeftWidth: b, borderRightWidth: c, borderBottomWidth: d }) => [a, b, c, d].map(parseFloat))(getComputedStyle(box().parentElement)) };
   typeIn(box(), "modal");
   await wait(150);
   got.modal = { ...list(), sideways: sideways() };
@@ -360,16 +383,25 @@ async function run(t: { skip: (m: string) => void }, mode: string, width: number
 test("in a browser: \"/\" focuses it (not from another field), typing shows the places by section, Enter goes there, Chinese, nothing matching, Esc", async (t) => {
   const got = await run(t, "desk", 1280, 800);
   if (!got) return;
-  // at rest: in the index column, over the tree, the key's hint showing; no phone button; nothing sideways
-  assert.deepEqual([got.start.hint, got.start.open, got.start.close, got.start.sideways, got.start.hash], [true, false, false, 0, ""]);
-  assert.ok(got.start.box.bottom < got.start.nav.top && got.start.box.left === got.start.nav.left, `the box over the tree: ${JSON.stringify([got.start.box, got.start.nav])}`);
-  assert.equal(got.start.box.height, 40);
+  // at rest: no input, the index's title with a magnifier at its end, in the index column over the tree; nothing sideways
+  assert.deepEqual([got.start.title, got.start.titleText, got.start.open, got.start.field, got.start.input, got.start.sideways, got.start.hash, got.start.label, got.start.expanded], [true, "Index", true, false, false, 0, "", "Search the parts", "false"]);
+  assert.ok(got.start.head.bottom < got.start.nav.top && got.start.head.left === got.start.nav.left, `the title row over the tree: ${JSON.stringify([got.start.head, got.start.nav])}`);
+  assert.equal(got.start.head.height, 40);
+  // a click on the title opens a line input in its place, the same height, focus in it: no box, a bottom line, the magnifier before and Close after
+  assert.deepEqual([got.title.input, got.title.focus, got.title.head, got.title.expanded, got.title.close, got.title.glass], [true, true, false, "true", true, true]);
+  assert.deepEqual(got.title.look.slice(0, 4), ["0px", "0px", "0px", "1px"]);
+  assert.equal(got.title.look[4], "rgba(0, 0, 0, 0)");
+  assert.equal(got.title.field.height, 40, "the line is as tall as the row it stands in, so nothing under it moves");
+  assert.equal(got.title.field.top, got.start.head.top);
+  // a click elsewhere puts the title back and does not take focus back
+  assert.deepEqual(got.away, { input: false, title: true, focusInBox: false });
+  // Close puts the title back, focus on the magnifier
+  assert.deepEqual(got.closeBtn, { input: false, title: true, focus: true });
   // "/"
   assert.deepEqual(got.slash, { prevented: true, focus: true });
   assert.deepEqual(got.otherSlash, { prevented: false, focus: true }, "typed in another field, \"/\" stays a character there");
-  assert.equal(got.hintFocused, false, "the hint gives way to the caret");
   // typing: the places in the page's sections, the best first, the first under the arrows; in the top layer
-  assert.deepEqual([got.drop.expanded, got.drop.top, got.drop.active, got.drop.hint, got.drop.sideways], ["true", true, "Dropdown", false, 0]);
+  assert.deepEqual([got.drop.expanded, got.drop.top, got.drop.active, got.drop.sideways], ["true", true, "Dropdown", 0]);
   assert.deepEqual(got.drop.groups.slice(0, 2).map((g: Run) => [g.label, g.options]), [["Overlays", ["Dropdown", "Menu"]], ["Forms", ["Select"]]]);
   const [l, b] = [got.drop.rect, got.drop.box];
   assert.ok((l.top === b.bottom + 4 || l.bottom === b.top - 4) && l.left === b.left && l.width > b.width, `the list against the box, wider than the column: ${JSON.stringify([l, b])}`);
@@ -377,6 +409,7 @@ test("in a browser: \"/\" focuses it (not from another field), typing shows the 
   assert.deepEqual([got.went.hash, got.went.focus, got.went.value, got.went.expanded, got.went.marked, got.went.mark], ["#dropdown", "dropdown-name", "", "false", true, "ud-found"]);
   assert.deepEqual(got.went.asked, { id: "dropdown", behavior: "smooth", block: "start" });
   assert.equal(got.went.after, false, "the mark lets go");
+  assert.deepEqual(got.went.shut, { input: false, title: true }, "a choice puts the title row back");
   // Chinese: the sections and the names in Chinese first
   assert.deepEqual(got.zh.groups.map((g: Run) => [g.label, g.lang, g.options]), [["浮层", "zh-CN", ["Dialog"]]]);
   assert.equal(got.zh.groups[0].shown[0], "对话框Dialog");
@@ -384,6 +417,7 @@ test("in a browser: \"/\" focuses it (not from another field), typing shows the 
   // Esc: the list shuts, the words stay; a second Esc empties the box
   assert.deepEqual([got.esc1.prevented, got.esc1.after.expanded, got.esc1.after.value, got.esc1.after.focus], [true, "false", "对话框", "ud-search"]);
   assert.deepEqual([got.esc2.value, got.esc2.focus], ["", "ud-search"]);
+  assert.deepEqual(got.esc3, { input: false, title: true, focus: true, expanded: "false" }, "a third Esc shuts it, focus on the magnifier");
   // nothing matching: the list says so, and the status that was in the page from the start says it to a screen reader
   assert.deepEqual([got.nothing.expanded, got.nothing.groups.length, got.nothing.status, got.nothing.same, got.nothing.shown], ["true", 0, "Nothing matches", true, "Nothing matches"]);
   assert.deepEqual([got.nothing.closed.expanded, got.nothing.closed.status], ["false", ""]);
@@ -409,6 +443,7 @@ test("in a browser, at night: the list on night paper, the option under the arro
   assert.equal(got.look.theme, "dark");
   assert.deepEqual([got.look.list, got.look.ink], [got.look.paper, got.look.inkToken]);
   assert.deepEqual(got.look.active, [got.look.inkToken, got.look.paper, got.look.paper], "reverse, its line too");
+  assert.equal(got.boxLook.line, got.boxLook.ink, "the line in the night's ink while it has focus");
   assert.deepEqual(got.list.groups.map((g: Run) => g.label), ["浮层", "表单"]);
   assert.deepEqual(got.list.groups.map((g: Run) => g.options), [["Dropdown", "Menu"], ["Select"]]);
   assert.match(got.list.groups[0].shown[0], /^下拉菜单Dropdown/);
@@ -427,7 +462,7 @@ test("at 390px: a button at the end of the index's bar opens the box over the ba
   assert.ok(start.here.right <= start.open.left, "where you are, never under the button");
   assert.ok(Math.abs((start.open.top + start.open.bottom) / 2 - (start.bar.top + start.bar.bottom) / 2) <= 1, "centred on the bar");
   // open: over the bar, the box and Close on its line, focus in the box, inside the screen
-  assert.deepEqual([opened.field, opened.focus, opened.expanded, opened.shownOpen, opened.sideways, opened.hint], [true, true, "true", false, 0, false]);
+  assert.deepEqual([opened.field, opened.focus, opened.expanded, opened.shownOpen, opened.sideways, opened.line], [true, true, "true", false, 0, [0, 0, 0, 1]]);
   assert.deepEqual([opened.fieldRect.top, opened.fieldRect.height, opened.fieldRect.left, opened.fieldRect.right], [start.bar.top, 48, 0, 390]);
   assert.ok(opened.box.left >= 16 && opened.box.right < opened.close.left && opened.close.right <= 390, `the box and Close inside: ${JSON.stringify([opened.box, opened.close])}`);
   // typing: the list inside the screen
