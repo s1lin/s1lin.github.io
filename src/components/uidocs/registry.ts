@@ -111,7 +111,7 @@ export interface PropDoc {
 }
 
 export interface Note {
-  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese" | "Forms" | "Rows";
+  label: "Accessibility" | "Keyboard" | "Reduced motion" | "Phone" | "Dark mode" | "Cost" | "Network" | "Styles" | "Server" | "Icons" | "Chinese" | "Forms" | "Rows" | "Sort";
   text: string;
 }
 
@@ -1077,7 +1077,7 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
     keywords: ["data table", "grid", "rows", "columns", "sort", "数据表"],
     group: "data",
     item: "table",
-    exports: ["Table", "TableProps", "Column", "Sort", "RowProps", "RowGroup", "OpenGroups", "GroupWords", "ALL_GROUPS_OPEN", "ALL_GROUPS_CLOSED", "isGroupOpen", "withGroupOpen", "allGroupsOpen"],
+    exports: ["Table", "TableProps", "Column", "Sort", "nextSort", "RowProps", "RowGroup", "OpenGroups", "GroupWords", "ALL_GROUPS_OPEN", "ALL_GROUPS_CLOSED", "isGroupOpen", "withGroupOpen", "allGroupsOpen"],
     summary:
       "A data table from columns and rows: a caption, column headers and row headers, numbers set to the end in mono, a row for when there is nothing, rows of bars while loading, headers that ask for a sort, and actions at the end of each row. Rows can come in groups, each under a heading row across the table that a button opens and closes, with \"Expand all\" above. Wider than its frame, it scrolls sideways inside it and says so, never the page; with `fit` it is never wider than its frame.",
     example: "live",
@@ -1113,7 +1113,7 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
         name: "columns",
         type: "Column<Row>[]",
         required: true,
-        desc: "Each `{ key, header, cell?, numeric?, align?, sortable?, wrap?, width?, clamp?, title?, span?, className? }`. Without `cell` the row's field `key` is shown; `numeric` sets it to the end in mono; `clamp` keeps it to that many lines and `title(row)` gives the whole; `span(row)` takes the next columns too.",
+        desc: "Each `{ key, header, cell?, numeric?, align?, sortable?, firstDir?, wrap?, width?, clamp?, title?, span?, className? }`. Without `cell` the row's field `key` is shown; `numeric` sets it to the end in mono; `sortable` makes the header a button that asks for the column's sort, `firstDir` the direction of the first press (\"desc\" for a numeric column, \"asc\" for any other, unless it says otherwise); `clamp` keeps it to that many lines and `title(row)` gives the whole; `span(row)` takes the next columns too.",
       },
       { name: "rows", type: "Row[]", desc: "The rows, in the order shown: the table does not sort or page them. Give `rows` or `groups`." },
       {
@@ -1129,7 +1129,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
       { name: "emptyMark", type: "ReactNode", desc: "A mark for the empty row (your one-colour logo): the words are then set as a small EmptyState under it. An `empty` that is already an element is shown as it is." },
       { name: "loading", type: "boolean | number", default: "false", desc: "Rows of bars in place of the rows (5, or the number given), and `aria-busy` on the table." },
       { name: "sort", type: "{ key, dir: \"asc\" | \"desc\" } | null", desc: "The sort to show: that header marked, and `aria-sort` on it." },
-      { name: "onSortChange", type: "(sort) => void", desc: "Called when a sortable header is pressed: ascending first, then the other way. Sort the rows yourself." },
+      { name: "onSortChange", type: "(sort) => void", desc: "Called when a sortable header is pressed, with `nextSort(column, sort)`: the column's first direction (figures from the biggest, words and dates from the start), then the other way; never none, since a list always has a sort. Sort the rows yourself (on the server for a paged list), one column at a time." },
+      { name: "nextSort", type: "(column, sort) => Sort", desc: "The sort a press on `column`'s header asks for, as the table works it out: for a list of cards or a phone's select that sorts as the table does." },
       { name: "actions", type: "(row, index) => ReactNode", desc: "A last column of buttons: a Menu, a Button. Its header is named for screen readers only." },
       { name: "actionsLabel", type: "string", default: "\"Actions\"", desc: "That header's name; by default the words' `actions`." },
       { name: "stickyHeader", type: "boolean", default: "false", desc: "The header row stays while the rows scroll inside the frame, `maxHeight` tall." },
@@ -1148,7 +1149,8 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
     ],
     notes: [
       { label: "Accessibility", text: "A real `<table>`: the caption names it, headers have `scope`, the first column's cells are row headers, so a screen reader reads \"prod-key, Spend, $41.20\" moving across. A sortable header is a button inside the `<th>`, and the `<th>` carries `aria-sort`. Shapes in the arrows and the badges, not colour, carry state. Each group is a `<tbody>` named by its heading row (`<th scope=\"rowgroup\">` across the table). Its toggle is a button named by the group's `label` (or its heading) with `aria-expanded`, so a screen reader hears \"Claude, collapsed\"; the triangle points down at the rows when they show. A heading may hold its own links and buttons: a click on them does not toggle." },
-      { label: "Keyboard", text: "When the table is wider than its frame (or the header is sticky), the frame becomes a region named by the caption, with `tabIndex=0`, so the arrow keys scroll it; when it fits, it is no stop at all. Tab reaches each group's toggle, Enter or Space opens and closes it." },
+      { label: "Keyboard", text: "When the table is wider than its frame (or the header is sticky), the frame becomes a region named by the caption, with `tabIndex=0`, so the arrow keys scroll it; when it fits, it is no stop at all. Tab reaches each group's toggle, Enter or Space opens and closes it. A sortable header is a button: Tab reaches it, Enter or Space asks for its sort, and the words hidden after the header say the sort it now has (\"sorted descending\")." },
+      { label: "Sort", text: "One column at a time, and always one: the page's default sort shows before any press, a first press on a column asks for its first direction (\"desc\" for figures, the big ones first; \"asc\" for words and dates; `firstDir` for another), a second press the other way, and no press goes back to none. A page keeps the sort in its address (`?sort=<key>&dir=asc|desc`, the default left out) and goes back to the first page when it changes." },
       { label: "Phone", text: "Cells keep to one line, so columns never squeeze to a word a line; the table scrolls sideways inside its frame, with a shade at the edge that has more and \"Scroll sideways for more\" under it. With `fit`, leave out what a phone cannot hold (mark the column with `className`, then give it no width and hide its words in a container query: not `display: none`, since a group's heading row spans every column), or fold it into the first cell." },
     ],
   },

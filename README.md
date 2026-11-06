@@ -170,7 +170,11 @@ results in their sections, Enter and a click, Chinese, nothing matching said in 
 status, Esc, reduced motion, night, and a phone's 390px (in a frame of that
 width), with nothing scrolling sideways. `test/select.test.ts` runs Select there too: its keys, its groups and filter, its
 list under the box or above it, a click, onChange, a form's submit and reset, the
-Field's label, hint and error, Chinese at night, and Esc inside a Dialog. The
+Field's label, hint and error, Chinese at night, and Esc inside a Dialog.
+`test/table-sort.test.ts` holds the Table's sort to its rule (a column's first press
+asks for its first direction, figures from the biggest and words from the start,
+the next the other way, never none, one column at a time) on a server and in Chrome,
+with `aria-sort` and the hidden words after each press. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
@@ -191,7 +195,7 @@ never inside it), Textarea, Select (the kit's own list, not the system's: groups
   with `clearOnChoose` and no open button, a search that goes somewhere), Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements wherever the browser's own is good enough.
-- **Data**: Table (caption, row headers, sort, empty and loading rows, row
+- **Data**: Table (caption, row headers, sort with each column's first direction, empty and loading rows, row
   actions, a sticky header, row groups that open and close with "Expand all", a
   `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
   Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
