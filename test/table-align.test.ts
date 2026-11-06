@@ -12,12 +12,14 @@ import { build } from "vite";
  * The Table's row rule (owner, 2026-11-06: "the table should be vertically aligned for icon+text, and each rows";
  * admin Services redesign §3.6), in Chrome with React running, on stories of the rows a console lists: a name that
  * wraps over its tags beside a mark, figures in mono over their notes, words in mono capitals, badges, a switch and its
- * word, a shape and its label, a row's buttons and a menu's dots, a dense log, a 40px menu, and Chinese. For every row:
- * each cell's first line (its first text, or its first control when it has none) centred within 1px of the row's line,
- * the cell's top plus its padding plus half of --s1-table-line; inside every .s1-table__pair each child centred within
- * 1px of the pair's centre, and no child of a pair taller than the line unless it is a control (words in a pair keep
- * to one line). At 1440 and at 390 (where the tables scroll in their frames). It fails on the old table.css (cells
- * centred in the middle, the actions cell padded 4px). Skipped where there is no Chrome: set CHROME to one.
+ * word, dots at a row's size, a shape and its label, a row's ghost dots and its trash, a dense log, a 40px menu, and
+ * Chinese. For every row: each cell's first line (its first text, or its first control when it has none) centred
+ * within 1px of the row's line, the cell's top plus its padding plus half of --s1-table-line; inside every
+ * .s1-table__pair each child centred within 1px of the pair's centre, and no child of a pair taller than the line
+ * unless it is a control (words in a pair keep to one line); dots on one line; a row's buttons inside their cell's
+ * padding. At 1440 and at 390 (where the tables scroll in their frames), border-box everywhere as the apps set it. It
+ * fails on the old table.css (cells centred in the middle, the actions cell padded 4px). Skipped where there is no
+ * Chrome: set CHROME to one.
  */
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -74,6 +76,10 @@ function checkRows(root, TOL) {
       cells++;
       if (Math.abs(got.y - expected) > TOL) failures.push("row \\"" + name + "\\": the first line of cell " + (list.indexOf(cell) + 1) + " (" + got.what + ") is " + (got.y - expected).toFixed(1) + "px off the row's line");
     }
+    for (const dots of tr.querySelectorAll(".s1-radios--dots")) {
+      const opts = [...dots.querySelectorAll(".s1-radio")].filter((o) => o.getClientRects().length);
+      if (opts.length > 1 && opts.some((o) => Math.abs(o.getBoundingClientRect().top - opts[0].getBoundingClientRect().top) > TOL)) failures.push("dots \\"" + dots.textContent.trim().slice(0, 24) + "\\": its options wrap onto more than one line");
+    }
     for (const pair of tr.querySelectorAll(".s1-table__pair")) {
       if (!pair.getClientRects().length) continue;
       pairs++;
@@ -101,6 +107,8 @@ import { createRoot } from "react-dom/client";
 import { Badge } from ${part("badge.tsx")};
 import { Button } from ${part("button.tsx")};
 import { Glyph } from ${part("glyph.tsx")};
+import { IconButton } from ${part("icon-button.tsx")};
+import { RadioGroup } from ${part("radio-group.tsx")};
 import { Menu } from ${part("menu.tsx")};
 import { Switch } from ${part("switch.tsx")};
 import { Table } from ${part("table.tsx")};
@@ -126,12 +134,13 @@ const columns = (zh) => [
   { key: "health", header: zh ? "状况" : "Health", cell: (g) => <span className="s1-table__pair"><Glyph status={g.status} /><span className="caps">{g.word}</span></span> },
   { key: "kind", header: zh ? "类型" : "Kind", cell: (g) => <Badge status={g.on ? "ok" : "neutral"}>{g.on ? (zh ? "开" : "Live") : (zh ? "关" : "Off")}</Badge> },
   { key: "status", header: zh ? "状态" : "Status", cell: (g) => <span className="s1-table__pair"><Switch aria-label={(g.on ? "Turn off " : "Turn on ") + g.name} defaultChecked={g.on} /><span className="caps">{g.state}</span></span> },
+  { key: "stage", header: zh ? "上架" : "Listing", width: 200, cell: (g) => <RadioGroup legend={"Listing of " + g.name} hideLegend variant="dots" size="sm" defaultValue={g.on ? "live" : "draft"} options={[{ value: "draft", label: zh ? "草稿" : "Draft" }, { value: "live", label: zh ? "上架" : "Live" }, { value: "archived", label: zh ? "归档" : "Archived" }]} /> },
   { key: "spend", header: zh ? "今日消费" : "Spend today", numeric: true, cell: (g) => g.spend },
 ];
 const actions = (g) => (
   <span className="s1-table__pair">
     <Menu variant="ghost" size="sm" align="end" label={"Actions for " + g.name} items={[{ label: "Edit", onSelect: () => {} }]} />
-    <Button variant="ghost" size="sm" icon={dots} aria-label={"Delete " + g.name} />
+    <IconButton size="sm" tone="danger" icon={dots} aria-label={"Delete " + g.name} />
   </span>
 );
 const LOG = [
@@ -175,14 +184,26 @@ function Stories() {
 flushSync(() => createRoot(document.getElementById("app")).render(<Stories />));
 document.fonts.ready.then(() => {
   const got = {};
-  for (const s of document.querySelectorAll("[data-story]")) got[s.dataset.story] = checkRows(s, 1);
+  for (const s of document.querySelectorAll("[data-story]")) {
+    got[s.dataset.story] = checkRows(s, 1);
+    // a row's buttons inside their cell's padding
+    got[s.dataset.story].outside = [...s.querySelectorAll(".s1-table__actions button")].filter((b) => b.getClientRects().length && !b.closest("[popover]")).filter((b) => {
+      const r = b.getBoundingClientRect();
+      const td = b.closest("td");
+      const cell = td.getBoundingClientRect();
+      const pad = getComputedStyle(td);
+      return r.left < cell.left + parseFloat(pad.paddingLeft) - 0.5 || r.right > cell.right - parseFloat(pad.paddingRight) + 0.5;
+    }).length;
+  }
   document.getElementById("out").textContent = JSON.stringify(got);
 });
 `;
 
-// The stories' own rules: a name over a quieter line beside a mark (its first line 20px, the line under it 16px), a
-// figure over its note, mono capitals, a page's mono time. The rest is the kit's.
+// The stories' own rules: border-box everywhere (as the apps and /ui/ set it), a name over a quieter line beside a mark
+// (its first line 20px, the line under it 16px), a figure over its note, mono capitals, a page's mono time. The rest is
+// the kit's.
 const STORY_CSS = `
+*, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: var(--s1-paper); color: var(--s1-ink); font-family: var(--s1-font-sans); }
 .stories { display: grid; gap: 32px; max-width: 1100px; padding: 16px; }
 .name { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
@@ -196,7 +217,7 @@ body { margin: 0; background: var(--s1-paper); color: var(--s1-ink); font-family
 .mono { font-family: var(--s1-font-mono); font-size: 12px; }
 `;
 
-type Result = { failures: string[]; rows: number; pairs: number; cells: number };
+type Result = { failures: string[]; rows: number; pairs: number; cells: number; outside: number };
 
 async function page(t: { skip: (m: string) => void }, sheet: (f: string) => string): Promise<string | undefined> {
   const bin = chrome();
@@ -243,10 +264,11 @@ test("every row's first lines lie on one line, and every icon and its words are 
     assert.deepEqual(Object.keys(got), ["groups, fitted", "groups, scrolling", "a dense log", "a 40px menu and a button", "Chinese"]);
     for (const [story, r] of Object.entries(got)) {
       assert.deepEqual(r.failures, [], `${width}px, ${story}`);
+      assert.equal(r.outside, 0, `${width}px, ${story}: a row's buttons stay inside their cell's padding`);
       assert.ok(r.rows >= 2, `${width}px, ${story}: ${r.rows} rows checked`);
     }
     assert.equal(got["groups, fitted"].pairs, 9, `${width}px: the health, the status and the actions of three rows`);
-    assert.equal(got["groups, fitted"].cells, 24, `${width}px: eight cells a row, each with a first line`);
+    assert.equal(got["groups, fitted"].cells, 27, `${width}px: nine cells a row, each with a first line`);
     assert.equal(got["a dense log"].pairs, 1, `${width}px: the one OK`);
   }
 });

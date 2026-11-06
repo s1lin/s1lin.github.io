@@ -536,7 +536,7 @@
       "name": "radio-group",
       "type": "registry:ui",
       "title": "RadioGroup",
-      "description": "One choice of a few: native radios in a fieldset that is the radiogroup, as a list, as cards (an amount, a plan) or a segmented row (24h · 7d · 30d) with no line and the chosen one filled, or as dots for a head or a toolbar, the chosen word with a dot under it.",
+      "description": "One choice of a few: native radios in a fieldset that is the radiogroup, as a list, as cards (an amount, a plan) or a segmented row (24h · 7d · 30d) with no line and the chosen one filled, or as dots for a head or a toolbar, the chosen word with a dot under it, at a table row's size too (size sm).",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
@@ -612,6 +612,34 @@
           "path": "src/ui/table.css",
           "type": "registry:file",
           "target": "@components/s1lin/table.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "data"
+      ]
+    },
+    {
+      "name": "icon-button",
+      "type": "registry:ui",
+      "title": "IconButton",
+      "description": "A square with one icon and no words, the ghost button without its line, named by its required aria-label (its tooltip too); in the bad hue for a delete, filled with it under the pointer. A row's delete beside its menu's dots.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/button.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/icon-button.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/icon-button.tsx"
+        },
+        {
+          "path": "src/ui/icon-button.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/icon-button.css"
         }
       ],
       "categories": [
@@ -933,7 +961,7 @@
       "name": "menu",
       "type": "registry:ui",
       "title": "Menu",
-      "description": "A button that opens a list of actions, the ARIA menu button: arrows, Home, End, letters, Esc; in the top layer, so no frame clips it.",
+      "description": "A button that opens a list of actions, the ARIA menu button: arrows, Home, End, letters, Esc; in the top layer, so no frame clips it; its three dots a square, with a line or (ghost) without, for a row's actions.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",

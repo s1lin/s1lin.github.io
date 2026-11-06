@@ -396,6 +396,8 @@ export function Demo({ id }: { id: string }) {
 
     case "table":
       return <demos.TableDemo />;
+    case "icon-button":
+      return <demos.IconButtonDemo />;
     case "pagination":
       return <demos.PaginationDemo />;
     case "badge":

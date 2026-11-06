@@ -53,6 +53,7 @@ import { Switch } from ${part("switch.tsx")};
 
 const RANGE = ["5m", "30m", "1h", "6h", "24h"].map((r) => ({ value: r, label: r }));
 const VIEW = [{ value: "chart", label: "Chart" }, { value: "table", label: "Table" }];
+const STATUS = [{ value: "active", label: "Active" }, { value: "disabled", label: "Disabled" }, { value: "banned", label: "Banned" }];
 const AMOUNT = [{ value: "5", label: "$5", hint: "the least" }, { value: "20", label: "$20", hint: "about 4M tokens" }];
 const LANGS = [{ value: "en", label: "EN", name: "English", lang: "en" }, { value: "zh", label: "中文", lang: "zh-CN" }];
 
@@ -63,6 +64,7 @@ function Set({ id, theme, style }) {
       <RadioGroup data-k="cards" legend="Amount" variant="cards" defaultValue="20" options={AMOUNT} />
       <RadioGroup data-k="dots" legend="View" variant="dots" defaultValue="chart" options={VIEW} />
       <RadioGroup data-k="quiet" legend="View" variant="segmented" quiet defaultValue="chart" options={VIEW} />
+      <RadioGroup data-k="dots-sm" legend="Status of m.okafor" hideLegend variant="dots" size="sm" defaultValue="active" options={STATUS} />
       <div data-k="ghost" role="group" aria-label="Layout">
         <Button variant="ghost" size="sm" data-size="sm" aria-pressed={true}>Grid</Button>
         <Button variant="ghost" size="sm" data-size="sm" aria-pressed={false}>List</Button>
@@ -164,6 +166,7 @@ const OPTIONS = {
   cards: [".s1-radio", (o) => o.querySelector("input").checked],
   dots: [".s1-radio", (o) => o.querySelector("input").checked],
   quiet: [".s1-radio", (o) => o.querySelector("input").checked],
+  "dots-sm": [".s1-radio", (o) => o.querySelector("input").checked],
   ghost: ["button", (o) => o.getAttribute("aria-pressed") === "true"],
   plain: ["button", (o) => o.getAttribute("aria-pressed") === "true"],
   icon: ["button", (o) => o.getAttribute("aria-pressed") === "true"],
@@ -176,7 +179,7 @@ const OPTIONS = {
 const target = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-switch__track, .s1-btn__icon") ?? o;
 // The element that sets the words.
 const words = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-switch__label") ?? o;
-const GROUPS = { segmented: ".s1-fieldset__body", cards: ".s1-fieldset__body", dots: ".s1-fieldset__body", quiet: ".s1-fieldset__body", lang: ".s1-lang" };
+const GROUPS = { segmented: ".s1-fieldset__body", cards: ".s1-fieldset__body", dots: ".s1-fieldset__body", quiet: ".s1-fieldset__body", "dots-sm": ".s1-fieldset__body", lang: ".s1-lang" };
 
 const got = { sets: {}, tokens: {} };
 for (const id of ["light", "dark", "brand"]) {
@@ -197,7 +200,8 @@ for (const id of ["light", "dark", "brand"]) {
           size: o.dataset.size ?? null, w: rect.width, h: rect.height, icon: svg ? [svg.width, svg.height] : null,
         };
         if (k === "switch") { const t = o.querySelector(".s1-switch__track"); r.track = { ...look(t), fade: fade(t) }; r.knob = look(t, "::after"); r.disabled = o.querySelector("input").disabled; }
-        if (k === "dots" || k === "quiet") r.dot = look(o.querySelector(".s1-radio__label"), "::after");
+        if (k === "dots" || k === "quiet" || k === "dots-sm") r.dot = look(o.querySelector(".s1-radio__label"), "::after");
+        if (k === "dots-sm") r.font = getComputedStyle(o).fontSize;
         if (k === "lang") r.dot = look(o.querySelector(".s1-lang__label"), "::after");
         if (group) r.group = painted(group).filter((p) => !p.inside);
         r.outer = painted(box).filter((p) => !p.inside);
@@ -216,7 +220,7 @@ for (const id of ["light", "dark", "brand"]) {
 
 // focus: script focus with no pointer before it is keyboard-like, so it matches :focus-visible; each kind's ring
 got.focus = {};
-for (const [k, sel] of [["segmented", "input"], ["cards", "input"], ["dots", "input"], ["quiet", "input"], ["ghost", "button"], ["plain", "button"], ["icon", "button"], ["chip", "button"], ["switch", "input"], ["lang", "button"]]) {
+for (const [k, sel] of [["segmented", "input"], ["cards", "input"], ["dots", "input"], ["quiet", "input"], ["dots-sm", "input"], ["ghost", "button"], ["plain", "button"], ["icon", "button"], ["chip", "button"], ["switch", "input"], ["lang", "button"]]) {
   const el = document.querySelector('#light [data-k="' + k + '"] ' + sel);
   el.focus();
   const ring = k === "switch" ? el.nextElementSibling : el.closest(".s1-radio") ?? el;
@@ -253,7 +257,7 @@ type Look = { border: string; outline: string; shadow: string; bg: string; color
 type Painted = Lines & { name: string };
 type State = {
   state: string; self: Look; text: Look; fade: number; painted: Painted[]; hint: (Look & { fade: number }) | null;
-  size: string | null; w: number; h: number; icon: [number, number] | null;
+  size: string | null; w: number; h: number; icon: [number, number] | null; font?: string;
   track?: Look & { fade: number }; knob?: Look; dot?: Look; group?: Painted[]; outer: Painted[]; disabled?: boolean;
 };
 type Option = { text: string; chosen: boolean; rest: State; hovered: State };
@@ -302,7 +306,7 @@ async function run(t: { skip: (m: string) => void }): Promise<Got | undefined> {
 
 const NONE = { border: "0px 0px 0px 0px", outline: "none", shadow: "none" };
 const linesOf = (l: Lines) => ({ border: l.border, outline: l.outline, shadow: l.shadow });
-const SWITCHERS = ["segmented", "cards", "dots", "quiet", "ghost", "plain", "icon", "chip", "switch", "lang"];
+const SWITCHERS = ["segmented", "cards", "dots", "quiet", "dots-sm", "ghost", "plain", "icon", "chip", "switch", "lang"];
 
 test("no switcher has a border, an outline or a box-shadow on anything it paints, on paper or at night, at rest, under the pointer, chosen or not", async (t) => {
   const got = await run(t);
@@ -362,7 +366,7 @@ test("dots: no fill ever; the chosen word heavier with a 4px dot in --s1-here un
   if (!got) return;
   for (const [set, kinds] of Object.entries(got.sets)) {
     const tk = got.tokens[set];
-    for (const kind of ["dots", "quiet", "lang"]) {
+    for (const kind of ["dots", "quiet", "dots-sm", "lang"]) {
       const chosen = kinds[kind].find((o) => o.chosen)!;
       const other = kinds[kind].find((o) => !o.chosen)!;
       const where = `${set} ${kind}`;
@@ -507,4 +511,18 @@ test("in the stylesheets an outline on a switcher is the keyboard's (:focus-visi
   has("switch.css", (r) => branches(r.selector).includes(".s1-switch__input:checked + .s1-switch__track") && /background:\s*Highlight/.test(r.body), "an on track in Highlight");
   assert.ok(!forced("switch.css").some((r) => /display:\s*none/.test(r.body)), "switch.css: the track stays in forced colours");
   has("lang-switch.css", (r) => branches(r.selector).includes(".s1-lang__label::after") && /background:\s*CanvasText/.test(r.body), "the dot in CanvasText");
+});
+
+test("dots at a row's size (size sm): 30px options in 10.5px mono, two apart, the chosen one's dot under it, as the other dots", async (t) => {
+  const got = await run(t);
+  if (!got) return;
+  for (const [set, kinds] of Object.entries(got.sets)) {
+    const options = kinds["dots-sm"];
+    assert.equal(options.length, 3, `${set}: three states`);
+    for (const o of options) {
+      assert.equal(o.rest.h, 30, `${set} "${o.text}": 30px tall`);
+      assert.ok(o.rest.w >= 30, `${set} "${o.text}": at least 30px wide`);
+      assert.equal(o.rest.font, "10.5px", `${set} "${o.text}": 10.5px type`);
+    }
+  }
 });

@@ -3,6 +3,11 @@
   .s1-menu { display: inline-flex; vertical-align: middle; }
   /* the three dots of an icon button, in the button's ink */
   .s1-menu__dots { width: 16px; height: 16px; flex: none; fill: currentColor; }
+  /* The dots alone are a square at the button's height, whatever its variant; a ghost's (a row's actions: no line, no
+     paper) rest in the second ink, and the pointer turns them over as it does every ghost. */
+  .s1-btn.s1-menu__more { width: 40px; padding: 0; flex: none; }
+  .s1-btn.s1-menu__more.s1-btn--sm { width: 30px; }
+  .s1-btn--ghost.s1-menu__more { color: var(--s1-ink-2); }
   .s1-menu__list {
     display: block; position: fixed; inset: auto; z-index: 1000; margin: 0; box-sizing: border-box;
     min-width: 180px; max-width: min(320px, calc(100vw - 16px)); max-height: min(var(--s1-menu-room, 60vh), 420px); overflow-y: auto; overscroll-behavior: contain;

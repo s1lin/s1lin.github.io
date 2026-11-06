@@ -42,6 +42,7 @@ import { Dialog } from "@/ui/dialog";
 import { EmptyState } from "@/ui/empty-state";
 import { Field, Fieldset } from "@/ui/field";
 import { Glyph, type Status } from "@/ui/glyph";
+import { IconButton } from "@/ui/icon-button";
 import { Input } from "@/ui/input";
 import { LangSwitch, type LangSwitchLinkProps } from "@/ui/lang-switch";
 import { Menu } from "@/ui/menu";
@@ -679,16 +680,14 @@ interface Route {
   sub: string;
   accounts: string;
   note?: string;
-  status: Status;
-  health: string;
   on: boolean;
   spend: number;
 }
 
 const ROUTES: Route[] = [
-  { id: 2, name: "Qwen", sub: "#2 · composite", accounts: "6/6", status: "ok", health: "Healthy", on: true, spend: 19.8 },
-  { id: 9, name: "Kimi · Discount, a route whose name is long enough to wrap", sub: "#9 · moonshot · subscription", accounts: "3/4", note: "1 limited", status: "warn", health: "Degraded", on: false, spend: 142.1 },
-  { id: 14, name: "Draw", sub: "#14 · composite", accounts: "2/2", status: "ok", health: "Healthy", on: true, spend: 3.4 },
+  { id: 2, name: "Qwen", sub: "#2 · composite", accounts: "6/6", on: true, spend: 19.8 },
+  { id: 9, name: "Kimi · Discount, a route whose name is long enough to wrap", sub: "#9 · moonshot · subscription", accounts: "3/4", note: "1 limited", on: false, spend: 142.1 },
+  { id: 14, name: "Draw", sub: "#14 · composite", accounts: "2/2", on: true, spend: 3.4 },
 ];
 
 /**
@@ -697,11 +696,12 @@ const ROUTES: Route[] = [
  */
 function TableRows() {
   const [on, setOn] = useState<Record<number, boolean>>(Object.fromEntries(ROUTES.map((r) => [r.id, r.on])));
+  const [stage, setStage] = useState<Record<number, string>>(Object.fromEntries(ROUTES.map((r, i) => [r.id, ["live", "draft", "archived"][i % 3]])));
+  const [said, setSaid] = useState("");
   const columns: Column<Route>[] = [
     {
       key: "name",
       header: "Route",
-      width: "36%",
       cell: (r) => (
         <span className="ud-name">
           <span className="ud-name__main">{r.name}</span>
@@ -709,20 +709,11 @@ function TableRows() {
         </span>
       ),
     },
-    { key: "accounts", header: "Accounts", numeric: true, cell: (r) => (r.note ? <span className="ud-name"><span>{r.accounts}</span><span className="ud-name__sub">{r.note}</span></span> : r.accounts) },
-    {
-      key: "health",
-      header: "Health",
-      cell: (r) => (
-        <span className="s1-table__pair">
-          <Glyph status={r.status} />
-          <span className="ud-caps">{r.health}</span>
-        </span>
-      ),
-    },
+    { key: "accounts", header: "Accounts", numeric: true, width: 104, cell: (r) => (r.note ? <span className="ud-name"><span>{r.accounts}</span><span className="ud-name__sub">{r.note}</span></span> : r.accounts) },
     {
       key: "on",
       header: "Status",
+      width: 132,
       cell: (r) => (
         <span className="s1-table__pair">
           <Switch aria-label={`Turn ${r.name} ${on[r.id] ? "off" : "on"}`} checked={on[r.id]} onChange={(e) => setOn({ ...on, [r.id]: e.target.checked })} />
@@ -730,17 +721,68 @@ function TableRows() {
         </span>
       ),
     },
-    { key: "spend", header: "Spend today", numeric: true, cell: (r) => usd(r.spend) },
+    {
+      key: "stage",
+      header: "Listing",
+      width: 220,
+      cell: (r) => (
+        <RadioGroup
+          legend={`Listing of ${r.name}`}
+          hideLegend
+          variant="dots"
+          size="sm"
+          value={stage[r.id]}
+          onValueChange={(v) => setStage({ ...stage, [r.id]: v })}
+          options={[
+            { value: "draft", label: "Draft" },
+            { value: "live", label: "Live" },
+            { value: "archived", label: "Archived" },
+          ]}
+        />
+      ),
+    },
+    { key: "spend", header: "Spend today", numeric: true, width: 110, cell: (r) => usd(r.spend) },
   ];
   return (
-    <Table
-      caption="Rows: one line across"
-      fit
-      columns={columns}
-      rows={ROUTES}
-      rowKey="id"
-      actions={(r) => <Menu variant="ghost" size="sm" align="end" label={`Actions for ${r.name}`} items={[{ label: "Edit", onSelect: () => undefined }, { label: "Duplicate", onSelect: () => undefined }]} />}
-    />
+    <>
+      <Table
+        caption="Rows: one line across"
+        fit
+        columns={columns}
+        rows={ROUTES}
+        rowKey="id"
+        actions={(r) => (
+          <span className="s1-table__pair">
+            <Menu variant="ghost" size="sm" align="end" label={`Actions for ${r.name}`} items={[{ label: "Edit", onSelect: () => setSaid(`Edit ${r.name}`) }, { label: "Duplicate", onSelect: () => setSaid(`Duplicate ${r.name}`) }]} />
+            <IconButton size="sm" tone="danger" icon={<Trash2 />} aria-label={`Delete ${r.name}`} onClick={() => setSaid(`Delete ${r.name}`)} />
+          </span>
+        )}
+      />
+      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "A row's status in the row (a switch for two states, dots for more), its actions as the ghost dots and a trash beside them."} />
+    </>
+  );
+}
+
+/** IconButton: a square with one icon, named by its aria-label; the danger one in the bad hue, at both sizes. */
+export function IconButtonDemo() {
+  const [said, setSaid] = useState("");
+  return (
+    <div className="ud-stack">
+      <p className="ud-row">
+        <IconButton icon={<Pencil />} aria-label="Edit prod-backend" onClick={() => setSaid("Edit prod-backend")} />
+        <IconButton tone="danger" icon={<Trash2 />} aria-label="Delete prod-backend" onClick={() => setSaid("Delete prod-backend")} />
+        <IconButton size="sm" icon={<RefreshCw />} aria-label="Refresh the list" onClick={() => setSaid("Refresh the list")} />
+        <IconButton size="sm" tone="danger" icon={<Trash2 />} aria-label="Delete Qwen" onClick={() => setSaid("Delete Qwen")} />
+        <IconButton size="sm" tone="danger" icon={<Trash2 />} aria-label="Delete Draw" disabled />
+      </p>
+      <p className="ud-row">
+        <span className="s1-table__pair">
+          <Menu variant="ghost" size="sm" align="end" label="Actions for Qwen" items={[{ label: "Edit", onSelect: () => setSaid("Edit Qwen") }]} />
+          <IconButton size="sm" tone="danger" icon={<Trash2 />} aria-label="Delete Qwen" onClick={() => setSaid("Delete Qwen")} />
+        </span>
+      </p>
+      <Said text={said ? `Pressed ${said}: nothing is sent from this page.` : "Hover each: the ghost fills with the ink, the danger one with the bad hue. The last trash is disabled."} />
+    </div>
   );
 }
 
@@ -1540,6 +1582,7 @@ export function MenuDemo() {
           Actions ▾
         </Menu>
         <Menu variant="icon" align="end" label="More actions for prod-backend" items={[{ label: "Copy id", onSelect: pick("Copy id") }, { label: "Archive", onSelect: pick("Archive") }]} />
+        <Menu variant="ghost" size="sm" align="end" label="Actions for Qwen" items={[{ label: "Edit", onSelect: pick("Edit") }, { label: "Duplicate", onSelect: pick("Duplicate") }]} />
       </p>
       <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Open one with the mouse or with ↓, move with the arrows, type a letter, Esc to close."} />
     </>

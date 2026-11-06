@@ -986,6 +986,7 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
       { name: "onValueChange", type: "(value: string) => void", desc: "Called with the value chosen." },
       { name: "variant", type: "\"list\" | \"cards\" | \"segmented\" | \"dots\"", default: "\"list\"", desc: "Radios down the page; a tile each, in a grid that wraps, the chosen one filled; a row of short words, the chosen one filled (`--s1-chosen`, the ink until a theme sets it), the others tinted under the pointer; a row of words, the chosen one in the ink and a weight heavier with a dot under it in `--s1-here`, the others dimmer, for a head or a toolbar. None but the list has a line." },
       { name: "orientation", type: "\"vertical\" | \"horizontal\"", default: "\"vertical\"", desc: "A list's radios in a row that wraps." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "`sm`: dots at a table row's size, 30px options in 10.5px mono, two apart: a row's status of more than two states (Draft, Published, Archived). In a cell the table centres the group on the row's line." },
       { name: "quiet", type: "boolean", default: "false", desc: "Deprecated: the same as `variant=\"dots\"`, which it overrides." },
       { name: "hideLegend", type: "boolean", default: "false", desc: "The legend is read, not shown, where the row says what it is by itself." },
       { name: "name", type: "string", desc: "The radios' name in a form; one is made up if not given." },
@@ -1150,9 +1151,41 @@ const [open, setOpen] = useState<OpenGroups>({ all: false, except: troubled }); 
     notes: [
       { label: "Accessibility", text: "A real `<table>`: the caption names it, headers have `scope`, the first column's cells are row headers, so a screen reader reads \"prod-key, Spend, $41.20\" moving across. A sortable header is a button inside the `<th>`, and the `<th>` carries `aria-sort`. Shapes in the arrows and the badges, not colour, carry state. Each group is a `<tbody>` named by its heading row (`<th scope=\"rowgroup\">` across the table). Its toggle is a button named by the group's `label` (or its heading) with `aria-expanded`, so a screen reader hears \"Claude, collapsed\"; the triangle points down at the rows when they show. A heading may hold its own links and buttons: a click on them does not toggle." },
       { label: "Keyboard", text: "When the table is wider than its frame (or the header is sticky), the frame becomes a region named by the caption, with `tabIndex=0`, so the arrow keys scroll it; when it fits, it is no stop at all. Tab reaches each group's toggle, Enter or Space opens and closes it. A sortable header is a button: Tab reaches it, Enter or Space asks for its sort, and the words hidden after the header say the sort it now has (\"sorted descending\")." },
-      { label: "Rows", text: "Every cell starts at the top with the same padding, and its first line is one line box of `--s1-table-line` (20px, the 14px type at 1.45; 18px dense), so the first lines of a row's cells lie on one line however tall the row grows: a name that wraps over its tags, a figure over its note. An icon and its words go in `<span className=\"s1-table__pair\">` (a mark and a name, a switch and its state, a shape and its label, a row's buttons): one line tall, centred on each other, never wrapping. A control taller than the line alone in a cell (a 30px button, a menu's dots, a badge) is centred on the line by the table; a Switch in a cell takes the table's type, its track on the line. Lines under the first are 16px. test/table-align.test.ts checks every row in Chrome, within 1px." },
+      { label: "Rows", text: "Every cell starts at the top with the same padding, and its first line is one line box of `--s1-table-line` (20px, the 14px type at 1.45; 18px dense), so the first lines of a row's cells lie on one line however tall the row grows: a name that wraps over its tags, a figure over its note. An icon and its words go in `<span className=\"s1-table__pair\">` (a mark and a name, a switch and its state, a shape and its label, a row's buttons): one line tall, centred on each other, never wrapping. A control taller than the line alone in a cell (a 30px button, a menu's dots, a badge, dots at `size=\"sm\"`) is centred on the line by the table; a Switch in a cell takes the table's type, its track on the line. A row's actions as a pair, the ghost Menu's dots and an IconButton (a trash): in a table that fits, the actions column holds both. Lines under the first are 16px. test/table-align.test.ts checks every row in Chrome, within 1px." },
       { label: "Sort", text: "One column at a time, and always one: the page's default sort shows before any press, a first press on a column asks for its first direction (\"desc\" for figures, the big ones first; \"asc\" for words and dates; `firstDir` for another), a second press the other way, and no press goes back to none. A page keeps the sort in its address (`?sort=<key>&dir=asc|desc`, the default left out) and goes back to the first page when it changes." },
       { label: "Phone", text: "Cells keep to one line, so columns never squeeze to a word a line; the table scrolls sideways inside its frame, with a shade at the edge that has more and \"Scroll sideways for more\" under it. With `fit`, leave out what a phone cannot hold (mark the column with `className`, then give it no width and hide its words in a container query: not `display: none`, since a group's heading row spans every column), or fold it into the first cell." },
+    ],
+  },
+  {
+    id: "icon-button",
+    name: "IconButton",
+    zh: "图标按钮",
+    keywords: ["icon button", "trash", "delete", "row actions", "删除", "图标"],
+    group: "data",
+    item: "icon-button",
+    exports: ["IconButton", "IconButtonProps"],
+    summary:
+      "A square with one icon and no words: the ghost Button without its line or its paper, in the second ink and the ink fill under the pointer, or with `tone=\"danger\"` in the bad hue and filled with it. A row's delete, beside its Menu's dots. Its name is its `aria-label`, which its type requires, and its tooltip the same.",
+    example: "live",
+    usage: `import { IconButton } from "@/components/s1lin/icon-button";
+import { Menu } from "@/components/s1lin/menu";
+import { Trash2 } from "lucide-react";
+
+// a row's actions: the ghost dots and the trash beside them, centred on the row's line
+<span className="s1-table__pair">
+  <Menu variant="ghost" size="sm" align="end" label={\`Actions for \${g.name}\`} items={…} />
+  <IconButton size="sm" tone="danger" icon={<Trash2 />} aria-label={\`Delete \${g.name}\`} onClick={askFirst} />
+</span>`,
+    props: [
+      { name: "icon", type: "ReactNode", required: true, desc: "The one picture: an svg at 16px (14px at `sm`), drawn in `currentColor`, hidden from screen readers." },
+      { name: "aria-label", type: "string", required: true, desc: "What it does, to what (\"Delete Qwen\"): its only name. Also its `title`, unless `title` says otherwise." },
+      { name: "tone", type: "\"default\" | \"danger\"", default: "\"default\"", desc: "`danger`: in `--s1-bad` (the ink until a theme sets it), filled with it under the pointer, the icon in `--s1-on-status`." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "40px square, or 30px a size down." },
+      { name: "title", type: "string", default: "the aria-label", desc: "Its tooltip. Any other attribute of a `<button>` (`onClick`, `disabled`) passes through." },
+    ],
+    notes: [
+      { label: "Accessibility", text: "A `<button type=\"button\">` named by its `aria-label` alone, the icon hidden. Under the pointer it turns over as every ghost does (danger to the bad hue's fill, AA both ways); the keyboard's ring is 2px in the ink, outside it. Disabled it fades and does not turn. In forced colours the danger fill is the system's button colours." },
+      { label: "Icons", text: "Only where words do not fit: a row's actions, a dense toolbar. Delete is lucide's `Trash2`. Anywhere else an action is a Button with an icon and a word." },
     ],
   },
   {
@@ -1685,8 +1718,8 @@ const LANGS = [
       { name: "children", type: "ReactNode", desc: "What the button shows; three dots when left out." },
       { name: "label", type: "string", desc: "The button's name, needed when it shows no words." },
       { name: "align", type: "\"start\" | \"end\"", default: "\"start\"", desc: "Which edge of the button the list lines up with; it is kept on the screen either way." },
-      { name: "variant", type: "ButtonVariant", default: "\"plain\"", desc: "The button: `icon` for three dots." },
-      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "The button's size." },
+      { name: "variant", type: "ButtonVariant", default: "\"icon\" with the dots, else \"plain\"", desc: "The button. With the three dots it is a square whatever the variant: `icon` with its line, `ghost` without a line or paper, the dots in the second ink, turned over under the pointer: a row's actions (`variant=\"ghost\" size=\"sm\"`, beside an IconButton)." },
+      { name: "size", type: "\"md\" | \"sm\"", default: "\"md\"", desc: "The button's size: 40px, or 30px a size down." },
       CLASS,
     ],
     notes: [
