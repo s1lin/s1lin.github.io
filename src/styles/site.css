@@ -379,33 +379,31 @@ figcaption, .cap {
 
 /* Under the contents and the foreword, one row of two charts on the page's own
    columns: the grass under the contents, the tokens under the foreword. The
-   grass is short, so it stays in view beside the tokens as the page scrolls. */
+   grass is a narrow column, shorter than the tokens, so it stays in view beside
+   them as the page scrolls, where the window is tall enough to hold all of it. */
 .charts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; margin-top: 72px; }
 .charts > * { min-width: 0; }
-.charts .heatmap { grid-column: 1 / span 5; max-width: 40rem; position: sticky; top: calc(var(--head-h) + 28px); }
+.charts .heatmap { grid-column: 1 / span 5; position: sticky; top: calc(var(--head-h) + 28px); }
+@media (max-height: 819.98px) { .charts .heatmap { position: static; } }
 .charts .tokens { grid-column: 7 / span 6; margin-top: 0; }
 
-/* A square a day in GitHub's own greens, its light scale on paper and its dark one at night. */
+/* A square a day in GitHub's own greens, its light scale on paper and its dark one at night.
+   A week to a row and the year in two columns (lib/calendar.ts), as wide as a
+   phone's page and no wider anywhere, so it never scrolls and its words stay 9 to 11px. */
 .heatmap {
   --l0: #ebedf0;
   --l1: #9be9a8;
   --l2: #40c463;
   --l3: #30a14e;
   --l4: #216e39;
-  container-type: inline-size;
+  max-width: 22rem;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .heatmap { --l0: #161b22; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353; }
 }
 :root[data-theme="dark"] .heatmap { --l0: #161b22; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353; }
 .heatmap .s1-section-label { margin-bottom: 18px; }
-/* Narrower than its least width, the year scrolls in its own box and opens on
-   the latest weeks; the earlier ones fade out at the edge rather than stop short. */
-.heatmap__plot { display: flex; flex-direction: row-reverse; overflow-x: auto; scrollbar-width: thin; }
-.heatmap svg { flex: none; width: 100%; min-width: 480px; height: auto; }
-@container (max-width: 479.98px) {
-  .heatmap__plot { mask-image: linear-gradient(to right, transparent, #000 28px); }
-}
+.heatmap svg { display: block; width: 100%; height: auto; }
 .heatmap text { font: 400 9px var(--f-mono); letter-spacing: 0.06em; fill: var(--ink-3); }
 .heatmap .l0 { fill: var(--l0); background: var(--l0); }
 .heatmap .l1 { fill: var(--l1); background: var(--l1); }
@@ -1142,8 +1140,9 @@ figcaption, .cap {
   @media (prefers-reduced-motion: no-preference) {
     .feature__line { animation: draw linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; transform-origin: left; }
     @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    /* the heatmap's year fills in from the left, just behind its label's rule */
-    .heatmap__plot { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; }
+    /* the heatmap's year fills in from the top, a week at a time down its columns */
+    .heatmap__plot { animation: fill-down linear both; animation-timeline: view(); animation-range: entry 10% cover 30%; }
+    @keyframes fill-down { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
     @keyframes fill-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
     /* and the token town is laid out under it in time order, from the left */
     .tokens__sky { animation: fill-in linear both; animation-timeline: view(); animation-range: entry 10% cover 35%; }

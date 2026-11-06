@@ -3,19 +3,22 @@ import {
   CAL,
   CELL,
   DAYS,
+  H,
   LEFT,
   MONTHS,
-  OFFSET,
+  SHIFT,
   STEP,
   TOP,
   W,
   WEEKDAYS,
-  WEEKS,
+  dayAt,
   dayOf,
   long,
+  monthRows,
+  rowAt,
   short,
+  squareAt,
   thousands,
-  weekOf,
 } from "@/lib/calendar";
 import { SectionLabel } from "@/ui/section-label";
 
@@ -23,26 +26,12 @@ import { SectionLabel } from "@/ui/section-label";
  * The editor's last year on GitHub, a square a day, shaded as the profile page
  * shades it. scripts/github-data.py copies the counts into src/content/github.json
  * when the issue is built, so the squares are in the prerendered page and the
- * reader's browser never asks GitHub for anything. The grid is lib/calendar.ts.
+ * reader's browser never asks GitHub for anything. The grid is lib/calendar.ts:
+ * a week to a row, read down the first column and then the second.
  */
-
-const H = TOP + 7 * STEP;
 
 const contributions = (n: number) =>
   n === 0 ? "No contributions" : n === 1 ? "1 contribution" : `${thousands(n)} contributions`;
-
-const x = (i: number) => LEFT + weekOf(i) * STEP;
-const y = (i: number) => TOP + ((i + OFFSET) % 7) * STEP;
-
-/** Each month's name over the first week that starts in it, where there is room before the next. */
-function months() {
-  const starts: { week: number; month: number }[] = [];
-  for (let week = 0; week < WEEKS; week++) {
-    const month = dayOf(Math.max(0, week * 7 - OFFSET)).getUTCMonth();
-    if (month !== starts.at(-1)?.month) starts.push({ week, month });
-  }
-  return starts.filter((s, i) => (starts[i + 1]?.week ?? WEEKS) - s.week >= 3);
-}
 
 /** The figure in a sentence or two, for readers who cannot see the squares. */
 function summary() {
@@ -65,26 +54,31 @@ function summary() {
 /* The drawing never changes, so it is made once and React passes over it on every hover. */
 const AXIS = (
   <g>
-    {months().map(({ week, month }) => (
-      <text key={week} x={LEFT + week * STEP} y={TOP - 5}>
+    {monthRows().map(({ week, month }) => (
+      <text key={week} x={rowAt(week).x + LEFT - 6} y={rowAt(week).y + CELL - 3} textAnchor="end">
         {MONTHS[month].slice(0, 3).toUpperCase()}
       </text>
     ))}
-    {[1, 3, 5].map((d) => (
-      <text key={d} x={0} y={TOP + d * STEP + CELL - 0.5}>
-        {WEEKDAYS[d].slice(0, 3).toUpperCase()}
-      </text>
-    ))}
+    {[0, 1].map((col) =>
+      WEEKDAYS.map((d, i) => (
+        <text key={`${col}${i}`} x={col * SHIFT + LEFT + i * STEP + CELL / 2} y={TOP - 5} textAnchor="middle">
+          {d[0]}
+        </text>
+      )),
+    )}
   </g>
 );
 
 const SQUARES = (
   <g>
-    {CAL.counts.map((c, i) => (
-      <rect key={i} className={`l${CAL.levels[i]}`} x={x(i)} y={y(i)} width={CELL} height={CELL}>
-        <title>{`${contributions(c)} on ${WEEKDAYS[dayOf(i).getUTCDay()]}, ${long(dayOf(i))}`}</title>
-      </rect>
-    ))}
+    {CAL.counts.map((c, i) => {
+      const { x, y } = squareAt(i);
+      return (
+        <rect key={i} className={`l${CAL.levels[i]}`} x={x} y={y} width={CELL} height={CELL}>
+          <title>{`${contributions(c)} on ${WEEKDAYS[dayOf(i).getUTCDay()]}, ${long(dayOf(i))}`}</title>
+        </rect>
+      );
+    })}
   </g>
 );
 
@@ -102,10 +96,7 @@ export function GitHubHeatmap() {
   /** The day under the pointer, from where it is on the drawing. */
   function pick(e: PointerEvent<SVGSVGElement>) {
     const r = e.currentTarget.getBoundingClientRect();
-    const week = Math.floor((((e.clientX - r.left) * W) / r.width - LEFT) / STEP);
-    const d = Math.floor((((e.clientY - r.top) * H) / r.height - TOP) / STEP);
-    const i = week * 7 + d - OFFSET;
-    setAt(week >= 0 && d >= 0 && d < 7 && i >= 0 && i < DAYS ? i : null);
+    setAt(dayAt(((e.clientX - r.left) * W) / r.width, ((e.clientY - r.top) * H) / r.height));
   }
 
   return (
@@ -129,7 +120,7 @@ export function GitHubHeatmap() {
           <desc id="hm-d">{SUMMARY}</desc>
           {AXIS}
           {SQUARES}
-          {at !== null && <rect className="heatmap__at" x={x(at) - 1} y={y(at) - 1} width={CELL + 2} height={CELL + 2} />}
+          {at !== null && <rect className="heatmap__at" x={squareAt(at).x - 1} y={squareAt(at).y - 1} width={CELL + 2} height={CELL + 2} />}
         </svg>
       </div>
       <div className="heatmap__foot mono">
@@ -147,8 +138,9 @@ export function GitHubHeatmap() {
         </p>
       </div>
       <figcaption>
-        <span lang="ja">草</span>, grass: what programmers in Japan call this chart. A square a day, the greener the
-        busier, to {LAST}. More at <a href={`https://github.com/${CAL.login}`}>github.com/{CAL.login} ↗</a>
+        <span lang="ja">草</span>, grass: what programmers in Japan call this chart. A square a day and a week to a
+        row, down one column and then the other, the greener the busier, to {LAST}. More at{" "}
+        <a href={`https://github.com/${CAL.login}`}>github.com/{CAL.login} ↗</a>
       </figcaption>
     </figure>
   );
