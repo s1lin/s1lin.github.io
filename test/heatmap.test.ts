@@ -135,7 +135,7 @@ test("on a server: an image named by its title and described by the year, a tool
   const { createElement } = await import("react");
   const { renderToStaticMarkup } = await import("react-dom/server");
   const html: string = renderToStaticMarkup(createElement(GitHubHeatmap as () => null));
-  const svg = html.match(/<svg[^>]*>/)?.[0] ?? "";
+  const svg = html.match(/<svg[^>]*role="img"[^>]*>/)?.[0] ?? "";
   assert.match(svg, /role="img"/);
   assert.match(svg, /aria-labelledby="hm-t"/);
   assert.match(svg, /aria-describedby="hm-d"/);
@@ -152,6 +152,9 @@ test("on a server: an image named by its title and described by the year, a tool
   assert.equal(months.length, cal.monthRows().length, "a month name for every one monthRows gives");
   assert.match(html, /<p class="heatmap__key" aria-hidden="true">Less<i class="l0"><\/i><i class="l1"><\/i><i class="l2"><\/i><i class="l3"><\/i><i class="l4"><\/i>More<\/p>/);
   assert.match(html, /[\d,]+ contributions in the last year/);
+  assert.match(html, /<h3 class="s1-section-label"><span class="s1-section-label__mark" aria-hidden="true"><svg viewBox="0 0 16 16"[^>]*><path d="M8 0c4\.42/, "the heading leads with the GitHub mark, hidden from readers");
+  assert.match(html, /<\/span> On GitHub<\/h3>/, "and its words still say GitHub");
+  assert.ok(!/<h3[^>]*><span lang="ja">/.test(html), "the grass character no longer leads the heading");
   assert.match(html, /a week to a\s+row, down one column and then the other/);
 });
 
@@ -176,7 +179,7 @@ const box = (e) => { const r = e.getBoundingClientRect(); return { left: r.left,
 
 function look() {
   const fig = document.querySelector(".heatmap");
-  const svg = fig.querySelector("svg");
+  const svg = fig.querySelector(".heatmap__plot svg");
   const plot = fig.querySelector(".heatmap__plot");
   const rects = [...svg.querySelectorAll("rect[class^=l]")];
   const fills = {};
@@ -200,7 +203,7 @@ function look() {
 }
 
 async function point(i) {
-  const svg = document.querySelector(".heatmap svg");
+  const svg = document.querySelector(".heatmap__plot svg");
   const r = svg.querySelectorAll("rect[class^=l]")[i].getBoundingClientRect();
   const at = { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerType: "mouse", bubbles: true };
   svg.dispatchEvent(new PointerEvent("pointerover", at));
@@ -214,7 +217,7 @@ async function point(i) {
   await document.fonts.ready;
   await wait(200);
   const paper = look();
-  const n = document.querySelectorAll(".heatmap svg rect[class^=l]").length;
+  const n = document.querySelectorAll(".heatmap__plot svg rect[class^=l]").length;
   const first = await point(0);
   const last = await point(n - 1);
   const mid = await point(Math.floor(n / 2));
