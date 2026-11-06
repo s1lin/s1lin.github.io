@@ -1,6 +1,7 @@
 "use client";
 
 import { cloneElement, useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode, type RefObject } from "react";
+import { anchorPanel } from "./anchor";
 import { cn } from "./cn";
 import "./tokens.css";
 import "./popover.css";
@@ -28,8 +29,6 @@ export type PopoverProps = {
   /** The element to focus on opening. By default the first with `data-autofocus`, else the panel itself. */
   initialFocus?: RefObject<HTMLElement | null>;
 };
-
-const canPop = (el: HTMLElement) => typeof el.showPopover === "function";
 
 /**
  * A panel that opens beside a button, over the page: a short form, a date
@@ -64,30 +63,11 @@ export function Popover({ trigger, children, open: given, defaultOpen = false, o
   useLayoutEffect(() => {
     const p = panel.current;
     if (!p || !open) return;
-    if (canPop(p) && !p.matches(":popover-open")) p.showPopover();
     const anchor = () => document.getElementById(triggerId);
-    // On its side of the trigger, or the other when the panel does not fit and there is more room there; never taller than its room.
-    const place = () => {
-      const a = anchor()?.getBoundingClientRect();
-      if (!a) return;
-      const vw = document.documentElement.clientWidth;
-      const vh = window.innerHeight;
-      const below = vh - a.bottom - offset - 8;
-      const above = a.top - offset - 8;
-      p.style.setProperty("--s1-popover-room", `${Math.max(0, Math.round(Math.max(below, above)))}px`);
-      const tall = p.offsetHeight;
-      const room = side === "top" ? above : below;
-      const other = side === "top" ? below : above;
-      const at = tall > room && other > room ? (side === "top" ? "bottom" : "top") : side;
-      p.style.setProperty("--s1-popover-room", `${Math.max(0, Math.round(at === "top" ? above : below))}px`);
-      const w = p.offsetWidth;
-      const h = p.offsetHeight;
-      const x = align === "end" ? a.right - w : align === "center" ? a.left + (a.width - w) / 2 : a.left;
-      p.style.left = `${Math.round(Math.max(8, Math.min(x, vw - w - 8)))}px`;
-      p.style.top = `${Math.round(Math.max(8, at === "top" ? a.top - offset - h : a.bottom + offset))}px`;
-      p.dataset.side = at;
-    };
-    place();
+    // On its side of the trigger, or the other when the panel does not fit and there is more room there; never taller
+    // than its room. Content that grows or shrinks while it is open (a section unfolding, a picture arriving) is
+    // placed again, focus left where it is.
+    const stop = anchorPanel(p, anchor, { side, align, offset, room: "--s1-popover-room" });
     const first = initialFocus?.current ?? p.querySelector<HTMLElement>("[data-autofocus]") ?? p;
     first.focus({ preventScroll: true });
     const outside = (e: PointerEvent) => {
@@ -99,26 +79,14 @@ export function Popover({ trigger, children, open: given, defaultOpen = false, o
       const to = e.relatedTarget as Node | null;
       if (to && !p.contains(to) && !anchor()?.contains(to)) set(false, "outside");
     };
-    // content that grows or shrinks while it is open (a section unfolding, a picture arriving) is placed again, focus
-    // left where it is: on a change to what it holds, and on a change of its size
-    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => place()) : null;
-    grows?.observe(p);
-    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => place()) : null;
-    changes?.observe(p, { childList: true, subtree: true, characterData: true });
     document.addEventListener("pointerdown", outside, true);
     p.addEventListener("focusout", away);
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
     return () => {
-      grows?.disconnect();
-      changes?.disconnect();
       document.removeEventListener("pointerdown", outside, true);
       p.removeEventListener("focusout", away);
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
       // closing with focus inside the panel (Esc, a choice that closes it) gives it back to the trigger
       const inside = p.contains(document.activeElement) || document.activeElement === document.body;
-      if (canPop(p) && p.matches(":popover-open")) p.hidePopover();
+      stop();
       if (how.current === "esc" || (how.current !== "outside" && inside)) anchor()?.focus({ preventScroll: true });
       how.current = "";
     };

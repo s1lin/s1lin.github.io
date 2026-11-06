@@ -17,6 +17,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { anchorPanel, placePanel } from "./anchor";
 import { cn } from "./cn";
 import { Glyph } from "./glyph";
 import "./tokens.css";
@@ -32,37 +33,25 @@ const entries = (menu: HTMLElement) => [...menu.querySelectorAll<HTMLElement>(IT
 
 /**
  * A list in the top layer, placed against what opened it: below it (or above, with no room below), lined up with
- * its start or end edge and at least as wide; or beside it, for a submenu (to its left with no room on the right).
- * Kept 8px inside the screen; never taller than the room it has (--s1-dropdown-room).
+ * its start or end edge and at least as wide (anchor.ts, as every overlay of the kit); or beside it, for a submenu
+ * (to its left with no room on the right). Kept 8px inside the screen; never taller than the room it has
+ * (--s1-dropdown-room).
  */
 function place(list: HTMLElement, at: DOMRect | undefined, how: "bottom" | "top" | "beside", align: "start" | "end") {
   if (!at) return;
-  const vw = document.documentElement.clientWidth;
-  const vh = window.innerHeight;
-  if (how === "beside") {
-    list.style.setProperty("--s1-dropdown-room", `${Math.max(0, vh - 16)}px`);
-    const w = list.offsetWidth;
-    const h = list.offsetHeight;
-    const right = at.right - 2;
-    const x = right + w > vw - 8 && at.left + 2 - w >= 8 ? at.left + 2 - w : Math.min(right, vw - w - 8);
-    list.style.left = `${Math.round(Math.max(8, x))}px`;
-    list.style.top = `${Math.round(Math.max(8, Math.min(at.top - 5, vh - h - 8)))}px`;
+  if (how !== "beside") {
+    placePanel(list, at, { side: how, align, offset: 4, room: "--s1-dropdown-room", matchWidth: true });
     return;
   }
-  list.style.minWidth = `${Math.round(at.width)}px`;
-  const below = vh - at.bottom - 4 - 8;
-  const above = at.top - 4 - 8;
-  list.style.setProperty("--s1-dropdown-room", `${Math.max(0, Math.round(Math.max(below, above)))}px`);
-  const tall = list.offsetHeight;
-  const room = how === "top" ? above : below;
-  const other = how === "top" ? below : above;
-  const side = tall > room && other > room ? (how === "top" ? "bottom" : "top") : how;
-  list.style.setProperty("--s1-dropdown-room", `${Math.max(0, Math.round(side === "top" ? above : below))}px`);
+  const vw = document.documentElement.clientWidth;
+  const vh = window.innerHeight;
+  list.style.setProperty("--s1-dropdown-room", `${Math.max(0, vh - 16)}px`);
   const w = list.offsetWidth;
   const h = list.offsetHeight;
-  const x = align === "end" ? at.right - w : at.left;
-  list.style.left = `${Math.round(Math.max(8, Math.min(x, vw - w - 8)))}px`;
-  list.style.top = `${Math.round(Math.max(8, side === "top" ? at.top - 4 - h : at.bottom + 4))}px`;
+  const right = at.right - 2;
+  const x = right + w > vw - 8 && at.left + 2 - w >= 8 ? at.left + 2 - w : Math.min(right, vw - w - 8);
+  list.style.left = `${Math.round(Math.max(8, x))}px`;
+  list.style.top = `${Math.round(Math.max(8, Math.min(at.top - 5, vh - h - 8)))}px`;
 }
 
 /** The keys that move inside one menu: the arrows (wrapping), Home and End, and letters typed to jump. True when one was taken. */
@@ -218,12 +207,11 @@ export function DropdownList({ children, align = "start", side = "bottom", class
   useLayoutEffect(() => {
     const m = list.current;
     if (!m || !open) return;
-    if (canPop(m) && !m.matches(":popover-open")) m.showPopover();
     // named by its trigger, whatever id the trigger brought
     const t = trigger();
     if (!label && t?.id) m.setAttribute("aria-labelledby", t.id);
-    const again = () => place(m, trigger()?.getBoundingClientRect(), side, align);
-    again();
+    // rows that come or go while it is open are placed again
+    const stop = anchorPanel(m, trigger, { side, align, offset: 4, room: "--s1-dropdown-room", matchWidth: true });
     const all = entries(m);
     (start() === "last" ? all[all.length - 1] : all[0])?.focus({ preventScroll: true });
     if (!all.length) m.focus({ preventScroll: true });
@@ -231,21 +219,10 @@ export function DropdownList({ children, align = "start", side = "bottom", class
       const t = e.target as Node;
       if (!m.contains(t) && !trigger()?.contains(t)) set(false);
     };
-    // rows that come or go while it is open are placed again
-    const grows = typeof ResizeObserver === "function" ? new ResizeObserver(() => again()) : null;
-    grows?.observe(m);
-    const changes = typeof MutationObserver === "function" ? new MutationObserver(() => again()) : null;
-    changes?.observe(m, { childList: true, subtree: true, characterData: true });
     document.addEventListener("pointerdown", outside, true);
-    window.addEventListener("resize", again);
-    window.addEventListener("scroll", again, true);
     return () => {
-      grows?.disconnect();
-      changes?.disconnect();
+      stop();
       document.removeEventListener("pointerdown", outside, true);
-      window.removeEventListener("resize", again);
-      window.removeEventListener("scroll", again, true);
-      if (canPop(m) && m.matches(":popover-open")) m.hidePopover();
     };
   }, [open, side, align, label, set, trigger, start]);
 

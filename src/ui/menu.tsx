@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { anchorPanel } from "./anchor";
 import { Button, type ButtonSize, type ButtonVariant } from "./button";
 import { cn } from "./cn";
 import { Glyph } from "./glyph";
@@ -40,8 +41,6 @@ type Props = {
   className?: string;
 };
 
-const canPop = (el: HTMLElement) => typeof el.showPopover === "function";
-
 /**
  * A button that opens a short list of actions: the menu button of the ARIA
  * practices. Enter, Space or ↓ opens it on the first item, ↑ on the last;
@@ -74,28 +73,9 @@ export function Menu({ items, children, label, align = "start", variant = childr
 
   useLayoutEffect(() => {
     const m = list.current;
-    if (!m) return;
-    if (!open) {
-      if (canPop(m) && m.matches(":popover-open")) m.hidePopover();
-      return;
-    }
-    // Against the button, inside the screen; above it when there is no room below.
-    const place = () => {
-      const b = button.current?.getBoundingClientRect();
-      if (!b) return;
-      m.style.minWidth = `${Math.round(b.width)}px`;
-      const vw = document.documentElement.clientWidth;
-      const vh = window.innerHeight;
-      const w = m.offsetWidth;
-      const h = m.offsetHeight;
-      const left = Math.max(8, Math.min(align === "end" ? b.right - w : b.left, vw - w - 8));
-      const below = b.bottom + 4;
-      const top = below + h > vh - 8 && b.top - 4 - h >= 8 ? b.top - 4 - h : below;
-      m.style.left = `${Math.round(left)}px`;
-      m.style.top = `${Math.round(top)}px`;
-    };
-    if (canPop(m) && !m.matches(":popover-open")) m.showPopover();
-    place();
+    if (!m || !open) return;
+    // Against the button, inside the screen; above it when there is no room below; never taller than its room.
+    const stop = anchorPanel(m, () => button.current, { align, offset: 4, room: "--s1-menu-room", matchWidth: true });
     const all = [...m.querySelectorAll<HTMLElement>('[role="menuitem"]')];
     (start.current === "last" ? all[all.length - 1] : all[0])?.focus();
     const outside = (e: PointerEvent) => {
@@ -103,12 +83,9 @@ export function Menu({ items, children, label, align = "start", variant = childr
       if (!m.contains(t) && !button.current?.contains(t)) setOpen(false);
     };
     document.addEventListener("pointerdown", outside, true);
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
     return () => {
+      stop();
       document.removeEventListener("pointerdown", outside, true);
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
     };
   }, [open, align]);
 

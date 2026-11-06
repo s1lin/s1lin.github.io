@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import {
   Ban,
   BookOpen,
@@ -29,6 +29,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import { anchorPanel } from "@/ui/anchor";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
@@ -52,7 +53,7 @@ import { Panel } from "@/ui/panel";
 import { Popover } from "@/ui/popover";
 import { RadioGroup } from "@/ui/radio-group";
 import { Secret } from "@/ui/secret";
-import { Select } from "@/ui/select";
+import { NativeSelect, Select } from "@/ui/select";
 import { SideNav, type SideNavSection } from "@/ui/side-nav";
 import { Skeleton } from "@/ui/skeleton";
 import { Slider } from "@/ui/slider";
@@ -218,12 +219,62 @@ export function TextareaDemo() {
 
 const MODELS = ["qwen-3.8", "qwen3.8-27b-cyber", "gpt-image-2", "gemini-3.1-flash-image"];
 
-export function SelectDemo() {
+type Plan = "official" | "discount" | "own";
+type PickKey = { id: string; name: string; plan: Plan; tier: "Pro" | "Basic"; family: string; note?: [string, string]; off?: boolean };
+/* Made-up keys, named as a team names them: the same name on several plans and families, as a console's list has. */
+const PICK_KEYS: PickKey[] = [
+  { id: "k01", name: "prod-backend", plan: "official", tier: "Pro", family: "Claude", note: ["Used 2 minutes ago", "2 分钟前使用"] },
+  { id: "k02", name: "prod-backend", plan: "official", tier: "Pro", family: "OpenAI" },
+  { id: "k03", name: "staging-web", plan: "official", tier: "Pro", family: "Gemini" },
+  { id: "k04", name: "nightly-batch", plan: "official", tier: "Pro", family: "Claude", note: ["Runs at 02:00 UTC", "每天 UTC 02:00 运行"] },
+  { id: "k05", name: "eval-runner", plan: "official", tier: "Basic", family: "OpenAI" },
+  { id: "k06", name: "docs-search", plan: "official", tier: "Pro", family: "Claude" },
+  { id: "k07", name: "image-worker", plan: "official", tier: "Pro", family: "OpenAI" },
+  { id: "k08", name: "health-check", plan: "official", tier: "Basic", family: "Gemini" },
+  { id: "k09", name: "support-bot", plan: "official", tier: "Pro", family: "Claude", off: true, note: ["Revoked", "已吊销"] },
+  { id: "k10", name: "health-check", plan: "discount", tier: "Basic", family: "Claude" },
+  { id: "k11", name: "health-check", plan: "discount", tier: "Basic", family: "OpenAI" },
+  { id: "k12", name: "health-check", plan: "discount", tier: "Basic", family: "DeepSeek" },
+  { id: "k13", name: "health-check", plan: "discount", tier: "Basic", family: "GLM" },
+  { id: "k14", name: "load-test", plan: "discount", tier: "Pro", family: "OpenAI" },
+  { id: "k15", name: "translation", plan: "discount", tier: "Pro", family: "DeepSeek" },
+  { id: "k16", name: "data-labeling", plan: "discount", tier: "Basic", family: "GLM" },
+  { id: "k17", name: "mobile-app", plan: "discount", tier: "Pro", family: "Claude" },
+  { id: "k18", name: "ci-smoke", plan: "discount", tier: "Basic", family: "Qwen" },
+  { id: "k19", name: "analytics", plan: "discount", tier: "Pro", family: "Gemini" },
+  { id: "k20", name: "chat-assistant", plan: "own", tier: "Pro", family: "Qwen", note: ["On our own GPUs", "在自有 GPU 上"] },
+  { id: "k21", name: "video-render", plan: "own", tier: "Pro", family: "MiniMax" },
+  { id: "k22", name: "health-check", plan: "own", tier: "Basic", family: "Qwen" },
+  { id: "k23", name: "research-sandbox", plan: "own", tier: "Pro", family: "Qwen" },
+  { id: "k24", name: "notebook", plan: "own", tier: "Basic", family: "Qwen" },
+  { id: "k25", name: "draw", plan: "own", tier: "Pro", family: "Qwen" },
+];
+const PLANS: [Plan, string, string][] = [
+  ["official", "Official", "官方"],
+  ["discount", "Discount", "折扣"],
+  ["own", "Own models", "自有模型"],
+];
+const SELECT_ZH: Partial<S1WordMap> = { filter: "筛选", noMatches: "没有匹配的密钥" };
+
+/** A short list as a native select's children, and a long one as data, grouped, with tags: as the console picks a key. */
+function SelectSet({ zh }: { zh: boolean }) {
+  const w = (en: string, cn: string) => (zh ? cn : en);
   const [model, setModel] = useState("");
+  const [key, setKey] = useState("k04");
+  const keys = PLANS.map(([plan, en, cn]) => ({
+    label: w(en, cn),
+    options: PICK_KEYS.filter((k) => k.plan === plan).map((k) => ({
+      value: k.id,
+      label: k.name,
+      meta: [zh ? (k.tier === "Pro" ? "专业版" : "基础版") : k.tier, k.family],
+      description: k.note && w(...k.note),
+      disabled: k.off,
+    })),
+  }));
   return (
-    <div className="ud-grid2">
-      <Field label="Model" required error={model ? undefined : "Choose the model this key may call."}>
-        <Select placeholder="Choose a model" required value={model} onChange={(e) => setModel(e.target.value)}>
+    <S1Words words={zh ? SELECT_ZH : {}}>
+      <Field label={w("Model", "模型")} required hint={model ? `${w("Chosen", "已选")}: ${model}` : w("Four options: no filter.", "四个选项：没有筛选框。")}>
+        <Select placeholder={w("Choose a model", "选择模型")} value={model} onChange={(e) => setModel(e.target.value)}>
           {MODELS.map((m) => (
             <option key={m} value={m}>
               {m}
@@ -231,18 +282,58 @@ export function SelectDemo() {
           ))}
         </Select>
       </Field>
-      <Field label="Region" disabled>
-        <Select defaultValue="auto">
-          <option value="auto">Nearest</option>
-        </Select>
+      <Field label={w("API key", "API 密钥")} hint={`${w("Chosen", "已选")}: ${key} · ${w("type to filter: “discount glm”", "输入以筛选：“折扣 glm”")}`}>
+        <Select options={keys} value={key} onValueChange={setKey} placeholder={w("Choose a key", "选择密钥")} filterLabel={w("Filter keys", "筛选密钥")} />
       </Field>
-      <div className="ud-span2 ud-row">
-        <Select size="sm" aria-label="Rows a page" defaultValue="20" className="ud-narrow">
-          <option value="20">20 a page</option>
-          <option value="50">50 a page</option>
-          <option value="100">100 a page</option>
-        </Select>
+    </S1Words>
+  );
+}
+
+export function SelectDemo() {
+  const [said, setSaid] = useState("");
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <Overlays>{(zh) => <SelectSet zh={zh} />}</Overlays>
+      <div className="ud-grid2">
+        <Field label="Region" required error="Choose where the key's calls are served.">
+          <Select placeholder="Choose a region">
+            <option value="auto">Nearest</option>
+            <option value="us">United States</option>
+            <option value="sg">Singapore</option>
+            <option value="eu" disabled>
+              Europe (soon)
+            </option>
+          </Select>
+        </Field>
+        <Field label="Region" disabled hint="Locked while the key is revoked.">
+          <Select defaultValue="auto">
+            <option value="auto">Nearest</option>
+          </Select>
+        </Field>
+        <form
+          className="ud-span2 ud-row"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = new FormData(e.currentTarget);
+            setSaid(`The form would send rows=${data.get("rows")} and sort=${data.get("sort")}. Nothing is sent from this page.`);
+          }}
+        >
+          <Select size="sm" name="rows" aria-label="Rows a page" defaultValue="20" className="ud-narrow">
+            <option value="20">20 a page</option>
+            <option value="50">50 a page</option>
+            <option value="100">100 a page</option>
+          </Select>
+          <NativeSelect size="sm" name="sort" aria-label="Sort by, in the browser's own select" defaultValue="new" className="ud-narrow">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+            <option value="name">By name</option>
+          </NativeSelect>
+          <Button size="sm" type="submit" icon={<Check />}>
+            Send
+          </Button>
+        </form>
       </div>
+      <Said text={said || "Open a list with a click or ↓; the arrows, Home, End and letters move, Enter chooses, Esc closes. The key list has a filter: type a name, a tag or a plan. The small row is a form: Send reads it."} />
     </div>
   );
 }
@@ -1715,6 +1806,41 @@ export function OverflowDemo() {
           A long line
         </Switch>
       </p>
+    </div>
+  );
+}
+
+/** A panel of the page's own, held under its button (or above it) with the kit's anchorPanel. */
+export function AnchorDemo() {
+  const [open, setOpen] = useState(false);
+  const [above, setAbove] = useState(false);
+  const [went, setWent] = useState("");
+  const button = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const p = panel.current;
+    if (!p || !open) return;
+    const stop = anchorPanel(p, () => button.current, { side: above ? "top" : "bottom", align: "center", offset: 6, room: "--ud-anchor-room" });
+    setWent(p.dataset.side ?? "");
+    return stop;
+  }, [open, above]);
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <p className="ud-row">
+        <Button ref={button} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          {open ? "Let it go" : "Hold a panel"}
+        </Button>
+        <Switch checked={above} onChange={(e) => setAbove(e.target.checked)}>
+          Above the button
+        </Switch>
+      </p>
+      <div ref={panel} popover="manual" hidden={!open} className="ud-anchor">
+        A panel of the page&rsquo;s own, in the top layer against its button. Scroll the page: it follows, and goes to the other side when it runs out of room.
+      </div>
+      <dl className="ud-readout">
+        <dt>data-side</dt>
+        <dd>{open ? went : "—"}</dd>
+      </dl>
     </div>
   );
 }

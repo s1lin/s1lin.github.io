@@ -91,8 +91,8 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-install pre:focus-visible { outline: 2px solid var(--sumi); outline-offset: -2px; }
 .ud-install pre code { font: inherit; }
 .ud-install__pm { flex: none; width: 5.4rem; }
-.ud-install__pm .s1-select__control { font-family: var(--f-mono); font-size: 12px; }
-@media (pointer: coarse) { .ud-install__pm .s1-select__control { font-size: 16px; } }
+.ud-install__pm .s1-select__trigger { font-family: var(--f-mono); font-size: 12px; }
+@media (pointer: coarse) { .ud-install__pm .s1-select__trigger { font-size: 16px; } }
 .ud-install__copy { flex: none; min-width: 72px; }
 .ud-install__said { margin: 0; font: 400 11px/1.6 var(--f-mono); color: var(--ink-2); }
 .ud-install__said:empty { display: none; }
@@ -356,6 +356,9 @@ html { scroll-padding-top: calc(var(--head-h) + 24px); }
 .ud-pop dt { font: 500 12px/1.5 var(--s1-font-mono); }
 .ud-pop dd { margin: 0; color: var(--s1-ink-2); }
 .ud-alt { color: var(--s1-ink-3); font-size: 12px; }
+/* anchorPanel's example: a plain panel of the page's own, placed by the kit. */
+.ud-anchor { position: fixed; inset: auto; box-sizing: border-box; margin: 0; max-width: min(280px, calc(100vw - 16px)); max-height: min(var(--ud-anchor-room, 60vh), 240px); overflow: auto; padding: 10px 12px; border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); color: var(--s1-ink); font: 400 13px/1.45 var(--s1-font-sans); }
+.ud-anchor[hidden] { display: none; }
 .ud-who { margin: 0; padding: 8px 10px 10px; border-bottom: 1px solid var(--s1-rule); margin-bottom: 4px; font: 400 12px/1.4 var(--s1-font-mono); color: var(--s1-ink-2); }
 /* The language switch's rows: what each shows, then the switch; a box of them at night in the kit's own tokens. */
 .ud-langbox { display: grid; background: var(--s1-paper); color: var(--s1-ink); border-top: 0.5px solid var(--s1-rule); }

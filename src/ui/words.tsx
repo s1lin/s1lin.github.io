@@ -52,6 +52,9 @@ export interface S1WordMap {
   /** Combobox: the names of the button that empties the box and of the one that opens its list. */
   clear: string;
   showOptions: string;
+  /** Select: the name of the box that narrows a long list, and what the list says when nothing matches it. */
+  filter: string;
+  noMatches: string;
   /** Spinner's status, and Table's while it loads. */
   loading: string;
   /** Table: the hint under a table that scrolls, the sort button's state, the empty row, the actions column's name. */
@@ -101,6 +104,8 @@ export const S1_WORDS: S1WordMap = {
   moreActions: "More actions",
   clear: "Clear",
   showOptions: "Show options",
+  filter: "Filter",
+  noMatches: "Nothing matches",
   loading: "Loading",
   scrollHint: "Scroll sideways for more",
   sortAscending: "sorted ascending",
