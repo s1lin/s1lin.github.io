@@ -478,7 +478,7 @@
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
-      "description": "A text box that suggests: the ARIA combobox with a list that autocompletes, the options in groups filtered by the app, the arrows, Enter or a click to choose; drawn as Input with a clear and an open button; wired to the Field around it.",
+      "description": "A text box that suggests: the ARIA combobox with a list that autocompletes, the options in groups filtered by the app, the arrows, Enter or a click to choose, what nothing matching says in a status; drawn as Input with words or a mark before and after the text, a clear and an open button, or as a search that empties after a choice; wired to the Field around it.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",

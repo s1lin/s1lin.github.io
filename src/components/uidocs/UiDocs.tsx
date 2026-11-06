@@ -4,7 +4,9 @@ import { Runhead } from "@/components/Runhead";
 import { Demo } from "@/components/uidocs/examples";
 import { Guide } from "@/components/uidocs/guides";
 import { Example, Inline, Install, Path, Reference } from "@/components/uidocs/parts";
-import { ENTRIES, GROUPS, LISTED, REGISTRY, type Entry, type Group } from "@/components/uidocs/registry";
+import { ENTRIES, GROUPS, LISTED, REGISTRY, SITE, type Entry, type Group } from "@/components/uidocs/registry";
+import { DocSearch } from "@/components/uidocs/search";
+import { siteRowId } from "@/components/uidocs/search-index";
 import { Kicker } from "@/ui/kicker";
 import { SideNav, type SideNavItem, type SideNavSection } from "@/ui/side-nav";
 import { Toaster } from "@/ui/toast";
@@ -95,8 +97,8 @@ function useActive(ids: string[]) {
 }
 
 /* In the page's order: each group, then its items; the site parts last. */
-const IDS = [...BY_GROUP.flatMap((g) => [g.id, ...g.entries.map((e) => e.id)]), "site"];
-const GROUP_IDS = new Set<string>([...GROUPS.map((g) => g.id), "site"]);
+const IDS = [...BY_GROUP.flatMap((g) => [g.id, ...g.entries.map((e) => e.id)]), SITE.id];
+const GROUP_IDS = new Set<string>([...GROUPS.map((g) => g.id), SITE.id]);
 /** The group the reader is in, whether at its heading or at one of its items. */
 const groupOf = (active: string | null) => (active && GROUP_IDS.has(active) ? active : ENTRIES.find((e) => e.id === active)?.group);
 
@@ -114,20 +116,20 @@ const NAV: SideNavSection[] = [
         }
       : { id: c.groups[0].id, number: pad(i + 1), title: c.name, href: `#${c.groups[0].id}`, items: c.groups[0].entries.map(entryItem) },
   ),
-  { id: "site", number: pad(SITE_NO), title: "Site parts", href: "#site" },
+  { id: SITE.id, number: pad(SITE_NO), title: SITE.name, href: `#${SITE.id}` },
 ];
 
 /**
  * The index. On a desktop it is held on the left, whole, the part being read
- * marked and kept in view. On a phone it is a bar under the running head that
- * says where you are and opens the same tree as a sheet (without script the
- * tree stays in the page).
+ * marked and kept in view, under the search. On a phone it is a bar under the
+ * running head that says where you are and opens the same tree as a sheet
+ * (without script the tree stays in the page), the search a button at its end.
  */
 function Nav() {
   const active = useActive(IDS);
   const entry = ENTRIES.find((e) => e.id === active);
   const group = groupOf(active);
-  const groupName = group === "site" ? "Site parts" : (GROUPS.find((g) => g.id === group) ?? GROUPS[0]).name;
+  const groupName = group === SITE.id ? SITE.name : (GROUPS.find((g) => g.id === group) ?? GROUPS[0]).name;
   const here = entry ? `${groupName} · ${entry.name}` : groupName;
   return <SideNav className="ud-nav" label="Library" title="Index" sections={NAV} current={active} currentType="location" sheet={900} here={here} />;
 }
@@ -148,11 +150,11 @@ function GroupHead({ g }: { g: Group }) {
 /** The site's own parts, not in the registry: a short list, so the inventory is whole. */
 function SiteParts() {
   return (
-    <section className="ud-group" id="site" data-run="部品 · Site parts" aria-labelledby="site-h">
+    <section className="ud-group" id={SITE.id} data-run={`部品 · ${SITE.name}`} aria-labelledby={`${SITE.id}-h`}>
       <header className="ud-group__head">
         <p className="ud-group__no">{pad(SITE_NO)} · Not published</p>
-        <h2 className="ud-group__h" id="site-h">
-          Site parts
+        <h2 className="ud-group__h" id={`${SITE.id}-h`}>
+          {SITE.name}
         </h2>
         <p className="ud-group__blurb">
           Sections and pieces written for one place in the site, from the parts above. They are listed so the inventory is
@@ -172,8 +174,8 @@ function SiteParts() {
           </thead>
           <tbody>
             {LISTED.map((l) => (
-              <tr key={l.name}>
-                <th scope="row" className="ud-listed__name">
+              <tr key={l.name} id={siteRowId(l.name)}>
+                <th scope="row" className="ud-listed__name" id={`${siteRowId(l.name)}-name`}>
                   <code>{l.name}</code>
                 </th>
                 <td className="ud-listed__file">
@@ -233,7 +235,10 @@ export function UiPage() {
 
             {/* the index and the parts in a box of their own, so the held index lets go where the parts end */}
             <div className="ud-main">
-              <Nav />
+              <div className="ud-index">
+                <DocSearch />
+                <Nav />
+              </div>
 
               <div className="ud-body" id="library">
                 {BY_GROUP.map((g) => (

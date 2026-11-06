@@ -129,7 +129,16 @@ prerendered HTML; printed or without JavaScript they show one after another). Th
 index beside it is the whole tree and marks the item being read; on a phone it is
 a bar saying where you are that opens the same tree as a sheet. The index is the
 library's own SideNav (`src/ui/side-nav.tsx`), the part apps use for their
-sidebars. The examples are
+sidebars. Over it is a search, the library's own Combobox: type a part's name, its
+Chinese name (下拉, 对话框), a word it goes by ("modal", "dropdown", "colours") or a
+word of its first line, and the places that match open under the box in the
+page's sections; Enter or a click scrolls there (at once under reduced motion),
+puts it in the address, gives its heading focus and marks it for a moment. "/"
+brings focus to the box from anywhere but a field; on a phone the search is a
+button at the end of the index's bar that opens the box over the bar. What it
+finds is built from the same inventory as the page and its index
+(`src/components/uidocs/search-index.ts`), so a new part is found without a list
+of its own; each entry carries its Chinese name (`zh`) and optional `keywords`. The examples are
 the published files themselves, from `src/ui/` (the console's, in
 `src/components/uidocs/console.tsx`, with made-up keys and figures; one
 `<Toaster />` sits at the foot of the page). The inventory is data, in
@@ -151,7 +160,13 @@ it is skipped where there is no Chrome
 and EmptyState as an app would and runs it in the same Chrome, at a desktop's width
 and a phone's: the current item's bar, the rail, the phone's sheet (it opens, focus
 goes in and stays, Esc, a tap outside and a choice close it), the mark's size.
-`test/select.test.ts` runs Select there too: its keys, its groups and filter, its
+`test/uidocs-search.test.ts` holds the search's index to the inventory (every
+group, item and site part, in the page's order, each found first by its own
+names) and its matching to cases in both languages, renders the page on a server,
+and runs the whole page in the same Chrome: "/" (not from another field), the
+results in their sections, Enter and a click, Chinese, nothing matching said in a
+status, Esc, reduced motion, night, and a phone's 390px (in a frame of that
+width), with nothing scrolling sideways. `test/select.test.ts` runs Select there too: its keys, its groups and filter, its
 list under the box or above it, a click, onChange, a form's submit and reset, the
 Field's label, hint and error, Chinese at night, and Esc inside a Dialog. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
@@ -170,7 +185,8 @@ never inside it), Textarea, Select (the kit's own list, not the system's: groups
   carries the value into the form; it reads `<option>` and `<optgroup>` children, so
   a native select becomes it by its import, and NativeSelect keeps the system's
   picker), Combobox (a text box that suggests, its options
-  in groups, filtered by the app), Checkbox, RadioGroup (a list, cards, or a
+  in groups, filtered by the app; words or a mark before and after the text, and,
+  with `clearOnChoose` and no open button, a search that goes somewhere), Checkbox, RadioGroup (a list, cards, or a
   segmented row), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements wherever the browser's own is good enough.
 - **Data**: Table (caption, row headers, sort, empty and loading rows, row

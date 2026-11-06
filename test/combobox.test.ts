@@ -10,9 +10,11 @@ import { build } from "vite";
 
 /*
  * Combobox: on a server, the box is a combobox wired to a hidden listbox and to the Field around it, its words from
- * S1Words, a chosen item's words in the box. In a real browser, with React running: typing opens the list on its first
- * option, the arrows move and wrap, Enter chooses, Esc closes and a second puts the chosen words back, leaving the box
- * puts them back, a click chooses and keeps focus in the box, × clears, the chevron opens, nothing matching says so;
+ * S1Words, a chosen item's words in the box, a status in the box from the start; words or marks before and after the
+ * text, every other prop on the <input>, and no open button for a search. In a real browser, with React running: typing
+ * opens the list on its first option, the arrows move and wrap, Enter chooses, Esc closes and a second puts the chosen
+ * words back, leaving the box puts them back, a click chooses and keeps focus in the box, × clears, the chevron opens,
+ * nothing matching says so in the status that was there all along; a search (clearOnChoose) empties after a choice;
  * the list in the top layer under the box and at least as wide, above it at the window's foot; the option under the
  * arrows in reverse, the chosen one with a tick; Input's heights; Esc inside a Dialog. Vite bundles a small page from
  * src/ui/ as an app would; headless Chrome runs it and prints what it found. The browser half is skipped where there
@@ -77,6 +79,9 @@ test("Combobox on a server: a combobox wired to a hidden listbox and to its Fiel
   assert.doesNotMatch(empty, /aria-label="Clear"/, "nothing to clear");
   assert.match(empty, /<button type="button" tabindex="-1" class="s1-combobox__button" aria-label="Show options" aria-expanded="false"/);
   assert.match(empty, /class="s1-input s1-input--md s1-combobox"/);
+  // the status a screen reader hears when nothing matches: in the box from the start, empty, before the input
+  assert.match(empty, /class="s1-input s1-input--md s1-combobox"><span class="s1-combobox__status" role="status"><\/span><input /);
+  assert.equal(empty.match(/role="status"/g)?.length, 1, "one status, in the box, not in the list");
   // chosen: its words in the box, a clear button; in error, and small; the words in Chinese from S1Words
   const chosen = renderToString(h(S1Words, { words: { clear: "清除", showOptions: "显示选项" } }, h(Combobox, { ...props, value: cities[1], invalid: true, size: "sm", "aria-label": "城市" })));
   assert.match(chosen.match(/<input[^>]*>/)![0], /value="Taipei"/);
@@ -84,6 +89,34 @@ test("Combobox on a server: a combobox wired to a hidden listbox and to its Fiel
   assert.match(chosen, /class="s1-input s1-input--sm s1-combobox" data-invalid=""/);
   assert.match(chosen, /aria-label="清除"/);
   assert.match(chosen, /aria-label="显示选项"/);
+  // a search: a mark before the text, a key's hint after it, inside the box; no open button; every other prop on the
+  // <input>; words before and after are read with the box, a mark hidden from screen readers is not
+  const search = renderToString(
+    h(Combobox, {
+      ...props,
+      value: null,
+      clearOnChoose: true,
+      showButton: false,
+      "aria-label": "Search",
+      "aria-keyshortcuts": "/",
+      enterKeyHint: "go",
+      name: "q",
+      required: true,
+      "aria-describedby": "help",
+      prefix: h("svg", { "aria-hidden": "true", class: "glass" }),
+      suffix: h("kbd", { "aria-hidden": "true" }, "/"),
+    }),
+  );
+  const box = search.match(/<span class="s1-input s1-input--md s1-combobox">[\s\S]*?<\/span><div/)![0];
+  assert.match(box, /<span class="s1-input__affix"><svg aria-hidden="true" class="glass"><\/svg><\/span><input /, "the mark before the text");
+  assert.match(box, /<input [^>]*><span class="s1-input__affix s1-input__affix--end"><kbd aria-hidden="true">\/<\/kbd><\/span><\/span><div$/, "the hint after it, last in the box");
+  assert.doesNotMatch(search, /Show options/, "no open button");
+  const searchInput = search.match(/<input[^>]*>/)![0];
+  for (const attr of [/aria-keyshortcuts="\/"/, /enterKeyHint="go"|enterkeyhint="go"/, /name="q"/, /required=""/, /aria-describedby="help"/, /role="combobox"/, /autoComplete="off"|autocomplete="off"/]) assert.match(searchInput, attr);
+  const worded = renderToString(h(Combobox, { ...props, value: null, "aria-label": "Price", prefix: "US$", suffix: "per day", "aria-describedby": "help" }));
+  const ids = [...worded.matchAll(/class="s1-input__affix[^"]*" id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(ids.length, 2);
+  assert.match(worded.match(/<input[^>]*>/)![0], new RegExp(`aria-describedby="${ids[0]} ${ids[1]} help"`), "words before and after are read with the box");
 });
 
 const ENTRY = `
@@ -110,6 +143,19 @@ function City({ id, size }) {
       itemText={(c) => c.name} itemKey={(c) => c.id} renderItem={(c) => <>{c.name} <small>{c.region}</small></>} empty="No matching city." />
   );
 }
+// a search that goes somewhere: the box empties after a choice, no open button, a mark before and a hint after
+function Search() {
+  const [text, setText] = useState("");
+  const q = text.trim().toLowerCase();
+  const items = CITIES.filter((c) => c.name.toLowerCase().includes(q));
+  const groups = q && items.length ? [{ key: "all", label: "Cities", items }] : [];
+  return (
+    <Combobox id="go" aria-label="Go to a city" groups={groups} value={null} clearOnChoose showButton={false}
+      onValueChange={(c) => log.push("go:" + (c ? c.id : null))} onInputChange={(t) => { log.push("go:text:" + t); setText(t); }}
+      itemText={(c) => c.name} itemKey={(c) => c.id} empty={q ? "Nothing matches" : undefined}
+      prefix={<svg className="glass" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" />} suffix={<kbd aria-hidden="true">/</kbd>} />
+  );
+}
 function InDialog() {
   const [open, setOpen] = useState(true);
   return <Dialog open={open} onClose={() => setOpen(false)} title="Where"><City id="dlg" /></Dialog>;
@@ -123,6 +169,7 @@ flushSync(() =>
       <div style={{ position: "absolute", top: 40, left: 40, width: 320 }}><City id="a" /></div>
       <div style={{ position: "absolute", top: 40, left: 420, width: 240 }}><City id="small" size="sm" /></div>
       <div style={{ position: "absolute", bottom: 10, left: 40, width: 320 }}><City id="foot" /></div>
+      <div style={{ position: "absolute", top: 40, left: 720, width: 320 }}><Search /></div>
       <span id="else" tabIndex={0}>else</span>
     </>),
   ),
@@ -137,10 +184,12 @@ const key = (el, k) => el.dispatchEvent(new KeyboardEvent("keydown", { key: k, b
 const state = (id) => {
   const i = $("#" + id);
   const act = i.getAttribute("aria-activedescendant");
-  return { value: i.value, expanded: i.getAttribute("aria-expanded"), active: act ? document.getElementById(act).getAttribute("aria-label") : null, focus: document.activeElement === i };
+  return { value: i.value, expanded: i.getAttribute("aria-expanded"), active: act ? document.getElementById(act).getAttribute("aria-label") ?? document.getElementById(act).textContent : null, focus: document.activeElement === i };
 };
 const steps = [];
 const step = (f) => steps.push(f);
+const statusOf = (id) => $("#" + id).parentElement.querySelector("[role=status]");
+const firstStatus = mode === "dialog" ? null : statusOf("a");
 
 if (mode === "dialog") {
   step(() => { $("#dlg").focus(); key($("#dlg"), "ArrowDown"); });
@@ -191,7 +240,7 @@ if (mode === "dialog") {
   });
   step(() => {
     const p = pop("a");
-    got.nothing = { ...state("a"), empty: p.querySelector("[role=status]")?.textContent, options: p.querySelectorAll("[role=option]").length };
+    got.nothing = { ...state("a"), empty: statusOf("a").textContent, same: statusOf("a") === firstStatus, shown: p.querySelector(".s1-combobox__empty")?.textContent, hidden: p.querySelector(".s1-combobox__empty")?.getAttribute("aria-hidden"), inList: p.querySelectorAll("[role=status]").length, options: p.querySelectorAll("[role=option]").length };
     key($("#a"), "Escape");
   });
   step(() => {
@@ -250,7 +299,30 @@ if (mode === "dialog") {
     $("#else").focus();
   });
   step(() => {
-    got.emptied = { ...state("a"), said: log.slice(got.logAt) };
+    got.emptied = { ...state("a"), said: log.slice(got.logAt), status: statusOf("a").textContent };
+    // the search: no buttons while it is empty, the mark before the text and the hint after it, inside the box
+    const g = $("#go");
+    const b = box(g.parentElement), i = box(g), mark = box(g.parentElement.querySelector(".glass")), hint = box(g.parentElement.querySelector("kbd"));
+    got.search = { buttons: g.parentElement.querySelectorAll("button").length, order: mark.left < i.left && i.left + i.width <= hint.left, inside: mark.left > b.left && hint.left + hint.width < b.left + b.width };
+    g.focus();
+    g.click();
+  });
+  step(() => {
+    got.search.clickedEmpty = state("go").expanded;
+    typeIn($("#go"), "tai");
+  });
+  step(() => {
+    got.search.typed = state("go");
+    got.search.buttons2 = $("#go").parentElement.querySelectorAll("button").length;
+    got.logAt = log.length;
+    key($("#go"), "Enter");
+  });
+  step(() => {
+    got.search.chosen = { ...state("go"), said: log.slice(got.logAt), buttons: $("#go").parentElement.querySelectorAll("button").length };
+    key($("#go"), "ArrowDown");
+  });
+  step(() => {
+    got.search.reopened = state("go").expanded;
   });
 }
 
@@ -316,6 +388,9 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   // Esc closes; nothing matching says so; a second Esc puts the chosen words back
   assert.deepEqual(got.esc1, { value: "Singapore", expanded: "false", active: null, focus: true });
   assert.deepEqual([got.nothing.expanded, got.nothing.empty, got.nothing.options], ["true", "No matching city.", 0]);
+  // said in the status that was in the box before anything was typed, so it is read as it changes; shown in the list,
+  // hidden there from screen readers so it is not read twice
+  assert.deepEqual([got.nothing.same, got.nothing.shown, got.nothing.hidden, got.nothing.inList], [true, "No matching city.", "true", 0]);
   assert.equal(got.esc2.value, "Singapore");
   // leaving the box puts the chosen words back
   assert.deepEqual([got.blurred.value, got.blurred.expanded], ["Singapore", "false"]);
@@ -334,6 +409,14 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   assert.equal(got.rechosen, "Singapore");
   assert.deepEqual([got.emptied.value, got.emptied.expanded], ["", "false"]);
   assert.ok(got.emptied.said.includes("a:null"), `cleared: ${JSON.stringify(got.emptied.said)}`);
+  assert.equal(got.emptied.status, "", "the status falls quiet once the list is shut");
+  // a search: no open button, nothing to clear while empty, the mark and the hint either side of the text in the box;
+  // a click in the empty box opens nothing; typing opens it; Enter goes, and the box empties and hears ""
+  assert.deepEqual([got.search.buttons, got.search.order, got.search.inside, got.search.clickedEmpty], [0, true, true, "false"]);
+  assert.deepEqual([got.search.typed.expanded, got.search.typed.active, got.search.buttons2], ["true", "Taipei", 1]);
+  assert.deepEqual([got.search.chosen.value, got.search.chosen.expanded, got.search.chosen.focus, got.search.chosen.buttons], ["", "false", true, 0]);
+  assert.deepEqual(got.search.chosen.said, ["go:tpe", "go:text:"], "chosen, then the text is \"\": nothing left to filter by");
+  assert.equal(got.search.reopened, "false", "↓ in the emptied box opens nothing, not the last search");
 
   // in a Dialog: Esc closes the list and keeps the dialog open
   const dialog = run("dialog");
