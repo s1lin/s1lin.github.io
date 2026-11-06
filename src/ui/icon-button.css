@@ -1,0 +1,15 @@
+/* IconButton (icon-button.tsx): the ghost Button made a square with one icon; Button's own rules give its size and
+   its turn under the pointer (the ink fill, the icon in the paper). */
+@layer components {
+  .s1-btn.s1-icon-btn { color: var(--s1-ink-2); }
+  /* A danger one in the bad hue; under the pointer filled with it, the icon in the words' colour on a solid status. */
+  .s1-btn.s1-icon-btn--danger { color: var(--s1-bad, var(--s1-ink)); }
+  .s1-btn.s1-btn--ghost.s1-icon-btn--danger:where(button, a[href]):hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--s1-bad, var(--s1-ink)); border-color: var(--s1-bad, var(--s1-ink)); color: var(--s1-on-status, var(--s1-paper));
+  }
+  @media (forced-colors: active) {
+    .s1-btn.s1-btn--ghost.s1-icon-btn--danger:where(button, a[href]):hover:not(:disabled, [aria-disabled="true"]) {
+      forced-color-adjust: none; background-color: ButtonText; color: ButtonFace; border-color: ButtonText;
+    }
+  }
+}

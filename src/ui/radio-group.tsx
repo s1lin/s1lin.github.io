@@ -36,6 +36,8 @@ export type RadioGroupProps = Omit<FieldsetHTMLAttributes<HTMLFieldSetElement>, 
   variant?: "list" | "cards" | "segmented" | "dots";
   /** "horizontal" sets a list's radios in a row that wraps. */
   orientation?: "vertical" | "horizontal";
+  /** "sm": dots at a table row's size, 30px options in 10.5px mono, for a row's status (Table's row rule centres them). */
+  size?: "md" | "sm";
   /** @deprecated The same as `variant="dots"`, which it overrides: kept so code written for it still builds. */
   quiet?: boolean;
   /** The legend is read, not shown: where the row says what it is by itself (a language, a range in a toolbar). */
@@ -61,6 +63,7 @@ export function RadioGroup({
   required,
   variant = "list",
   orientation = "vertical",
+  size = "md",
   quiet,
   hideLegend,
   className,
@@ -81,6 +84,7 @@ export function RadioGroup({
         "s1-radios",
         `s1-radios--${quiet ? "dots" : variant}`,
         orientation === "horizontal" && "s1-radios--row",
+        size === "sm" && "s1-radios--sm",
         hideLegend && "s1-radios--legend-hidden",
         className,
       )}

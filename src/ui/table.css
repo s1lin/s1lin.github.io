@@ -59,7 +59,13 @@
     display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; height: var(--s1-table-line); max-width: 100%;
     vertical-align: top; white-space: nowrap;
   }
+  /* Its children keep their size: a pair that is too wide for its cell runs past it, never over itself. */
+  .s1-table__pair > * { flex: none; }
   .s1-table__actions .s1-table__pair { gap: 2px; }
+  /* A row's two 30px buttons (a menu's ghost dots and an IconButton) in a table that fits: the column holds both and
+     the cell's padding, whatever box-sizing the page sets. */
+  .s1-table--fit:has(tbody .s1-table__actions > .s1-table__pair) .s1-table__actions { box-sizing: border-box; width: calc(2 * 30px + 2px + 2 * 14px); }
+  .s1-table--fit.s1-table--dense:has(tbody .s1-table__actions > .s1-table__pair) .s1-table__actions { width: calc(2 * 30px + 2px + 2 * 10px); }
   /* A control alone in a cell, taller than the line: centred on the line, the cell's padding kept. */
   .s1-table tbody tr > :is(td, th) > :is(.s1-btn, .s1-menu, .s1-badge) { vertical-align: top; }
   .s1-table tbody tr > :is(td, th) > .s1-btn, .s1-table tbody tr > :is(td, th) > .s1-menu > .s1-btn { margin-block: calc((var(--s1-table-line) - 40px) / 2); }

@@ -58,6 +58,11 @@
     align-items: center; justify-content: center; min-width: 30px; min-height: 30px; padding: 0 6px; border: 0; background: none;
     font: 500 11px/1 var(--s1-font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--s1-radios-dim);
   }
+  /* Dots at a table row's size (size="sm"): 30px options in 10.5px mono, two apart, on one line; in a cell the group
+     is centred on the row's line (Table's row rule), so the chosen word's dot hangs inside the row's padding. */
+  .s1-radios--dots.s1-radios--sm .s1-fieldset__body { flex-wrap: nowrap; gap: 2px; vertical-align: top; }
+  .s1-radios--dots.s1-radios--sm .s1-radio { flex: none; min-height: 30px; font-size: 10.5px; letter-spacing: 0.08em; white-space: nowrap; }
+  .s1-table :is(td, th) > .s1-radios--sm, .s1-table :is(td, th) > .s1-table__pair > .s1-radios--sm { margin-block: calc((var(--s1-table-line) - 30px) / 2); }
   .s1-radios--dots .s1-radio:hover { color: var(--s1-ink); }
   .s1-radios--dots .s1-radio:has(.s1-radio__input:checked) { color: var(--s1-ink); font-weight: 650; }
   .s1-radios--dots .s1-radio__hint { display: none; }

@@ -35,7 +35,10 @@ type Props = {
   label?: string;
   /** Which edge of the button the menu lines up with. */
   align?: "start" | "end";
-  /** The button: "icon" (square) when it shows the three dots, else "plain". */
+  /**
+   * The button: "icon" (square, with its line) when it shows the three dots, else "plain". "ghost" with the dots is
+   * the square without its line, the dots in the second ink: a row's actions.
+   */
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
@@ -152,6 +155,7 @@ export function Menu({ items, children, label, align = "start", variant = childr
         id={`${id}-button`}
         variant={variant}
         size={size}
+        className={children === undefined ? "s1-menu__more" : undefined}
         aria-label={label ?? (children === undefined ? w.moreActions : undefined)}
         aria-haspopup="menu"
         aria-expanded={open}

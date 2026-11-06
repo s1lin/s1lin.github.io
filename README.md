@@ -177,8 +177,11 @@ the next the other way, never none, one column at a time) on a server and in Chr
 with `aria-sort` and the hidden words after each press. `test/table-align.test.ts`
 holds every row to the row rule in Chrome (each cell's first line on the row's line,
 each icon and its words centred on each other, within 1px) on stories of a console's
-rows: a name that wraps, figures over notes, badges, a switch and its word, a row's
-buttons, a dense log and Chinese; it fails on the old table.css. The
+rows: a name that wraps, figures over notes, badges, a switch and its word, dots at
+a row's size, a row's ghost dots and its trash, a dense log and Chinese; it fails on
+the old table.css. `test/icon-button.test.ts` holds IconButton and the ghost Menu's
+dots to their squares, colours (the bad hue for a delete), turn under the pointer and
+ring, on paper, at night and in a theme with status hues. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 
@@ -196,12 +199,14 @@ never inside it), Textarea, Select (the kit's own list, not the system's: groups
   a native select becomes it by its import, and NativeSelect keeps the system's
   picker), Combobox (a text box that suggests, its options
   in groups, filtered by the app; words or a mark before and after the text, and,
-  with `clearOnChoose` and no open button, a search that goes somewhere), Checkbox, RadioGroup (a list, cards, or a
-  segmented row), Switch, Slider (a native range input on the Meter's hairline track,
+  with `clearOnChoose` and no open button, a search that goes somewhere), Checkbox, RadioGroup (a list, cards, a
+  segmented row, or dots, at a table row's size too), Switch, Slider (a native range input on the Meter's hairline track,
   with marks and a value). Native elements wherever the browser's own is good enough.
 - **Data**: Table (caption, row headers, sort with each column's first direction, every row's first lines on one line and an icon and its words a pair, empty and loading rows, row
   actions, a sticky header, row groups that open and close with "Expand all", a
-  `fit` mode; scrolls inside its frame), Pagination, Badge, Glyph,
+  `fit` mode; scrolls inside its frame), IconButton (a square with one icon named
+  by its required aria-label, the ghost button without its line, in the bad hue for
+  a row's delete beside its menu's ghost dots), Pagination, Badge, Glyph,
   Stat and StatGroup, Meter (a quota or budget), DescriptionList, Panel,
   EmptyState (its frame, or an app's own one-colour mark).
 - **Navigation**: SideNav (the docs' index and an app's sidebar: numbered chapters,
