@@ -35,7 +35,7 @@ page's first stylesheet declares the cascade layers in order (see Styles).
 | `src/ui/` | The UI library: the issue's parts (Button, SectionLabel, Kicker, Roundel, Folio, Barcode, Stack, Screen, Plate, Mark, AsciiArt, Tex), the console's (see below), six hooks and `cn`, each part with its own stylesheet, and `tokens.css`. Published as the registry; the site imports the same files (`@/ui/…`) |
 | `registry.json`, `scripts/registry.mjs` | The registry's items, and the script that builds them into `public/r/` |
 | `src/components/` | The site's own parts: cover, contents, features, cities, workshop, departures, colophon, the social parts, Life |
-| `src/components/TokensbeatFigures.tsx` | The plan in the Tokensbeat feature, drawn as a building section: apps moving in on the foundation, the models under it |
+| `src/components/TokensbeatFigures.tsx` | The plan in the TokensBeat feature, drawn as a building section: apps moving in on the foundation as projects, the models under it |
 | `src/components/canvasui/` | Canvas UI effects (Ripple, Magnify, Frost, Glitch, ParticleScroll), patched; see below |
 | `src/components/effects.tsx` | Where those effects meet the photographs and section titles, and the frost over the page |
 | `src/components/Metro2Line.tsx`, `src/hooks/useMetro2Line.ts`, `src/lib/metro.ts` | Metro2Line, playable, on the cover: ride twelve metro networks or guess a city |
