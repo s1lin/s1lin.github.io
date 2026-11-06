@@ -21,6 +21,11 @@ export interface Column<Row> {
   align?: "start" | "center" | "end";
   /** The header is a button that asks for this column's sort. */
   sortable?: boolean;
+  /**
+   * The direction the first press on the header asks for: words and dates read from the start ("asc"), figures from
+   * the biggest ("desc"). A numeric column starts "desc" unless this says otherwise; any other starts "asc".
+   */
+  firstDir?: "asc" | "desc";
   /** Let the cell's words wrap (a description); cells keep to one line by default, and the table scrolls. */
   wrap?: boolean;
   /** A CSS width for the column. In a table that fits (`fit`), the widths share out the frame. */
@@ -38,6 +43,16 @@ export interface Column<Row> {
 export interface Sort {
   key: string;
   dir: "asc" | "desc";
+}
+
+/**
+ * The sort a press on a column's header asks for: the other way when the column is the sort, else the column's first
+ * direction (`firstDir`, or "desc" for a numeric column and "asc" for any other). A list always has a sort, so a press
+ * never asks for none.
+ */
+export function nextSort(column: { key: string; numeric?: boolean; firstDir?: "asc" | "desc" }, sort: Sort | null | undefined): Sort {
+  if (sort?.key === column.key) return { key: column.key, dir: sort.dir === "asc" ? "desc" : "asc" };
+  return { key: column.key, dir: column.firstDir ?? (column.numeric ? "desc" : "asc") };
 }
 
 /** Attributes for a row's <tr>: a class, data attributes, a click that opens the row's link. */
@@ -133,7 +148,7 @@ export type TableProps<Row> = Body<Row> & {
   loading?: boolean | number;
   /** The sort shown: the column marked and its direction. The table does not sort; sort the rows yourself. */
   sort?: Sort | null;
-  /** Called with the sort asked for when a sortable header is pressed: ascending first, then the other way. */
+  /** Called with the sort asked for when a sortable header is pressed (`nextSort`): the column's first direction, then the other way. */
   onSortChange?: (sort: Sort) => void;
   /** Buttons at the end of each row: a Menu, a Button. */
   actions?: (row: Row, index: number) => ReactNode;
@@ -381,7 +396,7 @@ export function Table<Row>(props: TableProps<Row>) {
                     aria-sort={c.sortable ? (on === "asc" ? "ascending" : on === "desc" ? "descending" : "none") : undefined}
                   >
                     {c.sortable ? (
-                      <button type="button" className="s1-table__sort" data-dir={on} onClick={() => onSortChange?.({ key: c.key, dir: on === "asc" ? "desc" : "asc" })}>
+                      <button type="button" className="s1-table__sort" data-dir={on} onClick={() => onSortChange?.(nextSort(c, sort))}>
                         {c.header}
                         <span className="s1-table__arrow" aria-hidden="true" />
                         <VisuallyHidden>, {on ? sortSaid[on] : sortSaid.none}</VisuallyHidden>
