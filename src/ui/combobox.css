@@ -26,6 +26,10 @@
   /* The line: Input's box without the box, one underline in the rule that goes to the ink under the pointer and thickens
      in the ink while it has focus (a shadow, so nothing moves). No ring: a ring would draw the box back; forced colours get theirs below. */
   .s1-input.s1-combobox--line { border-width: 0 0 1px; background: transparent; }
+  /* Smaller than the page's type (16px) and not small: 14px, the small Input's size, so a placeholder like "Search the console"
+     fits a sidebar column. Phones zoom into type under 16px on focus, so touch screens keep 16px. */
+  .s1-input.s1-combobox--line { font-size: 14px; }
+  @media (pointer: coarse) { .s1-input.s1-combobox--line { font-size: 16px; } }
   .s1-input.s1-combobox--line:hover { border-color: var(--s1-ink); }
   .s1-input.s1-combobox--line:focus-within { outline: none; border-color: var(--s1-ink); box-shadow: 0 1px 0 0 var(--s1-ink); }
   .s1-combobox--line .s1-input__affix:not(.s1-input__affix--end) { padding-left: 0; }

@@ -205,7 +205,7 @@ if (mode === "dialog") {
   step(() => {
     got.heights = { md: box($("#a").parentElement).height, sm: box($("#small").parentElement).height };
     const lineBox = () => $("#line").parentElement;
-    const look = () => { const c = getComputedStyle(lineBox()); return { top: c.borderTopWidth, side: c.borderLeftWidth + "/" + c.borderRightWidth, bottom: c.borderBottomWidth, style: c.borderBottomStyle, bg: c.backgroundColor, height: Math.round(lineBox().getBoundingClientRect().height), shadow: c.boxShadow, outline: c.outlineStyle, color: c.borderBottomColor }; };
+    const look = () => { const c = getComputedStyle(lineBox()); return { top: c.borderTopWidth, side: c.borderLeftWidth + "/" + c.borderRightWidth, bottom: c.borderBottomWidth, style: c.borderBottomStyle, bg: c.backgroundColor, height: Math.round(lineBox().getBoundingClientRect().height), size: getComputedStyle($("#line")).fontSize, shadow: c.boxShadow, outline: c.outlineStyle, color: c.borderBottomColor }; };
     got.line = { rest: look() };
     $("#line").focus();
     got.line.focus = look();
@@ -431,6 +431,7 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   assert.equal(got.emptied.status, "", "the status falls quiet once the list is shut");
   // the line: no box, only the bottom edge, at Input's height; the line thickens in the ink with focus; the list opens under it
   assert.deepEqual([got.line.rest.top, got.line.rest.side, got.line.rest.bottom, got.line.rest.style, got.line.rest.bg, got.line.rest.height], ["0px", "0px/0px", "1px", "solid", "rgba(0, 0, 0, 0)", 40]);
+  assert.equal(got.line.rest.size, "14px", "the line types smaller than the 16px page and the box (touch screens keep 16px against focus zoom)");
   assert.equal(got.line.focus.outline, "none", "no ring around a line: the thicker ink line is its focus");
   assert.equal(got.line.focus.bottom, "1px");
   assert.ok(got.line.inkShadow, `focus thickens the line in the ink: ${got.line.focus.shadow}`);
