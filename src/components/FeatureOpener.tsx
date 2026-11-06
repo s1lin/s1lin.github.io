@@ -610,7 +610,7 @@ export function FeatureOpener() {
         <p className="dek">
           I work on several lines at once, the way a city runs several metro lines, and each line is one lemma of the
           theorem on page 04. The newest, TokensBeat, is the foundation: WorkGo and InclusifAI are moving onto it as
-          tenants, each keeping its own gateway, its own agent and its own users. Here is the network as of October
+          tenants, each keeping its own backend, its own assistant and its own users. Here is the network as of October
           2026.
         </p>
 

@@ -38,25 +38,50 @@ export function Features() {
         kanji={["基", "基盤", "foundation"]}
         spec={[
           ["Opened", "October 2026"],
-          ["Where", <a key="where" href="https://tokensbeat.com">tokensbeat.com</a>],
+          [
+            "Where",
+            <>
+              <a href="https://tokensbeat.com">tokensbeat.com</a> · <a href="https://aha.tokensbeat.com">Aha</a> ·{" "}
+              <a href="https://console.tokensbeat.com">Console</a> · <a href="https://news.tokensbeat.com">News</a>
+            </>,
+          ],
           ["Role", "Architect and operator"],
           [
             "What",
-            "The backend platform for builders: one key to the leading models, live today, with Postgres, auth, storage and an agent runtime in early access. Aha, an agent app, is the way in for people",
+            "The backend platform for builders: one key to the leading models and Aha, an agent app, live today; Postgres, auth, storage and an agent runtime in early access",
           ],
         ]}
-        lede="“Support while you build. Serve when you ship.” says the front page, and draws it as two rings. Serve, the inner ring, is what your app runs on in production; Support, the outer orbit, is what helps you while you build. Underneath is the drawing I keep coming back to: one gateway to many models, and a backend built from open-source parts. People get Aha, an agent app. App builders get the platform itself, and move in as tenants."
-        body="Today the models are live, with one key, one wallet and billing; Postgres and auth, storage and realtime, and the agent runtime are in early access, and a guide for moving over from Supabase is coming. A tenant takes any of three pieces, never a bundle: a private gateway with its own console, users and prices, where TokensBeat sees exactly one key; an agent instance on Pi, the runtime behind Aha, running the tenant's own agent; and, if it wants one, a managed backend. The first two tenants are the next two lines in this issue: WorkGo, whose agent is Obi, and InclusifAI, whose agent is Aria."
+        lede={
+          <>
+            “Galaxies of intelligence, born from within,” says the front page now. Its Chinese is a line of Cao Cao's,
+            the Milky Way rising out of the sea: <span lang="zh-Hans">星汉灿烂，若出其里</span>. Bedrock is what your app
+            runs on in production; Vanguard is what stands by you while you build, from the docs to an engineer who
+            answers your ticket. Underneath is the drawing I keep coming back to: one gateway to many models, and a
+            backend built from open-source parts. People get Aha, an agent app. App builders get the platform itself, and
+            move in as projects.
+          </>
+        }
+        body="Today the models and Aha are live, paid from one balance that starts at $5, and every part on the front page says whether it is live, in beta, in early access or still to come. A key is Simple or Pro: a Simple key carries a plan, the best price or official routes only, and leaves the route to the gateway; a Pro key is pinned to one route. Postgres and auth, storage and realtime, and the agent runtime are in early access. An app moves in as a project, never as a copy of the platform: its backend, its model keys and its assistant, which is a persona on the one runtime behind Aha. The first two moving in are the next two lines in this issue: WorkGo, whose assistant is Obi, and InclusifAI, whose assistant is Aria."
         built={[
-          b("The foundation.", "A gateway in Go in front of Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM and Qwen, and models on GPUs I run myself. One wallet, one console, and a public plaza of live health probes and prices."),
-          b("Tenant instances.", "The same binary again, with its own database, white-label site, sign-in and staff gate, and exactly one key upstream. A tenant's users never appear in TokensBeat's ledger, and a daily job reconciles the two."),
-          b("Agents on Pi.", "Events, durable state, tools, skills and hosted apps. To the public it is Aha; for a tenant it runs that tenant's agent behind a flag, so going back is one setting."),
-          b("A backend to move into.", "Postgres, a REST API and sign-in for each project, with files and realtime beside the data, built from the same open-source parts as Supabase, and trusting the tenant's own sign-in. In early access."),
-          b("Support while you build.", "Docs and guides, people reached by ticket, a status page, and a cloud dev box for your agents, in beta. The front page counts what is live, in beta, in early access and still to come, and says which is which."),
+          b("The foundation.", "A gateway in Go in front of Claude, OpenAI, Gemini, Grok, Kimi, DeepSeek, GLM and Qwen, and models on GPUs I run myself. One balance, Simple and Pro keys, a price map anyone can read and, signed in, every model's price beside the official one and its status by the hour."),
+          b(
+            "The console, redrawn.",
+            <>
+              console.tokensbeat.com, rebuilt in React on the kit this site publishes at <a href="/ui/">/ui/</a>, and
+              on nothing else. Its Service Plaza puts Access keys and Models on pages of their own, then three services
+              on the same balance: private sessions, a sandbox for Aha's code billed by the hour; workspaces, a cloud
+              dev box with Claude Code and Codex installed, in beta by invitation; and storage for what you keep in Aha.
+            </>,
+          ),
+          b("Aha.", "The agent app, on the web and in Windows and Android apps around the same page, in no app store yet: chat with tools, research with sources, images, apps that live inside it and a store, paid from the same balance. It is where people come in, and where builders' apps will meet them."),
+          b("Aha Code.", "A coding agent that works in your own checkout on your own computer, handed a task from Aha's chat or steered from a phone; the code never leaves the machine. Windows first, in early access."),
+          b("Projects, not copies.", "Postgres, a REST API, sign-in, storage and realtime at one address, built from the same open-source parts as Supabase, and the app's assistant on the runtime behind Aha: a persona and tools sent with each run, billed to the app's own key. Both are in early access; deploys from git, a domain from one DNS record and model keys with a budget are coming."),
+          b("TokensBeat Files.", "Being built: one file service for every app on the platform and for the agent's runs. A file comes in only through the service, is checked and scanned before it is kept, and every read of anything shared asks again whether the reader may. Aha moves onto it first."),
+          b("The news.", "news.tokensbeat.com, a daily paper in English and Chinese: a broadsheet front page and a Ranking of the day's or the week's stories from public publishers and the AI labs, each linked to its publisher and judged by models through the gateway, and the front page in your inbox at seven in the morning, Beijing time."),
           b("Moving house without dropping calls.", "In October the gateway and its database moved to Azure with 83 seconds of downtime, and Aha followed with 40. Every green commit now deploys itself, checks its health and rolls itself back if it must. Backups are hourly and encrypted, and a restore drill takes about two minutes."),
           b("The crew.", "Coding agents build it, one layer to a branch, and a second model reviews each layer before the next begins. I draw the plan and own the merges."),
         ]}
-        stack={["Go · Gin · Ent", "PostgreSQL", "Redis", "Vue", "React 19 · Hono", "Pi", "vLLM", "Azure", "Cloudflare", "Stripe"]}
+        stack={["Go · Gin · Ent", "PostgreSQL", "Redis", "React 19 · Hono", "Pi", "Tauri · Rust", "vLLM", "Azure", "Cloudflare", "Stripe"]}
         folio="08"
         figs={
           <>
@@ -64,10 +89,27 @@ export function Features() {
             <Shot
               bar="tokensbeat.com"
               src="/assets/img/web-tokensbeat-home.webp"
-              alt="TokensBeat front page: 'Support while you build. Serve when you ship.' above a dark orbit diagram with an inner ring for Serve and an outer orbit for Support."
+              alt="TokensBeat front page: 'Galaxies of Intelligence. Born from Within.' over a night sky, and below it an orbit of services, Docs, People, AI models, Billing and Storage, round a box that reads Your Creation."
             >
-              tokensbeat.com, 30 October 2026. The front page now splits the platform into Serve and Support; the plan above is what apps move into.
+              tokensbeat.com, 6 November 2026. The front page now opens on a night sky, with the services in orbit
+              round your app; the plan above is what apps move into.
             </Shot>
+            <div className="pair">
+              <Shot
+                bar="console.tokensbeat.com"
+                src="/assets/img/web-tokensbeat-console.webp"
+                alt="TokensBeat console sign-in page: the headline, an example API key card with a Best price tag and a $20 cap for 30 days, and the platform's parts with their labels, Live, Early access and Beta."
+              >
+                The console, rebuilt on this site's kit.
+              </Shot>
+              <Shot
+                bar="aha.tokensbeat.com"
+                src="/assets/img/web-tokensbeat-aha.webp"
+                alt="Aha sign-in page: 'It starts with a good question.' beside a view inside Aha of its LaTeX app, a paper compiled beside its source."
+              >
+                Aha, where people come in.
+              </Shot>
+            </div>
           </>
         }
       />

@@ -151,7 +151,7 @@ export function Colophon() {
             <dd>
               Cities: Skylines screenshots by the author; under three of them, the same frames re-rendered as
               photographs by an image model (Qwen-Image), not real places. Website screenshots of workgo.ai,
-              inclusifai.com, awakeai.ca and tokensbeat.com, October 2026.
+              inclusifai.com and awakeai.ca, October 2026; of tokensbeat.com, its console and Aha, November 2026.
             </dd>
             <dt>Printed on</dt>
             <dd>GitHub Pages. No ads, no cookies; visits are counted by Cloudflare Web Analytics, which keeps no personal data.</dd>
