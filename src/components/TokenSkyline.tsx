@@ -39,10 +39,10 @@ type Tokens = {
 // JSON imports type its rows as loose arrays; scripts/token-data.py writes them as this shape.
 const T = tokens as unknown as Tokens;
 
-const NAMES: Record<string, string> = { claude: "Claude", codex: "Codex", pi: "Pi", cursor: "Cursor", gemini: "Gemini", opencode: "OpenCode" };
+const NAMES: Record<string, string> = { claude: "Claude", codex: "Codex", pi: "Pi", cursor: "Cursor", copilot: "GitHub Copilot", gemini: "Gemini", opencode: "OpenCode" };
 const named = (app: string) => NAMES[app] ?? app;
 /** The agent's colour class; an agent with no colour of its own is drawn in ink. */
-const hue = (app: string) => (["claude", "codex", "pi", "cursor"].includes(app) ? `agent-${app}` : "agent-other");
+const hue = (app: string) => (["claude", "codex", "pi", "cursor", "copilot"].includes(app) ? `agent-${app}` : "agent-other");
 const MACHINES = ["no machines", "one machine", "my two machines", "my three machines"][T.machines] ?? `${T.machines} machines`;
 
 /** 47,944,236,992 → "47.9B". */
@@ -666,7 +666,7 @@ export function TokenSkyline() {
         out; a break in the axis marks where.
         The bar above a column is how many tokens the week used, on a square-root scale so the small weeks show beside the huge ones.
         Under it, each agent's tokens run to what they were: read back from the cache, fresh input, written to the
-        cache, or written back as output. Counted by cc-switch on {MACHINES}, and from Cursor's own usage exports, cache reads included, to {long(new Date(T.fetched))}. The money is what the
+        cache, or written back as output. Counted by cc-switch on {MACHINES}, from Cursor's own usage exports and from GitHub Copilot's CLI session logs, cache reads included, to {long(new Date(T.fetched))}. The money is what the
         tokens are worth at API list prices, not what I paid; models no price table knows, Cursor's Auto among them, count at nothing, so it is a
         floor. The typist types 40 words a minute, 230 days a year, and a token is about three-quarters of a word.
       </figcaption>

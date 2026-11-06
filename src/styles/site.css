@@ -456,6 +456,7 @@ figcaption, .cap {
 .tokens .agent-codex { fill: var(--agent-codex); background: var(--agent-codex); }
 .tokens .agent-pi { fill: var(--agent-pi); background: var(--agent-pi); }
 .tokens .agent-cursor { fill: var(--agent-cursor); background: var(--agent-cursor); }
+.tokens .agent-copilot { fill: var(--agent-copilot); background: var(--agent-copilot); }
 .tokens .agent-other { fill: var(--ink-3); background: var(--ink-3); }
 .tokens .kind-cache { fill: var(--kind-cache); background: var(--kind-cache); }
 .tokens .kind-input { fill: var(--ink-2); background: var(--ink-2); }
@@ -466,11 +467,11 @@ figcaption, .cap {
 /* The town by model (the owner, 2026-10-30): a company to a hue, the dataviz palette's
    first five slots in their validated order, so companies that touch stay apart; its
    models in shades of it, mixed toward the paper (MODEL_FILL in TokenSkyline.tsx). */
-.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #4fcf6e; --co-8b: #2fae52; --agent-cursor: #4fcf6e; }
+.tokens { --co-1: #2a78d6; --co-2: #eb6834; --co-3: #1baf7a; --co-4: #eda100; --co-5: #e87ba4; --co-6: #008300; --co-7: #6250d6; --co-8: #4fcf6e; --co-8b: #2fae52; --agent-cursor: #4fcf6e; --agent-copilot: #e87ba4; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; }
+  :root:not([data-theme="light"]) .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; --agent-copilot: #d55181; }
 }
-:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; }
+:root[data-theme="dark"] .tokens { --co-1: #3987e5; --co-2: #d95926; --co-3: #199e70; --co-4: #c98500; --co-5: #d55181; --co-6: #008300; --co-7: #9085e9; --co-8: #48c466; --co-8b: #2b9a49; --agent-cursor: #48c466; --agent-copilot: #d55181; }
 
 /* By model, under the town: the companies in two columns, each under its mark, every model a bar on one scale. */
 .models { margin: 18px 0 4px; padding-top: 18px; border-top: 0.5px solid var(--rule); }
