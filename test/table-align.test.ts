@@ -48,55 +48,94 @@ export const CHECK = `
 function checkRows(root, TOL) {
   const failures = [];
   let rows = 0, pairs = 0, cells = 0;
-  const hidden = (el) => el.closest(".s1-visually-hidden, legend, [hidden], [popover]");
-  const firstLine = (cell) => {
-    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() && n.parentElement.getClientRects().length && getComputedStyle(n.parentElement).position !== "absolute" && !hidden(n.parentElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+  const hidden = (el) => el.closest(".s1-visually-hidden, legend, [hidden], [popover], dialog");
+  const shown = (el) => el.getClientRects().length && !hidden(el) && getComputedStyle(el).visibility !== "hidden";
+  const label = (el) => el.tagName.toLowerCase() + "." + String(el.className.baseVal ?? el.className).split(" ")[0];
+  const CONTROLS = "button, input:not([type=radio]):not([type=checkbox]), .s1-switch__control, .s1-radio, .s1-select__trigger, svg, .s1-glyph";
+  // Everything on a cell's first line: each text whose first line box starts in it, each control whose box does.
+  const firstLine = (cell, top, line) => {
+    const found = [];
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() && shown(n.parentElement) && getComputedStyle(n.parentElement).position !== "absolute" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
     for (let t = walker.nextNode(); t; t = walker.nextNode()) {
       const range = document.createRange();
       range.selectNodeContents(t);
-      const rect = range.getClientRects()[0];
-      if (rect && rect.height > 2) return { y: (rect.top + rect.bottom) / 2, what: "text " + JSON.stringify(t.textContent.trim().slice(0, 16)) };
+      const rect = [...range.getClientRects()].find((r) => r.height > 2);
+      if (rect && rect.top < top + line - 1) found.push({ y: (rect.top + rect.bottom) / 2, what: "text " + JSON.stringify(t.textContent.trim().slice(0, 16)) });
     }
-    const control = [...cell.querySelectorAll("button, input:not([type=radio]):not([type=checkbox]), .s1-switch__control, .s1-radio, svg, .s1-glyph")].find((c) => c.getClientRects().length && !hidden(c));
-    if (control) { const r = control.getBoundingClientRect(); return { y: (r.top + r.bottom) / 2, what: control.tagName.toLowerCase() + "." + String(control.className.baseVal ?? control.className).split(" ")[0] }; }
+    for (const c of cell.querySelectorAll(CONTROLS)) {
+      if (!shown(c) || c.closest("svg") !== c && c.closest("svg")) continue;
+      const r = c.getBoundingClientRect();
+      if (r.height > 2 && r.top < top + line - 1) found.push({ y: (r.top + r.bottom) / 2, what: label(c) });
+    }
+    return found;
+  };
+  // The first words of the cell, and of each box side by side at its top (a mark and the name beside it, a pair's
+  // children), must start on the first line: words pushed below it would escape the line's check.
+  const firstWords = (el) => {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() && shown(n.parentElement) && getComputedStyle(n.parentElement).position !== "absolute" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+    for (let t = walker.nextNode(); t; t = walker.nextNode()) {
+      const range = document.createRange();
+      range.selectNodeContents(t);
+      const rect = [...range.getClientRects()].find((r) => r.height > 2);
+      if (rect) return { top: rect.top, what: JSON.stringify(t.textContent.trim().slice(0, 16)) };
+    }
     return null;
   };
-  for (const tr of root.querySelectorAll(".s1-table tbody tr")) {
-    if (tr.matches(".s1-table__ghead, .s1-table__loading") || !tr.getClientRects().length) continue;
+  const leads = (cell, top, line) => {
+    const out = [cell];
+    for (const box of cell.querySelectorAll("*")) {
+      const s = getComputedStyle(box);
+      if (!/flex/.test(s.display) || s.flexDirection.startsWith("column") || !shown(box) || box.getBoundingClientRect().top >= top + line - 1) continue;
+      // a flex line of its own holds every child; one that wraps, the children on its first line
+      for (const child of box.children) if (shown(child) && (s.flexWrap === "nowrap" || child.getBoundingClientRect().top < top + line - 1)) out.push(child);
+    }
+    return out;
+  };
+  [...root.querySelectorAll(".s1-table tbody tr")].forEach((tr, at) => {
+    if (tr.matches(".s1-table__ghead, .s1-table__loading") || !tr.getClientRects().length) return;
     const list = [...tr.children].filter((c) => c.matches("td, th") && !c.matches(".s1-table__empty"));
-    if (list.length < 2) continue;
+    if (list.length < 2) return;
     rows++;
     const name = tr.textContent.trim().replace(/\\s+/g, " ").slice(0, 40);
-    for (const cell of list) {
+    const say = (text) => failures.push({ row: at, text: "row " + JSON.stringify(name) + ": " + text });
+    // One line for the whole row: every cell's top padding the same, the target from the first cell's.
+    const s0 = getComputedStyle(list[0]);
+    const line = parseFloat(s0.getPropertyValue("--s1-table-line")) || parseFloat(s0.lineHeight);
+    const pad = parseFloat(s0.borderTopWidth) + parseFloat(s0.paddingTop);
+    const target = list[0].getBoundingClientRect().top + pad + line / 2;
+    list.forEach((cell, i) => {
       const s = getComputedStyle(cell);
-      const line = parseFloat(s.getPropertyValue("--s1-table-line")) || parseFloat(s.lineHeight);
-      const expected = cell.getBoundingClientRect().top + parseFloat(s.borderTopWidth) + parseFloat(s.paddingTop) + line / 2;
-      const got = firstLine(cell);
-      if (!got) continue;
-      cells++;
-      if (Math.abs(got.y - expected) > TOL) failures.push("row \\"" + name + "\\": the first line of cell " + (list.indexOf(cell) + 1) + " (" + got.what + ") is " + (got.y - expected).toFixed(1) + "px off the row's line");
-    }
+      const own = parseFloat(s.borderTopWidth) + parseFloat(s.paddingTop);
+      if (Math.abs(own - pad) > 0.01) say("cell " + (i + 1) + "'s top padding is " + own + "px, the row's " + pad + "px");
+      const top = cell.getBoundingClientRect().top + own;
+      const items = firstLine(cell, top, line);
+      if (items.length) cells++;
+      for (const lead of leads(cell, top, line)) {
+        const w = firstWords(lead);
+        if (w && w.top >= top + line - 1) say("cell " + (i + 1) + "'s words " + w.what + " start " + (w.top - top).toFixed(1) + "px below its top, off the row's line");
+      }
+      for (const it of items) if (Math.abs(it.y - target) > TOL) say("cell " + (i + 1) + " (" + it.what + ") is " + (it.y - target).toFixed(1) + "px off the row's line");
+    });
     for (const dots of tr.querySelectorAll(".s1-radios--dots")) {
       const opts = [...dots.querySelectorAll(".s1-radio")].filter((o) => o.getClientRects().length);
-      if (opts.length > 1 && opts.some((o) => Math.abs(o.getBoundingClientRect().top - opts[0].getBoundingClientRect().top) > TOL)) failures.push("dots \\"" + dots.textContent.trim().slice(0, 24) + "\\": its options wrap onto more than one line");
+      if (opts.length > 1 && opts.some((o) => Math.abs(o.getBoundingClientRect().top - opts[0].getBoundingClientRect().top) > TOL)) say("dots " + JSON.stringify(dots.textContent.trim().slice(0, 24)) + ": its options wrap onto more than one line");
     }
     for (const pair of tr.querySelectorAll(".s1-table__pair")) {
-      if (!pair.getClientRects().length) continue;
+      if (!shown(pair)) continue;
       pairs++;
       const pr = pair.getBoundingClientRect();
       const centre = (pr.top + pr.bottom) / 2;
-      const line = parseFloat(getComputedStyle(pair).height);
+      const height = parseFloat(getComputedStyle(pair).height);
       for (const child of pair.children) {
         const r = child.getBoundingClientRect();
         if (!r.height || hidden(child)) continue;
         const c = (r.top + r.bottom) / 2;
-        const label = child.tagName.toLowerCase() + "." + String(child.className.baseVal ?? child.className).split(" ")[0];
-        if (Math.abs(c - centre) > TOL) failures.push("pair \\"" + pair.textContent.trim().slice(0, 24) + "\\": " + label + " is " + (c - centre).toFixed(1) + "px off its centre");
-        if (r.height > line + 1 && !child.matches("button, .s1-btn, .s1-menu, .s1-switch, .s1-radios, .s1-badge, label, input")) failures.push("pair \\"" + pair.textContent.trim().slice(0, 24) + "\\": " + label + " is " + r.height.toFixed(0) + "px tall, more than the line (its words wrap)");
+        if (Math.abs(c - centre) > TOL) say("pair " + JSON.stringify(pair.textContent.trim().slice(0, 24)) + ": " + label(child) + " is " + (c - centre).toFixed(1) + "px off its centre");
+        if (r.height > height + 1 && !child.matches("button, .s1-btn, .s1-menu, .s1-switch, .s1-radios, .s1-badge, label, input")) say("pair " + JSON.stringify(pair.textContent.trim().slice(0, 24)) + ": " + label(child) + " is " + r.height.toFixed(0) + "px tall, more than the line (its words wrap)");
       }
     }
-  }
-  return { failures, rows, pairs, cells };
+  });
+  return { failures: failures.map((f) => f.text), failingRows: new Set(failures.map((f) => f.row)).size, rows, pairs, cells };
 }
 `;
 
@@ -108,6 +147,8 @@ import { Badge } from ${part("badge.tsx")};
 import { Button } from ${part("button.tsx")};
 import { Glyph } from ${part("glyph.tsx")};
 import { IconButton } from ${part("icon-button.tsx")};
+import { Input } from ${part("input.tsx")};
+import { Select } from ${part("select.tsx")};
 import { RadioGroup } from ${part("radio-group.tsx")};
 import { Menu } from ${part("menu.tsx")};
 import { Switch } from ${part("switch.tsx")};
@@ -174,6 +215,17 @@ function Stories() {
       <section data-story="a 40px menu and a button">
         <Table caption="Keys" columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }, { key: "go", header: "Open", cell: () => <Button size="sm">Open</Button> }]} rows={KEYS} rowKey="id" actions={(k) => <Menu label={"Actions for " + k.name} align="end" items={[{ label: "Rename", onSelect: () => {} }]} />} />
       </section>
+      <section data-story="fields in rows">
+        <Table caption="Limits" columns={[{ key: "name", header: "Key" }, { key: "cap", header: "Daily cap", cell: (k) => <Input size="sm" aria-label={"Daily cap of " + k.name} defaultValue="20" /> }, { key: "plan", header: "Plan", cell: (k) => <Select size="sm" aria-label={"Plan of " + k.name} defaultValue="pro"><option value="pro">Pro</option><option value="simple">Simple</option></Select> }, { key: "spend", header: "Spend", numeric: true }]} rows={KEYS} rowKey="id" />
+      </section>
+      <section data-story="fields in dense rows">
+        <Table caption="Limits" dense columns={[{ key: "name", header: "Key" }, { key: "cap", header: "Daily cap", cell: (k) => <Input size="sm" aria-label={"Daily cap of " + k.name} defaultValue="20" /> }, { key: "plan", header: "Plan", cell: (k) => <Select aria-label={"Plan of " + k.name} defaultValue="pro"><option value="pro">Pro</option></Select> }, { key: "spend", header: "Spend", numeric: true }]} rows={KEYS} rowKey="id" />
+      </section>
+      <section data-story="special rows">
+        <Table caption="Groups" collapsible columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }]} groups={[{ key: "a", label: "Claude", heading: <span>Claude <Button size="sm">Add</Button></span>, rows: KEYS }, { key: "b", label: "Empty", heading: "Empty", rows: [], empty: <Button size="sm">Add a key</Button> }]} rowKey="id" />
+        <Table caption="Keys" columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }]} rows={[]} rowKey="id" empty={<Button size="sm">Create a key</Button>} />
+        <Table caption="Keys" loading={2} columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }]} rows={KEYS} rowKey="id" />
+      </section>
       <section data-story="Chinese" lang="zh-CN">
         <Table caption="分组" fit columns={columns(true)} rows={GROUPS} rowKey="id" actions={actions} />
       </section>
@@ -187,6 +239,8 @@ document.fonts.ready.then(() => {
   for (const s of document.querySelectorAll("[data-story]")) {
     got[s.dataset.story] = checkRows(s, 1);
     // a row's buttons inside their cell's padding
+    // the centring of a control alone in a cell leaves a group's heading and the empty row alone
+    got[s.dataset.story].moved = [...s.querySelectorAll(".s1-table__ghead .s1-btn, .s1-table__empty .s1-btn")].filter((b) => parseFloat(getComputedStyle(b).marginTop) !== 0).length;
     got[s.dataset.story].outside = [...s.querySelectorAll(".s1-table__actions button")].filter((b) => b.getClientRects().length && !b.closest("[popover]")).filter((b) => {
       const r = b.getBoundingClientRect();
       const td = b.closest("td");
@@ -217,9 +271,9 @@ body { margin: 0; background: var(--s1-paper); color: var(--s1-ink); font-family
 .mono { font-family: var(--s1-font-mono); font-size: 12px; }
 `;
 
-type Result = { failures: string[]; rows: number; pairs: number; cells: number; outside: number };
+type Result = { failures: string[]; failingRows: number; rows: number; pairs: number; cells: number; outside: number; moved: number };
 
-async function page(t: { skip: (m: string) => void }, sheet: (f: string) => string): Promise<string | undefined> {
+async function page(t: { skip: (m: string) => void }, sheet: (f: string) => string, extra = ""): Promise<string | undefined> {
   const bin = chrome();
   if (!bin) return void t.skip("no Chrome here: set CHROME to run it");
   if (!existsSync(path.join(out, "node_modules"))) symlinkSync(path.join(ROOT, "node_modules"), path.join(out, "node_modules"), "dir");
@@ -235,7 +289,7 @@ async function page(t: { skip: (m: string) => void }, sheet: (f: string) => stri
   const js = readFileSync(path.join(out, "dist/harness.js"), "utf8");
   const css = readFileSync(path.join(out, "dist", readdirSync(path.join(out, "dist")).find((f) => f.endsWith(".css"))!), "utf8");
   const file = path.join(out, "page.html");
-  writeFileSync(file, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}\n${STORY_CSS}</style></head><body><div id="app"></div><pre id="out"></pre><script>${js.replaceAll("</script", "<\\/script")}</script></body></html>`);
+  writeFileSync(file, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}\n${STORY_CSS}\n${extra}</style></head><body><div id="app"></div><pre id="out"></pre><script>${js.replaceAll("</script", "<\\/script")}</script></body></html>`);
   return bin;
 }
 
@@ -261,10 +315,11 @@ test("every row's first lines lie on one line, and every icon and its words are 
   if (!bin) return;
   for (const width of [1440, 390]) {
     const got = open(bin, width);
-    assert.deepEqual(Object.keys(got), ["groups, fitted", "groups, scrolling", "a dense log", "a 40px menu and a button", "Chinese"]);
+    assert.deepEqual(Object.keys(got), ["groups, fitted", "groups, scrolling", "a dense log", "a 40px menu and a button", "fields in rows", "fields in dense rows", "special rows", "Chinese"]);
     for (const [story, r] of Object.entries(got)) {
       assert.deepEqual(r.failures, [], `${width}px, ${story}`);
       assert.equal(r.outside, 0, `${width}px, ${story}: a row's buttons stay inside their cell's padding`);
+      assert.equal(r.moved, 0, `${width}px, ${story}: nothing in a group's heading or the empty row is moved`);
       assert.ok(r.rows >= 2, `${width}px, ${story}: ${r.rows} rows checked`);
     }
     assert.equal(got["groups, fitted"].pairs, 9, `${width}px: the health, the status and the actions of three rows`);
@@ -283,8 +338,8 @@ test("the check fails on the old table.css: cells centred in the middle, the act
         .replace("vertical-align: top; line-height: var(--s1-table-line);", "vertical-align: middle;")
         .replace(".s1-table__actions { width: 1%; text-align: end !important; }", ".s1-table__actions { width: 1%; padding-block: 4px !important; text-align: end !important; }")
         .replace(/\n  \.s1-table__pair \{[\s\S]*?\n  \}\n/, "\n")
-        .replace(/\n  \.s1-table tbody tr > :is\(td, th\)[^\n]*/g, "");
-    if (id.endsWith("switch.css")) css = css.replace(/\n  \.s1-table :is\(td, th\)[^\n]*/g, "");
+        .replace(/\n  \/\* A control alone in a row's cell[\s\S]*?21px\) \/ 2\); \}/, "");
+    if (id.endsWith("switch.css")) css = css.replace(/\n  \.s1-table tbody :is\(td, th\)[^\n]*/g, "");
     return css;
   };
   const bin = await page(t, old);
@@ -293,4 +348,29 @@ test("the check fails on the old table.css: cells centred in the middle, the act
   if (process.env.S1LIN_ALIGN) writeFileSync(process.env.S1LIN_ALIGN, JSON.stringify(got, null, 1)); // the findings, for a report
   const failing = Object.values(got).reduce((n, r) => n + r.failures.length, 0);
   assert.ok(failing >= 10, `the old rules fail the check (${failing} findings)`);
+});
+
+test("the check sees one cell's padding moved, a name moved off its mark's line, and counts the rows, not the findings", async (t) => {
+  const bin = await page(
+    t,
+    own,
+    `[data-story="groups, fitted"] tbody tr:first-child > :nth-child(3) { padding-top: 13px; }
+     [data-story="groups, scrolling"] tbody tr:nth-child(2) .who__main { position: relative; top: 3px; }
+     [data-story="a dense log"] tbody td .caps { position: relative; top: 2px; }
+     [data-story="Chinese"] tbody tr:first-child .who__main { margin-top: 22px; }`,
+  );
+  if (!bin) return;
+  const got = open(bin, 1440);
+  if (process.env.S1LIN_ALIGN) writeFileSync(process.env.S1LIN_ALIGN, JSON.stringify(got, null, 1)); // the findings, for a report
+  const fitted = got["groups, fitted"].failures.join("\n");
+  assert.match(fitted, /cell 3's top padding is 13px, the row's 10px/, "a cell padded otherwise than its row");
+  assert.match(fitted, /cell 3 \(text "6\/6"\) is [23]\.\dpx off the row's line/, "its figure off the line by the padding's 3px");
+  assert.equal(got["groups, fitted"].failingRows, 1, "one row off, however many findings it has");
+  assert.match(got["groups, scrolling"].failures.join("\n"), /cell 1 \(text "Kimi · Discount,"\) is 3\.0px off the row's line/, "a name moved off its mark's line, the mark still on it");
+  assert.doesNotMatch(got["groups, scrolling"].failures.join("\n"), /text "K"\)/, "the mark itself stays on the line");
+  assert.equal(got["groups, scrolling"].failingRows, 1);
+  assert.equal(got["a dense log"].failingRows, 1, "the OK word moved in the one row that has it");
+  assert.match(got.Chinese.failures.join("\n"), /cell 1's words "Qwen" start 2\d\.\dpx below its top, off the row's line/, "a name pushed a whole line down beside its mark");
+  assert.equal(got.Chinese.failingRows, 1);
+  for (const story of ["a 40px menu and a button", "fields in rows", "fields in dense rows"]) assert.deepEqual(got[story].failures, [], story);
 });

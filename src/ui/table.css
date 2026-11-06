@@ -66,11 +66,18 @@
      the cell's padding, whatever box-sizing the page sets. */
   .s1-table--fit:has(tbody .s1-table__actions > .s1-table__pair) .s1-table__actions { box-sizing: border-box; width: calc(2 * 30px + 2px + 2 * 14px); }
   .s1-table--fit.s1-table--dense:has(tbody .s1-table__actions > .s1-table__pair) .s1-table__actions { width: calc(2 * 30px + 2px + 2 * 10px); }
-  /* A control alone in a cell, taller than the line: centred on the line, the cell's padding kept. */
-  .s1-table tbody tr > :is(td, th) > :is(.s1-btn, .s1-menu, .s1-badge) { vertical-align: top; }
-  .s1-table tbody tr > :is(td, th) > .s1-btn, .s1-table tbody tr > :is(td, th) > .s1-menu > .s1-btn { margin-block: calc((var(--s1-table-line) - 40px) / 2); }
-  .s1-table tbody tr > :is(td, th) > .s1-btn--sm, .s1-table tbody tr > :is(td, th) > .s1-menu > .s1-btn--sm { margin-block: calc((var(--s1-table-line) - 30px) / 2); }
-  .s1-table tbody tr > :is(td, th) > .s1-badge { margin-block: calc((var(--s1-table-line) - 21px) / 2); }
+  /* A control alone in a row's cell, taller than the line: centred on the line, the cell's padding kept. Not in a
+     group's heading row or the empty row, which have their own layout. */
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > :is(.s1-btn, .s1-menu, .s1-badge) { vertical-align: top; }
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > :is(.s1-btn, .s1-input--md, .s1-input__row--md, .s1-select--md),
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > .s1-menu > .s1-btn {
+    margin-block: calc((var(--s1-table-line) - 40px) / 2);
+  }
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > :is(.s1-btn--sm, .s1-input--sm, .s1-input__row--sm, .s1-select--sm),
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > .s1-menu > .s1-btn--sm {
+    margin-block: calc((var(--s1-table-line) - 30px) / 2);
+  }
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > .s1-badge { margin-block: calc((var(--s1-table-line) - 21px) / 2); }
   .s1-table__empty { padding: 0 !important; white-space: normal !important; text-align: center !important; color: var(--s1-ink-2); }
   .s1-table__empty:not(:has(.s1-empty)) { padding: 28px 14px !important; }
 
