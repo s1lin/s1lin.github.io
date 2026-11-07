@@ -72,6 +72,17 @@ const CLAUDE = T.apps.indexOf("claude");
 const CLAUDE_DAYS = CLAUDE < 0 ? [] : T.days.filter(([, n]) => n[CLAUDE] > 0);
 const CLAUDE_PER_DAY = CLAUDE_DAYS.reduce((a, [, , usd]) => a + usd[CLAUDE], 0) / Math.max(1, CLAUDE_DAYS.length);
 const PER_DAY = T.total / Math.max(1, T.days.length);
+/** The largest round count (1B, 10B, 100B, 1000B…) the running total has passed, and the day it did: "100B on 7 November 2026". */
+const PASSED = (() => {
+  let run = 0;
+  let passed: { mark: number; day: string } | null = null;
+  for (const [day, n] of T.days) {
+    const before = run;
+    run += n.reduce((a, b) => a + b, 0);
+    for (let mark = 1e9; mark <= run; mark *= 10) if (before < mark) passed = { mark, day };
+  }
+  return passed;
+})();
 // What the agents wrote back, as one person typing it: a token is about three-quarters of a
 // word, typed at 40 words a minute, six hours a day, 230 days a year.
 const TYPING_YEARS = Math.round((T.parts.output * 0.75) / (40 * 60 * 6 * 230));
@@ -567,6 +578,10 @@ export function TokenSkyline() {
       <p className="tokens__total">
         <Odometer value={T.total} />
         <span className="tokens__unit mono">tokens</span>
+      </p>
+      <p className="tokens__mark mono">
+        <span>{compact(T.total)}</span>
+        {PASSED && <span>{`passed ${PASSED.mark / 1e9}B on ${long(new Date(PASSED.day))}`}</span>}
       </p>
       <p className="tokens__usd">
         <span className="tokens__money">${Math.round(T.usd).toLocaleString("en-US")}</span>
