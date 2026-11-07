@@ -438,6 +438,8 @@ figcaption, .cap {
 .tokens__total, .tokens__usd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; }
 .tokens__n { font: 400 clamp(2.2rem, 8.6cqi, 3.5rem)/1 var(--f-display); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; white-space: nowrap; }
 .tokens__lead { color: var(--ink-3); opacity: 0.4; }
+/* The total in B under the odometer, and the round count it last passed with its day. */
+.tokens__mark { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 6px 0 0; font-size: 11px; letter-spacing: 0.08em; color: var(--ink-3); }
 .tokens__usd { margin: 8px 0 22px; }
 .tokens__money { font: 400 clamp(1.5rem, 5cqi, 2.1rem)/1 var(--f-display); font-variant-numeric: lining-nums; }
 .tokens__unit { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
