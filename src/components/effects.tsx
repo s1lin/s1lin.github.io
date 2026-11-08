@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { createFrost, type FrostInstance, type FrostOptions } from "@/components/canvasui/Frost";
 import { createGlitch, type GlitchInstance, type GlitchOptions } from "@/components/canvasui/Glitch";
@@ -209,6 +209,18 @@ const TEAR: GlitchOptions = {
 };
 
 /**
+ * A key for a WebGL canvas that changes once its context has been handed back (each effect's destroy() calls
+ * WEBGL_lose_context.loseContext()). A canvas gives that lost context again to every later getContext(), so the next
+ * run on it drew nothing: a title scrolled past and back never tore again, and in dev, where StrictMode runs effects
+ * twice, no effect showed at all. A new key is a new canvas (frontend scan 2026-11-07, P1).
+ */
+function useCanvasKey(): [number, () => void] {
+  const [key, setKey] = useState(0);
+  const retire = useCallback(() => setKey((k) => k + 1), []);
+  return [key, retire];
+}
+
+/**
  * A section title in ink that tears into RGB-split slices for a moment, in
  * colour, as it comes into view and again under the pointer, then settles.
  */
@@ -217,6 +229,7 @@ export function GlitchTitle({ className, style, children }: { className?: string
   const out = useRef<HTMLCanvasElement>(null);
   const tear = useRef<GlitchInstance | null>(null);
   const near = useNear(ref);
+  const [canvasKey, retire] = useCanvasKey();
 
   useEffect(() => {
     const content = ref.current;
@@ -226,15 +239,18 @@ export function GlitchTitle({ className, style, children }: { className?: string
     const glitch = createGlitch({ source: document.createElement("canvas"), content, output }, TEAR);
     tear.current = glitch;
     return () => {
-      glitch?.destroy();
       tear.current = null;
+      if (glitch) {
+        glitch.destroy();
+        retire();
+      }
     };
-  }, [near]);
+  }, [near, canvasKey, retire]);
 
   return (
     <h2 ref={ref} className={cn("glitch", className)} style={style} onPointerEnter={() => tear.current?.burst()}>
       {children}
-      <canvas ref={out} className="glitch__out" aria-hidden />
+      <canvas key={canvasKey} ref={out} className="glitch__out" aria-hidden />
     </h2>
   );
 }
@@ -265,6 +281,7 @@ export function FrostPane() {
   const narrow = useMedia("(max-width: 760px)");
   const ref = useRef<HTMLCanvasElement>(null);
   const pane = useRef<FrostInstance | null>(null);
+  const [canvasKey, retire] = useCanvasKey();
 
   useEffect(() => {
     const output = ref.current;
@@ -277,17 +294,20 @@ export function FrostPane() {
     );
     pane.current = frost;
     return () => {
-      frost?.destroy();
       pane.current = null;
+      if (frost) {
+        frost.destroy();
+        retire();
+      }
     };
-  }, [live]);
+  }, [live, canvasKey, retire]);
 
   useEffect(() => {
     // A phone has little margin to spare, so the frost keeps closer to the edges.
     pane.current?.setOptions({ ...(dark ? RIME_NIGHT : RIME_PAPER), reach: narrow ? 0.3 : 0.4 });
-  }, [dark, narrow, live]);
+  }, [dark, narrow, live, canvasKey]);
 
-  return live ? createPortal(<canvas ref={ref} className="frost-pane" aria-hidden />, document.body) : null;
+  return live ? createPortal(<canvas key={canvasKey} ref={ref} className="frost-pane" aria-hidden />, document.body) : null;
 }
 
 /* The sand lies on the last fifth of the screen: formed at 80% down, fully loose at the bottom edge. */
@@ -306,6 +326,7 @@ export function SandPane() {
   const live = useHydrated();
   const still = useMedia("(prefers-reduced-motion: reduce)");
   const ref = useRef<HTMLCanvasElement>(null);
+  const [canvasKey, retire] = useCanvasKey();
 
   useEffect(() => {
     const output = ref.current;
@@ -363,8 +384,9 @@ export function SandPane() {
       theme.disconnect();
       scheme.removeEventListener("change", reread);
       sand.destroy();
+      retire();
     };
-  }, [live, still]);
+  }, [live, still, canvasKey, retire]);
 
-  return live && !still ? createPortal(<canvas ref={ref} className="sand-pane" aria-hidden />, document.body) : null;
+  return live && !still ? createPortal(<canvas key={canvasKey} ref={ref} className="sand-pane" aria-hidden />, document.body) : null;
 }
