@@ -81,8 +81,6 @@ type Label = { x: number; y: number; anchor?: Anchor };
 type Line = { key: Key; code: string; name: string; since: string; live: string; planned?: string; end?: string };
 /** A stop on one line, or on the loop; its label may lead somewhere. */
 type Stop = { line: LineKey; x: number; y: number; label: string; at: Label; planned?: boolean; href?: string };
-/** AwakeAI's patent application, filed September 2024. */
-const PATENT = "#";
 /** A station several lines run through side by side, from the top track to the bottom one. */
 type Station = {
   x: number;
@@ -208,7 +206,7 @@ const STOPS: Stop[] = [
   { line: "p", x: x(2019), y: 160, label: "consultant", at: { x: x(2019), y: 184 } },
   // labels take turns above and below the line, so neighbours never meet
   { line: "a", x: 735, y: 160, label: "architect", at: { x: 735, y: 184 } },
-  { line: "a", x: 765, y: 160, label: "patent ↗", href: PATENT, at: { x: 765, y: 144 } },
+  { line: "a", x: 765, y: 160, label: "patent", at: { x: 765, y: 144 } },
   { line: "a", x: 800, y: 160, label: "COO", at: { x: 800, y: 184 } },
   { line: "w", x: 1260, y: 100, label: "2.0", at: { x: 1260, y: 84 } },
   { line: "i", x: 1250, y: 154, label: "Partner Hub", at: { x: 1250, y: 178 } },
@@ -258,7 +256,7 @@ const TIMETABLE: Record<LineKey, Row[]> = {
     { year: "2022", name: "Dobson Cup", note: "third place" },
     { year: "2023", name: "architect" },
     {
-      year: "2024", month: "09", name: "patent application (number removed)", href: PATENT,
+      year: "2024", month: "09", name: "patent application",
       note: "image processing for care-work recorders: private details removed on the device, actions read in the cloud",
     },
     { year: "2025", month: "01", name: "COO" },
@@ -343,7 +341,7 @@ function RouteMap({ on }: { on: LineKey | null }) {
         goes on with a consultant's role from 2018 to 2019. YoueData's track runs on
         into AwakeAI, just after McGill, at a Java interchange. Pioneer
         runs on into McGill, graduate school, M.Sc. 2019 to 2022, where AwakeAI sets out with its Java in December
-        2020, through the Dobson Cup, architect, a patent application in September 2024 ((number removed), image processing for
+        2020, through the Dobson Cup, architect, a patent application in September 2024 (image processing for
         care-work recorders) and COO. AwakeAI closes in July 2025 into a junction of architecture,
         cloud ops, React, TypeScript and Python, out of which WorkGo and InclusifAI open in October 2025, and HiRain,
         carrying edge vision, in 2026. EchoSonic, 2022 to 2023, sets out from McGill beside AwakeAI, sound recognition
@@ -652,9 +650,8 @@ export function FeatureOpener() {
             from it; the universities, <span lang="ja">大学</span> and <span lang="ja">大学院</span>, stand up through
             its top. Where lines run on the same stack at the
             same time, they share a station. Pioneer runs on into McGill, where AwakeAI sets out with its Java; AwakeAI
-            closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. On the way, in September 2024, AwakeAI filed patent application{" "}
-            <a href={PATENT}>(number removed)</a>, image processing for care-work recorders that removes private details on the
-            device. EchoSonic sets
+            closes into the junction WorkGo, InclusifAI and HiRain open out of, carrying what it taught. On the way, in September 2024, AwakeAI filed a patent application for image processing for care-work
+            recorders that removes private details on the device. EchoSonic sets
             out from McGill in 2022, sound recognition on STM32, and closes into HiRain, whose 2.5D detection runs on edge
             chips. Around it all
             runs the loop: city builder, since my first road in SimCity 4 in 2003. YoueData runs on into AwakeAI at a Java

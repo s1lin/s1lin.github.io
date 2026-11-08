@@ -272,9 +272,8 @@ export function Features() {
           b(
             "2024.",
             <>
-              Startup Mila status. RESI at the J.P. Morgan Healthcare Conference. Patent application{" "}
-              <a href="#">(number removed)</a>: image processing for
-              care-work recorders, private details removed on the device.
+              Startup Mila status. RESI at the J.P. Morgan Healthcare Conference. A patent application: image processing
+              for care-work recorders, private details removed on the device.
             </>,
           ),
           b("2025.", "COO from January. I also built the company website. I resigned in July."),
