@@ -2,6 +2,7 @@
 // dist/ (the issue, the blog and its posts, the UI docs), so the pages read without
 // JavaScript and the client only hydrates.
 import { readFile, rm, writeFile } from "node:fs/promises";
+import { withCsp } from "./csp.mjs";
 
 const { pages } = await import("../dist-ssr/entry-server.js");
 // The root may carry data attributes (a post's slug), which stay on it.
@@ -27,9 +28,13 @@ for (const [path, render] of Object.entries(pages())) {
   await layerOrder(html, path);
 
   // A function, so a "$" in the page is never read as a replacement pattern.
-  await writeFile(file, html.replace(marker, (_, attrs) => `<div id="root"${attrs}>${render()}</div>`));
+  // With its Content-Security-Policy, hashed over the page as it is written (scripts/csp.mjs).
+  await writeFile(file, withCsp(html.replace(marker, (_, attrs) => `<div id="root"${attrs}>${render()}</div>`), `dist/${path}`));
   console.log(`prerendered dist/${path}`);
 }
-// Life is drawn in the browser and not prerendered, but its stylesheets must stack the same way.
-await layerOrder(await readFile(new URL("../dist/life/index.html", import.meta.url), "utf8"), "life/index.html");
+// Life is drawn in the browser and not prerendered, but its stylesheets must stack the same way, and it has the policy.
+const life = new URL("../dist/life/index.html", import.meta.url);
+const lifeHtml = await readFile(life, "utf8");
+await layerOrder(lifeHtml, "life/index.html");
+await writeFile(life, withCsp(lifeHtml, "dist/life/index.html"));
 await rm(new URL("../dist-ssr", import.meta.url), { recursive: true, force: true });

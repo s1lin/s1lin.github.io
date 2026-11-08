@@ -35,6 +35,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # The built pages in a browser: each carries its Content-Security-Policy and loads with no violation.
+      - run: node --test test/csp.test.ts
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
