@@ -78,8 +78,13 @@ function Round({ index, next, jump }: { index: number; next: () => void; jump: (
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea")) return;
-      if (e.key === "Enter") (verdict === "yes" ? next : submit)();
+      const at = e.target as HTMLElement;
+      if (e.metaKey || e.ctrlKey || e.altKey || at.closest("input, textarea, select, [contenteditable]")) return;
+      // A focused button or link makes Enter its own click: Submit would run twice (two wrong tries counted, or the
+      // "solved" line skipped), and Undo, Reset or a level would submit too (frontend scan 2026-11-07, P1).
+      if (e.key === "Enter") {
+        if (!at.closest("button, a")) (verdict === "yes" ? next : submit)();
+      }
       else if (e.key === "z" || e.key === "Z") back();
       else if (e.key === "r" || e.key === "R") reset();
     };

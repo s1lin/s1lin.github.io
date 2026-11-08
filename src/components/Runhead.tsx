@@ -34,6 +34,14 @@ function ThemeToggle() {
 /** The section label under the reader's eye, from the nearest [data-run]. */
 function useRunningHead(initial: string) {
   const [label, setLabel] = useState(initial);
+  // A new label from the page (the reader switched language) is shown at once, and the sections are looked at again
+  // for their words in it. The Life page has no [data-run], so its head kept the first language (frontend scan
+  // 2026-11-07, P1).
+  const [given, setGiven] = useState(initial);
+  if (given !== initial) {
+    setGiven(initial);
+    setLabel(initial);
+  }
   useEffect(() => {
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver(
@@ -47,7 +55,7 @@ function useRunningHead(initial: string) {
     );
     document.querySelectorAll("[data-run]").forEach((s) => io.observe(s));
     return () => io.disconnect();
-  }, []);
+  }, [initial]);
   return label;
 }
 

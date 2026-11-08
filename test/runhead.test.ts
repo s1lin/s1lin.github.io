@@ -47,7 +47,8 @@ import { Runhead } from ${src("components/Runhead.tsx")};
 
 try { localStorage.removeItem("s1lin-theme"); } catch {}
 document.documentElement.dataset.theme = "light";
-flushSync(() => createRoot(document.getElementById("app")).render(<Runhead label="特集 · Architecture — nine lines, one proof" home="/" />));
+const root = createRoot(document.getElementById("app"));
+flushSync(() => root.render(<Runhead label="特集 · Architecture — nine lines, one proof" home="/" />));
 
 // Each :hover rule again as a .s1-hover rule, in the same layer and @media, right after it.
 const hoverize = (rules) => {
@@ -128,7 +129,11 @@ function state() {
   document.querySelector(".theme-toggle").click();
   await tick();
   const back = { pressed: document.querySelector(".theme-toggle").getAttribute("aria-pressed"), theme: document.documentElement.dataset.theme };
-  document.getElementById("out").textContent = JSON.stringify({ paper, night, back });
+  // the page in another language (Life, with no [data-run] sections): the head says the new words at once
+  flushSync(() => root.render(<Runhead label="生命 · The Game of Life" home="/" />));
+  await tick();
+  const relabelled = document.querySelector(".runhead__now").textContent;
+  document.getElementById("out").textContent = JSON.stringify({ paper, night, back, relabelled });
 })().catch((e) => { document.getElementById("out").textContent = JSON.stringify({ pageError: String(e?.stack ?? e) }); });
 `;
 
@@ -163,7 +168,7 @@ type State = {
   tokens: { ink: string; ink2: string; paper: string; paper2: string };
   theme: string; stored: string | null;
 };
-type Got = { paper: State; night: State; back: { pressed: string; theme: string } };
+type Got = { paper: State; night: State; back: { pressed: string; theme: string }; relabelled: string };
 
 const shared: Record<number, Got> = {};
 async function run(t: { skip: (m: string) => void }, width: number): Promise<Got | undefined> {
@@ -256,5 +261,13 @@ for (const width of [1440, 390]) {
       assert.ok(contrast(l.color, l.bg) >= 4.5, `at night: its words AA on the fill, ${contrast(l.color, l.bg).toFixed(2)}:1`);
     }
     assert.deepEqual(back, { pressed: "false", theme: "light" }, "a second press brings the paper back");
+  });
+
+  test(`${width}px: a new label from the page (another language) is shown at once`, async (t) => {
+    const got = await run(t, width);
+    if (!got) return;
+    assert.match(got.relabelled, /生命/);
+    assert.match(got.relabelled, /The Game of Life/);
+    assert.doesNotMatch(got.relabelled, /Architecture/);
   });
 }

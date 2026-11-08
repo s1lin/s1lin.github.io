@@ -516,7 +516,10 @@ function Odometer({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const near = useNear(ref, "0px");
   const still = useMedia("(prefers-reduced-motion: reduce)");
-  const [shown, setShown] = useState(value);
+  // The number while it rolls; the real total otherwise, so a roll cut short (the total scrolled out of view mid-roll)
+  // never leaves a believable wrong figure behind (frontend scan 2026-11-07, P1).
+  const [roll, setRoll] = useState<number | null>(null);
+  const shown = roll ?? value;
   const rolled = useRef(false);
 
   useEffect(() => {
@@ -527,11 +530,14 @@ function Odometer({ value }: { value: number }) {
     const tick = (now: number) => {
       // A frame's timestamp can fall just before the start; never roll below zero.
       const p = Math.min(1, Math.max(0, (now - start) / 1600));
-      setShown(Math.round(value * (1 - (1 - p) ** 4)));
+      setRoll(p < 1 ? Math.round(value * (1 - (1 - p) ** 4)) : null);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      setRoll(null);
+    };
   }, [near, still, value]);
 
   const width = String(value).length;
