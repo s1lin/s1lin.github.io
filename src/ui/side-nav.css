@@ -161,7 +161,9 @@
   .s1-sidenav--rail .s1-sidenav__item {
     position: relative; justify-content: center; width: 40px; height: 40px; min-height: 0; margin: 0 auto; padding: 0; border-left: 0;
   }
-  .s1-sidenav--rail .s1-sidenav__item[aria-current]:not([aria-current="true"]) { padding: 0; border-left: 0; box-shadow: inset 2px 0 0 var(--s1-ink); }
+  /* The rail draws no nested items, so the page's mark goes on the one item drawn on its path (the page itself, or
+     the item it sits under). A border, not an inset shadow: forced colours keep a border and drop a shadow. */
+  .s1-sidenav--rail .s1-sidenav__item[aria-current] { padding: 0 2px 0 0; border-left: 2px solid var(--s1-ink); }
   .s1-sidenav--rail .s1-sidenav__item:is(a, button):hover { background: var(--s1-paper-2); }
   .s1-sidenav--rail .s1-sidenav__label {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;

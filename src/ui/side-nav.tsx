@@ -345,7 +345,8 @@ export function SideNav({
           </div>
         )}
         {kids > 0 && (
-          <div className="s1-sidenav__body" id={bodyId} hidden={!isOpen}>
+          // the rail draws no heads, so a folded section could not be opened there: its items are always shown
+          <div className="s1-sidenav__body" id={bodyId} hidden={!rail && !isOpen}>
             {section.sections && section.sections.length > 0 && <ol className="s1-sidenav__sections">{section.sections.map((s) => renderSection(s, depth + 1))}</ol>}
             {section.items && section.items.length > 0 && <ul className="s1-sidenav__items">{section.items.map(renderItem)}</ul>}
           </div>

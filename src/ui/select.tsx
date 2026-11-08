@@ -454,6 +454,9 @@ export function Select({
   }
 
   function onFilterKey(e: KeyboardEvent<HTMLInputElement>) {
+    // a key that belongs to an IME (the Enter that commits 对话 typed in pinyin): never a choice. Safari sends that
+    // Enter just after compositionend, as keyCode 229
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     switch (e.key) {
       case "ArrowDown":
       case "ArrowUp":

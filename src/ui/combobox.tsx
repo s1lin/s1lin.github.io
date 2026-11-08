@@ -196,6 +196,9 @@ export function Combobox<T>({
   }, [shown, at, auto]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    // a key that belongs to an IME (the Enter that commits 对话 typed in pinyin, the arrows over its candidates): never
+    // a choice. Chrome and Firefox say isComposing; Safari sends that Enter just after compositionend, as keyCode 229
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     const n = flat.length;
     switch (e.key) {
       case "ArrowDown":

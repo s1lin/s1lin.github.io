@@ -66,6 +66,7 @@ flushSync(() =>
     <>
       <div id="desk" style={{ width: 280 }}><SideNav label="Desk" title="Index" sections={sections} current="b" /></div>
       <div id="rail" style={{ width: 56 }}><SideNav label="Rail" title="Aha" rail sections={sections} current="c1" /></div>
+      <div id="rail-fold" style={{ width: 56 }}><SideNav label="Rail folded" rail sections={[{ id: "proj", title: "Projects", collapsible: true, items: [{ id: "tb", label: "tokensbeat.com", icon: svg, href: "#tb", items: [{ id: "hp", label: "Homepage copy", href: "#hp" }] }, { id: "th", label: "Thesis", icon: svg, href: "#th" }] }, { id: "arch", title: "Archive", collapsible: true, defaultOpen: false, items: [{ id: "old", label: "Old notes", icon: svg, href: "#old" }] }]} current="hp" /></div>
       <div id="phone"><SideNav label="Phone" title="Index" sheet={900} sections={sections} current="b" onNavigate={(t) => chosen.push(t.id)} /></div>
       <div id="fold" style={{ width: 280 }}><SideNav label="Fold" sections={[{ id: "shut", title: "Video", collapsible: true, action: <button type="button">+</button>, items: [{ id: "v1", label: "Clip", href: "#v1" }] }, { id: "open", title: "Tasks", collapsible: true, items: [{ id: "t1", label: "Trip", href: "#t1" }] }]} defaultExpanded={["open"]} /></div>
       <div id="em"><EmptyState mark={svg} title="No friends yet" /><EmptyState size="sm" mark={svg} title="None" /></div>
@@ -99,9 +100,14 @@ if (!phone) {
       sizes: items.map((i) => { const r = i.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }),
       label: box("#rail .s1-sidenav__label"),
       titles: items.map((i) => i.getAttribute("title")),
-      current: style('#rail [aria-current="page"]').boxShadow,
+      current: (() => { const c = style('#rail [aria-current="page"]'); return [c.borderLeftWidth, c.borderLeftStyle, c.borderLeftColor, c.boxShadow]; })(),
       heads: style("#rail .s1-sidenav__head").display,
     };
+    // a folded section in the rail (Archive): its items still drawn (no head there to open it); the page under tokensbeat.com
+    // marks the one item drawn on its path, with a border (kept in forced colours)
+    const drawn = [...document.querySelectorAll("#rail-fold .s1-sidenav__item")].filter((i) => i.getBoundingClientRect().height > 0);
+    const path = $('#rail-fold .s1-sidenav__item[aria-current="true"]');
+    got.railFold = { drawn: drawn.map((i) => i.getAttribute("title")), marked: path && path.getAttribute("title"), bar: path && [getComputedStyle(path).borderLeftWidth, getComputedStyle(path).borderLeftStyle, getComputedStyle(path).borderLeftColor], width: path && Math.round(path.getBoundingClientRect().width) };
     // A folding head's sign is a hairline chevron (right folded, down open), never a "+" beside the family's own "+".
     const sign = (open) => { const el = $('#fold .s1-sidenav__heading[aria-expanded="' + open + '"] .s1-sidenav__sign'); const b = getComputedStyle(el, "::before"); return { bg: getComputedStyle(el).backgroundImage, lines: [b.borderRightWidth, b.borderBottomWidth, b.borderTopWidth, b.borderLeftWidth], turn: b.transform }; };
     got.fold = { shut: sign("false"), open: sign("true") };
@@ -185,7 +191,9 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
   for (const s of desk.rail.sizes) assert.deepEqual(s, [40, 40]);
   assert.deepEqual(desk.rail.label, [1, 1]);
   assert.deepEqual(desk.rail.titles.slice(0, 2), ["Button", "Kicker"]);
-  assert.match(desk.rail.current, /2px 0px 0px 0px inset/);
+  assert.deepEqual(desk.rail.current, ["2px", "solid", desk.ink, "none"]);
+  // a folded section's items stay in reach in the rail; a nested page marks the item it sits under
+  assert.deepEqual(desk.railFold, { drawn: ["tokensbeat.com", "Thesis", "Old notes"], marked: "tokensbeat.com", bar: ["2px", "solid", desk.ink], width: 40 });
   assert.equal(desk.rail.heads, "none");
   // EmptyState's mark: 56px, 40px at sm, in the second ink, and no frame
   // rotate(-45deg) points right, rotate(45deg) down: the matrices Chrome reports for them

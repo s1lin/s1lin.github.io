@@ -182,6 +182,8 @@ const box = (el) => { const r = el.getBoundingClientRect(); return { top: Math.r
 const listOf = (id) => document.getElementById($("#" + id).getAttribute("aria-controls"));
 const panelOf = (id) => listOf(id).parentElement;
 const key = (el, k, o = {}) => el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true, ...o }));
+// the Enter that ends an IME composition: isComposing (Chrome, Firefox), or keyCode 229 just after it (Safari)
+const imeEnter = (el) => { const safari = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }); Object.defineProperty(safari, "keyCode", { value: 229 }); return [key(el, "Enter", { isComposing: true }), el.dispatchEvent(safari)]; };
 const press = (el) => el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 }));
 const typeIn = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, v); el.dispatchEvent(new Event("input", { bubbles: true })); };
 const words = (el) => el ? el.querySelector(".s1-select__name").textContent : null;
@@ -334,6 +336,10 @@ if (mode === "dialog") {
   });
   step(() => {
     got.probeDown = state("long").active;
+    got.imeKept = imeEnter(document.activeElement);
+  });
+  step(() => {
+    got.ime = state("long");
     key(document.activeElement, "Enter");
   });
   step(() => {
@@ -509,6 +515,9 @@ test("Select in a browser: the select-only combobox's keys, groups, the filter, 
   assert.deepEqual([got.nothing.status, got.nothing.options, got.nothing.list, got.nothing.active], ["Nothing matches", 0, "none", null]);
   assert.deepEqual(got.probe, ["probe-2", "probe-7", "probe-12", "probe-17", "probe-22"]);
   assert.equal(got.probeDown, "probe-7");
+  // the Enter that commits an IME composition in the filter chooses nothing and is left to the IME
+  assert.deepEqual(got.imeKept, [true, true]);
+  assert.deepEqual([got.ime.expanded, got.ime.active, got.ime.focus], ["true", got.probeDown, "filter"]);
   assert.deepEqual(got.filterChose, { shown: "probe-7", expanded: "false", active: null, focus: "button", data: "k7" });
   // a letter on the box opens the filter with it, the caret after it
   assert.deepEqual([got.letter.expanded, got.letter.focus, got.letter.text, got.letter.caret], ["true", "filter", "w", 1]);

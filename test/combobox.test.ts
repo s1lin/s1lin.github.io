@@ -186,7 +186,9 @@ const $ = (s) => document.querySelector(s);
 const box = (el) => { const r = el.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), width: Math.round(r.width), height: Math.round(r.height) }; };
 const pop = (id) => document.getElementById($("#" + id).getAttribute("aria-controls")).parentElement;
 const typeIn = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, v); el.dispatchEvent(new Event("input", { bubbles: true })); };
-const key = (el, k) => el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+const key = (el, k, o = {}) => el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true, ...o }));
+// the Enter that ends an IME composition: isComposing (Chrome, Firefox), or keyCode 229 just after it (Safari)
+const imeEnter = (el) => { const safari = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }); Object.defineProperty(safari, "keyCode", { value: 229 }); return [key(el, "Enter", { isComposing: true }), el.dispatchEvent(safari)]; };
 const state = (id) => {
   const i = $("#" + id);
   const act = i.getAttribute("aria-activedescendant");
@@ -241,6 +243,10 @@ if (mode === "dialog") {
   });
   step(() => {
     got.up = state("a").active;
+    got.imeKept = imeEnter($("#a"));
+  });
+  step(() => {
+    got.ime = state("a");
     key($("#a"), "Enter");
   });
   step(() => {
@@ -400,6 +406,9 @@ test("Combobox in a browser: typing, the arrows, Enter, Esc twice, leaving the b
   assert.equal(got.down, "Suzhou");
   assert.equal(got.wrap, "Shanghai");
   assert.equal(got.up, "Singapore");
+  // the Enter that commits an IME composition chooses nothing and is left to the IME
+  assert.deepEqual(got.imeKept, [true, true]);
+  assert.deepEqual(got.ime, { value: "s", expanded: "true", active: "Singapore", focus: true });
   assert.deepEqual(got.entered, { value: "Singapore", expanded: "false", active: null, focus: true });
   assert.ok(got.log.includes("a:sg") && got.log.includes("a:text:Singapore"));
   // ↓ opens it on the chosen option, ticked and heavier
