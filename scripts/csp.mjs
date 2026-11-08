@@ -5,15 +5,21 @@
 // Why: after "Sign in with TokensBeat" the reader's bearer token sits in localStorage, and it can spend the reader's own
 // credit (/api/social/revise). With no policy any script on the page could read it: Cloudflare's unversioned beacon
 // (no SRI possible) or a bad release of a bundled package (frontend scan 2026-11-07, P1). Scripts now run only from
-// this site, Cloudflare's beacon and the hashed inline ones, and requests and images go only to named hosts, so a
-// script cannot post the token or load it as an image's address elsewhere (Codex round 1: `img-src https:` let it).
+// this site, Cloudflare's beacon and the hashed inline ones, and everything the page loads or sends goes only to named
+// hosts (default-src 'self' for every kind not named), so a script cannot post the token or load it as the address of
+// an image, a stylesheet, a font or a frame elsewhere (Codex rounds 1 and 2: `img-src https:`, then no default-src).
 // A policy cannot stop a script that runs from navigating the page away with the token: the token's own limits (short
 // lived, scoped, a fresh confirmation before a paid call) are Aha's part, recorded as social-token-short-lived.
 // Its check: test/csp.test.ts (the policy, and every built page in a browser with no violation).
 import { createHash } from "node:crypto";
 
 export const DIRECTIVES = {
+  "default-src": ["'self'"],
   "script-src": ["'self'", "https://static.cloudflareinsights.com"],
+  // The parts' and the prerendered pages' style attributes; stylesheets from the site only.
+  "style-src": ["'self'", "'unsafe-inline'"],
+  // KaTeX's and the site's faces; the build inlines the smallest as data: URLs.
+  "font-src": ["'self'", "data:"],
   // Aha's social API; the beacon's reports; this machine for ?social= while developing (src/lib/social/client.ts).
   "connect-src": ["'self'", "https://aha.tokensbeat.com", "https://cloudflareinsights.com", "https://static.cloudflareinsights.com", "http://localhost:*", "http://127.0.0.1:*"],
   // Commenters' avatars, from the hosts Aha accepts for them (backend/aha/bff/src/social/service.ts AVATAR); the favicon
@@ -21,6 +27,7 @@ export const DIRECTIVES = {
   "img-src": ["'self'", "data:", "blob:", "https://img.clerk.com", "https://images.clerk.dev", "https://avatars.githubusercontent.com", "https://lh3.googleusercontent.com", "https://www.gravatar.com"],
   "object-src": ["'none'"],
   "base-uri": ["'none'"],
+  "form-action": ["'self'"],
 };
 
 /** The text of each inline <script> (no src), as the browser hashes it. */

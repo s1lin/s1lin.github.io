@@ -42,15 +42,20 @@ test("the policy: the page's inline scripts by hash, scripts from the site and t
   const hash = (s: string) => `'sha256-${createHash("sha256").update(s).digest("base64")}'`;
   assert.deepEqual(inlineScripts(PAGE).length, 2);
   assert.deepEqual(directives["script-src"], ["'self'", "https://static.cloudflareinsights.com", ...inlineScripts(PAGE).map(hash)]);
-  assert.ok(!meta[1].includes("unsafe-inline") && !meta[1].includes("unsafe-eval"), "no unsafe-inline or unsafe-eval");
+  assert.ok(!directives["script-src"].some((s) => s.includes("unsafe")) && !meta[1].includes("unsafe-eval"), "no unsafe-inline or unsafe-eval for scripts");
   assert.deepEqual(directives["object-src"], ["'none'"]);
   assert.deepEqual(directives["base-uri"], ["'none'"]);
   assert.ok(directives["connect-src"].includes("https://aha.tokensbeat.com"), "Aha's social API");
   // requests and images go to named hosts only: an image's address is a way out for a token too
-  for (const d of ["connect-src", "img-src"]) assert.ok(!directives[d].includes("https:") && !directives[d].includes("*") && !directives[d].includes("http:"), `${d}: named hosts only`);
+  assert.deepEqual(directives["default-src"], ["'self'"], "every kind not named: the site only");
+  for (const [d, sources] of Object.entries(directives)) {
+    for (const wide of ["https:", "http:", "*"]) assert.ok(!sources.includes(wide), `${d}: named hosts only, no ${wide}`);
+    assert.equal(sources.includes("data:"), ["img-src", "font-src"].includes(d), `${d}: data: only for images and fonts`);
+  }
+  assert.deepEqual(directives["style-src"], ["'self'", "'unsafe-inline'"], "stylesheets from the site only");
   assert.ok(directives["img-src"].includes("https://img.clerk.com"), "Clerk's avatars");
   assert.equal(policy(PAGE), meta[1]);
-  assert.deepEqual(Object.keys(DIRECTIVES), ["script-src", "connect-src", "img-src", "object-src", "base-uri"]);
+  assert.deepEqual(Object.keys(DIRECTIVES), ["default-src", "script-src", "style-src", "font-src", "connect-src", "img-src", "object-src", "base-uri", "form-action"]);
   // once only, and only where a charset says where the head starts
   assert.throws(() => withCsp(html), /has a policy already/);
   assert.throws(() => withCsp("<html><head></head></html>"), /no <meta charset/);
