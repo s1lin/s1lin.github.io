@@ -46,7 +46,9 @@ test("the policy: the page's inline scripts by hash, scripts from the site and t
   assert.deepEqual(directives["object-src"], ["'none'"]);
   assert.deepEqual(directives["base-uri"], ["'none'"]);
   assert.ok(directives["connect-src"].includes("https://aha.tokensbeat.com"), "Aha's social API");
-  assert.ok(!directives["connect-src"].includes("https:") && !directives["connect-src"].includes("*"), "data goes to named hosts only");
+  // requests and images go to named hosts only: an image's address is a way out for a token too
+  for (const d of ["connect-src", "img-src"]) assert.ok(!directives[d].includes("https:") && !directives[d].includes("*") && !directives[d].includes("http:"), `${d}: named hosts only`);
+  assert.ok(directives["img-src"].includes("https://img.clerk.com"), "Clerk's avatars");
   assert.equal(policy(PAGE), meta[1]);
   assert.deepEqual(Object.keys(DIRECTIVES), ["script-src", "connect-src", "img-src", "object-src", "base-uri"]);
   // once only, and only where a charset says where the head starts
