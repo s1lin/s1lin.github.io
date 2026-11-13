@@ -421,6 +421,8 @@ export function Demo({ id }: { id: string }) {
 
     case "dialog":
       return <demos.DialogDemo />;
+    case "command":
+      return <demos.CommandDemo />;
     case "menu":
       return <demos.MenuDemo />;
     case "dropdown":

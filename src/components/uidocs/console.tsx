@@ -35,6 +35,7 @@ import { Button } from "@/ui/button";
 import { Checkbox } from "@/ui/checkbox";
 import { Code } from "@/ui/code";
 import { Combobox } from "@/ui/combobox";
+import { Command } from "@/ui/command";
 import { Copy } from "@/ui/copy";
 import { DescriptionList } from "@/ui/description-list";
 import { Dropdown, DropdownCheckItem, DropdownGroup, DropdownItem, DropdownLabel, DropdownList, DropdownRadioGroup, DropdownRadioItem, DropdownSeparator, DropdownSub, DropdownSubList, DropdownSubTrigger, DropdownTrigger } from "@/ui/dropdown";
@@ -1452,6 +1453,80 @@ export function SwitchersDemo() {
 }
 
 // ------------------------------------------------------------------ overlays
+
+/** The command palette's demo: pages and keys of a console, ranked by a plain prefix, then words, then anywhere. */
+type PaletteHit = { id: string; group: "pages" | "keys"; name: string; where: string };
+const PALETTE: PaletteHit[] = [
+  { id: "p-keys", group: "pages", name: "Access keys", where: "Account" },
+  { id: "p-usage", group: "pages", name: "Requests", where: "Access keys" },
+  { id: "p-orders", group: "pages", name: "My orders", where: "Account" },
+  { id: "p-plaza", group: "pages", name: "Service Plaza", where: "Models" },
+  { id: "p-profile", group: "pages", name: "Profile", where: "Account" },
+  { id: "k-prod", group: "keys", name: "prod-backend", where: "qwen-3.8" },
+  { id: "k-notebook", group: "keys", name: "notebook", where: "every model" },
+  { id: "k-ci", group: "keys", name: "ci-runner", where: "gemini-3.8-flash" },
+];
+
+export function CommandDemo() {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [scope, setScope] = useState("all");
+  const q = query.trim().toLowerCase();
+  const score = (h: PaletteHit) => {
+    const n = h.name.toLowerCase();
+    return !q ? 1 : n.startsWith(q) ? 3 : n.split(/[\s-]+/).some((w) => w.startsWith(q)) ? 2 : n.includes(q) ? 1 : 0;
+  };
+  const hits = PALETTE.filter((h) => (scope === "all" || h.group === scope) && score(h) > 0).sort((a, b) => score(b) - score(a));
+  const groups = [
+    { key: "pages", label: "Pages", items: hits.filter((h) => h.group === "pages") },
+    { key: "keys", label: "Keys", items: hits.filter((h) => h.group === "keys") },
+  ];
+  return (
+    <>
+      <p className="ud-row">
+        <Button icon={<Search />} onClick={() => setOpen(true)}>
+          Search or jump to…
+        </Button>
+      </p>
+      <Command
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setQuery("");
+        }}
+        label="Search"
+        placeholder="Search or jump to…"
+        prefix={<Search aria-hidden="true" />}
+        query={query}
+        onQueryChange={setQuery}
+        scopes={[
+          { value: "all", label: "All" },
+          { value: "pages", label: "Pages" },
+          { value: "keys", label: "Keys" },
+        ]}
+        scope={scope}
+        onScopeChange={setScope}
+        scopesLabel="Look in"
+        groups={groups}
+        itemKey={(h) => h.id}
+        renderItem={(h) => `${h.name} · ${h.where}`}
+        onChoose={(h) => {
+          setOpen(false);
+          setQuery("");
+          toast({ title: `Opened ${h.name}`, description: "Nothing was opened: this is the docs page.", status: "ok" });
+        }}
+        empty={`Nothing matches “${query.trim()}”.`}
+        foot={
+          <>
+            <span>↑↓ move</span>
+            <span>↵ open</span>
+            <span>esc close</span>
+          </>
+        }
+      />
+    </>
+  );
+}
 
 export function DialogDemo() {
   const [open, setOpen] = useState<"" | "create" | "revoke" | "once">("");

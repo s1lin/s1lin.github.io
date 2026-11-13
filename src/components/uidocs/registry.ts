@@ -1695,6 +1695,58 @@ const LANGS = [
     ],
   },
   {
+    id: "command",
+    name: "Command",
+    zh: "命令面板",
+    keywords: ["command palette", "palette", "quick open", "jump to", "spotlight", "search", "cmdk", "ctrl k", "搜索", "命令", "快速打开"],
+    group: "overlays",
+    item: "command",
+    exports: ["Command", "CommandGroup", "CommandScope"],
+    summary:
+      "A command palette: a dialog that is a search box over results in groups. The app ranks what matches (from memory, from a server, or both) and the palette shows it: the first result is chosen, the arrows move, Enter or a click opens, Esc closes. Chips under the box narrow where it looks. On a phone it is the whole screen.",
+    example: "live",
+    usage: `import { Command } from "@/components/s1lin/command";
+
+<Command open={open} onClose={() => setOpen(false)} label="Search" placeholder="Search or jump to…"
+  query={query} onQueryChange={setQuery}
+  scopes={[{ value: "all", label: "All" }, { value: "pages", label: "Pages" }]} scope={scope} onScopeChange={setScope} scopesLabel="Look in"
+  groups={[{ key: "pages", label: "Pages", items: pages }, { key: "keys", label: "Keys", items: keys }]}
+  itemKey={(r) => r.id} renderItem={(r) => r.name}
+  onChoose={(r) => { setOpen(false); go(r.href); }}
+  empty={\`Nothing matches “\${query}”.\`} status={loading ? "Searching…" : undefined}
+  foot={<><kbd>↑↓</kbd> move <kbd>↵</kbd> open <kbd>esc</kbd> close</>} />`,
+    props: [
+      { name: "open", type: "boolean", required: true, desc: "Open or not. The palette follows it." },
+      { name: "onClose", type: "() => void", required: true, desc: "Asked to close: Esc, the close button, the veil, or the browser. Set `open` false here." },
+      { name: "label", type: "string", required: true, desc: "Names the dialog, the box and the list: \"Search\"." },
+      { name: "query", type: "string", required: true, desc: "What is typed; the app keeps it, so it can rank, search a server and clear it." },
+      { name: "onQueryChange", type: "(query: string) => void", required: true, desc: "Called on every edit." },
+      { name: "placeholder", type: "string", desc: "The box's hint." },
+      { name: "groups", type: "CommandGroup<T>[]", required: true, desc: "`{ key, label?, items }`: the results to show now, ranked by the app. An empty group is left out; a new list chooses its first result again." },
+      { name: "itemKey", type: "(item: T) => string", required: true, desc: "A result's key, unique among them." },
+      { name: "renderItem", type: "(item: T) => ReactNode", required: true, desc: "What a result shows; its words are its name for screen readers." },
+      { name: "onChoose", type: "(item: T) => void", required: true, desc: "Enter or a click on a result. The palette stays open: close it here when the choice takes the reader away." },
+      { name: "scopes", type: "CommandScope[]", desc: "`{ value, label }`: chips under the box, a radio group in the filled design (no line; the chosen one on `--s1-chosen`)." },
+      { name: "scope", type: "string", desc: "The chosen chip's value." },
+      { name: "onScopeChange", type: "(scope: string) => void", desc: "Called with the chip chosen by a click or the arrows." },
+      { name: "scopesLabel", type: "string", desc: "The chips' name: \"Look in\"." },
+      { name: "prefix", type: "ReactNode", desc: "Before the text: a magnifier." },
+      { name: "empty", type: "ReactNode", desc: "Shown in place of the list when it is empty, and said as a status." },
+      { name: "status", type: "ReactNode", desc: "A line under the list, said as it changes: \"Searching…\", an error with its Retry." },
+      { name: "foot", type: "ReactNode", desc: "The foot: the keys' hints. Left out on a full screen." },
+      { name: "fullScreen", type: "boolean", default: "false", desc: "The whole screen, as on a phone; under 640px it is anyway." },
+      { name: "closeLabel", type: "string", default: "\"Close\"", desc: "The close button's name; it shows on a full screen only." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "Focus stays in the box: ↑ and ↓ move through every result across the groups and wrap, Enter opens the chosen one, Esc closes and focus goes back to what opened it. An IME's Enter (the one that commits 对话 typed in pinyin) never opens a result. Tab reaches the chips, whose arrows choose; then the close button on a full screen." },
+      { label: "Accessibility", text: "A modal dialog named by `label`; the box is a combobox whose listbox is always open, the result under the arrows its `aria-activedescendant` and `aria-selected`; results sit in `group`s named by their headings. What the empty list says, and the status line, are live regions in the page from the moment it opens. The page behind is inert." },
+      { label: "Phone", text: "Under 640px, or with `fullScreen`, it fills the screen: the box at the top with the keyboard under the list, a close button at the box's end, and no keys' hints." },
+      { label: "Chinese", text: "The group headings drop their tracking and capitals in Chinese and stay at 12px and 500. An IME's Enter only commits the word typed; the next Enter opens the result. A pointer moving over a result chooses it and a press never takes focus from the box, so typing in either language goes on." },
+    ],
+    where: "Aha's search (Ctrl/Cmd K): places, apps, actions, tasks by their titles and words, files.",
+  },
+  {
     id: "menu",
     name: "Menu",
     zh: "菜单",

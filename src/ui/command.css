@@ -1,0 +1,95 @@
+/* Command (command.tsx): Dialog's sheet near the top of the screen, a search box for its head with a hairline under it,
+   the scope chips as a filled switcher (no line, the chosen one on --s1-chosen), Menu's list of results in their groups
+   with the result under the arrows in reverse, a status line, and the keys' hints at the foot. Under 640px, or with
+   --full, it is the whole screen and shows its close button; the foot is left out there. */
+@layer components {
+  .s1-command {
+    box-sizing: border-box; width: min(640px, calc(100vw - 32px)); max-width: none; max-height: min(560px, calc(100vh - 96px)); max-height: min(560px, calc(100dvh - 96px));
+    margin: 12vh auto auto; padding: 0; overflow: visible;
+    border: 1px solid var(--s1-rule-strong); background: var(--s1-paper); color: var(--s1-ink);
+    box-shadow: 12px 12px 0 -1px var(--s1-paper-2), 12px 12px 0 0 var(--s1-rule);
+    font: 400 15px/1.5 var(--s1-font-sans);
+  }
+  .s1-command::backdrop { background: color-mix(in srgb, var(--s1-paper) 78%, transparent); backdrop-filter: blur(2px); }
+  :root:has(.s1-command:modal) { overflow: hidden; }
+
+  .s1-command__box { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; max-height: inherit; }
+  .s1-command__head { border-bottom: 1px solid var(--s1-rule); }
+  .s1-command__field { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 8px 0 16px; }
+  .s1-command__prefix { display: inline-flex; flex: none; color: var(--s1-ink-2); }
+  .s1-command__prefix svg { width: 18px; height: 18px; }
+  .s1-command__input {
+    flex: 1 1 auto; min-width: 0; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 0; outline: none;
+    background: transparent; color: var(--s1-ink); font: 400 17px/1.3 var(--s1-font-sans);
+  }
+  .s1-command__input::placeholder { color: var(--s1-ink-3); opacity: 1; }
+  /* the box's focus is the dialog's: the line under the head turns to the ink */
+  .s1-command__head:focus-within { border-bottom-color: var(--s1-ink); }
+  .s1-command__close {
+    display: none; align-items: center; justify-content: center; flex: none; width: 40px; height: 40px; margin: 0; padding: 0;
+    border: 0; background: none; color: var(--s1-ink); cursor: pointer;
+  }
+  .s1-command__close:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: -2px; }
+  .s1-command__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+  /* The scopes: a filled switcher, never a line round an option (owner, 2026-11-02). */
+  .s1-command__scopes { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 10px 12px; }
+  .s1-command__scope {
+    box-sizing: border-box; min-height: 28px; margin: 0; padding: 0 12px; border: 0; border-radius: 0;
+    background: transparent; color: var(--s1-ink-2); cursor: pointer; font: 500 13px/1 var(--s1-font-sans);
+  }
+  .s1-command__scope:hover { background: var(--s1-paper-2); color: var(--s1-ink); }
+  .s1-command__scope[aria-checked="true"], .s1-command__scope[aria-checked="true"]:hover { background: var(--s1-chosen, var(--s1-ink)); color: var(--s1-on-chosen, var(--s1-paper)); cursor: default; }
+  .s1-command__scope:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
+
+  .s1-command__list { min-height: 0; padding: 4px; overflow-y: auto; overscroll-behavior: contain; color-scheme: var(--s1-scheme); font: 400 14px/1.35 var(--s1-font-sans); }
+  .s1-command__group + .s1-command__group { margin-top: 4px; }
+  .s1-command__label {
+    padding: 10px 12px 4px; color: var(--s1-ink-2);
+    font: 500 10px/1.2 var(--s1-font-mono); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .s1-command__option {
+    display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 40px; padding: 6px 12px;
+    overflow-wrap: anywhere; cursor: pointer;
+  }
+  .s1-command__option[data-active] { background: var(--s1-ink); color: var(--s1-paper); }
+  .s1-command__empty { padding: 14px 12px; color: var(--s1-ink-2); font-size: 14px; line-height: 1.45; }
+  /* the empty list's words for screen readers: in the page from the start, out of sight */
+  .s1-command__said {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  .s1-command__status { padding: 8px 16px; border-top: 1px solid var(--s1-rule); color: var(--s1-ink-2); font-size: 13px; line-height: 1.45; }
+  .s1-command__status:empty { display: none; }
+  .s1-command__foot {
+    display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 16px; border-top: 1px solid var(--s1-rule);
+    color: var(--s1-ink-2); font: 400 12px/1.4 var(--s1-font-mono);
+  }
+
+  /* The whole screen: a phone, or `fullScreen`. The close button shows (a phone has no Esc), the keys' hints do not. */
+  .s1-command.s1-command--full {
+    width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; border: 0; box-shadow: none;
+  }
+  .s1-command--full .s1-command__box { height: 100%; max-height: none; }
+  .s1-command--full .s1-command__close { display: inline-flex; }
+  .s1-command--full .s1-command__foot { display: none; }
+  .s1-command--full .s1-command__input { font-size: 16px; }
+  @media (max-width: 639.98px) {
+    .s1-command { width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; border: 0; box-shadow: none; }
+    .s1-command__box { height: 100%; max-height: none; }
+    .s1-command__close { display: inline-flex; }
+    .s1-command__foot { display: none; }
+    .s1-command__input { font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-command[open] { animation: s1-command-in 140ms ease-out; }
+  }
+  @keyframes s1-command-in { from { opacity: 0; transform: translateY(-6px); } }
+
+  @media (forced-colors: active) {
+    .s1-command__option[data-active] { outline: 2px solid Highlight; outline-offset: -2px; }
+    .s1-command__scope[aria-checked="true"] { outline: 2px solid Highlight; }
+  }
+
+  /* Chinese: never tracked or cased, at 12px at least and 500, so the strokes hold at a label's size. */
+  .s1-command__label:lang(zh), .s1-command__label [lang|="zh"] { font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+}

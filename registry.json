@@ -958,6 +958,34 @@
       ]
     },
     {
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "A command palette: a dialog that is a search box over results in groups, ranked by the app; the first is chosen, the arrows move and wrap, Enter or a click opens, Esc closes; scope chips under the box as a filled switcher with no line; a status line and the keys' hints; the whole screen on a phone, with a close button.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/words.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/command.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/command.tsx"
+        },
+        {
+          "path": "src/ui/command.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/command.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "overlays"
+      ]
+    },
+    {
       "name": "menu",
       "type": "registry:ui",
       "title": "Menu",
