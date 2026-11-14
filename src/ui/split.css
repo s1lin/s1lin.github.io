@@ -1,6 +1,7 @@
 /* Split: two panes side by side, a half each, or one pane filling the frame. The pane at the end is set off by a
-   hairline; the active one carries a 2px rule along its top while two are shown (one pane alone needs no mark). No
-   line round a pane. Every colour is a token, so an app's theme carries it; --s1-split-mark recolours the rule. */
+   hairline; the active one carries a 2px rule along its top while two are shown (one pane alone needs no mark). Both
+   are drawn over the panes' own grounds, so a page that paints its background keeps them. No line round a pane.
+   Every colour is a token, so an app's theme carries it; --s1-split-mark recolours the rule. */
 @layer components {
   .s1-split {
     flex: 1 1 auto;
@@ -27,7 +28,15 @@
   }
   .s1-split[data-split] > .s1-split__pane[data-side="end"] {
     order: 2;
-    box-shadow: inset 1px 0 0 var(--s1-rule-strong);
+  }
+  .s1-split[data-split] > .s1-split__pane[data-side="end"]::before {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    inset: 0 auto 0 0;
+    width: 1px;
+    background: var(--s1-rule-strong);
+    pointer-events: none;
   }
   .s1-split[data-split] > .s1-split__pane[data-active]::after {
     content: "";
@@ -39,8 +48,8 @@
     pointer-events: none;
   }
   @media (forced-colors: active) {
-    .s1-split[data-split] > .s1-split__pane[data-side="end"] {
-      border-inline-start: 1px solid CanvasText;
+    .s1-split[data-split] > .s1-split__pane[data-side="end"]::before {
+      background: CanvasText;
     }
     .s1-split[data-split] > .s1-split__pane[data-active]::after {
       background: Highlight;

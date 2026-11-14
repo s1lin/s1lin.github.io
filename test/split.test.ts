@@ -48,12 +48,12 @@ test("Split on a server: a named group, split only with two panes; each pane a n
   assert.match(one, /<section aria-label="Trip plan" class="s1-split__pane" data-side="start" data-active="true">a<\/section>/);
 });
 
-test("Split's stylesheet: two equal columns only while split, the end pane set off by a hairline, the active one by a rule, no border round a pane, tokens only", () => {
+test("Split's stylesheet: two equal columns only while split, the end pane set off by a hairline and the active one by a rule, both over the panes' own grounds, no border round a pane, tokens only", () => {
   const css = readFileSync(path.join(ROOT, "src/ui/split.css"), "utf8");
   assert.match(css, /\.s1-split\[data-split\] \{\s*display: grid;\s*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);/);
-  assert.match(css, /\[data-side="end"\] \{\s*order: 2;\s*box-shadow: inset 1px 0 0 var\(--s1-rule-strong\);/);
+  assert.match(css, /\[data-side="end"\]::before \{[^}]*z-index: 2;[^}]*width: 1px;[^}]*background: var\(--s1-rule-strong\);/, "the hairline is drawn over the pane's own ground");
+  assert.match(css, /\[data-active\]::after \{[^}]*z-index: 2;/, "so is the rule");
   assert.match(css, /\[data-active\]::after \{[^}]*height: 2px;[^}]*background: var\(--s1-split-mark, var\(--s1-accent\)\);/);
-  const outside = css.replace(/@media \(forced-colors: active\) \{[\s\S]*?\n {2}\}\n/, "");
-  assert.doesNotMatch(outside, /\bborder(-[a-z-]+)?\s*:/, "no border round a pane (forced colours draw one)");
-  assert.doesNotMatch(outside, /#[0-9a-f]{3,8}\b|rgba?\(/i, "colours are tokens");
+  assert.doesNotMatch(css, /\bborder(-[a-z-]+)?\s*:/, "no border round a pane");
+  assert.doesNotMatch(css.replace(/@media \(forced-colors: active\) \{[\s\S]*?\n {2}\}\n/, ""), /#[0-9a-f]{3,8}\b|rgba?\(/i, "colours are tokens");
 });
