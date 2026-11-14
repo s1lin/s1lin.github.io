@@ -36,6 +36,7 @@ const out = mkdtempSync(path.join(tmpdir(), "s1lin-sidenav-"));
 after(() => rmSync(out, { recursive: true, force: true }));
 
 const ENTRY = `
+import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { SideNav } from ${JSON.stringify(path.join(ROOT, "src/ui/side-nav.tsx"))};
@@ -50,6 +51,19 @@ const chosen = [];
 // Two sidebars of 24 pages, at the last: one whose panel scrolls (the docs' index), one whose tree scrolls by itself
 // with its footer held under it (an app's column: the console's and the admin's, 2026-11-06).
 const many = [{ id: "all", title: "Pages", items: Array.from({ length: 24 }, (_, n) => ({ id: "p" + n, label: "Page " + n, href: "#p" + n })) }];
+// An app's column in two (split): new task, what needs you (a count) and places as tiles stay put; the days scroll.
+const days = [{ id: "today", title: "Today", items: Array.from({ length: 20 }, (_, n) => ({ id: "d" + n, label: "Task " + n, href: "#d" + n })) }];
+const split = [
+  { id: "head", items: [{ id: "new", label: "New task", icon: svg, onSelect: () => {} }, { id: "needs", label: "Needs you", icon: svg, count: 3, countLabel: "3 need you", onSelect: () => {} }, { id: "zero", label: "Nothing", icon: svg, count: 0, onSelect: () => {} }] },
+  { id: "places", tiles: true, items: ["Bots", "Projects", "Files", "Apps", "Explore", "Code"].map((p) => ({ id: p, label: p, icon: svg, href: "#" + p })) },
+  ...days,
+];
+// Pins in the user's order: Move up, Move down, and a handle to drag.
+function Reorder() {
+  const [ids, setIds] = useState(["a", "b", "c", "d"]);
+  window.order = ids;
+  return <SideNav label="Pinned" sections={[{ id: "pins", title: "Pinned", reorder: { onReorder: setIds, labels: { up: "Move up", down: "Move down", handle: "Drag to move" } }, items: ids.map((id) => ({ id, label: "Pin " + id, icon: svg, href: "#" + id })) }]} />;
+}
 const sheet = document.createElement("style");
 sheet.textContent = \`
   #by-panel .s1-sidenav__panel { max-height: 200px; overflow-y: auto; }
@@ -72,6 +86,10 @@ flushSync(() =>
       <div id="em"><EmptyState mark={svg} title="No friends yet" /><EmptyState size="sm" mark={svg} title="None" /></div>
       <div id="by-panel" style={{ width: 280 }}><SideNav label="By panel" sections={many} current="p23" /></div>
       <div id="by-tree" style={{ width: 280 }}><SideNav label="By tree" sections={many} current="p23" footer={<p>Account</p>} /></div>
+      <div id="split" style={{ width: 280, height: 420, display: "flex", flexDirection: "column" }}><SideNav label="Split" split="today" sections={split} current="d19" footer={<p>Account</p>} style={{ flex: "1 1 auto" }} /></div>
+      <div id="rail-count" style={{ width: 56 }}><SideNav label="Rail count" rail split="today" sections={split} current="Files" /></div>
+      <div id="reorder" style={{ width: 280 }}><Reorder /></div>
+      <div id="tiles" style={{ width: 280 }}><SideNav label="Tiles" sections={[split[1]]} current="Files" /></div>
     </>,
   ),
 );
@@ -120,8 +138,41 @@ if (!phone) {
     };
     $("#by-tree .s1-sidenav__tree").scrollTop = 0;
     got.follow.tree.footMoved = top("#by-tree .s1-sidenav__foot") - foot;
+    // split: the head (new task, needs, tiles) stays put over the days, which scrolled to the current one by themselves
+    const navTop = $("#split").getBoundingClientRect().top;
+    got.split = {
+      top: [...document.querySelectorAll("#split .s1-sidenav__top > li")].length,
+      headAt: Math.round($("#split .s1-sidenav__top").getBoundingClientRect().top - navTop),
+      scrolled: $("#split .s1-sidenav__tree").scrollTop > 0,
+      panel: $("#split .s1-sidenav__panel").scrollTop,
+      shown: shown('#split [aria-current="page"]', "#split .s1-sidenav__tree"),
+      footEnd: Math.round($("#split .s1-sidenav__foot").getBoundingClientRect().bottom - $("#split").getBoundingClientRect().bottom),
+    };
+    // an item's count: the number, said with its words; none for 0; in the rail on the icon's corner
+    const badge = $('#split button.s1-sidenav__item .s1-sidenav__badge');
+    got.count = { text: badge.textContent, shown: badge.querySelector('[aria-hidden="true"]').textContent, zero: [...document.querySelectorAll("#split .s1-sidenav__badge")].length, railPos: style("#rail-count .s1-sidenav__badge").position, railInside: (() => { const b = $("#rail-count .s1-sidenav__badge").getBoundingClientRect(), i = $("#rail-count .s1-sidenav__badge").closest(".s1-sidenav__item").getBoundingClientRect(); return b.right <= i.right + 1 && b.top >= i.top - 1; })() };
+    // tiles: three to a row; the rail draws them as items
+    const tiles = [...document.querySelectorAll("#split .s1-sidenav__items--tiles .s1-sidenav__item")].map((i) => Math.round(i.getBoundingClientRect().top));
+    got.tiles = { columns: style("#split .s1-sidenav__items--tiles").gridTemplateColumns.split(" ").length, rows: [...new Set(tiles)].length, current: style('#tiles .s1-sidenav__items--tiles [aria-current="page"]').boxShadow, rail: !!$("#rail-count .s1-sidenav__items--tiles") };
     got.mark = { md: box("#em .s1-empty--md .s1-empty__own"), sm: box("#em .s1-empty--sm .s1-empty__own"), color: style("#em .s1-empty__own").color, ink2: rgb(getComputedStyle(document.documentElement).getPropertyValue("--s1-ink-2").trim()), frame: !!$("#em .s1-empty__mark") };
   });
+  // reorder: Move down on the first, Move up is off at the top; then a drag of the last above the second
+  const moveBtn = (name) => [...document.querySelectorAll("#reorder .s1-sidenav__move")].find((b) => b.getAttribute("aria-label") === name);
+  step(() => { got.reorder = { links: document.querySelectorAll("#reorder a").length, upFirst: moveBtn("Move up: Pin a").getAttribute("aria-disabled"), downLast: moveBtn("Move down: Pin d").getAttribute("aria-disabled") }; moveBtn("Move down: Pin a").click(); });
+  step(() => { got.reorder.afterDown = [...window.order]; moveBtn("Move up: Pin a").click(); });
+  step(() => { got.reorder.afterUp = [...window.order]; moveBtn("Move up: Pin a").click(); });
+  step(() => {
+    got.reorder.atTopNoop = [...window.order];
+    const rows = [...document.querySelectorAll("#reorder .s1-sidenav__entry")];
+    const grip = rows[3].querySelector(".s1-sidenav__grip");
+    const g = grip.getBoundingClientRect(), second = rows[1].getBoundingClientRect();
+    const ev = (type, y) => grip.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientX: g.left + 4, clientY: y }));
+    ev("pointerdown", g.top + g.height / 2);
+    window.dragAt = second.top + second.height / 2 - 4;
+  });
+  step(() => { const grip = document.querySelectorAll("#reorder .s1-sidenav__grip")[3]; grip.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
+  step(() => { got.reorder.held = $("#reorder [data-held] .s1-sidenav__label").textContent; got.reorder.preview = [...document.querySelectorAll("#reorder .s1-sidenav__label")].map((l) => l.textContent); $("#reorder [data-held] .s1-sidenav__grip").dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
+  step(() => { got.reorder.afterDrag = [...window.order]; got.reorder.heldAfter = !!$("#reorder [data-held]"); });
 } else {
   const bar = () => $("#phone .s1-sidenav__bar");
   const panel = () => $("#phone .s1-sidenav__panel");
@@ -206,6 +257,25 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
   // the current item kept in view by scrolling the box that scrolls: the panel, or the tree under which the footer holds
   assert.deepEqual(desk.follow.panel, { scrolled: true, shown: true }, "a panel that scrolls is scrolled to the current item");
   assert.deepEqual(desk.follow.tree, { scrolled: true, panel: 0, shown: true, footEnd: 0, footMoved: 0 }, "a tree that scrolls by itself is scrolled, the footer held at the foot");
+  // split: the head stays at the top of the nav while the days scroll by themselves to the current one; the footer held
+  assert.deepEqual(desk.split, { top: 2, headAt: 0, scrolled: true, panel: 0, shown: true, footEnd: 0 }, "a split nav keeps its head and scrolls its tree");
+  // an item's count, and its words for a screen reader; none for 0; in the rail on the icon's corner
+  assert.deepEqual(desk.count, { text: "3, 3 need you", shown: "3", zero: 1, railPos: "absolute", railInside: true });
+  // tiles: three to a row (six places, two rows), the current one barred under its label; the rail draws plain items
+  assert.equal(desk.tiles.columns, 3);
+  assert.equal(desk.tiles.rows, 2);
+  assert.match(desk.tiles.current, /inset/);
+  assert.equal(desk.tiles.rail, false);
+  // reorder: no links meanwhile; Move up off at the top, Move down at the bottom; each move gives the new order; a drag
+  // shows the order as it would be and gives it when let go
+  assert.deepEqual([desk.reorder.links, desk.reorder.upFirst, desk.reorder.downLast], [0, "true", "true"]);
+  assert.deepEqual(desk.reorder.afterDown, ["b", "a", "c", "d"]);
+  assert.deepEqual(desk.reorder.afterUp, ["a", "b", "c", "d"]);
+  assert.deepEqual(desk.reorder.atTopNoop, ["a", "b", "c", "d"], "Move up at the top does nothing");
+  assert.equal(desk.reorder.held, "Pin d");
+  assert.deepEqual(desk.reorder.preview, ["Pin a", "Pin d", "Pin b", "Pin c"]);
+  assert.deepEqual(desk.reorder.afterDrag, ["a", "d", "b", "c"]);
+  assert.equal(desk.reorder.heldAfter, false);
   assert.deepEqual(desk.mark.md, [56, 56]);
   assert.deepEqual(desk.mark.sm, [40, 40]);
   assert.equal(desk.mark.color, desk.mark.ink2);

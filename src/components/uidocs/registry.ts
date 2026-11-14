@@ -1546,9 +1546,9 @@ import { metroHue } from "@/components/s1lin/metro-map";
     keywords: ["sidebar", "nav", "navigation", "index", "table of contents", "drawer", "侧栏", "目录", "导航"],
     group: "navigation",
     item: "side-nav",
-    exports: ["SideNav", "SideNavProps", "SideNavItem", "SideNavSection", "SideNavLinkProps"],
+    exports: ["SideNav", "SideNavProps", "SideNavItem", "SideNavSection", "SideNavLinkProps", "SideNavReorder"],
     summary:
-      "The index beside these docs, as a part: a title in small capitals over a rule; chapters in mono capitals, numbered; families with a count; items in the sans on a hairline rail, the current one in the ink with a 2px bar and no ground. An app's sidebar adds what it needs: an icon before an item, a time or a count after it, a status mark, an action at the end of a section (a \"+\"), nested items, sections that open and close. It folds to a rail of icons, and on a phone it is one bar that says where you are and opens the tree as a sheet.",
+      "The index beside these docs, as a part: a title in small capitals over a rule; chapters in mono capitals, numbered; families with a count; items in the sans on a hairline rail, the current one in the ink with a 2px bar and no ground. An app's sidebar adds what it needs: an icon before an item, a time or a count after it, a status mark, an action at the end of a section (a \"+\"), nested items, sections that open and close, places as tiles, a head that stays put over a tree that scrolls, and a section to put in another order. It folds to a rail of icons, and on a phone it is one bar that says where you are and opens the tree as a sheet.",
     example: "live",
     usage: `import { SideNav, type SideNavSection } from "@/components/s1lin/side-nav";
 import { Button } from "@/components/s1lin/button";
@@ -1578,11 +1578,24 @@ const sections: SideNavSection[] = [
 />
 
 // the docs' index: numbered chapters, families with a count, places on one page
-<SideNav label="Library" title="Index" currentType="location" sheet={900} sections={chapters} current={active} here={where} />`,
+<SideNav label="Library" title="Index" currentType="location" sheet={900} sections={chapters} current={active} here={where} />
+
+// an app's column in two: new task, what waits (a count) and the places as tiles stay put; the days scroll under them
+<SideNav label={t("Main")} split="today" sections={[
+  { id: "head", items: [{ id: "new", label: t("New task"), icon: <Pencil />, onSelect: newTask },
+                        { id: "needs", label: t("Needs you"), icon: <Bell />, count: 3, countLabel: t("3 need you"), href: "/needs" }] },
+  { id: "places", tiles: true, items: places },
+  { id: "today", title: t("Today"), items: tasks },
+]} />
+
+// pins in the user's order: a handle to drag, Move up and Move down
+<SideNav label={t("Pinned")} sections={[{ id: "pins", title: t("Pinned"), items: pins,
+  reorder: { onReorder: setOrder, labels: { up: t("Move up"), down: t("Move down"), handle: t("Drag to move") } } }]} />`,
     props: [
       { name: "label", type: "string", required: true, desc: "The nav landmark's name: \"Main\", \"Library\", \"Account\"." },
-      { name: "sections", type: "SideNavSection[]", required: true, desc: "The tree. A section: `{ id, title?, text?, number?, count?, action?, href?, onSelect?, collapsible?, defaultOpen?, sections?, items?, lang? }`. A `number` sets it as a chapter (mono capitals, its contents indented); without one it is a family or a list (smaller capitals, `count` or `action` at the end). A section with no title shows its items alone." },
-      { name: "SideNavItem", type: "{ id, label, text?, href?, onSelect?, icon?, meta?, status?, statusLabel?, items?, disabled?, lang? }", desc: "An item: `href` makes it a link (through `renderLink`), else a button that calls `onSelect`. `icon` 16px before the label; `meta` after it in mono (\"2m\", a count, a Badge); `status` a Glyph shape, said by `statusLabel`; `items` nest under it. `text` is the label in plain words where it is not a string." },
+      { name: "sections", type: "SideNavSection[]", required: true, desc: "The tree. A section: `{ id, title?, text?, number?, count?, action?, href?, onSelect?, collapsible?, defaultOpen?, sections?, items?, tiles?, reorder?, lang? }`. A `number` sets it as a chapter (mono capitals, its contents indented); without one it is a family or a list (smaller capitals, `count` or `action` at the end). A section with no title shows its items alone. `tiles` lays its items out three to a row, the icon over the label (the rail draws them as items). `reorder` puts them in another order (`SideNavReorder`)." },
+      { name: "SideNavItem", type: "{ id, label, text?, href?, onSelect?, icon?, meta?, status?, statusLabel?, count?, countLabel?, items?, disabled?, lang? }", desc: "An item: `href` makes it a link (through `renderLink`), else a button that calls `onSelect`. `icon` 16px before the label; `meta` after it in mono (\"2m\", a Badge); `status` a Glyph shape, said by `statusLabel`; `count` how many wait there, a small number at its end (on the icon's corner in the rail; none for 0), said by `countLabel`; `items` nest under it. `text` is the label in plain words where it is not a string." },
+      { name: "SideNavReorder", type: "{ onReorder: (ids: string[]) => void; labels: { up, down, handle } }", desc: "A section's `reorder`: each item gets a handle to drag (pointer events, so a mouse, a finger or a pen; Esc puts it back) and Move up and Move down buttons for the keyboard, named in the page's language. The items are not links meanwhile. `onReorder` gets the new order of the ids." },
       { name: "title", type: "ReactNode", desc: "The line over the tree, in small capitals over a rule: \"Index\"." },
       { name: "titleAction", type: "ReactNode", desc: "At the end of the title's line: Buttons (a new chat, fold the sidebar)." },
       { name: "current", type: "string | null", desc: "The id of the item or section you are at. It is marked `aria-current`, in the ink, with the 2px bar; the sections round it say `aria-current=\"true\"`." },
@@ -1597,11 +1610,12 @@ const sections: SideNavSection[] = [
       { name: "here", type: "ReactNode", desc: "Where you are, on the bar: the current section and item by default (\"Editorial · Button\")." },
       { name: "barLabel", type: "ReactNode", desc: "The bar's label; the title by default." },
       { name: "followCurrent", type: "boolean", default: "true", desc: "When the tree scrolls in its own box (the panel, or the tree itself where an app holds the footer under it), keep the current item in view by scrolling that box alone, never the page." },
+      { name: "split", type: "string", desc: "The tree in two: the sections before the one with this id stay put at the top over a hairline, and from it on they scroll by themselves under them, the footer held under both. Give the nav a height (its column's)." },
       { name: "footer", type: "ReactNode", desc: "Under the tree: the account, a note." },
       CLASS,
     ],
     notes: [
-      { label: "Accessibility", text: "A `nav` landmark named by `label`; the tree is lists (`ol` of sections, `ul` of items), so a screen reader says how many. The current item has `aria-current`; a collapsible head is a button with `aria-expanded` and `aria-controls`; icons are hidden and a status mark is said by its `statusLabel`. In the rail the label is still the item's name, and its tooltip. Focus is a 2px ring in the ink." },
+      { label: "Accessibility", text: "A `nav` landmark named by `label`; the tree is lists (`ol` of sections, `ul` of items), so a screen reader says how many. The current item has `aria-current`; a collapsible head is a button with `aria-expanded` and `aria-controls`; icons are hidden and a status mark is said by its `statusLabel`. In the rail the label is still the item's name, and its tooltip. A count is said with its `countLabel`. Reordering is never by pointer alone: each item's Move up and Move down are buttons named with the item (\"Move up: Thesis\"), off (`aria-disabled`) at the ends so focus stays on them. Focus is a 2px ring in the ink." },
       { label: "Keyboard", text: "Tab through the links; Enter follows one. On a phone the bar opens the sheet and focus goes to the current item; Tab and Shift+Tab stay among the bar and the sheet; Esc closes it and gives focus back to the bar." },
       { label: "Phone", text: "Turn the sheet on below your breakpoint with `sheet` (640, 768, 900, 1023 or `true`), all in CSS, so the server's HTML is right on any screen. Rows get taller in the sheet for a thumb." },
       { label: "Styles", text: "The nav sets no type of its own; the indent under a chapter is 2.4ch + 10px of the page's type, or `--s1-sidenav-indent`. Hold it in place (sticky, a scrolling box) from your own CSS: these docs keep the panel (`s1-sidenav__panel`) in a box that scrolls and fades at its foot." },

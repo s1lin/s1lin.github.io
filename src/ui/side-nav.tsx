@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type HTMLAttributes, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { cn } from "./cn";
 import { Glyph, type Status } from "./glyph";
 import { VisuallyHidden } from "./visually-hidden";
@@ -25,6 +25,13 @@ export interface SideNavItem {
   status?: Status;
   /** What the mark means, for screen readers: "running". */
   statusLabel?: string;
+  /**
+   * How many wait there, at the end of the item on a small ground (in the rail, on the icon's corner): "3". Nothing is
+   * drawn for 0. Say what it counts in `countLabel`.
+   */
+  count?: number;
+  /** What the count means, for screen readers: "3 need you". */
+  countLabel?: string;
   /** Items under this one, on a rail of their own. */
   items?: SideNavItem[];
   disabled?: boolean;
@@ -54,7 +61,20 @@ export interface SideNavSection {
   /** Sections under it: families under a chapter, folders under a list. */
   sections?: SideNavSection[];
   items?: SideNavItem[];
+  /** Its items as a grid of tiles, three to a row, the icon over the label: places a short column keeps one click away. */
+  tiles?: boolean;
+  /**
+   * Its items can be put in another order: each has a handle to drag (a mouse, a finger or a pen) and Move up and Move
+   * down buttons for the keyboard. Meanwhile the items are not links and choosing does nothing.
+   */
+  reorder?: SideNavReorder;
   lang?: string;
+}
+
+/** A section in another order: the new order of its item ids, and the controls' names in the page's language. */
+export interface SideNavReorder {
+  onReorder: (ids: string[]) => void;
+  labels: { up: string; down: string; handle: string };
 }
 
 /** What `renderLink` is handed: spread it on your router's link, with `href` as its destination. */
@@ -100,6 +120,12 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLElement>, "title" | "children
   barLabel?: ReactNode;
   /** Keep the current item in view when the tree scrolls inside its own box (the panel, or the tree itself). */
   followCurrent?: boolean;
+  /**
+   * The tree in two: the sections before the one with this id stay put at the top, and from it on they scroll by
+   * themselves under them, the footer held under both (an app's column: new task and places above, the history below).
+   * The nav needs a height of its own (its column's).
+   */
+  split?: string;
   /** Under the tree: the account, a footnote. Where the tree scrolls by itself it stays put under it. */
   footer?: ReactNode;
 };
@@ -157,6 +183,7 @@ export function SideNav({
   here,
   barLabel,
   followCurrent = true,
+  split,
   footer,
   className,
   ...rest
@@ -170,6 +197,8 @@ export function SideNav({
   const bar = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const tree = useRef<HTMLOListElement>(null);
+  // A reorder by dragging: the section, the item held, and the order it would take if let go now (null: none).
+  const [drag, setDrag] = useState<{ section: string; id: string; order: string[]; mids: number[] } | null>(null);
 
   const path = pathTo(sections, [], current);
   const at = new Set(path.map((s) => (s.section ?? s.item).id));
@@ -217,16 +246,25 @@ export function SideNav({
       const last = all[all.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
-        last.focus();
+        last?.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
         e.preventDefault();
-        first.focus();
+        first?.focus();
       }
     };
     const host = root.current;
     host?.addEventListener("keydown", onKey);
     return () => host?.removeEventListener("keydown", onKey);
   }, [open]);
+
+  // A drag in progress: Esc puts the items back where they were.
+  const dragging = drag !== null;
+  useEffect(() => {
+    if (!dragging) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrag(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dragging]);
 
   // Keep the current item in view inside a tree that scrolls in its own box, by scrolling that box alone: the panel, or
   // the tree where an app's sidebar holds its footer still under a tree that scrolls by itself (a sticky footer in a
@@ -269,6 +307,12 @@ export function SideNav({
           </span>
         )}
         {item.meta != null && <span className="s1-sidenav__meta">{item.meta}</span>}
+        {item.count != null && item.count > 0 && (
+          <span className="s1-sidenav__badge">
+            <span aria-hidden={item.countLabel ? "true" : undefined}>{item.count}</span>
+            {item.countLabel && <VisuallyHidden>, {item.countLabel}</VisuallyHidden>}
+          </span>
+        )}
       </>
     );
     const common = { className: cls, title: rail ? name : undefined, lang: item.lang };
@@ -293,6 +337,85 @@ export function SideNav({
         {item.items && item.items.length > 0 && !rail && <ul className="s1-sidenav__items s1-sidenav__items--nested">{item.items.map(renderItem)}</ul>}
       </li>
     );
+  };
+
+  // Reordering: Move up and Move down for the keyboard, a handle to drag for a pointer (pointer events, so a finger and a
+  // pen drag too, and no drag-and-drop of the browser's: nothing leaves the page). Esc or a cancelled pointer puts it back.
+  const reorderItems = (section: SideNavSection, reorder: SideNavReorder): ReactNode => {
+    const items = section.items ?? [];
+    const ids = items.map((i) => i.id);
+    const held = drag?.section === section.id ? drag : null;
+    const order = held ? held.order : ids;
+    const byId = new Map(items.map((i) => [i.id, i]));
+    const move = (from: number, to: number) => {
+      if (to < 0 || to >= ids.length || from === to) return;
+      const next = [...ids];
+      const [it] = next.splice(from, 1);
+      next.splice(to, 0, it!);
+      reorder.onReorder(next);
+    };
+    const grab = (e: PointerEvent<HTMLElement>, id: string) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // a pointer the browser no longer tracks: the moves still reach the handle while it is over it
+      }
+      const list = e.currentTarget.closest("ul");
+      const rows = list ? [...list.querySelectorAll<HTMLElement>(":scope > .s1-sidenav__entry")] : [];
+      setDrag({ section: section.id, id, order: ids, mids: rows.map((r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2; }) });
+    };
+    const follow = (e: PointerEvent<HTMLElement>) => {
+      if (!held) return;
+      // its place: after every other item whose middle is above the pointer
+      const others = ids.map((id, i) => [id, held.mids[i] ?? 0] as const).filter(([id]) => id !== held.id);
+      const at = others.filter(([, mid]) => mid < e.clientY).length;
+      const next = others.map(([id]) => id);
+      next.splice(at, 0, held.id);
+      if (next.join("\u0000") !== held.order.join("\u0000")) setDrag({ ...held, order: next });
+    };
+    const drop = () => {
+      if (!held) return;
+      setDrag(null);
+      if (held.order.join("\u0000") !== ids.join("\u0000")) reorder.onReorder(held.order);
+    };
+    return order.map((id) => {
+      const item = byId.get(id);
+      if (!item) return null;
+      const i = ids.indexOf(id);
+      const name = plain(item.label, item.text) ?? id;
+      return (
+        <li key={id} className="s1-sidenav__entry s1-sidenav__entry--reorder" data-held={held?.id === id ? "" : undefined}>
+          <span
+            className="s1-sidenav__grip"
+            aria-hidden="true"
+            title={reorder.labels.handle}
+            onPointerDown={(e) => grab(e, id)}
+            onPointerMove={follow}
+            onPointerUp={drop}
+            onPointerCancel={() => setDrag(null)}
+          />
+          <span className={cn("s1-sidenav__item", item.icon != null && "s1-sidenav__item--icon")} lang={item.lang}>
+            {item.icon != null && (
+              <span className="s1-sidenav__icon" aria-hidden="true">
+                {item.icon}
+              </span>
+            )}
+            <span className="s1-sidenav__label">{item.label}</span>
+            {item.meta != null && <span className="s1-sidenav__meta">{item.meta}</span>}
+          </span>
+          <span className="s1-sidenav__moves">
+            <button type="button" className="s1-sidenav__move s1-sidenav__move--up" aria-label={`${reorder.labels.up}: ${name}`} title={reorder.labels.up} aria-disabled={i === 0 ? "true" : undefined} onClick={() => move(i, i - 1)}>
+              <span className="s1-sidenav__sign" aria-hidden="true" />
+            </button>
+            <button type="button" className="s1-sidenav__move s1-sidenav__move--down" aria-label={`${reorder.labels.down}: ${name}`} title={reorder.labels.down} aria-disabled={i === ids.length - 1 ? "true" : undefined} onClick={() => move(i, i + 1)}>
+              <span className="s1-sidenav__sign" aria-hidden="true" />
+            </button>
+          </span>
+        </li>
+      );
+    });
   };
 
   const renderSection = (section: SideNavSection, depth: number): ReactNode => {
@@ -348,7 +471,11 @@ export function SideNav({
           // the rail draws no heads, so a folded section could not be opened there: its items are always shown
           <div className="s1-sidenav__body" id={bodyId} hidden={!rail && !isOpen}>
             {section.sections && section.sections.length > 0 && <ol className="s1-sidenav__sections">{section.sections.map((s) => renderSection(s, depth + 1))}</ol>}
-            {section.items && section.items.length > 0 && <ul className="s1-sidenav__items">{section.items.map(renderItem)}</ul>}
+            {section.items && section.items.length > 0 && (
+              <ul className={cn("s1-sidenav__items", section.tiles && !rail && !section.reorder && "s1-sidenav__items--tiles", section.reorder && !rail && "s1-sidenav__items--reorder")}>
+                {section.reorder && !rail ? reorderItems(section, section.reorder) : section.items.map(renderItem)}
+              </ul>
+            )}
           </div>
         )}
       </li>
@@ -356,8 +483,12 @@ export function SideNav({
   };
 
   const sheetClass = sheet === true ? "s1-sidenav--sheet-always" : sheet ? `s1-sidenav--sheet-${sheet}` : undefined;
+  // split: the sections before `split` stay put above the tree; the tree (from it on) scrolls by itself
+  const cut = split === undefined ? -1 : sections.findIndex((s) => s.id === split);
+  const top = cut > 0 ? sections.slice(0, cut) : [];
+  const below = cut > 0 ? sections.slice(cut) : sections;
   return (
-    <nav ref={root} className={cn("s1-sidenav", rail && "s1-sidenav--rail", sheetClass, className)} aria-label={label} data-open={open ? "" : undefined} {...rest}>
+    <nav ref={root} className={cn("s1-sidenav", rail && "s1-sidenav--rail", split !== undefined && "s1-sidenav--split", sheetClass, className)} aria-label={label} data-open={open ? "" : undefined} {...rest}>
       {sheet !== false && (
         <button ref={bar} type="button" className="s1-sidenav__bar" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
           {(barLabel ?? title) != null && <span className="s1-sidenav__bar-label">{barLabel ?? title}</span>}
@@ -373,8 +504,9 @@ export function SideNav({
             {titleAction != null && <span className="s1-sidenav__title-action">{titleAction}</span>}
           </div>
         )}
+        {top.length > 0 && <ol className="s1-sidenav__top">{top.map((s) => renderSection(s, 1))}</ol>}
         <ol className="s1-sidenav__tree" ref={tree}>
-          {sections.map((s) => renderSection(s, 1))}
+          {below.map((s) => renderSection(s, 1))}
         </ol>
         {footer != null && <div className="s1-sidenav__foot">{footer}</div>}
       </div>
