@@ -54,8 +54,10 @@ test("TabBar on a server: a named nav, tabs as links and a button, the one you a
   assert.match(html, /^<nav aria-label="Tabs" class="s1-tab-bar"><ul class="s1-tab-bar__items">/);
   // a page: a link, its picture hidden from screen readers over its word
   assert.match(html, /<li><a href="#\/chat" class="s1-tab-bar__item" title="Home" data-tab-id="home"><span class="s1-tab-bar__icon" aria-hidden="true"><svg id="ico-h"><\/svg><\/span><span class="s1-tab-bar__word">Home<\/span><\/a><\/li>/);
-  // the tab you are on, its count read after its name with what it counts
-  assert.match(html, /<a href="#\/tasks" class="s1-tab-bar__item" aria-current="page" title="Tasks" data-tab-id="tasks">.*?<span class="s1-tab-bar__count">2<span class="s1-visually-hidden">, <!-- -->Needs you · 2<\/span><\/span><\/a>/);
+  // the tab you are on, its count read once after its name, in the words that say what it counts
+  assert.match(html, /<a href="#\/tasks" class="s1-tab-bar__item" aria-current="page" title="Tasks" data-tab-id="tasks">/);
+  const tasks = html.slice(html.indexOf('data-tab-id="tasks"'), html.indexOf('data-tab-id="apps"'));
+  assert.ok(tasks.includes('<span class="s1-tab-bar__count"><span aria-hidden="true">2</span><span class="s1-visually-hidden">, <!-- -->Needs you · 2</span></span></a>'), tasks);
   // no count for 0
   assert.doesNotMatch(html.match(/data-tab-id="apps">.*?<\/a>/)?.[0] ?? "", /s1-tab-bar__count/);
   // a dot says what it means

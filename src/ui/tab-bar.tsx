@@ -85,7 +85,8 @@ export function TabBar({ label, items, current, className, ...rest }: TabBarProp
               <span className="s1-tab-bar__word">{item.label}</span>
               {count > 0 && (
                 <span className="s1-tab-bar__count">
-                  {count}
+                  {/* said once: the words carry the number where there are words */}
+                  <span aria-hidden={item.countLabel ? "true" : undefined}>{count}</span>
                   {item.countLabel && <VisuallyHidden>, {item.countLabel}</VisuallyHidden>}
                 </span>
               )}
