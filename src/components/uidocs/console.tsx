@@ -36,6 +36,7 @@ import { Checkbox } from "@/ui/checkbox";
 import { Code } from "@/ui/code";
 import { Combobox } from "@/ui/combobox";
 import { Command } from "@/ui/command";
+import { TabStrip } from "@/ui/tab-strip";
 import { Copy } from "@/ui/copy";
 import { DescriptionList } from "@/ui/description-list";
 import { Dropdown, DropdownCheckItem, DropdownGroup, DropdownItem, DropdownLabel, DropdownList, DropdownRadioGroup, DropdownRadioItem, DropdownSeparator, DropdownSub, DropdownSubList, DropdownSubTrigger, DropdownTrigger } from "@/ui/dropdown";
@@ -1363,6 +1364,57 @@ function LangRow({ name, zh, size, links = false }: { name: [string, string]; zh
 }
 
 /** The switch as buttons and as links, at its three heights, in English and in Chinese, on paper and at night. */
+/** The tab strip's demo: four open pages, one working, one that needs you; + opens another, × and Delete close. */
+export function TabStripDemo() {
+  const [tabs, setTabs] = useState([
+    { key: "keys", title: "Access keys" },
+    { key: "orders", title: "My orders", busy: true },
+    { key: "plaza", title: "Service Plaza", needs: true },
+    { key: "profile", title: "Profile" },
+  ] as Array<{ key: string; title: string; busy?: boolean; needs?: boolean }>);
+  const [front, setFront] = useState("orders");
+  const n = useRef(1);
+  const close = (key: string) => {
+    const i = tabs.findIndex((t) => t.key === key);
+    const rest = tabs.filter((t) => t.key !== key);
+    setTabs(rest);
+    if (key === front) setFront((rest[i] ?? rest[i - 1])?.key ?? "");
+  };
+  return (
+    <div className="ud-row" style={{ display: "block", background: "var(--s1-paper-2)", padding: "8px 8px 0" }}>
+      <TabStrip
+        label="Open tabs"
+        closeLabel="Close tab"
+        selected={front}
+        tabs={tabs.map((t) => ({
+          key: t.key,
+          label: t.title,
+          title: t.title,
+          icon: <MessageSquare />,
+          keep: t.needs,
+          mark: t.needs ? <span style={{ fontSize: 11, fontWeight: 650 }}>Needs you</span> : t.busy ? <span aria-label="Working" style={{ width: 7, height: 7, borderRadius: 4, background: "currentColor" }} /> : undefined,
+        }))}
+        onSelect={setFront}
+        onClose={close}
+        end={
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Plus />}
+            onClick={() => {
+              const key = `new-${n.current++}`;
+              setTabs((t) => [...t, { key, title: "New page" }]);
+              setFront(key);
+            }}
+          >
+            New tab
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
 export function LangSwitchDemo() {
   return (
     <div className="ud-stack ud-stack--wide">

@@ -1157,6 +1157,33 @@
       ]
     },
     {
+      "name": "tab-strip",
+      "type": "registry:ui",
+      "title": "TabStrip",
+      "description": "A browser's tabs: each with an icon, its words, a state mark and a close button; the tab in front raised onto the paper, no line round any tab; a pair drawn joined; tabs shrink to a floor as they crowd, one marked keep less. One tablist: arrows, Home and End move, Enter or Space brings to front, Delete or a middle click closes.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/tab-strip.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/tab-strip.tsx"
+        },
+        {
+          "path": "src/ui/tab-strip.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/tab-strip.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "navigation"
+      ]
+    },
+    {
       "name": "toast",
       "type": "registry:ui",
       "title": "Toast",

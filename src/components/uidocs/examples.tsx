@@ -433,6 +433,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.SideNavDemo />;
     case "lang-switch":
       return <demos.LangSwitchDemo />;
+    case "tab-strip":
+      return <demos.TabStripDemo />;
     case "tabs":
       return <demos.TabsDemo />;
     case "toast":

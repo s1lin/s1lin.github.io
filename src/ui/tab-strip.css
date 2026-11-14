@@ -1,0 +1,136 @@
+/* TabStrip: a browser's tabs. The tab in front is raised onto the page's paper; the others sit on the strip, shrinking to
+   a floor as they crowd (a tab marked keep keeps more of its words). No line round any tab: the raised paper is the
+   choice. A pair is one joined tab. Every colour is a token, so an app's theme carries it. */
+@layer components {
+  .s1-tabstrip {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    gap: 4px;
+    font-family: var(--s1-font-sans);
+  }
+  .s1-tabstrip__list {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    overflow: hidden;
+  }
+  .s1-tabstrip__tab {
+    position: relative;
+    flex: 0 1 210px;
+    min-width: 72px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 6px 0 10px;
+    border-radius: 10px 10px 0 0;
+    color: var(--s1-ink-2);
+    font-size: 13px;
+    line-height: 1.2;
+    cursor: default;
+    user-select: none;
+    outline: none;
+  }
+  .s1-tabstrip__tab[data-keep] {
+    flex-shrink: 0.35;
+    min-width: 168px;
+  }
+  .s1-tabstrip__tab:hover:not([data-on]) {
+    background: color-mix(in srgb, var(--s1-ink) 6%, transparent);
+  }
+  .s1-tabstrip__tab[data-on] {
+    background: var(--s1-paper);
+    color: var(--s1-ink);
+    font-weight: 550;
+  }
+  .s1-tabstrip__tab:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--s1-ink);
+  }
+  .s1-tabstrip__tab[data-faded] .s1-tabstrip__icon,
+  .s1-tabstrip__tab[data-faded] .s1-tabstrip__label {
+    opacity: 0.6;
+  }
+  .s1-tabstrip__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+  }
+  .s1-tabstrip__icon > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .s1-tabstrip__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .s1-tabstrip__mark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .s1-tabstrip__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--s1-ink-3);
+    opacity: 0;
+    cursor: pointer;
+  }
+  .s1-tabstrip__close > svg {
+    width: 12px;
+    height: 12px;
+  }
+  .s1-tabstrip__tab[data-on] .s1-tabstrip__close,
+  .s1-tabstrip__tab:hover .s1-tabstrip__close,
+  .s1-tabstrip__tab:focus-visible .s1-tabstrip__close {
+    opacity: 1;
+  }
+  .s1-tabstrip__close:hover {
+    background: color-mix(in srgb, var(--s1-ink) 10%, transparent);
+    color: var(--s1-ink);
+  }
+  .s1-tabstrip__pair {
+    flex: 0 1 400px;
+    min-width: 150px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .s1-tabstrip__pair > .s1-tabstrip__tab {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .s1-tabstrip__tab[data-joined="first"] {
+    border-radius: 10px 0 0 0;
+  }
+  .s1-tabstrip__tab[data-joined="second"] {
+    border-radius: 0 10px 0 0;
+    box-shadow: inset 1px 0 0 var(--s1-rule-strong);
+  }
+  .s1-tabstrip__end {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-tabstrip__close {
+      transition: opacity 120ms ease;
+    }
+  }
+  /* Chinese: a title or a word mark is never tracked or cased. */
+  .s1-tabstrip__tab:lang(zh), .s1-tabstrip__tab [lang|="zh"] { letter-spacing: 0; text-transform: none; }
+}

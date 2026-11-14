@@ -1670,6 +1670,43 @@ const LANGS = [
     where: "The head example (Foundations, Head), the Switchers example and the Button example's head row on this page; the heads and foot of the TokensBeat apps.",
   },
   {
+    id: "tab-strip",
+    name: "TabStrip",
+    zh: "标签栏",
+    keywords: ["tabs", "tab bar", "browser tabs", "tablist", "open tabs", "标签", "标签页", "多标签"],
+    group: "navigation",
+    item: "tab-strip",
+    exports: ["TabStrip", "TabStripTab"],
+    summary:
+      "A browser's tabs for an app that keeps several pages open at once: each tab its icon, its words, a mark for its state (a dot, a word such as \"Needs you\", a moon while it sleeps) and a close button. The tab in front is raised onto the page's paper; the others sit on the strip and shrink as they crowd. Two tabs shown side by side are one joined tab.",
+    example: "live",
+    usage: `import { TabStrip } from "@/components/s1lin/tab-strip";
+
+<TabStrip label="Open tabs" closeLabel="Close tab" selected={front}
+  tabs={open.map((p) => ({ key: p.id, label: p.title, icon: <FileText />, mark: p.busy ? <Dot /> : undefined, title: p.title }))}
+  onSelect={setFront} onClose={close}
+  end={<IconButton label="New tab" onClick={add}><Plus /></IconButton>} />`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "Names the list of tabs: \"Open tabs\"." },
+      { name: "tabs", type: "TabStripTab[]", required: true, desc: "`{ key, label, icon?, mark?, title?, faded?, keep? }`, in order. `mark` sits after the words (a dot, a word); `faded` dims a tab that sleeps; `keep` lets a tab keep more of its words when the strip is crowded (one that needs you)." },
+      { name: "selected", type: "string", required: true, desc: "The key of the tab in front." },
+      { name: "onSelect", type: "(key: string) => void", required: true, desc: "A click, Enter or Space on a tab." },
+      { name: "onClose", type: "(key: string) => void", required: true, desc: "Its close button, a middle click, or Delete on a focused tab." },
+      { name: "closeLabel", type: "string", required: true, desc: "The close button's name, in the page's language: \"Close tab\"." },
+      { name: "pair", type: "[string, string]", desc: "Two neighbouring tabs shown side by side: drawn as one joined tab." },
+      { name: "onMenu", type: "(key, event) => void", desc: "A right click on a tab: the app's tab menu (Close others, Open beside)." },
+      { name: "end", type: "ReactNode", desc: "After the tabs in the strip's row: a new tab button, a list of all tabs." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "One stop in the Tab order, on the tab in front. ← and → move focus across the tabs, Home and End to the first and the last; Enter or Space brings the focused tab to front; Delete closes it. The close buttons are for the pointer." },
+      { label: "Accessibility", text: "A `tablist` named by `label`; each tab a `tab` with `aria-selected` on the one in front. A middle click closes a tab, as in a browser, and never starts the browser's autoscroll." },
+      { label: "Styles", text: "No line round any tab (switchers are borderless): the tab in front is raised onto `--s1-paper`, a hover tints the strip. Tabs take 210px and shrink to 72px; a `keep` tab to 168px. The app shows the rest in a list of all tabs." },
+      { label: "Chinese", text: "Titles in either language cut with an ellipsis on one line; a word mark such as 需要你处理 keeps its whole width." },
+    ],
+    where: "Aha's Browser layout: the open chats, apps and pages, the tab strip at the window's top (its title bar in the Windows app).",
+  },
+  {
     id: "dialog",
     name: "Dialog",
     zh: "对话框",
