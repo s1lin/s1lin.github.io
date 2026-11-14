@@ -1,7 +1,7 @@
 "use client";
 
 import { cloneElement, useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactElement, type ReactNode, type RefObject } from "react";
-import { anchorPanel } from "./anchor";
+import { anchorPanel, type AnchorSide } from "./anchor";
 import { cn } from "./cn";
 import "./tokens.css";
 import "./popover.css";
@@ -17,9 +17,9 @@ export type PopoverProps = {
   defaultOpen?: boolean;
   /** Called with the next state: the trigger pressed, Esc, a press outside, focus gone elsewhere. */
   onOpenChange?: (open: boolean) => void;
-  /** Below the trigger, or above it; it goes to the other side when there is no room. */
-  side?: "bottom" | "top";
-  /** Which edge of the trigger the panel lines up with, or its middle; it is kept on the screen either way. */
+  /** Below the trigger, above it, or beside it (right, left: a rail's flyout); it goes to the other side when there is no room. */
+  side?: AnchorSide;
+  /** Which edge of the trigger the panel lines up with, or its middle (beside it: its top, middle or bottom); it is kept on the screen either way. */
   align?: "start" | "center" | "end";
   /** Pixels between the trigger and the panel. */
   offset?: number;

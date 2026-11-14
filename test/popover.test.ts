@@ -11,7 +11,8 @@ import { build } from "vite";
 /*
  * Popover: on a server, a closed one is in the HTML, wired to its trigger and hidden, its content not yet mounted.
  * In a real browser, with React running: it opens in the top layer below its trigger (lined up with its start, its
- * middle or its end), above it at the foot of the window, never taller than its room, kept 8px inside the screen;
+ * middle or its end), above it at the foot of the window, beside it when asked (before it at the screen's right
+ * edge), never taller than its room, kept 8px inside the screen;
  * focus goes into it and comes back on Esc; a press outside closes it and leaves focus be; Tab past its end closes it;
  * Esc inside a Dialog closes the popover and keeps the dialog; the look is Menu's list, by day and at night. Vite
  * bundles a small page from src/ui/ as an app would; headless Chrome runs it and prints what it found. The browser
@@ -137,6 +138,12 @@ flushSync(() =>
       </div>
       <div style={{ position: "absolute", top: 120, left: 40 }}><Kept /></div>
       <div style={{ position: "absolute", bottom: 120, left: 900 }}><Grows /></div>
+      <div style={{ position: "absolute", top: 300, left: 8 }}>
+        <Popover trigger={<button id="beside" style={{ width: 64, height: 56 }}>Tasks</button>} side="right" align="start" offset={6} label="Beside"><p style={{ width: 240, margin: 0 }}>Words</p></Popover>
+      </div>
+      <div style={{ position: "absolute", top: 300, right: 4 }}>
+        <Popover trigger={<button id="edge" style={{ width: 40, height: 40 }}>Edge</button>} side="right" label="Edge"><p style={{ width: 240, margin: 0 }}>Words</p></Popover>
+      </div>
       <div id="night" data-theme="dark" style={{ position: "absolute", top: 200, left: 400 }}>
         <Popover trigger={<button id="dark">Night</button>} label="Night"><p style={{ margin: 0 }}>Words</p></Popover>
       </div>
@@ -238,6 +245,18 @@ if (mode === "dialog") {
     got.grow.after = box(panelOf("grow"));
     got.grow.focus = document.activeElement.id;
   });
+  step(() => {
+    $("#beside").click();
+  });
+  step(() => {
+    got.beside = { trigger: box($("#beside")), panel: box(panelOf("beside")), side: panelOf("beside").dataset.side, room: panelOf("beside").style.getPropertyValue("--s1-popover-room"), vh: window.innerHeight };
+    $("#beside").click();
+    $("#edge").click();
+  });
+  step(() => {
+    got.edge = { trigger: box($("#edge")), panel: box(panelOf("edge")), side: panelOf("edge").dataset.side };
+    $("#edge").click();
+  });
 }
 
 let i = 0;
@@ -328,6 +347,14 @@ test("Popover in a browser: the top layer, placed on its side or the other, line
   assert.equal(got.grow.before.bottom, got.grow.trigger.top - 6);
   assert.ok(got.grow.after.height > got.grow.before.height, "it grew");
   assert.equal(got.grow.after.bottom, got.grow.trigger.top - 6);
+  // beside its trigger (a rail's flyout): after its right edge, lined up with its top, as tall as the screen allows
+  assert.equal(got.beside.side, "right");
+  assert.equal(got.beside.panel.left, got.beside.trigger.right + 6);
+  assert.equal(got.beside.panel.top, got.beside.trigger.top);
+  assert.equal(got.beside.room, `${got.beside.vh - 16}px`);
+  // no room after it at the window's right edge: before its left edge instead
+  assert.equal(got.edge.side, "left");
+  assert.ok(got.edge.panel.right <= got.edge.trigger.left, `before the trigger (${got.edge.panel.right} ≤ ${got.edge.trigger.left})`);
   assert.equal(got.grow.focus, "more");
 
   // in a Dialog: Esc closes the popover and keeps the dialog open, focus back on the popover's trigger
