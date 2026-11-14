@@ -1,0 +1,112 @@
+/* TabBar: a phone's tabs at the screen's foot, each a picture over its word. The tab you are on is in the ink, heavier,
+   on the second paper behind its picture; a hovered tab gets a lighter ground. No line round any tab, in any state
+   (switchers are borderless; the keyboard's ring is an outline on :focus-visible). A hairline over the bar; the safe
+   area's insets at the foot and the sides are its padding, so the home indicator never covers a word. Every colour is
+   a token. */
+@layer components {
+  .s1-tab-bar {
+    display: block;
+    box-sizing: border-box;
+    flex: none;
+    width: 100%;
+    padding: 0 max(4px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(4px, env(safe-area-inset-left, 0px));
+    border-top: 1px solid var(--s1-rule);
+    background: var(--s1-paper);
+    color: var(--s1-ink-2);
+    font-family: var(--s1-font-sans);
+  }
+  .s1-tab-bar__items {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .s1-tab-bar__items > li { display: flex; flex: 1 1 0; min-width: 0; }
+
+  .s1-tab-bar__item {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 56px;
+    margin: 0;
+    padding: 6px 2px 5px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: 500 11px/1.1 var(--s1-font-sans);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .s1-tab-bar__icon { display: grid; place-items: center; width: 24px; height: 24px; }
+  .s1-tab-bar__icon > svg { width: 22px; height: 22px; }
+  .s1-tab-bar__icon > img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+  .s1-tab-bar__word { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* the ground behind the picture: a hover, the tab you are on */
+  .s1-tab-bar__item::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 3px;
+    left: 50%;
+    width: 52px;
+    height: 30px;
+    margin-left: -26px;
+    border-radius: 15px;
+    background: transparent;
+  }
+  .s1-tab-bar__item:hover { color: var(--s1-ink); }
+  .s1-tab-bar__item:hover::before { background: color-mix(in srgb, var(--s1-ink) 6%, transparent); }
+  /* where you are: the ink, heavier, the second paper behind its picture (a fill, not a line: a tab is a switcher too) */
+  .s1-tab-bar__item[aria-current] { color: var(--s1-ink); font-weight: 650; }
+  .s1-tab-bar__item[aria-current]::before { background: var(--s1-paper-2); }
+  .s1-tab-bar__item:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: -2px; }
+  .s1-tab-bar__item:is(:disabled, [aria-disabled="true"]) { opacity: 0.45; cursor: default; }
+
+  /* how many wait there, on the picture's corner */
+  .s1-tab-bar__count {
+    position: absolute;
+    top: 3px;
+    left: calc(50% + 6px);
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--s1-ink);
+    color: var(--s1-paper);
+    font: 500 10.5px/1 var(--s1-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* one thing to notice, on the picture's corner */
+  .s1-tab-bar__dot {
+    position: absolute;
+    top: 5px;
+    left: calc(50% + 7px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--s1-warn);
+  }
+
+  /* Chinese: never tracked, at 12px, so the strokes hold under the picture. */
+  .s1-tab-bar__word:lang(zh), .s1-tab-bar__word [lang|="zh"] { font-size: 12px; letter-spacing: 0; }
+
+  /* forced colours drop the fills: the tab you are on is drawn with a line there */
+  @media (forced-colors: active) {
+    .s1-tab-bar__item[aria-current]::before { border: 1px solid CanvasText; }
+    .s1-tab-bar__count, .s1-tab-bar__dot { border: 1px solid CanvasText; }
+  }
+}

@@ -12,6 +12,7 @@ import {
   FileDown,
   Folder,
   FolderInput,
+  House,
   Image as ImageIcon,
   Keyboard,
   KeyRound,
@@ -31,6 +32,7 @@ import {
   Settings,
   Store,
   Trash2,
+  User,
   Wallet,
   X,
 } from "lucide-react";
@@ -61,6 +63,7 @@ import { Panel } from "@/ui/panel";
 import { Popover } from "@/ui/popover";
 import { RadioGroup } from "@/ui/radio-group";
 import { Rail } from "@/ui/rail";
+import { TabBar } from "@/ui/tab-bar";
 import { Secret } from "@/ui/secret";
 import { NativeSelect, Select } from "@/ui/select";
 import { SideNav, type SideNavSection } from "@/ui/side-nav";
@@ -1328,6 +1331,32 @@ export function RailDemo() {
           { id: "pc", label: "Aha's computer", icon: <Monitor />, pressed: dock === "pc", onSelect: () => toggle("pc") },
           { id: "map", label: "Agent map", icon: <Network />, pressed: dock === "map", onSelect: () => toggle("map") },
         ]} />
+      </div>
+    </div>
+  );
+}
+
+/** A phone's tab bar in English and in Chinese (the tab you are on, a count, a dot), and at night. */
+export function TabBarDemo() {
+  const [at, setAt] = useState("tasks");
+  const tabs = (zh: boolean) => [
+    { id: "home", label: zh ? "首页" : "Home", icon: <House />, href: "#home", onSelect: () => setAt("home") },
+    { id: "tasks", label: zh ? "任务" : "Tasks", icon: <ListChecks />, href: "#tasks", count: 2, countLabel: zh ? "2 件需要你处理" : "2 need you", onSelect: () => setAt("tasks") },
+    { id: "bots", label: zh ? "机器人" : "Bots", icon: <Bot />, href: "#bots", onSelect: () => setAt("bots") },
+    { id: "apps", label: zh ? "应用" : "Apps", icon: <LayoutGrid />, href: "#apps", onSelect: () => setAt("apps") },
+    { id: "me", label: zh ? "我" : "Me", icon: <User />, href: "#me", dot: true, dotLabel: zh ? "余额不足" : "Running low", onSelect: () => setAt("me") },
+  ];
+  const phone: CSSProperties = { width: 360, maxWidth: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: 140, background: "var(--s1-paper)" };
+  return (
+    <div className="ud-row" style={{ alignItems: "stretch", gap: 24, flexWrap: "wrap" }}>
+      <div style={phone}>
+        <TabBar label="Tabs" current={at} items={tabs(false)} />
+      </div>
+      <div lang="zh-CN" style={phone}>
+        <TabBar label="标签" current={at} items={tabs(true)} />
+      </div>
+      <div data-theme="dark" style={phone}>
+        <TabBar label="Tabs" current={at} items={tabs(false)} />
       </div>
     </div>
   );

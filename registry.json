@@ -1212,6 +1212,34 @@
       ]
     },
     {
+      "name": "tab-bar",
+      "type": "registry:ui",
+      "title": "Tab bar",
+      "description": "A phone's bar of tabs at the screen's foot: three to five top-level places, each a picture over its word, a page (a link) or a button, a count or a dot on the picture's corner; the tab you are on in the ink on the second paper, no line round any tab. The safe area's insets pad it, so the home indicator never covers a word. Left and Right move focus along it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/tab-bar.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/tab-bar.tsx"
+        },
+        {
+          "path": "src/ui/tab-bar.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/tab-bar.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "navigation"
+      ]
+    },
+    {
       "name": "toast",
       "type": "registry:ui",
       "title": "Toast",

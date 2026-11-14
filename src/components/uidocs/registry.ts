@@ -1749,6 +1749,39 @@ const LANGS = [
     where: "Aha's Spaces layout: the rail of places at the window's left (Tasks, Bots, Apps, Files, Explore) and the dock of a chat's side panels at its right.",
   },
   {
+    id: "tab-bar",
+    name: "Tab bar",
+    zh: "底部标签栏",
+    keywords: ["bottom navigation", "bottom tabs", "phone tabs", "mobile", "底部导航", "底栏"],
+    group: "navigation",
+    item: "tab-bar",
+    exports: ["TabBar", "TabBarItem", "TabBarProps"],
+    summary:
+      "A phone's bar of tabs at the screen's foot, as an app with three to five top-level places keeps them: each a picture over its word, a page to go to or a button, with a count or a dot on the picture's corner. The tab you are on says so. It stands above the home indicator: the safe area's insets at the foot and the sides are its padding.",
+    example: "live",
+    usage: `import { TabBar } from "@/components/s1lin/tab-bar";
+
+<TabBar label="Tabs" current={here}
+  items={[
+    { id: "home", label: "Home", icon: <House />, href: "/", onSelect: () => go("/") },
+    { id: "tasks", label: "Tasks", icon: <ListChecks />, href: "/tasks", count: waiting, countLabel: waitingWords, onSelect: () => go("/tasks") },
+    { id: "me", label: "Me", icon: <Avatar />, href: "/me", dot: low, dotLabel: "Running low", onSelect: () => go("/me") },
+  ]} />`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "The landmark's name (\"Tabs\")." },
+      { name: "items", type: "TabBarItem[]", required: true, desc: "`{ id, label, icon, text?, href?, onSelect?, count?, countLabel?, dot?, dotLabel?, disabled?, lang? }`, in order. With `href` the tab is a link (a plain click goes to `onSelect`, your router's step; a new tab is the browser's); without it a button. `count` sits on the picture's corner, said by `countLabel`; `dot` marks one thing to notice, said by `dotLabel` (a count wins over a dot)." },
+      { name: "current", type: "string | null", desc: "The id of the tab you are on: `aria-current=\"page\"` on it." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "Every tab is in the Tab order; ← and → move focus along the bar (the other way round right to left), Home and End to its ends. Enter follows a link; Enter or Space presses a button." },
+      { label: "Accessibility", text: "A `nav` named by `label`. The tab you are on has `aria-current=\"page\"` and is told by the ink, the weight and the ground behind its picture, never by colour alone. A count or a dot is read after the tab's name with what it means (`countLabel`, `dotLabel`)." },
+      { label: "Styles", text: "No line round any tab (switchers are borderless): a hover lays a light ground behind its picture, the tab you are on the second paper. A hairline over the bar. Its foot and sides are padded by `env(safe-area-inset-*)`: give the page `viewport-fit=cover` and put the bar last in a column that fills the screen." },
+      { label: "Chinese", text: "A word under a picture is set at 12px, never tracked; two characters fit, a longer word cuts with an ellipsis and keeps its whole name as the tooltip." },
+    ],
+    where: "Aha on a phone in its Spaces layout: Home, Tasks, Bots, Apps and Me at the screen's foot, on the top-level screens only (a chat or an app has Back instead).",
+  },
+  {
     id: "dialog",
     name: "Dialog",
     zh: "对话框",
