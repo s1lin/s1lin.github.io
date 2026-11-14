@@ -1749,6 +1749,43 @@ const LANGS = [
     where: "Aha's Spaces layout: the rail of places at the window's left (Tasks, Bots, Apps, Files, Explore) and the dock of a chat's side panels at its right.",
   },
   {
+    id: "split",
+    name: "Split",
+    zh: "分屏",
+    keywords: ["split view", "split screen", "side by side", "two panes", "panes", "分屏", "并排", "双栏"],
+    group: "navigation",
+    item: "split",
+    exports: ["Split", "SplitPane"],
+    summary:
+      "Two pages side by side, a half each, one of them active: the one the app's keys, its address and a send follow. One pane alone fills the same frame, so a pane keeps what it holds when the second comes or goes. Pressing or focusing a pane makes it the active one before the press does anything inside it.",
+    example: "live",
+    usage: `import { Split, SplitPane } from "@/components/s1lin/split";
+
+<Split label="Split view" split={!!pair}>
+  {shown.map((p) => (
+    <SplitPane key={p.id} label={p.title} side={p.id === pair?.[1] ? "end" : "start"} active={p.id === front} onActivate={() => setFront(p.id)}>
+      <Page id={p.id} />
+    </SplitPane>
+  ))}
+</Split>`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "Split: the group's name (\"Split view\")." },
+      { name: "split", type: "boolean", required: true, desc: "Split: two panes side by side, a half each; otherwise the one pane fills the frame." },
+      { name: "label", type: "string", required: true, desc: "SplitPane: the region's name, the page it holds." },
+      { name: "side", type: "\"start\" | \"end\"", desc: "SplitPane: its side when two are shown. Default `start`." },
+      { name: "active", type: "boolean", desc: "SplitPane: the pane the keys and a send follow; a rule along its top while two are shown." },
+      { name: "onActivate", type: "() => void", desc: "SplitPane: a press or the focus coming into it while it is not active, called in the capture phase (before the press acts inside)." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "Tab moves into the other pane as into any region; the focus arriving there makes it active. The app's own keys follow the active pane." },
+      { label: "Accessibility", text: "A `group` named by `label`; each pane a named region (`section` with `aria-label`). Which pane is active is the app's to say where it matters (its address bar, its title): the rule is a mark for the eye." },
+      { label: "Styles", text: "Two equal columns only while split; the end pane is set off by a hairline, the active one by a 2px rule in `--s1-split-mark` (the accent by default). No line round a pane. Keep a pane at least as wide as its page needs: an app ends the split on a narrow window." },
+      { label: "Chinese", text: "Nothing of its own to set: each pane's page sets its words." },
+    ],
+    where: "Aha's Browser layout: two tabs side by side on a wide screen (two chats, or a chat beside Files, a project or a LaTeX document), each with its own head and composer.",
+  },
+  {
     id: "tab-bar",
     name: "Tab bar",
     zh: "底部标签栏",

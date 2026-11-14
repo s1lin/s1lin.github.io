@@ -1240,6 +1240,33 @@
       ]
     },
     {
+      "name": "split",
+      "type": "registry:ui",
+      "title": "Split",
+      "description": "Two panes side by side, a half each, one of them active, or one pane alone in the same frame (so a pane keeps its state when the second comes or goes). A press or the focus coming into a pane makes it the active one first; the active pane carries a rule along its top, the end pane a hairline. No line round a pane.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/split.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/split.tsx"
+        },
+        {
+          "path": "src/ui/split.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/split.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "navigation"
+      ]
+    },
+    {
       "name": "toast",
       "type": "registry:ui",
       "title": "Toast",

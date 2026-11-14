@@ -44,6 +44,7 @@ import { Code } from "@/ui/code";
 import { Combobox } from "@/ui/combobox";
 import { Command } from "@/ui/command";
 import { TabStrip } from "@/ui/tab-strip";
+import { Split, SplitPane } from "@/ui/split";
 import { Copy } from "@/ui/copy";
 import { DescriptionList } from "@/ui/description-list";
 import { Dropdown, DropdownCheckItem, DropdownGroup, DropdownItem, DropdownLabel, DropdownList, DropdownRadioGroup, DropdownRadioItem, DropdownSeparator, DropdownSub, DropdownSubList, DropdownSubTrigger, DropdownTrigger } from "@/ui/dropdown";
@@ -1426,6 +1427,37 @@ function LangRow({ name, zh, size, links = false }: { name: [string, string]; zh
         renderLink={stay}
         size={size}
       />
+    </div>
+  );
+}
+
+/** The split's demo: two notes side by side, the one pressed or focused active; one alone fills the frame. */
+export function SplitDemo() {
+  const [two, setTwo] = useState(true);
+  const [front, setFront] = useState("b");
+  const panes = [
+    { id: "a", title: "Trip plan", text: "Book the night train, then the ryokan by the river." },
+    { id: "b", title: "Packing list", text: "Rain jacket, adapters, the guidebook." },
+  ];
+  const shown = two ? panes : panes.filter((p) => p.id === front);
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <div style={{ display: "flex", height: 180, background: "var(--s1-paper)", boxShadow: "inset 0 0 0 1px var(--s1-rule)" }}>
+        <Split label="Split view" split={two}>
+          {shown.map((p) => (
+            <SplitPane key={p.id} label={p.title} side={p.id === "b" && two ? "end" : "start"} active={p.id === front} onActivate={() => setFront(p.id)}>
+              <div style={{ padding: "14px 16px" }}>
+                <b>{p.title}</b>
+                <p style={{ margin: "6px 0 10px", color: "var(--s1-ink-2)" }}>{p.text}</p>
+                <Input aria-label={`A note in ${p.title}`} placeholder="Type here" />
+              </div>
+            </SplitPane>
+          ))}
+        </Split>
+      </div>
+      <Button size="sm" variant="ghost" onClick={() => setTwo((v) => !v)}>
+        {two ? "Close split" : "Open beside"}
+      </Button>
     </div>
   );
 }

@@ -439,6 +439,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.RailDemo />;
     case "tab-bar":
       return <demos.TabBarDemo />;
+    case "split":
+      return <demos.SplitDemo />;
     case "tabs":
       return <demos.TabsDemo />;
     case "toast":
