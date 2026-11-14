@@ -170,9 +170,20 @@ if (!phone) {
     ev("pointerdown", g.top + g.height / 2);
     window.dragAt = second.top + second.height / 2 - 4;
   });
-  step(() => { const grip = document.querySelectorAll("#reorder .s1-sidenav__grip")[3]; grip.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
-  step(() => { got.reorder.held = $("#reorder [data-held] .s1-sidenav__label").textContent; got.reorder.preview = [...document.querySelectorAll("#reorder .s1-sidenav__label")].map((l) => l.textContent); $("#reorder [data-held] .s1-sidenav__grip").dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
+  // the moves and the letting go reach the window, wherever the pointer is (a row moved under it loses the handle)
+  step(() => { window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
+  step(() => { got.reorder.held = $("#reorder [data-held] .s1-sidenav__label").textContent; got.reorder.preview = [...document.querySelectorAll("#reorder .s1-sidenav__label")].map((l) => l.textContent); document.body.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 7, button: 0, clientY: window.dragAt })); });
   step(() => { got.reorder.afterDrag = [...window.order]; got.reorder.heldAfter = !!$("#reorder [data-held]"); });
+  // another drag, cancelled by Esc: nothing moves
+  step(() => {
+    const grip = document.querySelectorAll("#reorder .s1-sidenav__grip")[0];
+    const g = grip.getBoundingClientRect();
+    grip.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 8, button: 0, clientY: g.top + g.height / 2 }));
+  });
+  step(() => { window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: 8, button: 0, clientY: 10000 })); });
+  step(() => { got.reorder.escPreview = [...document.querySelectorAll("#reorder .s1-sidenav__label")].map((l) => l.textContent); window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+  step(() => { document.body.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 8, button: 0, clientY: 10000 })); });
+  step(() => { got.reorder.afterEsc = [...window.order]; got.reorder.heldEsc = !!$("#reorder [data-held]"); });
 } else {
   const bar = () => $("#phone .s1-sidenav__bar");
   const panel = () => $("#phone .s1-sidenav__panel");
@@ -276,6 +287,10 @@ test("SideNav in a browser: the current bar, the rail, the phone's sheet (opens,
   assert.deepEqual(desk.reorder.preview, ["Pin a", "Pin d", "Pin b", "Pin c"]);
   assert.deepEqual(desk.reorder.afterDrag, ["a", "d", "b", "c"]);
   assert.equal(desk.reorder.heldAfter, false);
+  // Esc during a drag puts it back: the preview moved, the order did not
+  assert.deepEqual(desk.reorder.escPreview, ["Pin d", "Pin b", "Pin c", "Pin a"]);
+  assert.deepEqual(desk.reorder.afterEsc, ["a", "d", "b", "c"]);
+  assert.equal(desk.reorder.heldEsc, false);
   assert.deepEqual(desk.mark.md, [56, 56]);
   assert.deepEqual(desk.mark.sm, [40, 40]);
   assert.equal(desk.mark.color, desk.mark.ink2);

@@ -131,6 +131,12 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLElement>, "title" | "children
 };
 
 type Step = { section: SideNavSection; item?: undefined } | { item: SideNavItem; section?: undefined };
+type Drag = { section: string; pointer: number; id: string; ids: string[]; order: string[]; mids: number[]; onReorder: (ids: string[]) => void };
+
+/** Every section in reorder mode, at any depth. */
+function collectReorders(sections: SideNavSection[]): SideNavSection[] {
+  return sections.flatMap((s) => [...(s.reorder ? [s] : []), ...collectReorders(s.sections ?? [])]);
+}
 const plain = (node: ReactNode, text?: string) => text ?? (typeof node === "string" ? node : undefined);
 const wordsOf = (s: Step) => (s.section ? plain(s.section.title, s.section.text) : plain(s.item.label, s.item.text));
 
@@ -197,8 +203,12 @@ export function SideNav({
   const bar = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const tree = useRef<HTMLOListElement>(null);
-  // A reorder by dragging: the section, the item held, and the order it would take if let go now (null: none).
-  const [drag, setDrag] = useState<{ section: string; id: string; order: string[]; mids: number[] } | null>(null);
+  // A reorder by dragging: the section, the pointer, the item held, the ids and their rows' middles when it was taken,
+  // the order it would take if let go now, and where to give it (null: none).
+  const [drag, setDrag] = useState<Drag | null>(null);
+  // Each reorder section's ids as last drawn: a drag let go after its items changed gives no order (an item would be
+  // left out or come back).
+  const drawnIds = useRef(new Map<string, string>());
 
   const path = pathTo(sections, [], current);
   const at = new Set(path.map((s) => (s.section ?? s.item).id));
@@ -257,14 +267,42 @@ export function SideNav({
     return () => host?.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // A drag in progress: Esc puts the items back where they were.
-  const dragging = drag !== null;
   useEffect(() => {
-    if (!dragging) return;
+    drawnIds.current = new Map(collectReorders(sections).map((s) => [s.id, (s.items ?? []).map((i) => i.id).join("\u0000")]));
+  });
+
+  // A drag in progress, followed on the window so it ends wherever the pointer is let go (a row moved under it can lose
+  // the handle's capture): a move places the item, letting go gives the order, a cancelled pointer or Esc puts it back.
+  useEffect(() => {
+    if (!drag) return;
+    const mine = (e: globalThis.PointerEvent) => e.pointerId === drag.pointer;
+    const onMove = (e: globalThis.PointerEvent) => {
+      if (!mine(e)) return;
+      // its place: after every other item whose middle is above the pointer
+      const others = drag.ids.map((id, i) => [id, drag.mids[i] ?? 0] as const).filter(([id]) => id !== drag.id);
+      const next = others.map(([id]) => id);
+      next.splice(others.filter(([, mid]) => mid < e.clientY).length, 0, drag.id);
+      if (next.join("\u0000") !== drag.order.join("\u0000")) setDrag({ ...drag, order: next });
+    };
+    const onUp = (e: globalThis.PointerEvent) => {
+      if (!mine(e)) return;
+      setDrag(null);
+      const same = drawnIds.current.get(drag.section) === drag.ids.join("\u0000");
+      if (same && drag.order.join("\u0000") !== drag.ids.join("\u0000")) drag.onReorder(drag.order);
+    };
+    const onCancel = (e: globalThis.PointerEvent) => mine(e) && setDrag(null);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrag(null);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [dragging]);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [drag]);
 
   // Keep the current item in view inside a tree that scrolls in its own box, by scrolling that box alone: the panel, or
   // the tree where an app's sidebar holds its footer still under a tree that scrolls by itself (a sticky footer in a
@@ -345,7 +383,8 @@ export function SideNav({
     const items = section.items ?? [];
     const ids = items.map((i) => i.id);
     const held = drag?.section === section.id ? drag : null;
-    const order = held ? held.order : ids;
+    // the preview, kept to the items there are now (one added meanwhile goes last; one gone is left out)
+    const order = held ? [...held.order.filter((id) => ids.includes(id)), ...ids.filter((id) => !held.order.includes(id))] : ids;
     const byId = new Map(items.map((i) => [i.id, i]));
     const move = (from: number, to: number) => {
       if (to < 0 || to >= ids.length || from === to) return;
@@ -357,28 +396,13 @@ export function SideNav({
     const grab = (e: PointerEvent<HTMLElement>, id: string) => {
       if (e.button !== 0) return;
       e.preventDefault();
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {
-        // a pointer the browser no longer tracks: the moves still reach the handle while it is over it
-      }
       const list = e.currentTarget.closest("ul");
       const rows = list ? [...list.querySelectorAll<HTMLElement>(":scope > .s1-sidenav__entry")] : [];
-      setDrag({ section: section.id, id, order: ids, mids: rows.map((r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2; }) });
-    };
-    const follow = (e: PointerEvent<HTMLElement>) => {
-      if (!held) return;
-      // its place: after every other item whose middle is above the pointer
-      const others = ids.map((id, i) => [id, held.mids[i] ?? 0] as const).filter(([id]) => id !== held.id);
-      const at = others.filter(([, mid]) => mid < e.clientY).length;
-      const next = others.map(([id]) => id);
-      next.splice(at, 0, held.id);
-      if (next.join("\u0000") !== held.order.join("\u0000")) setDrag({ ...held, order: next });
-    };
-    const drop = () => {
-      if (!held) return;
-      setDrag(null);
-      if (held.order.join("\u0000") !== ids.join("\u0000")) reorder.onReorder(held.order);
+      const mids = rows.map((r) => {
+        const b = r.getBoundingClientRect();
+        return b.top + b.height / 2;
+      });
+      setDrag({ section: section.id, pointer: e.pointerId, id, ids, order: ids, mids, onReorder: reorder.onReorder });
     };
     return order.map((id) => {
       const item = byId.get(id);
@@ -392,9 +416,6 @@ export function SideNav({
             aria-hidden="true"
             title={reorder.labels.handle}
             onPointerDown={(e) => grab(e, id)}
-            onPointerMove={follow}
-            onPointerUp={drop}
-            onPointerCancel={() => setDrag(null)}
           />
           <span className={cn("s1-sidenav__item", item.icon != null && "s1-sidenav__item--icon")} lang={item.lang}>
             {item.icon != null && (
@@ -473,7 +494,7 @@ export function SideNav({
             {section.sections && section.sections.length > 0 && <ol className="s1-sidenav__sections">{section.sections.map((s) => renderSection(s, depth + 1))}</ol>}
             {section.items && section.items.length > 0 && (
               <ul className={cn("s1-sidenav__items", section.tiles && !rail && !section.reorder && "s1-sidenav__items--tiles", section.reorder && !rail && "s1-sidenav__items--reorder")}>
-                {section.reorder && !rail ? reorderItems(section, section.reorder) : section.items.map(renderItem)}
+                {section.reorder ? (rail ? section.items.map((i) => renderItem({ ...i, disabled: true })) : reorderItems(section, section.reorder)) : section.items.map(renderItem)}
               </ul>
             )}
           </div>
