@@ -435,6 +435,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.LangSwitchDemo />;
     case "tab-strip":
       return <demos.TabStripDemo />;
+    case "rail":
+      return <demos.RailDemo />;
     case "tabs":
       return <demos.TabsDemo />;
     case "toast":

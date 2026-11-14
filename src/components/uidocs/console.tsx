@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Fo
 import {
   Ban,
   BookOpen,
+  Bot,
   CalendarDays,
   Check,
   Clapperboard,
@@ -14,7 +15,11 @@ import {
   Image as ImageIcon,
   Keyboard,
   KeyRound,
+  LayoutGrid,
+  ListChecks,
   MessageSquare,
+  Monitor,
+  Network,
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
@@ -55,6 +60,7 @@ import { Pagination } from "@/ui/pagination";
 import { Panel } from "@/ui/panel";
 import { Popover } from "@/ui/popover";
 import { RadioGroup } from "@/ui/radio-group";
+import { Rail } from "@/ui/rail";
 import { Secret } from "@/ui/secret";
 import { NativeSelect, Select } from "@/ui/select";
 import { SideNav, type SideNavSection } from "@/ui/side-nav";
@@ -1291,6 +1297,38 @@ function AppSideNav({ zh = false, startRail = false }: { zh?: boolean; startRail
         rail={rail}
         footer={<p className="ud-navbox__foot">s1lin · {zh ? "免费版" : "Free"}</p>}
       />
+    </div>
+  );
+}
+
+/** An app's rail of places in English and in Chinese (a panel place pressed, a page place current, a count), and a dock of switches. */
+export function RailDemo() {
+  const [panel, setPanel] = useState("tasks");
+  const [at, setAt] = useState("tasks");
+  const [dock, setDock] = useState<string | null>("files");
+  const places = (zh: boolean) => [
+    { id: "tasks", label: zh ? "任务" : "Tasks", icon: <ListChecks />, pressed: panel === "tasks", count: 3, countLabel: zh ? "3 件需要你处理" : "3 need you", onSelect: () => setPanel("tasks") },
+    { id: "bots", label: zh ? "机器人" : "Bots", icon: <Bot />, pressed: panel === "bots", onSelect: () => setPanel("bots") },
+    { id: "apps", label: zh ? "应用" : "Apps", icon: <LayoutGrid />, pressed: panel === "apps", onSelect: () => setPanel("apps") },
+    { id: "files", label: zh ? "文件" : "Files", icon: <Folder />, href: "#files", onSelect: () => setAt("files") },
+    { id: "store", label: zh ? "探索" : "Explore", icon: <Store />, href: "#store", onSelect: () => setAt("store") },
+  ];
+  const toggle = (id: string) => setDock((d) => (d === id ? null : id));
+  return (
+    <div className="ud-row" style={{ alignItems: "stretch", gap: 24 }}>
+      <div style={{ height: 420, display: "flex" }}>
+        <Rail label="Places" current={at} head={<b>A</b>} foot={<span aria-label="Ann">AE</span>} items={places(false)} />
+      </div>
+      <div lang="zh-CN" style={{ height: 420, display: "flex" }}>
+        <Rail label="位置" current={at} head={<b>A</b>} items={places(true)} />
+      </div>
+      <div data-theme="dark" style={{ height: 420, display: "flex", background: "var(--s1-paper)" }}>
+        <Rail label="This chat's panels" group words={false} edge="end" items={[
+          { id: "files", label: "Files in this chat", icon: <Folder />, pressed: dock === "files", onSelect: () => toggle("files") },
+          { id: "pc", label: "Aha's computer", icon: <Monitor />, pressed: dock === "pc", onSelect: () => toggle("pc") },
+          { id: "map", label: "Agent map", icon: <Network />, pressed: dock === "map", onSelect: () => toggle("map") },
+        ]} />
+      </div>
     </div>
   );
 }

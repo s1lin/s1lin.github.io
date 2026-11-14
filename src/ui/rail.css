@@ -1,0 +1,143 @@
+/* Rail: a column of places at the window's edge, each a picture over its word. The place you are at is in the ink,
+   heavier, with a 2px bar at its start; a switch that is on (a panel shown, a flyout open) sits on the second paper,
+   as a hovered place does. No line round any place, in any state (switchers are borderless; the keyboard's ring is an
+   outline on :focus-visible). The head is as tall as the app's header
+   (--s1-rail-head-h) over a hairline; the foot sits at the bottom. Every colour is a token. */
+@layer components {
+  .s1-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    flex: none;
+    width: 72px;
+    height: 100%;
+    min-height: 0;
+    padding: 0 0 10px;
+    border-right: 1px solid var(--s1-rule);
+    background: var(--s1-paper);
+    color: var(--s1-ink-2);
+    font-family: var(--s1-font-sans);
+  }
+  .s1-rail--end { border-right: 0; border-left: 1px solid var(--s1-rule); }
+  .s1-rail--icons { width: 52px; padding-top: 10px; }
+
+  .s1-rail__head {
+    flex: none;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--s1-rail-head-h, 48px);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--s1-rule);
+    color: var(--s1-ink);
+  }
+  .s1-rail__items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    list-style: none;
+  }
+  .s1-rail--icons .s1-rail__items { gap: 4px; }
+  .s1-rail__foot { flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: auto; padding-top: 6px; }
+
+  .s1-rail__item {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-sizing: border-box;
+    width: 64px;
+    min-height: 56px;
+    margin: 0;
+    padding: 6px 2px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: 500 11.5px/1.1 var(--s1-font-sans);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    outline: none;
+  }
+  .s1-rail--icons .s1-rail__item { width: 38px; min-height: 38px; padding: 0; }
+  .s1-rail__icon { display: grid; place-items: center; width: 22px; height: 22px; }
+  .s1-rail__icon > svg { width: 22px; height: 22px; }
+  .s1-rail--icons .s1-rail__icon, .s1-rail--icons .s1-rail__icon > svg { width: 19px; height: 19px; }
+  .s1-rail__word { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .s1-rail--icons .s1-rail__word {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+
+  /* the ground behind the picture: a hover, a switch that is on, a flyout open from it */
+  .s1-rail__item::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 5px;
+    left: 50%;
+    width: 46px;
+    height: 30px;
+    margin-left: -23px;
+    border-radius: 15px;
+    background: transparent;
+  }
+  .s1-rail--icons .s1-rail__item::before { inset: 0; width: auto; height: auto; margin: 0; border-radius: 10px; }
+  .s1-rail__item:hover { color: var(--s1-ink); }
+  .s1-rail__item:hover::before { background: color-mix(in srgb, var(--s1-ink) 6%, transparent); }
+  .s1-rail__item:is([aria-pressed="true"], [aria-expanded="true"])::before { background: var(--s1-paper-2); }
+  .s1-rail__item:is([aria-pressed="true"], [aria-expanded="true"]) { color: var(--s1-ink); }
+  /* where you are: the ink, heavier, a 2px bar at its start (drawn as a fill, not a line: a place is a switcher too) */
+  .s1-rail__item[aria-current] { color: var(--s1-ink); font-weight: 650; }
+  .s1-rail__item[aria-current]::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 0;
+    width: 2px;
+    background: var(--s1-ink);
+  }
+  .s1-rail__item:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: -2px; }
+  .s1-rail__item:is(:disabled, [aria-disabled="true"]) { opacity: 0.45; cursor: default; }
+
+  /* how many wait there, on the picture's corner */
+  .s1-rail__count {
+    position: absolute;
+    top: 2px;
+    left: calc(50% + 4px);
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--s1-ink);
+    color: var(--s1-paper);
+    font: 500 10.5px/1 var(--s1-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .s1-rail--icons .s1-rail__count { top: -4px; left: auto; right: -4px; }
+
+  /* Chinese: never tracked, at 12px, so the strokes hold under the picture. */
+  .s1-rail__word:lang(zh), .s1-rail__word [lang|="zh"] { font-size: 12px; letter-spacing: 0; }
+
+  /* forced colours drop the fills: the switch that is on and the bar of where you are are drawn as lines there */
+  @media (forced-colors: active) {
+    .s1-rail__item:is([aria-pressed="true"], [aria-expanded="true"])::before { border: 1px solid Highlight; }
+    .s1-rail__item[aria-current]::after { border-left: 2px solid CanvasText; }
+    .s1-rail__count { border: 1px solid CanvasText; }
+  }
+}

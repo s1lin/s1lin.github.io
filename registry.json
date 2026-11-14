@@ -1184,6 +1184,34 @@
       ]
     },
     {
+      "name": "rail",
+      "type": "registry:ui",
+      "title": "Rail",
+      "description": "A column of places at the window's edge: each a picture over its word, a page (a link) or a button (a panel to show), a count on the picture's corner; the place you are at in the ink with a 2px bar, a switch that is on on the second paper, no line round any place. A head as tall as the app's header, a foot for the account; without words, a dock of switches. Up and Down move focus along it.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/visually-hidden.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/rail.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/rail.tsx"
+        },
+        {
+          "path": "src/ui/rail.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/rail.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "navigation"
+      ]
+    },
+    {
       "name": "toast",
       "type": "registry:ui",
       "title": "Toast",

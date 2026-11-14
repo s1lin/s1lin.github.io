@@ -1707,6 +1707,48 @@ const LANGS = [
     where: "Aha's Browser layout: the open chats, apps and pages, the tab strip at the window's top (its title bar in the Windows app).",
   },
   {
+    id: "rail",
+    name: "Rail",
+    zh: "侧边栏",
+    keywords: ["rail", "activity bar", "places", "dock", "navigation rail", "side bar", "侧栏", "导航栏", "分区"],
+    group: "navigation",
+    item: "rail",
+    exports: ["Rail", "RailItem", "RailProps"],
+    summary:
+      "A column of places at the window's edge, as an app with a few places keeps them (an activity bar): each a picture over its word, a page to go to or a button that shows a panel, with a count on the picture's corner. The place you are at says so, a switch that is on is pressed. Its head is as tall as the app's header and holds the app's mark; its foot holds the account. Without words it is a dock of switches at the other edge (a chat's side panels).",
+    example: "live",
+    usage: `import { Rail } from "@/components/s1lin/rail";
+
+<Rail label="Places" current={here} head={<Logo />} foot={<Account />}
+  items={[
+    { id: "tasks", label: "Tasks", icon: <ListChecks />, pressed: panel === "tasks", count: waiting, countLabel: waitingWords, onSelect: () => setPanel("tasks") },
+    { id: "files", label: "Files", icon: <Folder />, href: "/files", onSelect: () => go("/files") },
+  ]} />
+
+// a dock of switches at the window's right edge
+<Rail label="This chat's panels" group words={false} edge="end"
+  items={[{ id: "files", label: "Files", icon: <Folder />, pressed: files, onSelect: toggleFiles }]} />`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "The landmark's name (\"Places\"), or the group's with `group`." },
+      { name: "items", type: "RailItem[]", required: true, desc: "`{ id, label, icon, text?, href?, onSelect?, pressed?, count?, countLabel?, disabled?, lang? }`, in order. With `href` the item is a link (a plain click goes to `onSelect`, your router's step; a new tab is the browser's); without it a button. `pressed` makes a button a switch; `count` sits on the picture's corner, said by `countLabel`." },
+      { name: "current", type: "string | null", desc: "The id of the place you are at: `aria-current=\"page\"` on it." },
+      { name: "words", type: "boolean", default: "true", desc: "The words under the pictures; `false`: pictures only, each word its name and tooltip." },
+      { name: "head", type: "ReactNode", desc: "Over the places, as tall as the app's header (`--s1-rail-head-h`, 48px by default), over a hairline: the app's mark." },
+      { name: "foot", type: "ReactNode", desc: "At the rail's foot: the account, a help button." },
+      { name: "edge", type: "\"start\" | \"end\"", default: "\"start\"", desc: "The window's edge it stands at; its hairline is on the side that faces the page." },
+      { name: "group", type: "boolean", default: "false", desc: "A group of switches (`role=\"group\"`) instead of a navigation landmark." },
+      { name: "wrap", type: "(item, element) => ReactNode", desc: "Puts an item's element inside something of yours: a Popover around it, for a panel that opens beside the rail (`side=\"right\"`)." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Keyboard", text: "Every place is in the Tab order; ↑ and ↓ move focus along the rail, Home and End to its ends. Enter follows a link; Enter or Space presses a button." },
+      { label: "Accessibility", text: "A `nav` named by `label` (or a `group`). The place you are at has `aria-current=\"page\"` and is told by the ink, the weight and its bar, never by colour alone; a switch has `aria-pressed`. A count is read after the place's name with what it counts (`countLabel`)." },
+      { label: "Styles", text: "No line round any place (switchers are borderless): a hover, a switch that is on and a panel open from a place lay the second paper behind its picture; where you are adds the ink, a heavier word and a 2px bar. 72px wide with words, 52px without; give `--s1-rail-head-h` the height of your header so the head lines up with it." },
+      { label: "Chinese", text: "A word under a picture is set at 12px, never tracked; two characters fit, longer words cut with an ellipsis and keep their whole name as the tooltip." },
+    ],
+    where: "Aha's Spaces layout: the rail of places at the window's left (Tasks, Bots, Apps, Files, Explore) and the dock of a chat's side panels at its right.",
+  },
+  {
     id: "dialog",
     name: "Dialog",
     zh: "对话框",
