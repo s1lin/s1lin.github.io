@@ -182,6 +182,7 @@ export const ENTRIES: Entry[] = [
     props: [
       { name: "--s1-paper", type: "colour", default: "#f6f6f4 · #0f0f0f", desc: "The page, and the face of a plain button." },
       { name: "--s1-paper-2", type: "colour", default: "#ececea · #191919", desc: "Plates, wells, a chip under the pointer." },
+      { name: "--s1-paper-lift", type: "colour", default: "the paper · 7 % ink over the paper", desc: "A sheet that floats over the page (a toast): the paper by day, a step lighter at night so it floats rather than sinks." },
       { name: "--s1-ink", type: "colour", default: "#111 · #ededed", desc: "Text, marks, the go button's face." },
       { name: "--s1-ink-2", type: "colour", default: "#4d4d4d · #b3b3b3", desc: "Second ink: labels, a link among buttons." },
       { name: "--s1-ink-3", type: "colour", default: "#8a8a8a · #7a7a7a", desc: "Third ink: page numbers, hints, guide lines." },
@@ -200,6 +201,9 @@ export const ENTRIES: Entry[] = [
       { name: "--s1-on-status", type: "colour", default: "unset: the paper", desc: "The words on a solid status fill: the bad badge's." },
       { name: "--s1-chosen", type: "colour", default: "unset: the ink", desc: "The fill under the chosen option of a filled switcher: a segmented row's, a card's, a pressed ghost button's or chip's. Set it to your brand; see Switchers." },
       { name: "--s1-on-chosen", type: "colour", default: "unset: the paper", desc: "The words on `--s1-chosen`: 4.5:1 on it at least, by day and at night." },
+      { name: "--s1-brand", type: "colour", default: "unset: the ink", desc: "The brand: a toast's bar for a good result, its action's fill under the pointer and its focus ring. Set it to your brand; see Theming." },
+      { name: "--s1-brand-strong", type: "colour", default: "unset: the ink", desc: "Words in the brand, AA on --s1-brand-tint: a toast's action." },
+      { name: "--s1-brand-tint", type: "colour", default: "unset: the paper-2", desc: "A ground in the brand: a toast's action at rest." },
       { name: "--s1-scheme", type: "light | dark", default: "light · dark", desc: "The colour scheme native controls are drawn in: a select's list, a number's arrows, a date's picker." },
       { name: "--s1-font-display", type: "font stack", default: "Instrument Serif… Chinese serif, Chinese sans, serif", desc: "Headlines. Chinese takes `--s1-font-cjk-serif`, then the Chinese sans: never SimSun." },
       { name: "--s1-font-sans", type: "font stack", default: "Inter Tight… var(--s1-font-cjk), sans-serif", desc: "Text, and the roundel's letter." },
@@ -2088,7 +2092,7 @@ const id = toast({ title: "Saving…", duration: Infinity });
 toast({ id, title: "Saved", status: "ok" });       // the same toast, replaced
 toast({ title: "Key revoked", action: { label: "Undo", onClick: undo } });`,
     props: [
-      { name: "toast", type: "(message | ToastOptions) => id", desc: "Show one. `{ title, description?, status?, action?: { label, onClick }, duration?, id? }`. Give an id again to replace a toast in place. `toast.dismiss(id?)` takes one, or all, away." },
+      { name: "toast", type: "(message | ToastOptions) => id", desc: "Show one. `{ title, description?, status?, action?: { label, onClick, icon? }, duration?, id? }`: the action's icon (an svg) goes before its label, as Undo's arrow. Give an id again to replace a toast in place. `toast.dismiss(id?)` takes one, or all, away." },
       { name: "duration", type: "number", default: "5000", desc: "Milliseconds on screen; Infinity to stay. A toast with an action stays until it is dismissed." },
       { name: "position", type: "\"bottom-end\" | \"bottom-start\" | \"top-end\" | \"top-start\"", default: "\"bottom-end\"", desc: "Toaster: the corner. On a phone they take the width of the screen at that edge." },
       { name: "label", type: "string", default: "\"Notifications\"", desc: "Toaster: the region's name." },

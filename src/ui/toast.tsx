@@ -16,8 +16,8 @@ export interface ToastOptions {
   description?: ReactNode;
   /** The shape before it and the word read first, as Notice. */
   status?: Status;
-  /** One button in the toast: "Undo", "View". A toast with one stays until it is dismissed. */
-  action?: { label: string; onClick: () => void };
+  /** One button in the toast: "Undo", "View", with its picture (an svg) before the label. A toast with one stays until it is dismissed. */
+  action?: { label: string; onClick: () => void; icon?: ReactNode };
   /** Milliseconds on screen; Infinity to stay. 5000 by default; a toast with an action stays. */
   duration?: number;
   /** Give the same id again to replace a toast in place ("Saving…", then "Saved"). */
@@ -103,6 +103,7 @@ function One({ item, paused, dismissLabel, words }: { item: Item; paused: boolea
         {item.action && (
           <Button
             size="sm"
+            icon={item.action.icon}
             className="s1-toast__action"
             onClick={() => {
               item.action!.onClick();

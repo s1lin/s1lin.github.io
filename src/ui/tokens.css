@@ -1,6 +1,6 @@
 /*
  * The tokens every part of the library is drawn in: one ink on plain stock, a
- * second paper for plates and wells, two greys, two hairline strengths, one
+ * second paper for plates and wells, a lifted paper for sheets that float over the page (a toast), two greys, two hairline strengths, one
  * accent (the go button's offset shadow), one light blue for "here" (the dot
  * under the language in force), five typefaces and the Chinese faces they end
  * in, the "+" marks, and the scheme native controls are drawn in (a select's
@@ -19,6 +19,7 @@
   :root {
     --s1-paper: #f6f6f4;
     --s1-paper-2: #ececea;
+    --s1-paper-lift: var(--s1-paper);
     --s1-ink: #111;
     --s1-ink-2: #4d4d4d;
     --s1-ink-3: #8a8a8a;
@@ -75,13 +76,20 @@
          --s1-chosen:    unset, the ink   (the fill under the chosen option)
          --s1-on-chosen: unset, the paper (its words: AA on that fill)
        A switcher never has a line round it; the fill and the weight say
-       which one is chosen (owner, 2026-11-02). */
+       which one is chosen (owner, 2026-11-02).
+
+       The brand, unset on purpose too: a toast's bar for a good result and
+       its action's tint, words and fill under the pointer:
+         --s1-brand:        unset, the ink     (the bar, a fill, a ring)
+         --s1-brand-strong: unset, the ink     (words in the brand: AA on its tint)
+         --s1-brand-tint:   unset, the paper-2 (a ground in the brand) */
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"], .light, [data-mode="light"]) {
       --s1-paper: #0f0f0f;
       --s1-paper-2: #191919;
+      --s1-paper-lift: color-mix(in srgb, var(--s1-ink) 7%, var(--s1-paper));
       --s1-ink: #ededed;
       --s1-ink-2: #b3b3b3;
       --s1-ink-3: #7a7a7a;
@@ -96,6 +104,7 @@
   [data-theme="dark"], .dark, [data-mode="dark"] {
     --s1-paper: #0f0f0f;
     --s1-paper-2: #191919;
+    --s1-paper-lift: color-mix(in srgb, var(--s1-ink) 7%, var(--s1-paper));
     --s1-ink: #ededed;
     --s1-ink-2: #b3b3b3;
     --s1-ink-3: #7a7a7a;
@@ -110,6 +119,7 @@
   :root [data-theme="light"], :root .light, :root [data-mode="light"] {
     --s1-paper: #f6f6f4;
     --s1-paper-2: #ececea;
+    --s1-paper-lift: var(--s1-paper);
     --s1-ink: #111;
     --s1-ink-2: #4d4d4d;
     --s1-ink-3: #8a8a8a;
