@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useRef, useState, type CSSProperties, type HTMLAttributes, type Key, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type HTMLAttributes, type Key, type MouseEvent, type ReactNode } from "react";
 import { cn } from "./cn";
+import { copyText } from "./copy";
 import { EmptyState } from "./empty-state";
 import { Skeleton } from "./skeleton";
 import { useOverflow } from "./use-overflow";
@@ -11,7 +12,10 @@ import "./tokens.css";
 import "./table.css";
 
 export interface Column<Row> {
-  /** Unique among the columns; the sort key, and the row's field shown when there is no `cell`. */
+  /**
+   * Unique among the columns; the sort key, and the row's field shown when there is no `cell`. A first column keyed
+   * "select" is a row's checkbox: the ID column (`rowId`) comes after it.
+   */
   key: string;
   header: ReactNode;
   /** What the cell shows; by default the row's field named `key`. */
@@ -134,6 +138,18 @@ export type TableProps<Row> = Body<Row> & {
   columns: Column<Row>[];
   /** Each row's React key: a field's name, or a function. */
   rowKey: keyof Row | ((row: Row, index: number) => Key);
+  /**
+   * Each row's id, in a column of its own at the start of the row (after a first column keyed "select", a row's
+   * checkbox): "ID" over it (the words' `id`), the id in mono with figures of one width, in a column as narrow as the
+   * longest id shown (two to eight figures), a longer one cut short with "…"; a press copies the whole id. A field's
+   * name or a function; a row with none shows "—". Rows that have an id show it here, not inline in another cell.
+   */
+  rowId?: keyof Row | ((row: Row, index: number) => string | number | null | undefined);
+  /**
+   * The ID column's header asks for a sort, under this key ("id" for true), where the list can sort by its id: the
+   * first press asks for the newest first ("desc").
+   */
+  idSort?: boolean | string;
   /** The column whose cells name their rows (row headers); the first by default. */
   rowHeader?: string;
   /** Attributes for each row's <tr>: a class, data attributes, a click. */
@@ -192,10 +208,52 @@ function fromRowBackground(e: MouseEvent<HTMLElement>): boolean {
   return !window.getSelection?.()?.toString();
 }
 
+/** The id the ID column shows: a field's value or the function's, null when the row has none. */
+function idOf<Row>(rowId: NonNullable<TableProps<Row>["rowId"]>, row: Row, index: number): string | null {
+  const v = typeof rowId === "function" ? rowId(row, index) : (row[rowId] as unknown);
+  return typeof v === "string" || typeof v === "number" || typeof v === "bigint" ? (String(v) === "" ? null : String(v)) : null;
+}
+
+/**
+ * A row's id in the ID column: a button that copies it (never the row's own click), its name "Copy ID 42", the ink
+ * behind it for a moment after a copy, and the same said to a screen reader.
+ */
+function IdCell({ id }: { id: string | null }) {
+  const w = useS1Words();
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const timer = useRef<number>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  if (id === null) return <span className="s1-table__noid">—</span>;
+  const name = w.copyName(`${w.id} ${id}`);
+  return (
+    <>
+      <button
+        type="button"
+        className="s1-table__copy"
+        data-state={state === "idle" ? undefined : state}
+        aria-label={name}
+        title={name}
+        onClick={async (e) => {
+          e.stopPropagation();
+          setState("idle");
+          const ok = await copyText(id, e.currentTarget);
+          setState(ok ? "copied" : "failed");
+          window.clearTimeout(timer.current);
+          timer.current = window.setTimeout(() => setState("idle"), ok ? 1500 : 3000);
+        }}
+      >
+        {id}
+      </button>
+      <VisuallyHidden role="status">{state === "copied" ? w.copiedMessage : state === "failed" ? w.copyFailedMessage : ""}</VisuallyHidden>
+    </>
+  );
+}
+
 /**
  * A data table: a real <table> with a caption, column headers and row
  * headers, numbers set to the end in mono, an empty row, rows of bars while
- * loading, sortable headers with aria-sort, and actions at the end of each row.
+ * loading, sortable headers with aria-sort, each row's id in a column of its
+ * own at the start (`rowId`), and actions at the end of each row.
  * Rows can come in groups, each a <tbody> under a heading row across the table,
  * which a button opens and closes. Wider than its frame, it scrolls sideways
  * inside it and says so under it, never the page; the frame is then a region
@@ -206,10 +264,12 @@ export function Table<Row>(props: TableProps<Row>) {
   const {
     caption,
     hideCaption = false,
-    columns,
+    columns: given,
     rows,
     groups,
     rowKey,
+    rowId,
+    idSort,
     rowHeader,
     rowProps,
     rail,
@@ -246,7 +306,23 @@ export function Table<Row>(props: TableProps<Row>) {
     if (openGroups === undefined) setOwnOpen(next);
     onOpenGroupsChange?.(next);
   };
-  const head = rowHeader ?? columns[0]?.key;
+  // The ID column, at the start of the row: after a row's checkbox (a first column keyed "select"), else first.
+  const columns: Column<Row>[] =
+    rowId === undefined
+      ? given
+      : (() => {
+          const id: Column<Row> = {
+            key: typeof idSort === "string" ? idSort : "id",
+            header: w.id,
+            sortable: Boolean(idSort),
+            firstDir: "desc",
+            className: "s1-table__id",
+            cell: (r, i) => <IdCell id={idOf(rowId, r, i)} />,
+          };
+          const at = given[0]?.key === "select" ? 1 : 0;
+          return [...given.slice(0, at), id, ...given.slice(at)];
+        })();
+  const head = rowHeader ?? given[0]?.key;
   const span = columns.length + (actions ? 1 : 0);
   const busy = loading !== false && loading !== 0;
   const skeletons = typeof loading === "number" ? loading : 5;
@@ -256,6 +332,12 @@ export function Table<Row>(props: TableProps<Row>) {
   const cls = (c: Column<Row>) =>
     cn(c.numeric && "s1-table__num", c.align && `s1-table__${c.align}`, c.wrap && "s1-table__wrap", c.clamp && "s1-table__clamped", c.className);
   const keys = groups?.map((g) => g.key) ?? [];
+  // The ID column is as wide as the longest id shown, two to eight figures: narrow for a short list's ids, one width
+  // down the column (the figures are of one width), a longer id cut short.
+  const idChars =
+    rowId === undefined
+      ? undefined
+      : Math.min(8, Math.max(2, ...(rows ?? groups?.flatMap((g) => g.rows) ?? []).map((r, i) => idOf(rowId, r, i)?.length ?? 1)));
   const everyOpen = allGroupsOpen(open, keys);
 
   const row = (r: Row, i: number) => {
@@ -361,6 +443,7 @@ export function Table<Row>(props: TableProps<Row>) {
   return (
     <div
       className={cn("s1-table", stickyHeader && "s1-table--sticky", dense && "s1-table--dense", fit && "s1-table--fit", groups && "s1-table--groups", className)}
+      style={idChars === undefined ? undefined : ({ "--s1-table-id-chars": idChars } as CSSProperties)}
       data-overflow={over ? "" : undefined}
     >
       {expandAll && collapsible && groups && groups.length > 0 && (

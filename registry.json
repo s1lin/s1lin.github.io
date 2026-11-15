@@ -591,11 +591,12 @@
       "name": "table",
       "type": "registry:ui",
       "title": "Table",
-      "description": "A data table: caption, column and row headers, numbers in mono at the end, an empty row, rows of bars while loading, sortable headers, row actions, a sticky header, rows in groups that open and close (Expand all), a fit mode that never outgrows its frame; otherwise scrolls sideways inside its frame.",
+      "description": "A data table: caption, column and row headers, numbers in mono at the end, an empty row, rows of bars while loading, sortable headers, each row's id in a column of its own first (copied on a press), row actions, a sticky header, rows in groups that open and close (Expand all), a fit mode that never outgrows its frame; otherwise scrolls sideways inside its frame.",
       "author": "s1lin",
       "registryDependencies": [
         "https://s1lin.tokensbeat.com/r/tokens.json",
         "https://s1lin.tokensbeat.com/r/cn.json",
+        "https://s1lin.tokensbeat.com/r/copy.json",
         "https://s1lin.tokensbeat.com/r/empty-state.json",
         "https://s1lin.tokensbeat.com/r/skeleton.json",
         "https://s1lin.tokensbeat.com/r/use-overflow.json",

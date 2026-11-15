@@ -78,8 +78,39 @@
     margin-block: calc((var(--s1-table-line) - 30px) / 2);
   }
   .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th):not(.s1-table__empty) > .s1-badge { margin-block: calc((var(--s1-table-line) - 21px) / 2); }
+  /*
+   * A checkbox with no words alone in a cell (a row's, and the header's that chooses every row): its 18px box centred
+   * on the cell's first line, the header's words or the row's --s1-table-line (1lh: the cell's line, which the box
+   * inherits), not 2px down a 24px row as in a form (owner 2026-11-15: "the checkbox and row title are not vertically
+   * aligned").
+   */
+  .s1-table :is(th, td) > .s1-check { margin-block: calc((1lh - 18px) / 2); }
+  .s1-table :is(th, td) > .s1-check > .s1-check__row { min-height: 0; }
+  .s1-table :is(th, td) > .s1-check .s1-check__control { margin-top: 0; }
   .s1-table__empty { padding: 0 !important; white-space: normal !important; text-align: center !important; color: var(--s1-ink-2); }
   .s1-table__empty:not(:has(.s1-empty)) { padding: 28px 14px !important; }
+
+  /*
+   * The ID column (rowId; owner 2026-11-15: "we should break the id as its own column, first column"): as wide as the
+   * longest id shown, --s1-table-id-chars figures of the mono (0.6em each; two to eight, the table works it out), and
+   * never narrower than its header "ID" and its sort arrow; little padding at its end, since the name after it has its
+   * own. The id in mono with figures of one width, quiet, a longer one cut short with "…"; a button that copies it, the
+   * ink behind it for a moment after.
+   */
+  .s1-table th.s1-table__id, .s1-table td.s1-table__id { box-sizing: border-box; padding-inline-end: 4px; width: max(47px, calc(var(--s1-table-id-chars, 8) * 0.6 * 13px + 14px + 4px)); }
+  .s1-table--dense th.s1-table__id, .s1-table--dense td.s1-table__id { padding-inline-end: 2px; width: max(41px, calc(var(--s1-table-id-chars, 8) * 0.6 * 12px + 10px + 2px)); }
+  .s1-table td.s1-table__id { font-family: var(--s1-font-mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--s1-ink-2); }
+  .s1-table--dense td.s1-table__id { font-size: 12px; }
+  .s1-table__copy {
+    display: inline-block; box-sizing: border-box; max-width: calc(var(--s1-table-id-chars, 8) * 1ch + 8px); margin: 0 -4px; padding: 0 4px; border: 0; border-radius: 2px;
+    background: none; color: inherit; font: inherit; line-height: inherit; letter-spacing: inherit; text-align: start;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: top; cursor: copy;
+  }
+  .s1-table__copy:hover { color: var(--s1-ink); background: color-mix(in srgb, var(--s1-ink) 7%, transparent); }
+  .s1-table__copy:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 0; }
+  .s1-table__copy[data-state="copied"] { color: var(--s1-paper); background: var(--s1-ink); }
+  .s1-table__copy[data-state="failed"] { color: var(--s1-ink); text-decoration: line-through; }
+  .s1-table__noid { color: var(--s1-ink-3); }
 
   /* A sortable header: the whole header is the button; ▲ ▼ for the sort, both faint when it is unsorted. */
   .s1-table__sort {
@@ -87,6 +118,12 @@
     font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer;
   }
   .s1-table__num .s1-table__sort { flex-direction: row-reverse; }
+  /* In a table that fits, a figure's header too long for its narrow column stays at the column's end, over its figures,
+     and runs back over the column before it, never past its end into the next header (owner 2026-11-15: headers that
+     ran together, "PRIORITYLOAD"). The button fills the cell; its words and arrow are packed at the end. */
+  .s1-table--fit thead :is(.s1-table__num, .s1-table__end) > .s1-table__sort { display: flex; box-sizing: border-box; width: calc(100% + 16px); white-space: nowrap; }
+  .s1-table--fit thead .s1-table__num > .s1-table__sort { justify-content: flex-start; }
+  .s1-table--fit thead .s1-table__end:not(.s1-table__num) > .s1-table__sort { justify-content: flex-end; }
   .s1-table__sort:hover, .s1-table__sort[data-dir] { color: var(--s1-ink); }
   .s1-table__sort:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: -2px; }
   .s1-table__arrow { position: relative; width: 7px; height: 11px; flex: none; }

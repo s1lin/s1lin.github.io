@@ -17,9 +17,12 @@ import { build } from "vite";
  * within 1px of the row's line, the cell's top plus its padding plus half of --s1-table-line; inside every
  * .s1-table__pair each child centred within 1px of the pair's centre, and no child of a pair taller than the line
  * unless it is a control (words in a pair keep to one line); dots on one line; a row's buttons inside their cell's
- * padding. At 1440 and at 390 (where the tables scroll in their frames), border-box everywhere as the apps set it. It
- * fails on the old table.css (cells centred in the middle, the actions cell padded 4px). Skipped where there is no
- * Chrome: set CHROME to one.
+ * padding. The header row the same way on its words' line, and a checkbox's box (a row's, the header's that chooses
+ * every row; owner 2026-11-15: "the checkbox and row title are not vertically aligned") within half a pixel of its
+ * line, at both sizes, in a table that fits and one that scrolls, in Chinese, beside the ID column. At 1440 and at 390
+ * (where the tables scroll in their frames), border-box everywhere as the apps set it. It fails on the old table.css
+ * (cells centred in the middle, the actions cell padded 4px), and without the table's rule for a checkbox (the box 2px
+ * down a 24px row, as in a form). Skipped where there is no Chrome: set CHROME to one.
  */
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -47,13 +50,13 @@ const part = (f: string) => JSON.stringify(path.join(UI, f));
 export const CHECK = `
 function checkRows(root, TOL) {
   const failures = [];
-  let rows = 0, pairs = 0, cells = 0;
+  let rows = 0, heads = 0, pairs = 0, cells = 0, boxes = 0;
   const hidden = (el) => el.closest(".s1-visually-hidden, legend, [hidden], [popover], dialog");
   const shown = (el) => el.getClientRects().length && !hidden(el) && getComputedStyle(el).visibility !== "hidden";
   const label = (el) => el.tagName.toLowerCase() + "." + String(el.className.baseVal ?? el.className).split(" ")[0];
-  const CONTROLS = "button, input:not([type=radio]):not([type=checkbox]), .s1-switch__control, .s1-radio, .s1-select__trigger, svg, .s1-glyph";
+  const CONTROLS = "button, input:not([type=radio]):not([type=checkbox]), .s1-switch__control, .s1-radio, .s1-select__trigger, svg, .s1-glyph, .s1-check__box";
   // Everything on a cell's first line: each text whose first line box starts in it, each control whose box does.
-  const firstLine = (cell, top, line) => {
+  const firstLine = (cell, top, line, controls) => {
     const found = [];
     const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() && shown(n.parentElement) && getComputedStyle(n.parentElement).position !== "absolute" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
     for (let t = walker.nextNode(); t; t = walker.nextNode()) {
@@ -62,10 +65,10 @@ function checkRows(root, TOL) {
       const rect = [...range.getClientRects()].find((r) => r.height > 2);
       if (rect && rect.top < top + line - 1) found.push({ y: (rect.top + rect.bottom) / 2, what: "text " + JSON.stringify(t.textContent.trim().slice(0, 16)) });
     }
-    for (const c of cell.querySelectorAll(CONTROLS)) {
+    for (const c of cell.querySelectorAll(controls)) {
       if (!shown(c) || c.closest("svg") !== c && c.closest("svg")) continue;
       const r = c.getBoundingClientRect();
-      if (r.height > 2 && r.top < top + line - 1) found.push({ y: (r.top + r.bottom) / 2, what: label(c) });
+      if (r.height > 2 && r.top < top + line - 1) found.push({ y: (r.top + r.bottom) / 2, what: label(c), box: c.matches(".s1-check__box") });
     }
     return found;
   };
@@ -91,16 +94,21 @@ function checkRows(root, TOL) {
     }
     return out;
   };
-  [...root.querySelectorAll(".s1-table tbody tr")].forEach((tr, at) => {
+  // The header row keeps the rule too, on its own line (its words' line-height): every label's first line on it, and
+  // a checkbox that chooses every row centred on it, as each row's checkbox on the row's.
+  const head = [...root.querySelectorAll(".s1-table thead tr")];
+  [...head, ...root.querySelectorAll(".s1-table tbody tr")].forEach((tr, at) => {
     if (tr.matches(".s1-table__ghead, .s1-table__loading") || !tr.getClientRects().length) return;
     const list = [...tr.children].filter((c) => c.matches("td, th") && !c.matches(".s1-table__empty"));
     if (list.length < 2) return;
-    rows++;
-    const name = tr.textContent.trim().replace(/\\s+/g, " ").slice(0, 40);
+    const isHead = at < head.length;
+    if (isHead) heads++;
+    else rows++;
+    const name = (isHead ? "header " : "") + tr.textContent.trim().replace(/\\s+/g, " ").slice(0, 40);
     const say = (text) => failures.push({ row: at, text: "row " + JSON.stringify(name) + ": " + text });
     // One line for the whole row: every cell's top padding the same, the target from the first cell's.
     const s0 = getComputedStyle(list[0]);
-    const line = parseFloat(s0.getPropertyValue("--s1-table-line")) || parseFloat(s0.lineHeight);
+    const line = (!isHead && parseFloat(s0.getPropertyValue("--s1-table-line"))) || parseFloat(s0.lineHeight);
     const pad = parseFloat(s0.borderTopWidth) + parseFloat(s0.paddingTop);
     const target = list[0].getBoundingClientRect().top + pad + line / 2;
     list.forEach((cell, i) => {
@@ -108,13 +116,16 @@ function checkRows(root, TOL) {
       const own = parseFloat(s.borderTopWidth) + parseFloat(s.paddingTop);
       if (Math.abs(own - pad) > 0.01) say("cell " + (i + 1) + "'s top padding is " + own + "px, the row's " + pad + "px");
       const top = cell.getBoundingClientRect().top + own;
-      const items = firstLine(cell, top, line);
-      if (items.length) cells++;
+      // in the header its words and its checkbox: a sort button holds a label that may wrap, its words checked as words
+      const items = firstLine(cell, top, line, isHead ? ".s1-check__box" : CONTROLS);
+      if (items.length && !isHead) cells++;
+      boxes += items.filter((it) => it.box).length;
       for (const lead of leads(cell, top, line)) {
         const w = firstWords(lead);
         if (w && w.top >= top + line - 1) say("cell " + (i + 1) + "'s words " + w.what + " start " + (w.top - top).toFixed(1) + "px below its top, off the row's line");
       }
-      for (const it of items) if (Math.abs(it.y - target) > TOL) say("cell " + (i + 1) + " (" + it.what + ") is " + (it.y - target).toFixed(1) + "px off the row's line");
+      // a checkbox's box within half of TOL: an 18px square a pixel low reads as off its words (the 2px of a form's row)
+      for (const it of items) if (Math.abs(it.y - target) > (it.box ? TOL / 2 : TOL)) say("cell " + (i + 1) + " (" + it.what + ") is " + (it.y - target).toFixed(1) + "px off the row's line");
     });
     for (const dots of tr.querySelectorAll(".s1-radios--dots")) {
       const opts = [...dots.querySelectorAll(".s1-radio")].filter((o) => o.getClientRects().length);
@@ -135,7 +146,7 @@ function checkRows(root, TOL) {
       }
     }
   });
-  return { failures: failures.map((f) => f.text), failingRows: new Set(failures.map((f) => f.row)).size, rows, pairs, cells };
+  return { failures: failures.map((f) => f.text), failingRows: new Set(failures.map((f) => f.row)).size, rows, heads, pairs, cells, boxes };
 }
 `;
 
@@ -145,6 +156,7 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { Badge } from ${part("badge.tsx")};
 import { Button } from ${part("button.tsx")};
+import { Checkbox } from ${part("checkbox.tsx")};
 import { Glyph } from ${part("glyph.tsx")};
 import { IconButton } from ${part("icon-button.tsx")};
 import { Input } from ${part("input.tsx")};
@@ -199,6 +211,18 @@ const KEYS = [
   { id: 1, name: "prod-backend", spend: "$41.20" },
   { id: 2, name: "nightly-batch", spend: "$88.04" },
 ];
+// Rows to choose, each with its id: a short one, a long one cut short, a word id cut short, a row with none.
+const CHOSEN = [
+  { id: 42, name: "anthropic-apikey-03", sub: "anthropic · apikey", spend: "$2.00" },
+  { id: 12345678901, name: "deepseek-apikey-06", sub: "deepseek · apikey", spend: "$15.00" },
+  { id: "a3f9c2e1-77b0-4d1e-9c55-0d2f1e9b8a10", name: "gemini-oauth-17", sub: "gemini · oauth", spend: "$0.40" },
+  { id: null, name: "kimi-apikey-08", sub: "kimi · apikey", spend: "—" },
+];
+const chooseColumns = (zh) => [
+  { key: "select", header: <Checkbox aria-label={zh ? "选择本页全部" : "Select every account"} />, cell: (a) => <Checkbox aria-label={(zh ? "选择 " : "Select ") + a.name} defaultChecked={a.id === 42} /> },
+  { key: "name", header: zh ? "账号" : "Account", sortable: true, cell: (a) => <span className="name"><Mark c={a.name[0]} /><Who name={a.name} sub={a.sub} /></span> },
+  { key: "spend", header: zh ? "今日消费" : "Spend today", numeric: true, sortable: true, cell: (a) => a.spend },
+];
 
 function Stories() {
   return (
@@ -226,8 +250,15 @@ function Stories() {
         <Table caption="Keys" columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }]} rows={[]} rowKey="id" empty={<Button size="sm">Create a key</Button>} />
         <Table caption="Keys" loading={2} columns={[{ key: "name", header: "Name" }, { key: "spend", header: "Spend", numeric: true }]} rows={KEYS} rowKey="id" />
       </section>
+      <section data-story="rows to choose">
+        <Table caption="Accounts" columns={chooseColumns(false)} rows={CHOSEN} rowKey="name" rowId="id" idSort sort={{ key: "id", dir: "desc" }} rowHeader="name" actions={actions} />
+      </section>
+      <section data-story="rows to choose, fitted and dense">
+        <Table caption="Accounts" fit dense columns={chooseColumns(false)} rows={CHOSEN} rowKey="name" rowId="id" rowHeader="name" />
+      </section>
       <section data-story="Chinese" lang="zh-CN">
         <Table caption="分组" fit columns={columns(true)} rows={GROUPS} rowKey="id" actions={actions} />
+        <Table caption="账号" fit columns={chooseColumns(true)} rows={CHOSEN} rowKey="name" rowId="id" idSort rowHeader="name" actions={actions} />
       </section>
     </div>
   );
@@ -315,7 +346,7 @@ test("every row's first lines lie on one line, and every icon and its words are 
   if (!bin) return;
   for (const width of [1440, 390]) {
     const got = open(bin, width);
-    assert.deepEqual(Object.keys(got), ["groups, fitted", "groups, scrolling", "a dense log", "a 40px menu and a button", "fields in rows", "fields in dense rows", "special rows", "Chinese"]);
+    assert.deepEqual(Object.keys(got), ["groups, fitted", "groups, scrolling", "a dense log", "a 40px menu and a button", "fields in rows", "fields in dense rows", "special rows", "rows to choose", "rows to choose, fitted and dense", "Chinese"]);
     for (const [story, r] of Object.entries(got)) {
       assert.deepEqual(r.failures, [], `${width}px, ${story}`);
       assert.equal(r.outside, 0, `${width}px, ${story}: a row's buttons stay inside their cell's padding`);
@@ -325,7 +356,28 @@ test("every row's first lines lie on one line, and every icon and its words are 
     assert.equal(got["groups, fitted"].pairs, 9, `${width}px: the health, the status and the actions of three rows`);
     assert.equal(got["groups, fitted"].cells, 27, `${width}px: nine cells a row, each with a first line`);
     assert.equal(got["a dense log"].pairs, 1, `${width}px: the one OK`);
+    // a box in the header and in each of the four rows, measured on its line: in each table of rows to choose
+    assert.equal(got["rows to choose"].boxes, 5, `${width}px: the header's checkbox and four rows'`);
+    assert.equal(got["rows to choose, fitted and dense"].boxes, 5, `${width}px: the header's checkbox and four rows', dense`);
+    assert.equal(got.Chinese.boxes, 5, `${width}px: the header's checkbox and four rows', in Chinese`);
+    for (const story of ["rows to choose", "rows to choose, fitted and dense", "Chinese"]) assert.ok(got[story].heads >= 1, `${width}px, ${story}: its header row checked`);
   }
+});
+
+test("the check sees a checkbox off its line without the table's rule for it: the header's 4px down its words, a row's 1px down the row's line", async (t) => {
+  // table.css without its rule for a checkbox in a cell: the box as a form draws it, 2px down a row 24px tall.
+  const bare = (id: string) => (id.endsWith("table.css") ? own(id).replace(/\n  \/\*\n   \* A checkbox with no words alone in a cell[\s\S]*?margin-top: 0; \}/, "") : own(id));
+  assert.notEqual(bare(path.join(UI, "table.css")), own(path.join(UI, "table.css")), "the rule is found and taken out");
+  const bin = await page(t, bare);
+  if (!bin) return;
+  const got = open(bin, 1440);
+  if (process.env.S1LIN_ALIGN) writeFileSync(process.env.S1LIN_ALIGN, JSON.stringify(got, null, 1)); // the findings, for a report
+  const said = got["rows to choose"].failures.join("\n");
+  assert.match(said, /row "header [^"]*": cell 1 \(span\.s1-check__box\) is 4\.\dpx off the row's line/, "the header's checkbox 4px down its words");
+  assert.match(said, /row "[^"]*anthropic-apikey-03[^"]*": cell 1 \(span\.s1-check__box\) is 1\.0px off the row's line/, "a row's checkbox 1px down the row's line");
+  assert.equal(got["rows to choose"].failingRows, 5, "the header and the four rows");
+  assert.match(got.Chinese.failures.join("\n"), /row "header [^"]*": cell 1 \(span\.s1-check__box\) is [3-5]\.\dpx off/, "in Chinese too, on the header's 12px words");
+  assert.equal(got["rows to choose, fitted and dense"].failingRows, 5, "dense: the header, and rows 18px tall under a 24px row's box");
 });
 
 test("the check fails on the old table.css: cells centred in the middle, the actions cell padded 4px, no pair", async (t) => {
@@ -357,7 +409,7 @@ test("the check sees one cell's padding moved, a name moved off its mark's line,
     `[data-story="groups, fitted"] tbody tr:first-child > :nth-child(3) { padding-top: 13px; }
      [data-story="groups, scrolling"] tbody tr:nth-child(2) .who__main { position: relative; top: 3px; }
      [data-story="a dense log"] tbody td .caps { position: relative; top: 2px; }
-     [data-story="Chinese"] tbody tr:first-child .who__main { margin-top: 22px; }`,
+     [data-story="Chinese"] .s1-table:first-child tbody tr:first-child .who__main { margin-top: 22px; }`,
   );
   if (!bin) return;
   const got = open(bin, 1440);

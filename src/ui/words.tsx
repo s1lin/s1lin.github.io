@@ -64,6 +64,8 @@ export interface S1WordMap {
   sortNone: string;
   empty: string;
   actions: string;
+  /** Table: the ID column's header (`rowId`), and the start of its copy button's name ("Copy ID 42", with `copyName`). */
+  id: string;
   /** Table with collapsible groups: the button above it. */
   expandAll: string;
   collapseAll: string;
@@ -113,6 +115,7 @@ export const S1_WORDS: S1WordMap = {
   sortNone: "sort",
   empty: "Nothing here yet.",
   actions: "Actions",
+  id: "ID",
   expandAll: "Expand all",
   collapseAll: "Collapse all",
   sameFare: "Same fare",

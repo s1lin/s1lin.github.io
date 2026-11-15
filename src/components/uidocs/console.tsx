@@ -603,7 +603,7 @@ export function SliderDemo() {
 // ------------------------------------------------------------------ data
 
 interface Key {
-  id: string;
+  id: number;
   name: string;
   prefix: string;
   status: Status;
@@ -613,11 +613,11 @@ interface Key {
 }
 
 const KEYS: Key[] = [
-  { id: "k1", name: "prod-backend", prefix: "sk-tb-4f7c", status: "ok", state: "Active", created: "2026-09-02", spend: 41.2 },
-  { id: "k2", name: "nightly-batch", prefix: "sk-tb-91ae", status: "warn", state: "90% used", created: "2026-08-17", spend: 88.04 },
-  { id: "k3", name: "staging", prefix: "sk-tb-0c3d", status: "neutral", state: "Off", created: "2026-07-30", spend: 0.6 },
-  { id: "k4", name: "old-laptop", prefix: "sk-tb-77b2", status: "bad", state: "Revoked", created: "2026-03-11", spend: 3.15 },
-  { id: "k5", name: "eval-harness", prefix: "sk-tb-e5f0", status: "info", state: "Read only", created: "2026-10-20", spend: 12.9 },
+  { id: 4107, name: "prod-backend", prefix: "sk-tb-4f7c", status: "ok", state: "Active", created: "2026-09-02", spend: 41.2 },
+  { id: 3982, name: "nightly-batch", prefix: "sk-tb-91ae", status: "warn", state: "90% used", created: "2026-08-17", spend: 88.04 },
+  { id: 3511, name: "staging", prefix: "sk-tb-0c3d", status: "neutral", state: "Off", created: "2026-07-30", spend: 0.6 },
+  { id: 1204, name: "old-laptop", prefix: "sk-tb-77b2", status: "bad", state: "Revoked", created: "2026-03-11", spend: 3.15 },
+  { id: 4230, name: "eval-harness", prefix: "sk-tb-e5f0", status: "info", state: "Read only", created: "2026-10-20", spend: 12.9 },
 ];
 const usd = (n: number) => `$${n.toFixed(2)}`;
 
@@ -626,12 +626,34 @@ export function TableDemo() {
   const [sort, setSort] = useState<Sort | null>({ key: "spend", dir: "desc" });
   const [page, setPage] = useState(1);
   const [said, setSaid] = useState("");
+  const [chosen, setChosen] = useState<ReadonlySet<number>>(() => new Set());
   const rows = [...KEYS].sort((a, b) => {
     if (!sort) return 0;
-    const d = sort.key === "spend" ? a.spend - b.spend : a[sort.key as "name" | "created"].localeCompare(b[sort.key as "name" | "created"]);
+    const d = sort.key === "spend" || sort.key === "id" ? a[sort.key] - b[sort.key] : a[sort.key as "name" | "created"].localeCompare(b[sort.key as "name" | "created"]);
     return sort.dir === "asc" ? d : -d;
   });
+  const shown = view === "rows" ? rows : [];
+  const all = shown.length > 0 && shown.every((k) => chosen.has(k.id));
+  const choose = (k: Key, on: boolean) =>
+    setChosen((was) => {
+      const next = new Set(was);
+      if (on) next.add(k.id);
+      else next.delete(k.id);
+      return next;
+    });
   const columns: Column<Key>[] = [
+    {
+      key: "select",
+      header: (
+        <Checkbox
+          aria-label="Choose every key"
+          checked={all}
+          indeterminate={!all && shown.some((k) => chosen.has(k.id))}
+          onChange={(e) => setChosen(e.target.checked ? new Set(shown.map((k) => k.id)) : new Set())}
+        />
+      ),
+      cell: (k) => <Checkbox aria-label={`Choose ${k.name}`} checked={chosen.has(k.id)} onChange={(e) => choose(k, e.target.checked)} />,
+    },
     { key: "name", header: "Name", sortable: true },
     { key: "prefix", header: "Key", cell: (k) => <Code>{`${k.prefix}…`}</Code> },
     { key: "status", header: "Status", cell: (k) => <Badge status={k.status}>{k.state}</Badge> },
@@ -654,8 +676,11 @@ export function TableDemo() {
       <Table
         caption="API keys"
         columns={columns}
-        rows={view === "rows" ? rows : []}
+        rows={shown}
         rowKey="id"
+        rowId="id"
+        idSort
+        rowHeader="name"
         loading={view === "loading" ? 3 : false}
         sort={sort}
         onSortChange={setSort}
@@ -680,7 +705,7 @@ export function TableDemo() {
         )}
       />
       <Pagination page={page} pageCount={12} onPageChange={setPage} summary={`${(page - 1) * 5 + 1}–${page * 5} of 58`} />
-      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Sort by a header, open a row's ⋯, change the page; on a phone the table scrolls in its frame."} />
+      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "Sort by a header, press an ID to copy it, choose rows, open a row's ⋯, change the page; on a phone the table scrolls in its frame."} />
       <TableRows />
     </div>
   );
