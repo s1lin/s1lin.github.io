@@ -181,7 +181,11 @@ rows: a name that wraps, figures over notes, badges, a switch and its word, dots
 a row's size, a row's ghost dots and its trash, a dense log and Chinese; it fails on
 the old table.css. `test/icon-button.test.ts` holds IconButton and the ghost Menu's
 dots to their squares, colours (the bad hue for a delete), turn under the pointer and
-ring, on paper, at night and in a theme with status hues. The
+ring, on paper, at night and in a theme with status hues. `test/theme-vars.test.ts`
+holds the variables a theme may set on StatusSwitch (`--s1-status-on`, `-off` and their
+dots), Checkbox (`--s1-check-on`, `--s1-check-tick`) and Table (`--s1-table-num-align`,
+`-sort`, `-wrap`, figures at the start) to the look before while unset and to the theme
+once set. The
 docs page never mounts the social parts, so it never signs in, posts or calls Aha. The page
 is prerendered like the issue.
 

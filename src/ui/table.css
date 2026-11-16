@@ -46,7 +46,13 @@
   .s1-table tbody tr:hover > * { background: color-mix(in srgb, var(--s1-ink) 4%, transparent); }
   .s1-table tbody tr.s1-table__loading:hover > * { background: none; }
 
-  .s1-table__num { text-align: end !important; font-family: var(--s1-font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+  /*
+   * A figure: at the end of its column, in mono with figures of one width. A theme may set every column at its start,
+   * figures too, with three variables read here with today's look as the fallback: --s1-table-num-align (end; start),
+   * --s1-table-num-sort (row-reverse, the sort arrow before the words; row, after them) and --s1-table-num-wrap (nowrap,
+   * a fitted table's figure header on one line; normal, wrapping between words as any header's).
+   */
+  .s1-table__num { text-align: var(--s1-table-num-align, end) !important; font-family: var(--s1-font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
   .s1-table thead .s1-table__num { font-size: 10.5px; }
   .s1-table__end { text-align: end !important; }
   .s1-table__center { text-align: center !important; }
@@ -115,16 +121,23 @@
   .s1-table__copy[data-state="failed"] { color: var(--s1-ink); text-decoration: line-through; }
   .s1-table__noid { color: var(--s1-ink-3); }
 
-  /* A sortable header: the whole header is the button; ▲ ▼ for the sort, both faint when it is unsorted. */
+  /* A sortable header: the whole header is the button; ▲ ▼ for the sort, both faint when it is unsorted. Words that
+     wrap keep to the column's side (a button's own text-align is the centre). */
   .s1-table__sort {
     display: inline-flex; align-items: center; gap: 7px; margin: -6px -8px; padding: 6px 8px; border: 0; background: none; color: inherit;
-    font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer;
+    font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: inherit; cursor: pointer;
   }
-  .s1-table__num .s1-table__sort { flex-direction: row-reverse; }
+  /* A figure's sort arrow comes before its words, so the words end over the figures (--s1-table-num-sort, row-reverse;
+     a theme that sets the figures at the start sets it to row: the words start over them, the arrow after, as any
+     header's). */
+  .s1-table__num .s1-table__sort { flex-direction: var(--s1-table-num-sort, row-reverse); }
   /* In a table that fits, a figure's header too long for its narrow column stays at the column's end, over its figures,
      and runs back over the column before it, never past its end into the next header (owner 2026-11-15: headers that
-     ran together, "PRIORITYLOAD"). The button fills the cell; its words and arrow are packed at the end. */
+     ran together, "PRIORITYLOAD"). The button fills the cell; its words and arrow are packed at the end. A theme that
+     sets the figures at the start packs them at the start (--s1-table-num-sort: row) and lets the words wrap as any
+     header's (--s1-table-num-wrap: normal): the column must then hold its longest word. */
   .s1-table--fit thead :is(.s1-table__num, .s1-table__end) > .s1-table__sort { display: flex; box-sizing: border-box; width: calc(100% + 16px); white-space: nowrap; }
+  .s1-table--fit thead .s1-table__num > .s1-table__sort { white-space: var(--s1-table-num-wrap, nowrap); }
   .s1-table--fit thead .s1-table__num > .s1-table__sort { justify-content: flex-start; }
   .s1-table--fit thead .s1-table__end:not(.s1-table__num) > .s1-table__sort { justify-content: flex-end; }
   .s1-table__sort:hover, .s1-table__sort[data-dir] { color: var(--s1-ink); }
@@ -148,6 +161,9 @@
   .s1-table--fit table { width: 100%; min-width: 0; table-layout: fixed; }
   .s1-table--fit th, .s1-table--fit td { white-space: normal; overflow-wrap: anywhere; }
   .s1-table--fit .s1-table__num { white-space: nowrap; overflow-wrap: normal; }
+  /* A figure's header that wraps (--s1-table-num-wrap: normal) breaks between words only, never inside one (参与调度
+     whole, not a character a line): a word longer than its column runs into the cell's own padding at its end. */
+  .s1-table--fit thead .s1-table__num { white-space: var(--s1-table-num-wrap, nowrap); word-break: keep-all; }
   .s1-table--fit .s1-table__wrap { min-width: 0; }
   .s1-table--fit .s1-table__actions { width: 3rem; }
   .s1-table__clamped { white-space: normal !important; }

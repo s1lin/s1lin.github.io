@@ -1,4 +1,8 @@
-/* Checkbox (checkbox.tsx): the <input> lies over the drawn box, invisible, and takes the clicks. */
+/*
+ * Checkbox (checkbox.tsx): the <input> lies over the drawn box, invisible, and takes the clicks. A ticked (or mixed)
+ * box is filled in --s1-check-on with its tick or bar in --s1-check-tick: the ink and the paper until a theme sets them
+ * (a theme's fill clears 3:1 on its papers, its tick 3:1 on the fill).
+ */
 @layer components {
   .s1-check { display: grid; gap: 2px; min-width: 0; }
   .s1-check__row {
@@ -12,11 +16,11 @@
     background: var(--s1-paper); border: 1px solid var(--s1-rule-strong);
   }
   .s1-check__box::after {
-    content: ""; position: absolute; inset: 3px; background: var(--s1-paper); opacity: 0;
+    content: ""; position: absolute; inset: 3px; background: var(--s1-check-tick, var(--s1-paper)); opacity: 0;
     clip-path: polygon(0 56%, 15% 41%, 38% 63%, 85% 14%, 100% 29%, 38% 93%);
   }
   .s1-check__row:hover .s1-check__box { border-color: var(--s1-ink); }
-  .s1-check__input:checked + .s1-check__box, .s1-check__input:indeterminate + .s1-check__box { background: var(--s1-ink); border-color: var(--s1-ink); }
+  .s1-check__input:checked + .s1-check__box, .s1-check__input:indeterminate + .s1-check__box { background: var(--s1-check-on, var(--s1-ink)); border-color: var(--s1-check-on, var(--s1-ink)); }
   .s1-check__input:checked + .s1-check__box::after { opacity: 1; }
   .s1-check__input:indeterminate + .s1-check__box::after { opacity: 1; clip-path: inset(40% 8%); }
   .s1-check__input:focus-visible + .s1-check__box { outline: 2px solid var(--s1-ink); outline-offset: 2px; }
