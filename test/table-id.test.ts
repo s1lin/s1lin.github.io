@@ -149,7 +149,7 @@ document.fonts.ready.then(async () => {
     got[s.dataset.story] = {
       width: th.getBoundingClientRect().width,
       headFits: th.querySelector(".s1-table__arrow").getBoundingClientRect().right <= th.getBoundingClientRect().right - parseFloat(getComputedStyle(th).paddingRight) + 0.5,
-      ids: [...s.querySelectorAll("td.s1-table__id .s1-table__copy")].map((b) => ({ text: b.textContent, cut: b.scrollWidth > b.clientWidth + 0.5, inside: b.getBoundingClientRect().right <= b.closest("td").getBoundingClientRect().right + 0.5 })),
+      ids: [...s.querySelectorAll("td.s1-table__id .s1-table__copy")].map((b) => ({ text: b.textContent, cut: b.scrollWidth > b.clientWidth + 0.5, inside: b.getBoundingClientRect().right <= b.closest("td").getBoundingClientRect().right + 0.5, byRule: parseFloat(getComputedStyle(b).marginRight) + parseFloat(getComputedStyle(b.closest("td")).paddingRight) >= 0 })),
     };
   }
   document.querySelector('[data-story="long"] td.s1-table__id .s1-table__copy').click();
@@ -187,7 +187,7 @@ test("in Chrome: the column as wide as its longest id (two to eight figures, nev
     assert.fail(`Chrome failed on the page (${bin}): ${String(err.stderr ?? e).slice(0, 400)}`);
   }
   const text = dom.match(/<pre id="out">([\s\S]*?)<\/pre>/)?.[1] ?? "";
-  type Story = { width: number; headFits: boolean; ids: { text: string; cut: boolean; inside: boolean }[] };
+  type Story = { width: number; headFits: boolean; ids: { text: string; cut: boolean; inside: boolean; byRule: boolean }[] };
   const got = JSON.parse(text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as Record<string, Story> & { pageError?: string; copied: string[]; opened: number; state: string | null; said: string };
   assert.equal(got.pageError, undefined, `the page failed: ${got.pageError}`);
   const near = (a: number, b: number, what: string) => assert.ok(Math.abs(a - b) < 1, `${what}: ${a.toFixed(1)}px, not ${b.toFixed(1)}px`);
@@ -200,6 +200,7 @@ test("in Chrome: the column as wide as its longest id (two to eight figures, nev
   for (const [story, s] of Object.entries(got).filter(([, v]) => typeof v === "object" && v && "ids" in v) as [string, Story][]) {
     assert.ok(s.headFits, `${story}: "ID" and its arrow fit the header`);
     for (const id of s.ids) assert.ok(id.inside, `${story}: ${id.text} stays inside its cell`);
+    for (const id of s.ids) assert.ok(id.byRule, `${story}: ${id.text}'s press never reaches past its cell, whatever the font`);
   }
   assert.deepEqual(got.long.ids.map((i) => i.cut), [false, true], "eight figures whole, a uuid cut short");
   assert.deepEqual(got["five figures"].ids.map((i) => i.cut), [false, false]);

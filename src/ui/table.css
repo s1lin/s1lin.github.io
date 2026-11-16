@@ -106,6 +106,9 @@
     background: none; color: inherit; font: inherit; line-height: inherit; letter-spacing: inherit; text-align: start;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: top; cursor: copy;
   }
+  /* The dense cell keeps 2px after its id: the press reaches 2px past the figures there, not 4, or a full id's box
+     would cross into the next cell (CI's Chrome, 2026-11-16). */
+  .s1-table--dense .s1-table__copy { max-width: calc(var(--s1-table-id-chars, 8) * 1ch + 6px); margin-inline-end: -2px; padding-inline-end: 2px; }
   .s1-table__copy:hover { color: var(--s1-ink); background: color-mix(in srgb, var(--s1-ink) 7%, transparent); }
   .s1-table__copy:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 0; }
   .s1-table__copy[data-state="copied"] { color: var(--s1-paper); background: var(--s1-ink); }
