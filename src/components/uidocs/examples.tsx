@@ -391,6 +391,8 @@ export function Demo({ id }: { id: string }) {
       return <demos.RadioDemo />;
     case "switch":
       return <demos.SwitchDemo />;
+    case "status-switch":
+      return <demos.StatusSwitchDemo />;
     case "slider":
       return <demos.SliderDemo />;
 

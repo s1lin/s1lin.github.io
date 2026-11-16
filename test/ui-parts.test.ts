@@ -244,6 +244,36 @@ test("RadioGroup: a radiogroup fieldset; one name; each radio named by its label
   assert.equal(attr(quiet, fs, "class"), "s1-fieldset s1-radios s1-radios--dots");
 });
 
+test("StatusSwitch: a radiogroup named for the row, of two radios named by their words, the current one checked and Tab's only stop; busy and locked said", async () => {
+  const { StatusSwitch } = await part("status-switch");
+  const words = { on: "Active", off: "Inactive" };
+  const m = html(h(StatusSwitch, { label: "Status of Qwen", words, value: true }));
+  assert.match(m, /^<span role="radiogroup" aria-label="Status of Qwen" class="s1-status s1-status--sm">/);
+  const radios = [...m.matchAll(/<button[^>]*>/g)].map((r) => r[0]);
+  assert.equal(radios.length, 2);
+  for (const r of radios) assert.match(r, /type="button" role="radio"/);
+  assert.equal(attr(radios[0], /.*/, "aria-checked"), "true");
+  assert.equal(attr(radios[0], /.*/, "tabindex"), "0");
+  assert.equal(attr(radios[0], /.*/, "class"), "s1-status__item s1-status__item--on");
+  assert.equal(attr(radios[1], /.*/, "aria-checked"), "false");
+  assert.equal(attr(radios[1], /.*/, "tabindex"), "-1");
+  assert.match(m, /<span class="s1-status__label">Active<\/span><\/button><button[^>]*><span class="s1-status__label">Inactive<\/span>/);
+  assert.doesNotMatch(m, /aria-busy|aria-disabled/, "at rest, neither busy nor disabled");
+  // busy: the group says so and both words wait; disabled: the group and both words
+  const busy = html(h(StatusSwitch, { label: "Status of Qwen", words, value: false, busy: true }));
+  assert.match(busy, /^<span role="radiogroup" aria-label="Status of Qwen" aria-busy="true"/);
+  assert.equal([...busy.matchAll(/aria-disabled="true"/g)].length, 2);
+  const off = html(h(StatusSwitch, { label: "Status of Qwen", words, value: true, disabled: true, size: "xs" }));
+  assert.match(off, /aria-disabled="true" class="s1-status s1-status--xs"/);
+  // locked: only the word that cannot be chosen
+  const locked = html(h(StatusSwitch, { label: "Status of you", words, value: true, locked: "off" }));
+  const [lockedOn, lockedOff] = [...locked.matchAll(/<button[^>]*>/g)].map((r) => r[0]);
+  assert.equal(attr(lockedOn, /.*/, "aria-disabled"), undefined);
+  assert.equal(attr(lockedOff, /.*/, "aria-disabled"), "true");
+  // phrasing content only, so it may sit in a cell's line or a paragraph
+  assert.doesNotMatch(m, /<(div|p)[\s>]/);
+});
+
 test("Table: caption, column and row headers, aria-sort, an empty row across, rows of bars and aria-busy while loading", async () => {
   const { Table } = await part("table");
   const columns = [

@@ -12,11 +12,11 @@ import { build } from "vite";
  * The Table's row rule (owner, 2026-11-06: "the table should be vertically aligned for icon+text, and each rows";
  * admin Services redesign §3.6), in Chrome with React running, on stories of the rows a console lists: a name that
  * wraps over its tags beside a mark, figures in mono over their notes, words in mono capitals, badges, a switch and its
- * word, dots at a row's size, a shape and its label, a row's ghost dots and its trash, a dense log, a 40px menu, and
- * Chinese. For every row: each cell's first line (its first text, or its first control when it has none) centred
+ * word, a StatusSwitch's two words, dots at a row's size, a shape and its label, a row's ghost dots and its trash, a
+ * dense log, a 40px menu, and Chinese. For every row: each cell's first line (its first text, or its first control when it has none) centred
  * within 1px of the row's line, the cell's top plus its padding plus half of --s1-table-line; inside every
  * .s1-table__pair each child centred within 1px of the pair's centre, and no child of a pair taller than the line
- * unless it is a control (words in a pair keep to one line); dots on one line; a row's buttons inside their cell's
+ * unless it is a control (words in a pair keep to one line); dots and a StatusSwitch's words on one line; a row's buttons inside their cell's
  * padding. The header row the same way on its words' line, and a checkbox's box (a row's, the header's that chooses
  * every row; owner 2026-11-15: "the checkbox and row title are not vertically aligned") within half a pixel of its
  * line, at both sizes, in a table that fits and one that scrolls, in Chinese, beside the ID column. At 1440 and at 390
@@ -127,8 +127,8 @@ function checkRows(root, TOL) {
       // a checkbox's box within half of TOL: an 18px square a pixel low reads as off its words (the 2px of a form's row)
       for (const it of items) if (Math.abs(it.y - target) > (it.box ? TOL / 2 : TOL)) say("cell " + (i + 1) + " (" + it.what + ") is " + (it.y - target).toFixed(1) + "px off the row's line");
     });
-    for (const dots of tr.querySelectorAll(".s1-radios--dots")) {
-      const opts = [...dots.querySelectorAll(".s1-radio")].filter((o) => o.getClientRects().length);
+    for (const dots of tr.querySelectorAll(".s1-radios--dots, .s1-status")) {
+      const opts = [...dots.querySelectorAll(".s1-radio, .s1-status__item")].filter((o) => o.getClientRects().length);
       if (opts.length > 1 && opts.some((o) => Math.abs(o.getBoundingClientRect().top - opts[0].getBoundingClientRect().top) > TOL)) say("dots " + JSON.stringify(dots.textContent.trim().slice(0, 24)) + ": its options wrap onto more than one line");
     }
     for (const pair of tr.querySelectorAll(".s1-table__pair")) {
@@ -142,7 +142,7 @@ function checkRows(root, TOL) {
         if (!r.height || hidden(child)) continue;
         const c = (r.top + r.bottom) / 2;
         if (Math.abs(c - centre) > TOL) say("pair " + JSON.stringify(pair.textContent.trim().slice(0, 24)) + ": " + label(child) + " is " + (c - centre).toFixed(1) + "px off its centre");
-        if (r.height > height + 1 && !child.matches("button, .s1-btn, .s1-menu, .s1-switch, .s1-radios, .s1-badge, label, input")) say("pair " + JSON.stringify(pair.textContent.trim().slice(0, 24)) + ": " + label(child) + " is " + r.height.toFixed(0) + "px tall, more than the line (its words wrap)");
+        if (r.height > height + 1 && !child.matches("button, .s1-btn, .s1-menu, .s1-switch, .s1-radios, .s1-status, .s1-badge, label, input")) say("pair " + JSON.stringify(pair.textContent.trim().slice(0, 24)) + ": " + label(child) + " is " + r.height.toFixed(0) + "px tall, more than the line (its words wrap)");
       }
     }
   });
@@ -163,6 +163,7 @@ import { Input } from ${part("input.tsx")};
 import { Select } from ${part("select.tsx")};
 import { RadioGroup } from ${part("radio-group.tsx")};
 import { Menu } from ${part("menu.tsx")};
+import { StatusSwitch } from ${part("status-switch.tsx")};
 import { Switch } from ${part("switch.tsx")};
 import { Table } from ${part("table.tsx")};
 ${CHECK}
@@ -187,6 +188,7 @@ const columns = (zh) => [
   { key: "health", header: zh ? "状况" : "Health", cell: (g) => <span className="s1-table__pair"><Glyph status={g.status} /><span className="caps">{g.word}</span></span> },
   { key: "kind", header: zh ? "类型" : "Kind", cell: (g) => <Badge status={g.on ? "ok" : "neutral"}>{g.on ? (zh ? "开" : "Live") : (zh ? "关" : "Off")}</Badge> },
   { key: "status", header: zh ? "状态" : "Status", cell: (g) => <span className="s1-table__pair"><Switch aria-label={(g.on ? "Turn off " : "Turn on ") + g.name} defaultChecked={g.on} /><span className="caps">{g.state}</span></span> },
+  { key: "on", header: zh ? "启用" : "On", cell: (g) => <StatusSwitch label={"On of " + g.name} words={zh ? { on: "正常", off: "未启用" } : { on: "Active", off: "Inactive" }} value={g.on} /> },
   { key: "stage", header: zh ? "上架" : "Listing", width: 200, cell: (g) => <RadioGroup legend={"Listing of " + g.name} hideLegend variant="dots" size="sm" defaultValue={g.on ? "live" : "draft"} options={[{ value: "draft", label: zh ? "草稿" : "Draft" }, { value: "live", label: zh ? "上架" : "Live" }, { value: "archived", label: zh ? "归档" : "Archived" }]} /> },
   { key: "spend", header: zh ? "今日消费" : "Spend today", numeric: true, cell: (g) => g.spend },
 ];
@@ -354,7 +356,7 @@ test("every row's first lines lie on one line, and every icon and its words are 
       assert.ok(r.rows >= 2, `${width}px, ${story}: ${r.rows} rows checked`);
     }
     assert.equal(got["groups, fitted"].pairs, 9, `${width}px: the health, the status and the actions of three rows`);
-    assert.equal(got["groups, fitted"].cells, 27, `${width}px: nine cells a row, each with a first line`);
+    assert.equal(got["groups, fitted"].cells, 30, `${width}px: ten cells a row (a StatusSwitch's among them), each with a first line`);
     assert.equal(got["a dense log"].pairs, 1, `${width}px: the one OK`);
     // a box in the header and in each of the four rows, measured on its line: in each table of rows to choose
     assert.equal(got["rows to choose"].boxes, 5, `${width}px: the header's checkbox and four rows'`);

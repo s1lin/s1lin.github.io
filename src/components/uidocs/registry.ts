@@ -1033,6 +1033,48 @@ const groups = useMemo(() => byRegion(search(text)), [text]); // [{ key, label, 
   },
 
   {
+    id: "status-switch",
+    name: "StatusSwitch",
+    zh: "状态切换",
+    keywords: ["status", "active", "inactive", "enable", "disable", "on off", "toggle", "row status", "状态", "启用", "停用", "正常"],
+    group: "forms",
+    item: "status-switch",
+    exports: ["StatusSwitch", "StatusSwitchProps"],
+    summary:
+      "A row's on or off as its two words, drawn as LangSwitch draws the languages: Active · Inactive, On · Off, with no line, box or fill round them or round the pair. The current one is a weight heavier with a light-blue dot under it, and when it is the on state it is in the ok hue (`--s1-ok`), so an active row reads at a glance; the other is dimmer. A press on the other word changes the row at once (the page settles it, and may ask first). For a setting in a form, use a Switch; for more than two states, RadioGroup's dots.",
+    example: "live",
+    usage: `import { StatusSwitch } from "@/components/s1lin/status-switch";
+
+<StatusSwitch
+  label={t("Status of {name}", { name: group.name })}
+  words={{ on: t("Active"), off: t("Inactive") }}
+  value={group.status === "active"}
+  busy={saving}
+  onValueChange={(on) => save(on ? "active" : "inactive")}
+/>`,
+    props: [
+      { name: "label", type: "string", required: true, desc: "The group's name, in the page's language, with the row's: \"Status of Claude Standard\"." },
+      { name: "words", type: "{ on: ReactNode; off: ReactNode }", required: true, desc: "The two states' words, the on state first: `{ on: \"Active\", off: \"Disabled\" }`, `{ on: \"On\", off: \"Off\" }`." },
+      { name: "value", type: "boolean", required: true, desc: "The on state is the current one." },
+      { name: "onValueChange", type: "(on: boolean) => void", desc: "Called with the state pressed, or moved to with an arrow key, Home or End; never for the current one, nor while busy or disabled." },
+      { name: "busy", type: "boolean", default: "false", desc: "A change is on its way: the group is `aria-busy`, both words `aria-disabled`, the dot under the state asked for pulses, and a press does nothing; focus stays where it is. Say \"Saving…\" beside it, and tell a screen reader through a status region: the busy pair alone could read as done." },
+      { name: "disabled", type: "boolean", default: "false", desc: "Neither state can be chosen (another change of the row holds it): both words in the third ink, still focusable, `aria-disabled`." },
+      { name: "locked", type: "\"on\" | \"off\"", desc: "One state cannot be chosen from here (off, for the account signed in): its word in the third ink and `aria-disabled`; the other works." },
+      { name: "size", type: "\"md\" | \"sm\" | \"xs\"", default: "\"sm\"", desc: "`sm` 30px, a table row's (centred on the row's line, its words started at the column's edge); `md` 40px for a sheet or a form; `xs` 24px for a narrow column or a foot." },
+      CLASS,
+    ],
+    notes: [
+      { label: "Styles", text: "Words and a dot, as the language switch: a row's two states read at a glance, and a track and a thumb in every row of a list was the heaviest thing in it, beside a word that said the state again (owner, 2026-11-16: \"change status active from a tag or a toggler to a switch like language with dots, but active should change text color as well\"). The current word is in the ink, a weight heavier, with the `--s1-here` dot under it; the on state, current, is in `--s1-ok` (the ink until a theme sets it; a theme's ok clears 4.5:1 on its papers), the off state in the ink. The other word is halfway from the second ink to the third (`--s1-status-dim`), AA on both papers. Each word is at least 24px wide and 30px tall at `sm`, 4px of room either side; in a table's cell that room is pulled out over the cell's padding, so the first word starts at the column's edge under its header." },
+      { label: "Accessibility", text: "A `radiogroup` named by `label`, of two `radio` buttons named by their words, the current one `aria-checked`: a screen reader hears \"Status of Claude Standard, Active, radio button, checked, 1 of 2\". The state is told by the weight, the dot and (on) the hue together, never by a colour alone; in forced colours the dot is in the text's colour. While a change is on its way the group is `aria-busy` and the words `aria-disabled`, still focusable, so focus is never lost to the page." },
+      { label: "Keyboard", text: "Tab reaches the current word only (one stop a row in a long list). An arrow key moves to the other word and chooses it, Home the on state and End the off; Space or Enter on the other word chooses it. Nothing happens on the current one, while busy, or on a word that cannot be chosen." },
+      { label: "Reduced motion", text: "Where motion is welcome the dot grows in under the new state and pulses while a change is on its way; under `prefers-reduced-motion: reduce` it is simply there, whole while waiting (the page says \"Saving…\" beside it: a busy dot alone could read as done)." },
+      { label: "Chinese", text: "Chinese words are set in the Chinese sans (`--s1-font-cjk`, never SimSun) at 12px (13px at `md`), never tracked or in capitals: 正常 · 未启用, 开 · 关." },
+      { label: "Dark mode", text: "The inks, `--s1-here` (#7fb2ff) and a theme's night ok follow the scheme." },
+    ],
+    where: "The admin console's lists: users, groups, channels, accounts (and whether each is scheduled), proxies, monitors, promo codes, plans, payment providers, alert rules.",
+  },
+
+  {
     id: "slider",
     name: "Slider",
     zh: "滑块",

@@ -10,8 +10,8 @@ import { build } from "vite";
 
 /*
  * Every switcher the kit draws, in a real browser with React running, on paper and at night: RadioGroup's cards,
- * segmented row and dots (and `quiet`, which is dots), a ghost Button and a chip with aria-pressed, Switch, and
- * LangSwitch. Owner, 2026-11-02: "all switchers to non-border design ... one dots, two backgrounded. Never have
+ * segmented row and dots (and `quiet`, which is dots), a ghost Button and a chip with aria-pressed, Switch, LangSwitch
+ * and StatusSwitch. Owner, 2026-11-02: "all switchers to non-border design ... one dots, two backgrounded. Never have
  * border." So no option, group, track or thumb has a border, an outline or a box-shadow, at rest, under the
  * pointer, chosen, or chosen under the pointer. The pointer is the page's own: each :hover rule is copied as a
  * .s1-hover rule in the same layer and @media, and the class put on the element and its ancestors, as the pointer
@@ -49,6 +49,7 @@ import { createRoot } from "react-dom/client";
 import { Button } from ${part("button.tsx")};
 import { LangSwitch } from ${part("lang-switch.tsx")};
 import { RadioGroup } from ${part("radio-group.tsx")};
+import { StatusSwitch } from ${part("status-switch.tsx")};
 import { Switch } from ${part("switch.tsx")};
 
 const RANGE = ["5m", "30m", "1h", "6h", "24h"].map((r) => ({ value: r, label: r }));
@@ -94,6 +95,7 @@ function Set({ id, theme, style }) {
         <Switch disabled defaultChecked>On, disabled</Switch>
       </div>
       <div data-k="lang"><LangSwitch label="Language" options={LANGS} value="en" onValueChange={() => {}} /></div>
+      <div data-k="status"><StatusSwitch label="Status of Qwen" words={{ on: "Active", off: "Inactive" }} value onValueChange={() => {}} /></div>
     </div>
   );
 }
@@ -142,7 +144,7 @@ const look = (el, pseudo) => {
 // rendered and the native input the drawn control stands for (it is invisible and takes the clicks).
 const painted = (o) => {
   const found = [];
-  const options = o.querySelectorAll(".s1-radio, .s1-lang__item, button, .s1-switch");
+  const options = o.querySelectorAll(".s1-radio, .s1-lang__item, .s1-status__item, button, .s1-switch");
   for (const el of [o, ...o.querySelectorAll("*")]) {
     // inside an option: measured with the option (a group's own lines are what is left)
     const inside = [...options].some((x) => x !== o && x.contains(el));
@@ -173,13 +175,14 @@ const OPTIONS = {
   chip: ["button", (o) => o.getAttribute("aria-pressed") === "true"],
   switch: [".s1-switch__row", (o) => o.querySelector("input").checked],
   lang: [".s1-lang__item", (o) => o.getAttribute("aria-pressed") === "true"],
+  status: [".s1-status__item", (o) => o.getAttribute("aria-checked") === "true"],
   unpressed: ["button", () => false],
 };
 // Where the pointer is, inside an option: its words, its track, its icon (the class goes on the ancestors too).
-const target = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-switch__track, .s1-btn__icon") ?? o;
+const target = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-status__label, .s1-switch__track, .s1-btn__icon") ?? o;
 // The element that sets the words.
-const words = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-switch__label") ?? o;
-const GROUPS = { segmented: ".s1-fieldset__body", cards: ".s1-fieldset__body", dots: ".s1-fieldset__body", quiet: ".s1-fieldset__body", "dots-sm": ".s1-fieldset__body", lang: ".s1-lang" };
+const words = (o) => o.querySelector(".s1-radio__label, .s1-lang__label, .s1-status__label, .s1-switch__label") ?? o;
+const GROUPS = { segmented: ".s1-fieldset__body", cards: ".s1-fieldset__body", dots: ".s1-fieldset__body", quiet: ".s1-fieldset__body", "dots-sm": ".s1-fieldset__body", lang: ".s1-lang", status: ".s1-status" };
 
 const got = { sets: {}, tokens: {} };
 for (const id of ["light", "dark", "brand"]) {
@@ -203,6 +206,7 @@ for (const id of ["light", "dark", "brand"]) {
         if (k === "dots" || k === "quiet" || k === "dots-sm") r.dot = look(o.querySelector(".s1-radio__label"), "::after");
         if (k === "dots-sm") r.font = getComputedStyle(o).fontSize;
         if (k === "lang") r.dot = look(o.querySelector(".s1-lang__label"), "::after");
+        if (k === "status") r.dot = look(o.querySelector(".s1-status__label"), "::after");
         if (group) r.group = painted(group).filter((p) => !p.inside);
         r.outer = painted(box).filter((p) => !p.inside);
         return r;
@@ -220,7 +224,7 @@ for (const id of ["light", "dark", "brand"]) {
 
 // focus: script focus with no pointer before it is keyboard-like, so it matches :focus-visible; each kind's ring
 got.focus = {};
-for (const [k, sel] of [["segmented", "input"], ["cards", "input"], ["dots", "input"], ["quiet", "input"], ["dots-sm", "input"], ["ghost", "button"], ["plain", "button"], ["icon", "button"], ["chip", "button"], ["switch", "input"], ["lang", "button"]]) {
+for (const [k, sel] of [["segmented", "input"], ["cards", "input"], ["dots", "input"], ["quiet", "input"], ["dots-sm", "input"], ["ghost", "button"], ["plain", "button"], ["icon", "button"], ["chip", "button"], ["switch", "input"], ["lang", "button"], ["status", "button[aria-checked='true']"]]) {
   const el = document.querySelector('#light [data-k="' + k + '"] ' + sel);
   el.focus();
   const ring = k === "switch" ? el.nextElementSibling : el.closest(".s1-radio") ?? el;
@@ -306,7 +310,7 @@ async function run(t: { skip: (m: string) => void }): Promise<Got | undefined> {
 
 const NONE = { border: "0px 0px 0px 0px", outline: "none", shadow: "none" };
 const linesOf = (l: Lines) => ({ border: l.border, outline: l.outline, shadow: l.shadow });
-const SWITCHERS = ["segmented", "cards", "dots", "quiet", "dots-sm", "ghost", "plain", "icon", "chip", "switch", "lang"];
+const SWITCHERS = ["segmented", "cards", "dots", "quiet", "dots-sm", "ghost", "plain", "icon", "chip", "switch", "lang", "status"];
 
 test("no switcher has a border, an outline or a box-shadow on anything it paints, on paper or at night, at rest, under the pointer, chosen or not", async (t) => {
   const got = await run(t);
@@ -366,7 +370,7 @@ test("dots: no fill ever; the chosen word heavier with a 4px dot in --s1-here un
   if (!got) return;
   for (const [set, kinds] of Object.entries(got.sets)) {
     const tk = got.tokens[set];
-    for (const kind of ["dots", "quiet", "dots-sm", "lang"]) {
+    for (const kind of ["dots", "quiet", "dots-sm", "lang", "status"]) {
       const chosen = kinds[kind].find((o) => o.chosen)!;
       const other = kinds[kind].find((o) => !o.chosen)!;
       const where = `${set} ${kind}`;
@@ -444,7 +448,7 @@ test("a toggle keeps its button's size without the line: its height at its size,
 });
 
 // The stylesheets: an outline on a switcher only for the keyboard or in forced colours, and a cue there for the chosen one.
-const SHEETS = ["radio-group.css", "button.css", "switch.css", "lang-switch.css"];
+const SHEETS = ["radio-group.css", "button.css", "switch.css", "lang-switch.css", "status-switch.css"];
 const rules = (css: string) => {
   const found: { selector: string; body: string; forced: boolean }[] = [];
   const text = css.replace(/\/\*[\s\S]*?\*\//g, "");

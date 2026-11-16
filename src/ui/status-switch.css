@@ -1,0 +1,76 @@
+/*
+ * StatusSwitch (status-switch.tsx). A row's two states as words, drawn as LangSwitch draws the languages: no line, box
+ * or fill round them or round their group (owner, 2026-11-02: switchers have no border). The current state is a weight
+ * heavier with a dot centred under it in --s1-here; the other is dimmer, three fifths of the way from the third ink to
+ * the second (AA on both papers, a chosen row's second paper too: 4.9:1 by day), and the pointer raises it to the ink.
+ * The on state, when current, is in the ok hue (--s1-ok: the ink until a theme sets it; a theme's ok clears 4.5:1 on
+ * its papers), so an active row reads at a glance (owner, 2026-11-16: "active should change text color as well"); the
+ * off state, when current, is in the ink. A word that cannot be chosen is in the third ink. While a change is on its
+ * way the dot under the state asked for pulses where motion is welcome, and is simply there where it is not. Latin in
+ * mono capitals, Chinese in the Chinese sans at 12px, never SimSun. One height at each size: 30px, a table row's (sm),
+ * 40px (md), 24px (xs); each word at least 24px wide (40px at md) with 4px either side, so the pair fits a status
+ * column; in a table's cell it is centred on the row's first line (table.css, the row rule) and its first word starts
+ * at the column's edge.
+ */
+@layer components {
+  .s1-status {
+    --s1-status-dim: color-mix(in srgb, var(--s1-ink-2) 60%, var(--s1-ink-3));
+    --s1-status-track: 0.06em;
+    display: inline-flex; align-items: center; gap: 2px; flex: none; margin: 0; padding: 0; border: 0; background: none;
+    vertical-align: top; white-space: nowrap;
+  }
+  .s1-status__item {
+    appearance: none; position: relative; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    min-width: 24px; min-height: 30px; margin: 0; padding: 0 4px; border: 0; border-radius: 0; background: none; box-shadow: none;
+    color: var(--s1-status-dim); font: 500 10.5px/1 var(--s1-font-mono); letter-spacing: var(--s1-status-track); text-transform: uppercase;
+    white-space: nowrap; cursor: pointer;
+  }
+  .s1-status__item:not([aria-checked="true"], [aria-disabled="true"]):hover { color: var(--s1-ink); }
+  .s1-status__item[aria-checked="true"] { color: var(--s1-ink); font-weight: 650; cursor: default; }
+  .s1-status__item--on[aria-checked="true"] { color: var(--s1-ok, var(--s1-ink)); }
+  .s1-status__item[aria-disabled="true"]:not([aria-checked="true"]) { color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-status[aria-disabled="true"] .s1-status__item { color: var(--s1-ink-3); cursor: not-allowed; }
+  .s1-status[aria-busy="true"] .s1-status__item { cursor: progress; }
+
+  /* The words' own box (the tracking after the last letter left out), so the dot is centred under the letters. */
+  .s1-status__label { position: relative; display: block; margin-inline-end: calc(-1 * var(--s1-status-track)); }
+  .s1-status__label::after {
+    content: ""; position: absolute; left: 50%; top: calc(100% + 3px); width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+    background: var(--s1-here, var(--s1-ink)); opacity: 0; transform: scale(0.25);
+  }
+  .s1-status__item[aria-checked="true"] > .s1-status__label::after { opacity: 1; transform: none; }
+  .s1-status[aria-disabled="true"] .s1-status__label::after { background: var(--s1-ink-3); }
+
+  .s1-status--md { --s1-status-track: 0.08em; gap: 4px; }
+  .s1-status--md .s1-status__item { min-width: 40px; min-height: 40px; padding: 0 10px; font-size: 12px; }
+  .s1-status--md .s1-status__label::after { top: calc(100% + 4px); }
+  .s1-status--xs { gap: 0; }
+  .s1-status--xs .s1-status__item { min-width: 24px; min-height: 24px; padding: 0 4px; }
+  .s1-status--xs .s1-status__label::after { top: calc(100% + 2px); }
+
+  /* In a table row's cell: alone, centred on the row's first line (in a pair, the pair centres it); and its words' padding
+     pulled out over the cell's, so the first word starts at the column's edge, under its header, as the cell's words do. */
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th) > .s1-status--sm { margin-block: calc((var(--s1-table-line) - 30px) / 2); }
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th) > .s1-status--xs { margin-block: calc((var(--s1-table-line) - 24px) / 2); }
+  .s1-table tbody tr:not(.s1-table__ghead, .s1-table__loading) > :is(td, th) :is(.s1-status--sm, .s1-status--xs):not(:is([popover], dialog) *) { margin-inline: -4px; }
+
+  /* Chinese: the Chinese sans (never the browser's pick, SimSun on Windows), 12px at least, never tracked or capitalised. */
+  .s1-status__item:lang(zh) { font-family: var(--s1-font-cjk), sans-serif; font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .s1-status--md .s1-status__item:lang(zh) { font-size: 13px; }
+  .s1-status__item:lang(zh) > .s1-status__label { margin-inline-end: 0; }
+
+  .s1-status__item:focus-visible { outline: 2px solid var(--s1-ink); outline-offset: 0; }
+
+  @keyframes s1-status-wait { from { opacity: 1; } to { opacity: 0.2; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .s1-status__item { transition: color 0.12s ease; }
+    .s1-status__label::after { transition: opacity 0.16s ease, transform 0.16s ease; }
+    .s1-status[aria-busy="true"] .s1-status__item[aria-checked="true"] > .s1-status__label::after { animation: s1-status-wait 0.7s ease-in-out infinite alternate; }
+  }
+  /* Forced colours flatten the inks: the dot stays, in the text's colour, beside the heavier weight; a word that cannot
+     be chosen is in GrayText. */
+  @media (forced-colors: active) {
+    .s1-status__label::after { forced-color-adjust: none; background: CanvasText; }
+    .s1-status__item[aria-disabled="true"], .s1-status[aria-disabled="true"] .s1-status__item { color: GrayText; }
+  }
+}

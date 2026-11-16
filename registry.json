@@ -588,6 +588,33 @@
       ]
     },
     {
+      "name": "status-switch",
+      "type": "registry:ui",
+      "title": "StatusSwitch",
+      "description": "A row's two states as words, drawn as LangSwitch draws the languages: Active · Inactive or On · Off with no line, box or fill round them, the current one heavier with a light-blue dot under it, the on state in the ok hue when current; a radiogroup of two radios (arrows, Home, End), busy while a change is on its way; 30px for a table row, 40px or 24px.",
+      "author": "s1lin",
+      "registryDependencies": [
+        "https://s1lin.tokensbeat.com/r/tokens.json",
+        "https://s1lin.tokensbeat.com/r/cn.json"
+      ],
+      "files": [
+        {
+          "path": "src/ui/status-switch.tsx",
+          "type": "registry:ui",
+          "target": "@components/s1lin/status-switch.tsx"
+        },
+        {
+          "path": "src/ui/status-switch.css",
+          "type": "registry:file",
+          "target": "@components/s1lin/status-switch.css"
+        }
+      ],
+      "categories": [
+        "console",
+        "forms"
+      ]
+    },
+    {
       "name": "table",
       "type": "registry:ui",
       "title": "Table",

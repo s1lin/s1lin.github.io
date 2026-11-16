@@ -72,6 +72,7 @@ import { Skeleton } from "@/ui/skeleton";
 import { Slider } from "@/ui/slider";
 import { Spinner } from "@/ui/spinner";
 import { Stat, StatGroup } from "@/ui/stat";
+import { StatusSwitch } from "@/ui/status-switch";
 import { Switch } from "@/ui/switch";
 import { Table, type Column, type Sort } from "@/ui/table";
 import { Tabs } from "@/ui/tabs";
@@ -564,6 +565,76 @@ export function SwitchDemo() {
   );
 }
 
+interface Listed {
+  id: number;
+  name: string;
+  on: boolean;
+  /** The account signed in: it cannot be turned off from its own row. */
+  self?: boolean;
+}
+
+const LISTED: Listed[] = [
+  { id: 3, name: "Claude Standard", on: true },
+  { id: 10, name: "Grok", on: false },
+  { id: 12, name: "you@example.com", on: true, self: true },
+];
+
+/** A list's status column, as a console has it: each row's two words, a change shown at once and settled a moment later. */
+function StatusRows({ night = false, zh = false }: { night?: boolean; zh?: boolean }) {
+  const [on, setOn] = useState<Record<number, boolean>>(Object.fromEntries(LISTED.map((r) => [r.id, r.on])));
+  const [busy, setBusy] = useState<number | null>(null);
+  const change = (id: number, next: boolean) => {
+    setOn((cur) => ({ ...cur, [id]: next }));
+    setBusy(id);
+    window.setTimeout(() => setBusy((b) => (b === id ? null : b)), 1200);
+  };
+  const columns: Column<Listed>[] = [
+    { key: "name", header: zh ? "名称" : "Name", cell: (r) => r.name },
+    {
+      key: "status",
+      header: zh ? "状态" : "Status",
+      width: zh ? 100 : 136,
+      cell: (r) => (
+        <StatusSwitch
+          label={zh ? `${r.name} 的状态` : `Status of ${r.name}`}
+          words={zh ? { on: "正常", off: "未启用" } : { on: "Active", off: "Inactive" }}
+          value={on[r.id]}
+          busy={busy === r.id}
+          locked={r.self ? "off" : undefined}
+          onValueChange={(v) => change(r.id, v)}
+        />
+      ),
+    },
+    {
+      key: "alerts",
+      header: zh ? "提醒" : "Alerts",
+      width: zh ? 90 : 96,
+      cell: (r) => <StatusSwitch label={zh ? `${r.name} 的提醒` : `Alerts of ${r.name}`} words={zh ? { on: "开", off: "关" } : { on: "On", off: "Off" }} value={r.id !== 10} />,
+    },
+  ];
+  return (
+    <div data-theme={night ? "dark" : undefined} lang={zh ? "zh-CN" : undefined} style={night ? { background: "var(--s1-paper)", color: "var(--s1-ink)", padding: 8 } : undefined}>
+      <Table caption={zh ? "分组" : night ? "At night" : "Groups"} fit columns={columns} rows={LISTED} rowKey="id" rowId="id" />
+    </div>
+  );
+}
+
+export function StatusSwitchDemo() {
+  return (
+    <div className="ud-stack ud-stack--wide">
+      <StatusRows />
+      <StatusRows zh />
+      <StatusRows night />
+      <div className="ud-row">
+        <StatusSwitch label="Status of a sheet's row" size="md" words={{ on: "Active", off: "Disabled" }} value />
+        <StatusSwitch label="Status in a foot" size="xs" words={{ on: "On", off: "Off" }} value={false} />
+        <StatusSwitch label="Status held by another change" words={{ on: "Active", off: "Inactive" }} value disabled />
+      </div>
+      <Said text="Press the other word, or move to it with an arrow key: it takes the dot (and, for the on state, the ok hue) at once, and the dot pulses until the change is settled (here, a moment later). The account signed in cannot be turned off from its own row. No line, box or fill round any word or round the pair." />
+    </div>
+  );
+}
+
 /** The setting a console has it for: how dark its hairlines are, drawn live in a ledger beside it. */
 export function SliderDemo() {
   const [contrast, setContrast] = useState(14);
@@ -750,13 +821,8 @@ function TableRows() {
     {
       key: "on",
       header: "Status",
-      width: 132,
-      cell: (r) => (
-        <span className="s1-table__pair">
-          <Switch aria-label={`Turn ${r.name} ${on[r.id] ? "off" : "on"}`} checked={on[r.id]} onChange={(e) => setOn({ ...on, [r.id]: e.target.checked })} />
-          <span className="ud-caps">{on[r.id] ? "Active" : "Inactive"}</span>
-        </span>
-      ),
+      width: 136,
+      cell: (r) => <StatusSwitch label={`Status of ${r.name}`} words={{ on: "Active", off: "Inactive" }} value={on[r.id]} onValueChange={(v) => setOn({ ...on, [r.id]: v })} />,
     },
     {
       key: "stage",
@@ -795,7 +861,7 @@ function TableRows() {
           </span>
         )}
       />
-      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "A row's status in the row (a switch for two states, dots for more), its actions as the ghost dots and a trash beside them."} />
+      <Said text={said ? `Chose ${said}: nothing is sent from this page.` : "A row's status in the row (its two words, a StatusSwitch, for two states; dots for more), its actions as the ghost dots and a trash beside them."} />
     </>
   );
 }
